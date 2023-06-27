@@ -1,0 +1,109 @@
+:root {
+  --bg-color: #ffffff;
+  --bg-color-page: #f2f3f5;
+  --text-color-regular: #606266;
+  --border-color: #dcdfe6;
+  --transition-duration-fast: 0.2s;
+  --transition-function-ease-in-out-bezier: cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+html {
+  background-color: #ffffff;
+  //text-align: center;
+  cursor: default;
+  -webkit-user-select: none; /* Chrome, Safari */
+  -moz-user-select: none; /* Firefox */
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+  "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  sans-serif;
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 400;
+  src: local(""),
+  url("assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
+}
+
+#app {
+  height: 100vh;
+  //text-align: center;
+}
+
+.flex-box {
+  display: flex;
+}
+
+.flex-box-v {
+  @extend .flex-box;
+  flex-direction: column;
+}
+
+.flex-box-h {
+  @extend .flex-box;
+  flex-direction: row;
+}
+
+.flex-item {
+  flex: 0 0 auto;
+}
+
+.flex-item-expand {
+  flex-grow: 1;
+}
+
+.icon-btn {
+  cursor: pointer;
+  line-height: 100%;
+}
+
+.ellipsis {
+  white-space: nowrap; /* 禁止文本换行 */
+  overflow: hidden; /* 隐藏超出容器的文本 */
+  text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
+}
+
+.unit-item {
+  margin-left: 10px;
+}
+
+.fill-height {
+  height: 100%;
+}
+
+.content-wrapper {
+  background-color: var(--bg-color);
+  height: 100%;
+  overflow: hidden;
+  gap: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+
+  .tb2 {
+    gap: 5px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .value-wrapper {
+    border-top: var(--border-color) 1px solid;
+    padding: 5px;
+    user-select: text;
+  }
+}
+
+.n-dynamic-input-item {
+  align-items: center;
+  gap: 10px;
+}
+
+.context-menu-item {
+  min-width: 120px;
+  padding-right: 10px;
+}
