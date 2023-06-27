@@ -103,5 +103,9 @@
   "spec_field_required": "\"{key}\" should not be blank",
   "no_connections": "No Connection",
   "empty_tab_content": "Select the key from left list to see the details of the key.",
-  "reload_when_succ": "Reload immediately after success"
+  "reload_when_succ": "Reload immediately after success",
+  "server": "Server",
+  "structure": "Structure",
+  "about": "About",
+  "check_update": "Check for Updates..."
 }

@@ -106,5 +106,9 @@
   "spec_field_required": "{key} 不能为空",
   "no_connections": "空空如也",
   "empty_tab_content": "可以从左边选择键来查看键的详细内容",
-  "reload_when_succ": "操作成功后立即重新加载"
+  "reload_when_succ": "操作成功后立即重新加载",
+  "server": "服务器",
+  "structure": "结构",
+  "about": "关于",
+  "check_update": "检查更新..."
 }

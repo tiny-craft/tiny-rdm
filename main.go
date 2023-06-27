@@ -47,7 +47,14 @@ func main() {
 			connSvc,
 		},
 		Mac: &mac.Options{
-			//TitleBar:             mac.TitleBarHiddenInset(),
+			TitleBar: &mac.TitleBar{
+				TitlebarAppearsTransparent: false,
+				HideTitle:                  false,
+				HideTitleBar:               false,
+				FullSizeContent:            false,
+				UseToolbar:                 false,
+				HideToolbarSeparator:       true,
+			},
 			//WebviewIsTransparent: true,
 			//WindowIsTranslucent:  true,
 		},

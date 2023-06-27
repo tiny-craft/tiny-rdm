@@ -16,7 +16,7 @@ const onSort = () => {
 </script>
 
 <template>
-    <div class="nav-pane-container flex-box-v">
+    <div v-if="true" class="nav-pane-container flex-box-v">
         <ConnectionsTree />
 
         <!-- bottom function bar -->
