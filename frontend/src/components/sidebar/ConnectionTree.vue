@@ -145,7 +145,7 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(ToggleServer, { modelValue: !!connecte }),
+                    default: () => h(ToggleServer, { modelValue: !!connected }),
                 }
             )
     }
@@ -166,10 +166,12 @@ const onUpdateSelectedKeys = (keys, option, meta) => {
  */
 const openConnection = async (name) => {
     try {
-        openingConnection.value = true
-        await connectionStore.openConnection(name)
+        if (!connectionStore.isConnected(name)) {
+            openingConnection.value = true
+            await connectionStore.openConnection(name)
+        }
         tabStore.upsertTab({
-            server: name,
+            server: nam,
         })
     } catch (e) {
         message.error(e.message)

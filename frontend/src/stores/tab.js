@@ -109,7 +109,7 @@ const useTabStore = defineStore('tab', {
                     type,
                     ttl,
                     key,
-                    valu,
+                    value,
                 })
                 tabIndex = this.tabList.length - 1
             }

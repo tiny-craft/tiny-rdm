@@ -168,7 +168,7 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(ToggleDb, { modelValue: option.opened === true },
+                    default: () => h(ToggleDb, { modelValue: option.opened === true }),
                 }
             )
         case ConnectionType.RedisKey:
@@ -331,11 +331,11 @@ const handleOutsideContextMenu = () => {
         :data="connectionStore.databases[props.server] || []"
         :expand-on-click="false"
         :expanded-keys="expandedKeys"
+        :selected-keys="selectedKeys"
         :on-update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
         :on-load="onLoadTree"
         :on-update:expanded-keys="onUpdateExpanded"
-        :selected-keys="selectedKeys"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"
