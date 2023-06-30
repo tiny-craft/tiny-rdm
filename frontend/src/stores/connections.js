@@ -196,6 +196,9 @@ const useConnectionStore = defineStore('connections', {
             }
 
             delete this.databases[name]
+
+            const tabStore = useTabStore()
+            tabStore.removeTabByName(name)
             return true
         },
 

@@ -9,7 +9,6 @@ import ToggleServer from '../icons/ToggleServer.vue'
 import { indexOf } from 'lodash'
 import Config from '../icons/Config.vue'
 import Delete from '../icons/Delete.vue'
-import Refresh from '../icons/Refresh.vue'
 import Unlink from '../icons/Unlink.vue'
 import CopyLink from '../icons/CopyLink.vue'
 import Connect from '../icons/Connect.vue'
@@ -26,6 +25,7 @@ const dialogStore = useDialogStore()
 const message = useMessage()
 
 const expandedKeys = ref([])
+const selectedKeys = ref([])
 
 onMounted(async () => {
     try {
@@ -65,14 +65,10 @@ const menuOptions = {
             icon: renderIcon(Delete),
         },
     ],
-    [ConnectionType.Server]: ({ connected }) => {
+    [ConnectionType.Server]: ({ name }) => {
+        const connected = connectionStore.isConnected(name)
         if (connected) {
             return [
-                {
-                    key: 'server_reload',
-                    label: i18n.t('reload'),
-                    icon: renderIcon(Refresh),
-                },
                 {
                     key: 'server_close',
                     label: i18n.t('disconnect'),
@@ -149,14 +145,18 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(ToggleServer, { modelValue: !!connected }),
+                    default: () => h(ToggleServer, { modelValue: !!connecte }),
                 }
             )
     }
 }
 
-const onUpdateExpandedKeys = (value, option, meta) => {
-    expandedKeys.value = value
+const onUpdateExpandedKeys = (keys, option, meta) => {
+    expandedKeys.value = keys
+}
+
+const onUpdateSelectedKeys = (keys, option, meta) => {
+    selectedKeys.value = keys
 }
 
 /**
@@ -199,6 +199,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
+                selectedKeys.value = [option.key]
             })
         },
     }
@@ -214,6 +215,10 @@ const handleSelectContextMenu = (key) => {
     switch (key) {
         case 'server_open':
             openConnection(name).then(() => {})
+            break
+        case 'server_close':
+            connectionStore.closeConnection(name)
+            break
     }
     console.warn('TODO: handle context menu:' + key)
 }
@@ -228,8 +233,10 @@ const handleSelectContextMenu = (key) => {
         :data="connectionStore.connections"
         :expand-on-click="true"
         :expanded-keys="expandedKeys"
+        :on-update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
         :on-update:expanded-keys="onUpdateExpandedKeys"
+        :selected-keys="selectedKeys"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         class="fill-height"

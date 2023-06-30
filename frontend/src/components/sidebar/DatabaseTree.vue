@@ -4,7 +4,7 @@ import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { indexOf, remove, startsWith } from 'lodash'
+import { indexOf } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -14,15 +14,14 @@ import Delete from '../icons/Delete.vue'
 import Connect from '../icons/Connect.vue'
 import useDialogStore from '../../stores/dialog.js'
 import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
-import useTabStore from '../../stores/tab.js'
 import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 const loading = ref(false)
 const loadingConnections = ref(false)
 const expandedKeys = ref([])
+const selectedKeys = ref([])
 const connectionStore = useConnectionStore()
-const tabStore = useTabStore()
 const dialogStore = useDialogStore()
 
 const contextMenuParam = reactive({
@@ -128,7 +127,7 @@ onMounted(async () => {
 })
 
 const props = defineProps({
-    server: Strig,
+    server: String,
 })
 
 const expandKey = (key) => {
@@ -138,18 +137,6 @@ const expandKey = (key) => {
     } else {
         expandedKeys.value.splice(idx, 1)
     }
-}
-
-const collapseKeyAndChildren = (key) => {
-    remove(expandedKeys.value, (k) => startsWith(k, key))
-    // console.log(key)
-    // const idx = indexOf(expandedKeys.value, key)
-    // console.log(JSON.stringify(expandedKeys.value))
-    // if (idx !== -1) {
-    //     expandedKeys.value.splice(idx, 1)
-    //     return true
-    // }
-    // return false
 }
 
 const message = useMessage()
@@ -170,6 +157,10 @@ const onUpdateExpanded = (value, option, meta) => {
     }
 }
 
+const onUpdateSelectedKeys = (keys, option, meta) => {
+    selectedKeys.value = keys
+}
+
 const renderPrefix = ({ option }) => {
     switch (option.type) {
         case ConnectionType.RedisDB:
@@ -177,7 +168,7 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(ToggleDb, { modelValue: option.opened === true }),
+                    default: () => h(ToggleDb, { modelValue: option.opened === true },
                 }
             )
         case ConnectionType.RedisKey:
@@ -253,6 +244,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
+                selectedKeys.value = [option.key]
             })
         },
         // onMouseover() {
@@ -281,14 +273,6 @@ const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
     switch (key) {
-        case 'server_disconnect':
-            connectionStore.closeConnection(nodeKey).then((success) => {
-                if (success) {
-                    collapseKeyAndChildren(nodeKey)
-                    tabStore.removeTabByName(name)
-                }
-            })
-            break
         // case 'server_reload':
         // case 'db_reload':
         //     connectionStore.loadKeyValue()
@@ -347,9 +331,11 @@ const handleOutsideContextMenu = () => {
         :data="connectionStore.databases[props.server] || []"
         :expand-on-click="false"
         :expanded-keys="expandedKeys"
+        :on-update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
         :on-load="onLoadTree"
         :on-update:expanded-keys="onUpdateExpanded"
+        :selected-keys="selectedKeys"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"

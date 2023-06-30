@@ -73,9 +73,21 @@ const useTabStore = defineStore('tab', {
             this._setActivatedIndex(size(this.tabList) - 1)
         },
 
-        _setActivatedIndex(idx) {
+        /**
+         *
+         * @param idx
+         * @param {boolean} [switchNav]
+         * @private
+         */
+        _setActivatedIndex(idx, switchNav) {
             this.activatedIndex = idx
-            this.nav = idx >= 0 ? 'structure' : 'server'
+            if (switchNav === true) {
+                this.nav = idx >= 0 ? 'structure' : 'server'
+            } else {
+                if (idx < 0) {
+                    this.nav = 'server'
+                }
+            }
         },
 
         /**
@@ -111,7 +123,7 @@ const useTabStore = defineStore('tab', {
             tab.ttl = ttl
             tab.key = key
             tab.value = value
-            this._setActivatedIndex(tabIndex)
+            this._setActivatedIndex(tabIndex, true)
             // this.activatedTab = tab.name
         },
 
@@ -169,12 +181,12 @@ const useTabStore = defineStore('tab', {
             this.activatedIndex -= 1
             if (this.activatedIndex < 0) {
                 if (this.tabList.length > 0) {
-                    this._setActivatedIndex(0)
+                    this._setActivatedIndex(0, false)
                 } else {
-                    this._setActivatedIndex(-1)
+                    this._setActivatedIndex(-1, false)
                 }
             } else {
-                this._setActivatedIndex(this.activatedIndex)
+                this._setActivatedIndex(this.activatedIndex, false)
             }
 
             return size(removed) > 0 ? removed[0] : null

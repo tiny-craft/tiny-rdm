@@ -6,7 +6,7 @@ import ContentValueList from '../content_value/ContentValueList.vue'
 import ContentValueString from '../content_value/ContentValueString.vue'
 import ContentValueSet from '../content_value/ContentValueSet.vue'
 import ContentValueZset from '../content_value/ContentValueZSet.vue'
-import { isEmpty, map, toUpper } from 'lodash'
+import { get, isEmpty, map, toUpper } from 'lodash'
 import useTabStore from '../../stores/tab.js'
 import { useDialog } from 'naive-ui'
 import useConnectionStore from '../../stores/connections.js'
@@ -69,9 +69,9 @@ const onCloseTab = (tabIndex) => {
         maskClosable: false,
         transformOrigin: 'center',
         onPositiveClick: () => {
-            const removedTab = tabStore.removeTab(tabIndex)
-            if (removedTab != null) {
-                connectionStore.closeConnection(removedTab.name)
+            const tab = get(tabStore.tabs, tabIndex)
+            if (tab != null) {
+                connectionStore.closeConnection(tab.name)
             }
         },
     })
