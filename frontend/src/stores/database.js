@@ -6,7 +6,6 @@ import {
     AddZSetValue,
     CloseConnection,
     GetKeyValue,
-    ListConnection,
     OpenConnection,
     OpenDatabase,
     RemoveKey,
@@ -21,12 +20,13 @@ import {
 } from '../../wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
+import useConnectionStore from './connections.js'
 
 const separator = ':'
 
-const useConnectionStore = defineStore('connection', {
+const useDatabaseStore = defineStore('database', {
     /**
-     * @typedef {Object} ConnectionItem
+     * @typedef {Object} DatabaseItem
      * @property {string} key
      * @property {string} label
      * @property {string} name - server name, type != ConnectionType.Group only
@@ -40,62 +40,14 @@ const useConnectionStore = defineStore('connection', {
 
     /**
      *
-     * @returns {{connections: ConnectionItem[]}}
+     * @returns {{connections: DatabaseItem[]}}
      */
     state: () => ({
         connections: [], // all connections list
+        databases: {}, // all database group by opened connections
     }),
     getters: {},
     actions: {
-        /**
-         * Load all store connections struct from local profile
-         * @returns {Promise<void>}
-         */
-        async initConnection() {
-            if (!isEmpty(this.connections)) {
-                return
-            }
-            const { data = [{ groupName: '', connections: [] }] } = await ListConnection()
-            for (let i = 0; i < data.length; i++) {
-                const group = data[i]
-                // Top level group
-                if (isEmpty(group.groupName)) {
-                    for (let j = 0; j < group.connections.length; j++) {
-                        const item = group.connections[j]
-                        this.connections.push({
-                            key: item.name,
-                            label: item.name,
-                            name: item.name,
-                            type: ConnectionType.Server,
-                            // isLeaf: false,
-                        })
-                    }
-                } else {
-                    // Custom group
-                    const children = []
-                    for (let j = 0; j < group.connections.length; j++) {
-                        const item = group.connections[j]
-                        const value = group.groupName + '/' + item.name
-                        children.push({
-                            key: value,
-                            label: item.name,
-                            name: item.name,
-                            type: ConnectionType.Server,
-                            children: j === group.connections.length - 1 ? undefined : [],
-                            // isLeaf: false,
-                        })
-                    }
-                    this.connections.push({
-                        key: group.groupName,
-                        label: group.groupName,
-                        type: ConnectionType.Group,
-                        children,
-                    })
-                }
-            }
-            console.debug(JSON.stringify(this.connections))
-        },
-
         /**
          * Open connection
          * @param {string} connName
@@ -107,7 +59,8 @@ const useConnectionStore = defineStore('connection', {
                 throw new Error(msg)
             }
             // append to db node to current connection
-            const connNode = this.getConnection(connName)
+            const connStore = useConnectionStore()
+            const connNode = connStore.getConnection(connName)
             if (connNode == null) {
                 throw new Error('no such connection')
             }
@@ -901,4 +854,4 @@ const useConnectionStore = defineStore('connection', {
     },
 })
 
-export default useConnectionStore
+export default useDatabaseStore

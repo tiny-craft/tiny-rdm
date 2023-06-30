@@ -2,8 +2,8 @@
 import { reactive, ref, watch } from 'vue'
 import useDialog from '../../stores/dialog'
 import useTabStore from '../../stores/tab.js'
-import useConnectionStore from '../../stores/connection.js'
 import { useMessage } from 'naive-ui'
+import useConnectionStore from '../../stores/connections.js'
 
 const ttlForm = reactive({
     ttl: -1,

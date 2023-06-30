@@ -1,38 +1,37 @@
 <script setup>
 import { h, nextTick, onMounted, reactive, ref } from 'vue'
-import { ConnectionType } from '../consts/connection_type.js'
-import useConnection from '../stores/connection.js'
+import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
-import ToggleFolder from './icons/ToggleFolder.vue'
-import Key from './icons/Key.vue'
-import ToggleDb from './icons/ToggleDb.vue'
-import ToggleServer from './icons/ToggleServer.vue'
+import Key from '../icons/Key.vue'
+import ToggleDb from '../icons/ToggleDb.vue'
 import { indexOf, remove, startsWith } from 'lodash'
 import { useI18n } from 'vue-i18n'
-import Refresh from './icons/Refresh.vue'
-import Config from './icons/Config.vue'
-import CopyLink from './icons/CopyLink.vue'
-import Unlink from './icons/Unlink.vue'
-import Add from './icons/Add.vue'
-import Layer from './icons/Layer.vue'
-import Delete from './icons/Delete.vue'
-import Connect from './icons/Connect.vue'
-import useDialogStore from '../stores/dialog.js'
-import { ClipboardSetText } from '../../wailsjs/runtime/runtime.js'
-import useTabStore from '../stores/tab.js'
+import Refresh from '../icons/Refresh.vue'
+import CopyLink from '../icons/CopyLink.vue'
+import Add from '../icons/Add.vue'
+import Layer from '../icons/Layer.vue'
+import Delete from '../icons/Delete.vue'
+import Connect from '../icons/Connect.vue'
+import useDialogStore from '../../stores/dialog.js'
+import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
+import useTabStore from '../../stores/tab.js'
+import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 const loading = ref(false)
 const loadingConnections = ref(false)
 const expandedKeys = ref([])
-const connectionStore = useConnection()
+const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
 
-const showContextMenu = ref(false)
-const contextPos = reactive({ x: 0, y: 0 })
-const contextMenuOptions = ref(null)
-const currentContextNode = ref(null)
+const contextMenuParam = reactive({
+    show: false,
+    x: 0,
+    y: 0,
+    options: null,
+    currentNode: null,
+})
 const renderIcon = (icon) => {
     return () => {
         return h(NIcon, null, {
@@ -41,61 +40,6 @@ const renderIcon = (icon) => {
     }
 }
 const menuOptions = {
-    [ConnectionType.Group]: ({ opened }) => [
-        {
-            key: 'group_reload',
-            label: i18n.t('config_conn_group'),
-            icon: renderIcon(Config),
-        },
-        {
-            key: 'group_delete',
-            label: i18n.t('remove_conn_group'),
-            icon: renderIcon(Delete),
-        },
-    ],
-    [ConnectionType.Server]: ({ connected }) => {
-        if (connected) {
-            return [
-                {
-                    key: 'server_reload',
-                    label: i18n.t('reload'),
-                    icon: renderIcon(Refresh),
-                },
-                {
-                    key: 'server_disconnect',
-                    label: i18n.t('disconnect'),
-                    icon: renderIcon(Unlink),
-                },
-                {
-                    key: 'server_dup',
-                    label: i18n.t('dup_conn'),
-                    icon: renderIcon(CopyLink),
-                },
-                {
-                    key: 'server_config',
-                    label: i18n.t('config_conn'),
-                    icon: renderIcon(Config),
-                },
-                {
-                    type: 'divider',
-                    key: 'd1',
-                },
-                {
-                    key: 'server_remove',
-                    label: i18n.t('remove_conn'),
-                    icon: renderIcon(Delete),
-                },
-            ]
-        } else {
-            return [
-                {
-                    key: 'server_open',
-                    label: i18n.t('open_connection'),
-                    icon: renderIcon(Connect),
-                },
-            ]
-        }
-    },
     [ConnectionType.RedisDB]: ({ opened }) => {
         if (opened) {
             return [
@@ -177,10 +121,14 @@ onMounted(async () => {
     try {
         // TODO: Show loading list status
         loadingConnections.value = true
-        nextTick(connectionStore.initConnection)
+        // nextTick(connectionStore.initConnection)
     } finally {
         loadingConnections.value = false
     }
+})
+
+const props = defineProps({
+    server: Strig,
 })
 
 const expandKey = (key) => {
@@ -224,22 +172,6 @@ const onUpdateExpanded = (value, option, meta) => {
 
 const renderPrefix = ({ option }) => {
     switch (option.type) {
-        case ConnectionType.Group:
-            return h(
-                NIcon,
-                { size: 20 },
-                {
-                    default: () => h(ToggleFolder, { modelValue: option.expanded === true }),
-                }
-            )
-        case ConnectionType.Server:
-            return h(
-                NIcon,
-                { size: 20 },
-                {
-                    default: () => h(ToggleServer, { modelValue: option.connected === true }),
-                }
-            )
         case ConnectionType.RedisDB:
             return h(
                 NIcon,
@@ -302,6 +234,7 @@ const nodeProps = ({ option }) => {
 
                 case ConnectionType.RedisDB:
                     option.isLeaf = false
+                    break
             }
 
             // default handle is expand current node
@@ -313,13 +246,13 @@ const nodeProps = ({ option }) => {
             if (mop == null) {
                 return
             }
-            showContextMenu.value = false
+            contextMenuParam.show = false
             nextTick().then(() => {
-                contextMenuOptions.value = mop(option)
-                currentContextNode.value = option
-                contextPos.x = e.clientX
-                contextPos.y = e.clientY
-                showContextMenu.value = true
+                contextMenuParam.options = mop(option)
+                contextMenuParam.currentNode = option
+                contextMenuParam.x = e.clientX
+                contextMenuParam.y = e.clientY
+                contextMenuParam.show = true
             })
         },
         // onMouseover() {
@@ -330,17 +263,6 @@ const nodeProps = ({ option }) => {
 
 const onLoadTree = async (node) => {
     switch (node.type) {
-        case ConnectionType.Server:
-            loading.value = true
-            try {
-                await connectionStore.openConnection(node.name)
-            } catch (e) {
-                message.error(e.message)
-                node.isLeaf = undefined
-            } finally {
-                loading.value = false
-            }
-            break
         case ConnectionType.RedisDB:
             loading.value = true
             try {
@@ -356,8 +278,8 @@ const onLoadTree = async (node) => {
 }
 
 const handleSelectContextMenu = (key) => {
-    showContextMenu.value = false
-    const { name, db, key: nodeKey, redisKey } = currentContextNode.value
+    contextMenuParam.show = false
+    const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
     switch (key) {
         case 'server_disconnect':
             connectionStore.closeConnection(nodeKey).then((success) => {
@@ -412,7 +334,7 @@ const handleSelectContextMenu = (key) => {
 }
 
 const handleOutsideContextMenu = () => {
-    showContextMenu.value = false
+    contextMenuParam.show = false
 }
 </script>
 
@@ -420,7 +342,9 @@ const handleOutsideContextMenu = () => {
     <n-tree
         :block-line="true"
         :block-node="true"
-        :data="connectionStore.connections"
+        :animated="false"
+        :cancelable="false"
+        :data="connectionStore.databases[props.server] || []"
         :expand-on-click="false"
         :expanded-keys="expandedKeys"
         :node-props="nodeProps"
@@ -429,17 +353,16 @@ const handleOutsideContextMenu = () => {
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"
-        block-line
         class="fill-height"
         virtual-scroll
     />
     <n-dropdown
         :animated="false"
-        :options="contextMenuOptions"
+        :options="contextMenuParam.options"
         :render-label="renderContextLabel"
-        :show="showContextMenu"
-        :x="contextPos.x"
-        :y="contextPos.y"
+        :show="contextMenuParam.show"
+        :x="contextMenuParam.x"
+        :y="contextMenuParam.y"
         placement="bottom-start"
         trigger="manual"
         @clickoutside="handleOutsideContextMenu"

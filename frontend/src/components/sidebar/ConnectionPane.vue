@@ -1,12 +1,12 @@
 <script setup>
-import useDialogStore from '../stores/dialog.js'
+import useDialogStore from '../../stores/dialog.js'
 import { NIcon } from 'naive-ui'
-import AddGroup from './icons/AddGroup.vue'
-import AddLink from './icons/AddLink.vue'
-import Sort from './icons/Sort.vue'
-import ConnectionsTree from './ConnectionsTree.vue'
-import IconButton from './IconButton.vue'
-import Filter from './icons/Filter.vue'
+import AddGroup from '../icons/AddGroup.vue'
+import AddLink from '../icons/AddLink.vue'
+import Sort from '../icons/Sort.vue'
+import IconButton from '../common/IconButton.vue'
+import Filter from '../icons/Filter.vue'
+import ConnectionTree from './ConnectionTree.vue'
 
 const dialogStore = useDialogStore()
 
@@ -16,8 +16,8 @@ const onSort = () => {
 </script>
 
 <template>
-    <div v-if="true" class="nav-pane-container flex-box-v">
-        <ConnectionsTree />
+    <div class="nav-pane-container flex-box-v">
+        <connection-tree />
 
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">

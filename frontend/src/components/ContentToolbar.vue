@@ -5,11 +5,11 @@ import Delete from './icons/Delete.vue'
 import Edit from './icons/Edit.vue'
 import Refresh from './icons/Refresh.vue'
 import Timer from './icons/Timer.vue'
-import RedisTypeTag from './RedisTypeTag.vue'
-import useConnectionStore from '../stores/connection.js'
+import RedisTypeTag from './common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
 import { useMessage } from 'naive-ui'
-import IconButton from './IconButton.vue'
+import IconButton from './common/IconButton.vue'
+import useConnectionStore from '../stores/connections.js'
 
 const props = defineProps({
     server: String,

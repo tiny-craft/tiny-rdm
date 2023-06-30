@@ -1,9 +1,9 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import useDialog from '../../stores/dialog'
-import useConnectionStore from '../../stores/connection.js'
 import { useMessage } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
+import useConnectionStore from '../../stores/connections.js'
 
 const renameForm = reactive({
     server: '',

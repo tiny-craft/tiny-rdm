@@ -1,23 +1,38 @@
 <script setup>
-import { computed, h, ref } from 'vue'
+import { computed, h } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import ToggleDb from './icons/ToggleDb.vue'
 import { useI18n } from 'vue-i18n'
 import ToggleServer from './icons/ToggleServer.vue'
-import IconButton from './IconButton.vue'
+import IconButton from './common/IconButton.vue'
 import Config from './icons/Config.vue'
 import useDialogStore from '../stores/dialog.js'
 import Github from './icons/Github.vue'
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime.js'
+import Log from './icons/Log.vue'
+import useConnectionStore from '../stores/connections.js'
 
 const themeVars = useThemeVars()
 
-const iconSize = 26
-const selectedMenu = ref('server')
+const props = defineProps({
+    value: {
+        type: String,
+        default: 'server',
+    },
+    width: {
+        type: Number,
+        default: 60,
+    },
+})
+
+const emit = defineEmits(['update:value'])
+
+const iconSize = computed(() => Math.floor(props.width * 0.4))
 const renderIcon = (icon) => {
     return () => h(NIcon, null, { default: () => h(icon) })
 }
 
+const connectionStore = useConnectionStore()
 const i18n = useI18n()
 const menuOptions = computed(() => {
     return [
@@ -25,12 +40,17 @@ const menuOptions = computed(() => {
             label: i18n.t('structure'),
             key: 'structure',
             icon: renderIcon(ToggleDb),
-            show: true,
+            show: connectionStore.anyConnectionOpened,
         },
         {
             label: i18n.t('server'),
             key: 'server',
             icon: renderIcon(ToggleServer),
+        },
+        {
+            label: i18n.t('log'),
+            key: 'log',
+            icon: renderIcon(Log),
         },
     ]
 })
@@ -74,12 +94,19 @@ const openGithub = () => {
 </script>
 
 <template>
-    <div id="app-nav-menu" class="flex-box-v">
+    <div
+        id="app-nav-menu"
+        :style="{
+            width: props.width + 'px',
+        }"
+        class="flex-box-v"
+    >
         <n-menu
-            v-model:value="selectedMenu"
+            :collapsed-width="props.width"
+            :value="props.value"
             :collapsed="true"
             :collapsed-icon-size="iconSize"
-            :collapsed-width="60"
+            @update:value="(val) => emit('update:value', val)"
             :options="menuOptions"
         ></n-menu>
         <div class="flex-item-expand"></div>
@@ -101,7 +128,7 @@ const openGithub = () => {
 
 <style lang="scss">
 #app-nav-menu {
-    width: 60px;
+    //width: 60px;
     height: 100vh;
     border-right: var(--border-color) solid 1px;
 

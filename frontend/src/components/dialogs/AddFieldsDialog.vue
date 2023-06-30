@@ -4,12 +4,12 @@ import { types } from '../../consts/support_redis_type'
 import useDialog from '../../stores/dialog'
 import NewStringValue from '../new_value/NewStringValue.vue'
 import NewSetValue from '../new_value/NewSetValue.vue'
-import useConnectionStore from '../../stores/connection.js'
 import { useI18n } from 'vue-i18n'
 import { useMessage } from 'naive-ui'
 import AddListValue from '../new_value/AddListValue.vue'
 import AddHashValue from '../new_value/AddHashValue.vue'
 import AddZSetValue from '../new_value/AddZSetValue.vue'
+import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 const newForm = reactive({

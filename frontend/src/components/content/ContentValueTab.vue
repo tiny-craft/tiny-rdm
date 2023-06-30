@@ -1,9 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue'
-import useConnectionStore from '../stores/connection.js'
-import { throttle } from 'lodash'
-import { ConnectionType } from '../consts/connection_type.js'
-import Close from './icons/Close.vue'
+import { ref } from 'vue'
+import { ConnectionType } from '../../consts/connection_type.js'
+import Close from '../icons/Close.vue'
+import useConnectionStore from '../../stores/connections.js'
 
 const emit = defineEmits(['switchTab', 'closeTab', 'update:modelValue'])
 
@@ -31,7 +30,7 @@ const onCurrentSelectChange = ({ type, group = '', server = '', db = 0, key = ''
         // load and update content value
     }
 }
-watch(() => connectionStore.currentSelect, throttle(onCurrentSelectChange, 1000))
+// watch(() => databaseStore.currentSelect, throttle(onCurrentSelectChange, 1000))
 
 const items = ref(props.modelValue)
 const selIndex = ref(props.selectedIndex)

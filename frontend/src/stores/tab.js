@@ -1,4 +1,4 @@
-import { find, findIndex, isEmpty, size } from 'lodash'
+import { find, findIndex, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -21,6 +21,8 @@ const useTabStore = defineStore('tab', {
      * @returns {{tabList: TabItem[], activatedTab: string, activatedIndex: number}}
      */
     state: () => ({
+        nav: 'server',
+        asideWidth: 300,
         tabList: [],
         activatedTab: '',
         activatedIndex: 0, // current activated tab index
@@ -31,9 +33,9 @@ const useTabStore = defineStore('tab', {
          * @returns {TabItem[]}
          */
         tabs() {
-            if (isEmpty(this.tabList)) {
-                this.newBlankTab()
-            }
+            // if (isEmpty(this.tabList)) {
+            //     this.newBlankTab()
+            // }
             return this.tabList
         },
 
@@ -53,7 +55,7 @@ const useTabStore = defineStore('tab', {
         currentTabIndex() {
             const len = size(this.tabs)
             if (this.activatedIndex < 0 || this.activatedIndex >= len) {
-                this.activatedIndex = 0
+                this._setActivatedIndex(0)
             }
             return this.tabs[this.activatedIndex]
         },
@@ -68,17 +70,22 @@ const useTabStore = defineStore('tab', {
                 title: 'new tab',
                 blank: true,
             })
-            this.activatedIndex = size(this.tabList) - 1
+            this._setActivatedIndex(size(this.tabList) - 1)
+        },
+
+        _setActivatedIndex(idx) {
+            this.activatedIndex = idx
+            this.nav = idx >= 0 ? 'structure' : 'server'
         },
 
         /**
          * update or insert a new tab if not exists with the same name
          * @param {string} server
-         * @param {number} db
-         * @param {number} type
-         * @param {number} ttl
-         * @param {string} key
-         * @param {*} value
+         * @param {number} [db]
+         * @param {number} [type]
+         * @param {number} [ttl]
+         * @param {string} [key]
+         * @param {*} [value]
          */
         upsertTab({ server, db, type, ttl, key, value }) {
             let tabIndex = findIndex(this.tabList, { name: server })
@@ -90,20 +97,21 @@ const useTabStore = defineStore('tab', {
                     type,
                     ttl,
                     key,
-                    value,
+                    valu,
                 })
                 tabIndex = this.tabList.length - 1
             }
             const tab = this.tabList[tabIndex]
             tab.blank = false
-            tab.title = `${server}/db${db}`
+            // tab.title = db !== undefined ? `${server}/db${db}` : `${server}`
+            tab.title = server
             tab.server = server
             tab.db = db
             tab.type = type
             tab.ttl = ttl
             tab.key = key
             tab.value = value
-            this.activatedIndex = tabIndex
+            this._setActivatedIndex(tabIndex)
             // this.activatedTab = tab.name
         },
 
@@ -149,23 +157,27 @@ const useTabStore = defineStore('tab', {
             const len = size(this.tabs)
             // ignore remove last blank tab
             if (len === 1 && this.tabs[0].blank) {
-                return
+                return null
             }
 
             if (tabIndex < 0 || tabIndex >= len) {
-                return
+                return null
             }
-            this.tabList.splice(tabIndex, 1)
+            const removed = this.tabList.splice(tabIndex, 1)
 
-            if (len === 1) {
-                this.newBlankTab()
-            } else {
-                // Update select index if removed index equal current selected
-                this.activatedIndex -= 1
-                if (this.activatedIndex < 0 && this.tabList.length > 0) {
-                    this.activatedIndex = 0
+            // update select index if removed index equal current selected
+            this.activatedIndex -= 1
+            if (this.activatedIndex < 0) {
+                if (this.tabList.length > 0) {
+                    this._setActivatedIndex(0)
+                } else {
+                    this._setActivatedIndex(-1)
                 }
+            } else {
+                this._setActivatedIndex(this.activatedIndex)
             }
+
+            return size(removed) > 0 ? removed[0] : null
         },
         removeTabByName(tabName) {
             const idx = findIndex(this.tabs, { name: tabName })

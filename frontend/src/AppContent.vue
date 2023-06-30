@@ -1,21 +1,25 @@
 <script setup>
-import ContentPane from './components/ContentPane.vue'
-import NavigationPane from './components/NavigationPane.vue'
+import ContentPane from './components/content/ContentPane.vue'
+import DatabasePane from './components/sidebar/DatabasePane.vue'
 import { computed, nextTick, onMounted, provide, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { GetPreferences } from '../wailsjs/go/storage/PreferencesStorage.js'
 import { get } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import NavMenu from './components/NavMenu.vue'
+import ConnectionPane from './components/sidebar/ConnectionPane.vue'
+import ContentServerPane from './components/content/ContentServerPane.vue'
+import useTabStore from './stores/tab.js'
 
 const themeVars = useThemeVars()
 
 const data = reactive({
-    asideWith: 300,
+    navMenuWidth: 60,
     hoverResize: false,
     resizing: false,
 })
 
+const tabStore = useTabStore()
 const preferences = ref({})
 provide('preferences', preferences)
 const i18n = useI18n()
@@ -34,7 +38,7 @@ const getFontSize = computed(() => {
 
 const handleResize = (evt) => {
     if (data.resizing) {
-        data.asideWith = Math.max(evt.clientX, 300)
+        tabStore.asideWidth = Math.max(evt.clientX - data.navMenuWidth, 300)
     }
 }
 
@@ -52,7 +56,7 @@ const startResize = () => {
 }
 
 const asideWidthVal = computed(() => {
-    return data.asideWith + 'px'
+    return tabStore.asideWidth + 'px'
 })
 
 const dragging = computed(() => {
@@ -62,22 +66,51 @@ const dragging = computed(() => {
 
 <template>
     <!-- app content-->
-    <div id="app-container" :class="{ dragging: dragging }" class="flex-box-h">
-        <nav-menu />
-        <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
-            <navigation-pane class="flex-item-expand"></navigation-pane>
-            <div
-                :class="{
-                    'resize-divider-hover': data.hoverResize,
-                    'resize-divider-drag': data.resizing,
-                }"
-                class="resize-divider"
-                @mousedown="startResize"
-                @mouseout="data.hoverResize = false"
-                @mouseover="data.hoverResize = true"
-            ></div>
+    <div id="app-container" :class="{ dragging }" class="flex-box-h">
+        <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
+        <!-- structure page-->
+        <div v-show="tabStore.nav === 'structure'" class="flex-box-h flex-item-expand">
+            <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                <database-pane
+                    v-for="t in tabStore.tabs"
+                    v-show="get(tabStore.currentTab, 'name') === t.name"
+                    :key="t.name"
+                    class="flex-item-expand"
+                />
+                <div
+                    :class="{
+                        'resize-divider-hover': data.hoverResize,
+                        'resize-divider-drag': data.resizing,
+                    }"
+                    class="resize-divider"
+                    @mousedown="startResize"
+                    @mouseout="data.hoverResize = false"
+                    @mouseover="data.hoverResize = true"
+                />
+            </div>
+            <content-pane class="flex-item-expand" />
         </div>
-        <content-pane class="flex-item-expand" />
+
+        <!-- server list page -->
+        <div v-show="tabStore.nav === 'server'" class="flex-box-h flex-item-expand">
+            <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                <connection-pane class="flex-item-expand" />
+                <div
+                    :class="{
+                        'resize-divider-hover': data.hoverResize,
+                        'resize-divider-drag': data.resizing,
+                    }"
+                    class="resize-divider"
+                    @mousedown="startResize"
+                    @mouseout="data.hoverResize = false"
+                    @mouseover="data.hoverResize = true"
+                />
+            </div>
+            <content-server-pane class="flex-item-expand" />
+        </div>
+
+        <!-- log page -->
+        <div v-show="tabStore.nav === 'log'">display log</div>
     </div>
 </template>
 

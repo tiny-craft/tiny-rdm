@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { flatMap, isEmpty, reject } from 'lodash'
 import Add from '../icons/Add.vue'
 import Delete from '../icons/Delete.vue'
-import IconButton from '../IconButton.vue'
+import IconButton from '../common/IconButton.vue'
 
 const props = defineProps({
     value: Array,

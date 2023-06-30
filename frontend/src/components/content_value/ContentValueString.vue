@@ -9,10 +9,10 @@ import { types } from '../../consts/value_view_type.js'
 import Close from '../icons/Close.vue'
 import Edit from '../icons/Edit.vue'
 import { IsJson } from '../../utils/check_string_format.js'
-import useConnectionStore from '../../stores/connection.js'
 import { types as redisTypes } from '../../consts/support_redis_type.js'
 import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
 import { toLower } from 'lodash'
+import useConnectionStore from '../../stores/connections.js'
 
 const props = defineProps({
     name: String,

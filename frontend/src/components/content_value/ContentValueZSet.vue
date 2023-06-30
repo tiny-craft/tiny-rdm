@@ -5,10 +5,10 @@ import ContentToolbar from '../ContentToolbar.vue'
 import AddLink from '../icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, NInputNumber, useMessage } from 'naive-ui'
 import { types, types as redisTypes } from '../../consts/support_redis_type.js'
-import EditableTableColumn from '../EditableTableColumn.vue'
-import useConnectionStore from '../../stores/connection.js'
+import EditableTableColumn from '../common/EditableTableColumn.vue'
 import { isEmpty } from 'lodash'
 import useDialogStore from '../../stores/dialog.js'
+import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 const props = defineProps({

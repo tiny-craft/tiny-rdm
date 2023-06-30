@@ -1,13 +1,16 @@
 <script setup>
 import { computed } from 'vue'
-import { types } from '../consts/support_redis_type.js'
-import ContentValueHash from './content_value/ContentValueHash.vue'
-import ContentValueList from './content_value/ContentValueList.vue'
-import ContentValueString from './content_value/ContentValueString.vue'
-import ContentValueSet from './content_value/ContentValueSet.vue'
-import ContentValueZset from './content_value/ContentValueZset.vue'
+import { types } from '../../consts/support_redis_type.js'
+import ContentValueHash from '../content_value/ContentValueHash.vue'
+import ContentValueList from '../content_value/ContentValueList.vue'
+import ContentValueString from '../content_value/ContentValueString.vue'
+import ContentValueSet from '../content_value/ContentValueSet.vue'
+import ContentValueZset from '../content_value/ContentValueZSet.vue'
 import { isEmpty, map, toUpper } from 'lodash'
-import useTabStore from '../stores/tab.js'
+import useTabStore from '../../stores/tab.js'
+import { useDialog } from 'naive-ui'
+import useConnectionStore from '../../stores/connections.js'
+import { useI18n } from 'vue-i18n'
 
 const valueComponents = {
     [types.STRING]: ContentValueString,
@@ -17,6 +20,8 @@ const valueComponents = {
     [types.ZSET]: ContentValueZset,
 }
 
+const dialog = useDialog()
+const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const tab = computed(() =>
     map(tabStore.tabs, (item) => ({
@@ -52,9 +57,24 @@ const onAddTab = () => {
     tabStore.newBlankTab()
 }
 
+const i18n = useI18n()
 const onCloseTab = (tabIndex) => {
-    tabStore.removeTab(tabIndex)
-    console.log('TODO: close connection also')
+    dialog.warning({
+        title: i18n.t('close_confirm_title'),
+        content: i18n.t('close_confirm'),
+        positiveText: i18n.t('confirm'),
+        negativeText: i18n.t('cancel'),
+        closable: false,
+        closeOnEsc: false,
+        maskClosable: false,
+        transformOrigin: 'center',
+        onPositiveClick: () => {
+            const removedTab = tabStore.removeTab(tabIndex)
+            if (removedTab != null) {
+                connectionStore.closeConnection(removedTab.name)
+            }
+        },
+    })
 }
 </script>
 
@@ -63,8 +83,7 @@ const onCloseTab = (tabIndex) => {
         <!--    <content-tab :model-value="tab"></content-tab>-->
         <n-tabs
             v-model:value="tabStore.activatedIndex"
-            :closable="tab.length > 1"
-            addable
+            :closable="true"
             size="small"
             type="card"
             @add="onAddTab"
@@ -75,10 +94,10 @@ const onCloseTab = (tabIndex) => {
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-tab>
         </n-tabs>
-        <!-- add loading status -->
+        <!-- TODO: add loading status -->
         <component
-            :is="valueComponents[tabContent.type]"
             v-if="tabContent != null && !isEmpty(tabContent.keyPath)"
+            :is="valueComponents[tabContent.type]"
             :db="tabContent.db"
             :key-path="tabContent.keyPath"
             :name="tabContent.name"
@@ -92,20 +111,5 @@ const onCloseTab = (tabIndex) => {
 </template>
 
 <style lang="scss" scoped>
-.content-container {
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--bg-color);
-    padding-top: 2px;
-    padding-bottom: 5px;
-    box-sizing: border-box;
-}
-
-.empty-content {
-    height: 100%;
-    justify-content: center;
-}
-
-.tab-content {
-}
+@import 'content';
 </style>

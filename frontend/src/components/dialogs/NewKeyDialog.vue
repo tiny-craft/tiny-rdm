@@ -8,8 +8,8 @@ import NewHashValue from '../new_value/NewHashValue.vue'
 import NewListValue from '../new_value/NewListValue.vue'
 import NewZSetValue from '../new_value/NewZSetValue.vue'
 import NewSetValue from '../new_value/NewSetValue.vue'
-import useConnectionStore from '../../stores/connection.js'
 import { useI18n } from 'vue-i18n'
+import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 const newForm = reactive({
