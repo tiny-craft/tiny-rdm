@@ -1,5 +1,5 @@
 <script setup>
-import NewConnDialog from './components/dialogs/NewConnDialog.vue'
+import ConnectionDialog from './components/dialogs/ConnectionDialog.vue'
 import NewKeyDialog from './components/dialogs/NewKeyDialog.vue'
 import PreferencesDialog from './components/dialogs/PreferencesDialog.vue'
 import RenameKeyDialog from './components/dialogs/RenameKeyDialog.vue'
@@ -40,7 +40,7 @@ const themeOverrides = {
                 <app-content />
 
                 <!-- top modal dialogs -->
-                <new-conn-dialog />
+                <connection-dialog />
                 <new-key-dialog />
                 <add-fields-dialog />
                 <rename-key-dialog />

@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
+import useConnectionStore from './connections.js'
 
 const useDialogStore = defineStore('dialog', {
     state: () => ({
-        newDialogVisible: false,
+        connDialogVisible: false,
+        connParam: null,
 
         /**
          * @property {string} prefix
@@ -38,10 +40,22 @@ const useDialogStore = defineStore('dialog', {
     }),
     actions: {
         openNewDialog() {
-            this.newDialogVisible = true
+            this.connParam = null
+            this.connDialogVisible = true
         },
         closeNewDialog() {
-            this.newDialogVisible = false
+            this.connDialogVisible = false
+        },
+
+        async openEditDialog(name) {
+            console.log('open edit dialog:' + name)
+            const connStore = useConnectionStore()
+            const profile = await connStore.getConnectionProfile(name)
+            this.connParam = profile || connStore.newDefaultConnection(name)
+            this.connDialogVisible = true
+        },
+        closeEditDialog() {
+            this.connDialogVisible = false
         },
 
         /**

@@ -83,13 +83,39 @@ func (c *connectionService) ListConnection() (resp types.JSResp) {
 	return
 }
 
+// GetConnection get connection profile by name
+func (c *connectionService) GetConnection(name string) (resp types.JSResp) {
+	conn := c.conns.GetConnection(name)
+	resp.Success = conn != nil
+	resp.Data = conn
+	return
+}
+
 // SaveConnection save connection config to local profile
-func (c *connectionService) SaveConnection(param types.Connection, replace bool) (resp types.JSResp) {
-	if err := c.conns.UpsertConnection(param, replace); err != nil {
+func (c *connectionService) SaveConnection(name string, param types.Connection) (resp types.JSResp) {
+	var err error
+	if len(name) > 0 {
+		// update connection
+		err = c.conns.UpdateConnection(name, param)
+	} else {
+		err = c.conns.CreateConnection(param)
+	}
+	if err != nil {
 		resp.Msg = err.Error()
 	} else {
 		resp.Success = true
 	}
+	return
+}
+
+// RemoveConnection remove connection by name
+func (c *connectionService) RemoveConnection(name string) (resp types.JSResp) {
+	err := c.conns.RemoveConnection(name)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
 	return
 }
 

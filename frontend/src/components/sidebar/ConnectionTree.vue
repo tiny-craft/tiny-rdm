@@ -2,7 +2,7 @@
 import useDialogStore from '../../stores/dialog.js'
 import { h, nextTick, onMounted, reactive, ref } from 'vue'
 import useConnectionStore from '../../stores/connections.js'
-import { NIcon, useMessage } from 'naive-ui'
+import { NIcon, useDialog, useMessage } from 'naive-ui'
 import { ConnectionType } from '../../consts/connection_type.js'
 import ToggleFolder from '../icons/ToggleFolder.vue'
 import ToggleServer from '../icons/ToggleServer.vue'
@@ -111,7 +111,7 @@ const menuOptions = {
                     key: 'd1',
                 },
                 {
-                    key: 'server_delete',
+                    key: 'server_remove',
                     label: i18n.t('remove_conn'),
                     icon: renderIcon(Delete),
                 },
@@ -171,7 +171,7 @@ const openConnection = async (name) => {
             await connectionStore.openConnection(name)
         }
         tabStore.upsertTab({
-            server: nam,
+            server: nae,
         })
     } catch (e) {
         message.error(e.message)
@@ -179,6 +179,28 @@ const openConnection = async (name) => {
     } finally {
         openingConnection.value = false
     }
+}
+
+const dialog = useDialog()
+const removeConnection = async (name) => {
+    dialog.warning({
+        title: i18n.t('warning'),
+        content: i18n.t('delete_key_tip', { key: name }),
+        closable: false,
+        autoFocus: false,
+        transformOrigin: 'center',
+        positiveText: i18n.t('confirm'),
+        negativeText: i18n.t('cancel'),
+        onPositiveClick: async () => {
+            connectionStore.removeConnection(name).then(({ success, msg }) => {
+                if (!success) {
+                    message.error(msg)
+                } else {
+                    message.success(i18n.t('delete_key_succ', { key: name }))
+                }
+            })
+        },
+    })
 }
 
 const nodeProps = ({ option }) => {
@@ -217,6 +239,12 @@ const handleSelectContextMenu = (key) => {
     switch (key) {
         case 'server_open':
             openConnection(name).then(() => {})
+            break
+        case 'server_edit':
+            dialogStore.openEditDialog(name)
+            break
+        case 'server_remove':
+            removeConnection(name)
             break
         case 'server_close':
             connectionStore.closeConnection(name)

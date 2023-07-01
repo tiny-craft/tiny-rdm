@@ -1,23 +1,26 @@
 import { defineStore } from 'pinia'
-import { get, isEmpty, last, remove, size, sortedIndexBy, split } from 'lodash'
+import { get, isEmpty, last, remove, size, sortedIndexBy, split, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
     AddZSetValue,
     CloseConnection,
+    GetConnection,
     GetKeyValue,
     ListConnection,
     OpenConnection,
     OpenDatabase,
+    RemoveConnection,
     RemoveKey,
     RenameKey,
+    SaveConnection,
     SetHashValue,
     SetKeyTTL,
     SetKeyValue,
     SetListItem,
     SetSetItem,
     UpdateSetItem,
-    UpdateZSetValue,
+    UpdateZSetValue
 } from '../../wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
@@ -51,8 +54,9 @@ const useConnectionStore = defineStore('connections', {
      * @returns {{databases: Object<string, DatabaseItem[]>, connections: ConnectionItem[]}}
      */
     state: () => ({
+        groups: [], // all group name
         connections: [], // all connections
-        databases: {}, // all databases in opened connections group by name
+        databases: {, // all databases in opened connections group by name
     }),
     getters: {
         anyConnectionOpened() {
@@ -61,14 +65,16 @@ const useConnectionStore = defineStore('connections', {
     },
     actions: {
         /**
-         * Load all store connections struct from local profile
+         * load all store connections struct from local profile
+         * @param {boolean} [force]
          * @returns {Promise<void>}
          */
-        async initConnections() {
-            if (!isEmpty(this.connections)) {
+        async initConnections(force) {
+            if (!force && !isEmpty(this.connections)) {
                 return
             }
             const conns = []
+            const groups = []
             const { data = [{ groupName: '', connections: [] }] } = await ListConnection()
             for (let i = 0; i < data.length; i++) {
                 const group = data[i]
@@ -86,6 +92,7 @@ const useConnectionStore = defineStore('connections', {
                         })
                     }
                 } else {
+                    groups.push(group.groupName)
                     // Custom group
                     const children = []
                     const len = size(group.connections)
@@ -97,7 +104,6 @@ const useConnectionStore = defineStore('connections', {
                             label: item.name,
                             name: item.name,
                             type: ConnectionType.Server,
-                            children: j === len - 1 ? undefined : [],
                             // isLeaf: false,
                         })
                     }
@@ -105,12 +111,49 @@ const useConnectionStore = defineStore('connections', {
                         key: group.groupName,
                         label: group.groupName,
                         type: ConnectionType.Group,
-                        children,
+                        children
                     })
                 }
             }
             this.connections = conns
-            console.debug(JSON.stringify(this.connections))
+            this.groups = uniq(groups)
+        },
+
+        /**
+         * get connection by name from local profile
+         * @param name
+         * @returns {Promise<{}|null>}
+         */
+        async getConnectionProfile(name) {
+            try {
+                const { data, success } = await GetConnection(name)
+                if (success) {
+                    return data
+                }
+            } finally {
+            }
+            return null
+        },
+
+        /**
+         * create a new default connection
+         * @param {string} [name]
+         * @returns {{}}
+         */
+        newDefaultConnection(name) {
+            return {
+                group: '',
+                name: name || '',
+                addr: '127.0.0.1',
+                port: 6379,
+                username: '',
+                password: '',
+                defaultFilter: '*',
+                keySeparator: ':',
+                connTimeout: 60,
+                execTimeout: 60,
+                markColor: ''
+            }
         },
 
         /**
@@ -133,6 +176,23 @@ const useConnectionStore = defineStore('connections', {
                 }
             }
             return null
+        },
+
+        /**
+         * Create a new connection or update current connection profile
+         * @param {string} name set null if create a new connection
+         * @param {{}} param
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async saveConnection(name, param) {
+            const { success, msg } = await SaveConnection(name, param)
+            if (!success) {
+                return { success: false, msg }
+            }
+
+            // reload connection list
+            await this.initConnections(true)
+            return { success: true }
         },
 
         /**
@@ -200,6 +260,22 @@ const useConnectionStore = defineStore('connections', {
             const tabStore = useTabStore()
             tabStore.removeTabByName(name)
             return true
+        },
+
+        /**
+         * Remove connection
+         * @param name
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async removeConnection(name) {
+            // close connection first
+            await this.closeConnection(name)
+            const { success, msg } = await RemoveConnection(name)
+            if (!success) {
+                return { success: false, msg }
+            }
+            await this.initConnections(true)
+            return { success: true }
         },
 
         /**

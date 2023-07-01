@@ -67,24 +67,29 @@ func (c *ConnectionsStorage) getConnections() (ret []types.ConnectionGroup) {
 
 // GetConnections get all store connections from local
 func (c *ConnectionsStorage) GetConnections() (ret []types.ConnectionGroup) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
 	return c.getConnections()
 }
 
 // GetConnectionsFlat get all store connections from local flat(exclude group level)
 func (c *ConnectionsStorage) GetConnectionsFlat() (ret []types.Connection) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+	conns := c.getConnections()
+	for _, group := range conns {
+		ret = append(ret, group.Connections...)
+	}
+	return
+}
 
+// GetConnection get connection by name
+func (c *ConnectionsStorage) GetConnection(name string) *types.Connection {
 	conns := c.getConnections()
 	for _, group := range conns {
 		for _, conn := range group.Connections {
-			ret = append(ret, conn)
+			if conn.Name == name {
+				return &conn
+			}
 		}
 	}
-	return
+	return nil
 }
 
 func (c *ConnectionsStorage) saveConnections(conns []types.ConnectionGroup) error {
@@ -98,36 +103,61 @@ func (c *ConnectionsStorage) saveConnections(conns []types.ConnectionGroup) erro
 	return nil
 }
 
-// UpsertConnection update or insert a connection
-func (c *ConnectionsStorage) UpsertConnection(param types.Connection, replace bool) error {
+// CreateConnection create new connection
+func (c *ConnectionsStorage) CreateConnection(param types.Connection) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	conn := c.GetConnection(param.Name)
+	if conn != nil {
+		return errors.New("duplicated connection name")
+	}
+
+	conns := c.getConnections()
+	groupIndex, existsGroup := sliceutil.Find(conns, func(i int) bool {
+		return conns[i].GroupName == param.Group
+	})
+	if !existsGroup {
+		// no group matched, create new group
+		group := types.ConnectionGroup{
+			GroupName:   param.Group,
+			Connections: []types.Connection{param},
+		}
+		conns = append(conns, group)
+	} else {
+		conns[groupIndex].Connections = append(conns[groupIndex].Connections, param)
+	}
+
+	return c.saveConnections(conns)
+}
+
+// UpdateConnection update existing connection by name
+func (c *ConnectionsStorage) UpdateConnection(name string, param types.Connection) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	conns := c.getConnections()
 	groupIndex := -1
 	connIndex := -1
+	// find out edit connection
 	for i, group := range conns {
 		for j, conn := range group.Connections {
 			// check conflict connection name
-			if conn.Name == param.Name {
-				if !replace {
-					return errors.New("duplicated connection name")
-				} else {
-					// different group name, should move group
-					// remove from current group first
-					if group.GroupName != param.Group {
-						group.Connections = append(group.Connections[:j], group.Connections[j+1:]...)
+			if conn.Name == name {
+				// different group name, should move to new group
+				// remove from current group first
+				if group.GroupName != param.Group {
+					conns[i].Connections = append(conns[i].Connections[:j], conns[i].Connections[j+1:]...)
 
-						// find new group index
-						groupIndex, _ = sliceutil.Find(conns, func(i int) bool {
-							return conns[i].GroupName == param.Group
-						})
-					} else {
-						groupIndex = i
-						connIndex = j
-					}
-					break
+					// find new group index
+					groupIndex, _ = sliceutil.Find(conns, func(i int) bool {
+						return conns[i].GroupName == param.Group
+					})
+				} else {
+					groupIndex = i
+					connIndex = j
 				}
+				break
 			}
 		}
 	}
@@ -149,25 +179,22 @@ func (c *ConnectionsStorage) UpsertConnection(param types.Connection, replace bo
 		}
 		conns = append(conns, group)
 	}
-
 	return c.saveConnections(conns)
 }
 
 // RemoveConnection remove special connection
-func (c *ConnectionsStorage) RemoveConnection(group, name string) error {
+func (c *ConnectionsStorage) RemoveConnection(name string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	conns := c.getConnections()
 	for i, connGroup := range conns {
-		if connGroup.GroupName == group {
-			for j, conn := range connGroup.Connections {
-				if conn.Name == name {
-					connList := conns[i].Connections
-					connList = append(connList[:j], connList[j+1:]...)
-					conns[i].Connections = connList
-					return c.saveConnections(conns)
-				}
+		for j, conn := range connGroup.Connections {
+			if conn.Name == name {
+				connList := conns[i].Connections
+				connList = append(connList[:j], connList[j+1:]...)
+				conns[i].Connections = connList
+				return c.saveConnections(conns)
 			}
 		}
 	}
