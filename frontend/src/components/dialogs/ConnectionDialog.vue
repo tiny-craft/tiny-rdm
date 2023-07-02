@@ -85,8 +85,8 @@ const onSaveConnection = async () => {
         return
     }
 
-    message.success(i18n.t('new_conn_succ'))
-    dialogStore.closeNewDialog()
+    message.success(i18n.t('handle_succ'))
+    onClose()
 }
 
 const resetForm = () => {
@@ -132,7 +132,11 @@ const onTestConnection = async () => {
 }
 
 const onClose = () => {
-    dialogStore.closeNewDialog()
+    if (isEditMode.value) {
+        dialogStore.closeEditDialog()
+    } else {
+        dialogStore.closeNewDialog()
+    }
 }
 </script>
 
@@ -162,7 +166,7 @@ const onClose = () => {
                     <n-form-item :label="$t('conn_name')" path="name" required>
                         <n-input v-model:value="generalForm.name" :placeholder="$t('conn_name_tip')" />
                     </n-form-item>
-                    <n-form-item :label="$t('conn_group')" required>
+                    <n-form-item v-if="!isEditMode" :label="$t('conn_group')" required>
                         <n-select v-model:value="generalForm.group" :options="groupOptions"></n-select>
                     </n-form-item>
                     <n-form-item :label="$t('conn_addr')" path="addr" required>

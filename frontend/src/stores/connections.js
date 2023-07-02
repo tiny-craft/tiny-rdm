@@ -5,13 +5,16 @@ import {
     AddListItem,
     AddZSetValue,
     CloseConnection,
+    CreateGroup,
     GetConnection,
     GetKeyValue,
     ListConnection,
     OpenConnection,
     OpenDatabase,
     RemoveConnection,
+    RemoveGroup,
     RemoveKey,
+    RenameGroup,
     RenameKey,
     SaveConnection,
     SetHashValue,
@@ -76,29 +79,23 @@ const useConnectionStore = defineStore('connections', {
             const conns = []
             const groups = []
             const { data = [{ groupName: '', connections: [] }] } = await ListConnection()
-            for (let i = 0; i < data.length; i++) {
-                const group = data[i]
-                // Top level group
-                if (isEmpty(group.groupName)) {
-                    const len = size(group.connections)
-                    for (let j = 0; j < len; j++) {
-                        const item = group.connections[j]
-                        conns.push({
-                            key: item.name,
-                            label: item.name,
-                            name: item.name,
-                            type: ConnectionType.Server,
-                            // isLeaf: false,
-                        })
-                    }
+            for (const conn of data) {
+                if (conn.type !== 'group') {
+                    // top level
+                    conns.push({
+                        key: conn.name,
+                        label: conn.name,
+                        name: conn.name,
+                        type: ConnectionType.Server,
+                        // isLeaf: false,
+                    })
                 } else {
-                    groups.push(group.groupName)
-                    // Custom group
+                    // custom group
+                    groups.push(conn.name)
+                    const subConns = get(conn, 'connections', [])
                     const children = []
-                    const len = size(group.connections)
-                    for (let j = 0; j < len; j++) {
-                        const item = group.connections[j]
-                        const value = group.groupName + '/' + item.name
+                    for (const item of subConns) {
+                        const value = conn.name + '/' + item.name
                         children.push({
                             key: value,
                             label: item.name,
@@ -108,8 +105,8 @@ const useConnectionStore = defineStore('connections', {
                         })
                     }
                     conns.push({
-                        key: group.groupName,
-                        label: group.groupName,
+                        key: conn.name,
+                        label: conn.name,
                         type: ConnectionType.Group,
                         children,
                     })
@@ -127,7 +124,6 @@ const useConnectionStore = defineStore('connections', {
         async getConnectionProfile(name) {
             try {
                 const { data, success } = await GetConnection(name)
-                console.log(JSON.stringify(data))
                 if (success) {
                     return data
                 }
@@ -264,6 +260,20 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * Close all connection
+         * @returns {Promise<void>}
+         */
+        async closeAllConnection() {
+            for (const name in this.databases) {
+                await CloseConnection(name)
+            }
+
+            this.databases = {}
+            const tabStore = useTabStore()
+            tabStore.removeAllTab()
+        },
+
+        /**
          * Remove connection
          * @param name
          * @returns {Promise<{success: boolean, [msg]: string}>}
@@ -272,6 +282,53 @@ const useConnectionStore = defineStore('connections', {
             // close connection first
             await this.closeConnection(name)
             const { success, msg } = await RemoveConnection(name)
+            if (!success) {
+                return { success: false, msg }
+            }
+            await this.initConnections(true)
+            return { success: true }
+        },
+
+        /**
+         * Create connection group
+         * @param name
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async createGroup(name) {
+            const { success, msg } = await CreateGroup(name)
+            if (!success) {
+                return { success: false, msg }
+            }
+            await this.initConnections(true)
+            return { success: true }
+        },
+
+        /**
+         * Rename connection group
+         * @param name
+         * @param newName
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async renameGroup(name, newName) {
+            if (name === newName) {
+                return { success: true }
+            }
+            const { success, msg } = await RenameGroup(name, newName)
+            if (!success) {
+                return { success: false, msg }
+            }
+            await this.initConnections(true)
+            return { success: true }
+        },
+
+        /**
+         * Remove group by name
+         * @param {string} name
+         * @param {boolean} [includeConn]
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async deleteGroup(name, includeConn) {
+            const { success, msg } = await RemoveGroup(name, includeConn === true)
             if (!success) {
                 return { success: false, msg }
             }

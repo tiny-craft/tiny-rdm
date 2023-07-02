@@ -11,6 +11,7 @@ import useTabStore from '../../stores/tab.js'
 import { useDialog } from 'naive-ui'
 import useConnectionStore from '../../stores/connections.js'
 import { useI18n } from 'vue-i18n'
+import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
 const valueComponents = {
     [types.STRING]: ContentValueString,
@@ -58,22 +59,13 @@ const onAddTab = () => {
 }
 
 const i18n = useI18n()
+const confirmDialog = useConfirmDialog()
 const onCloseTab = (tabIndex) => {
-    dialog.warning({
-        title: i18n.t('close_confirm_title'),
-        content: i18n.t('close_confirm'),
-        positiveText: i18n.t('confirm'),
-        negativeText: i18n.t('cancel'),
-        closable: false,
-        closeOnEsc: false,
-        maskClosable: false,
-        transformOrigin: 'center',
-        onPositiveClick: () => {
-            const tab = get(tabStore.tabs, tabIndex)
-            if (tab != null) {
-                connectionStore.closeConnection(tab.name)
-            }
-        },
+    confirmDialog.warning(i18n.t('close_confirm'), () => {
+        const tab = get(tabStore.tabs, tabIndex)
+        if (tab != null) {
+            connectionStore.closeConnection(tab.name)
+        }
     })
 }
 </script>

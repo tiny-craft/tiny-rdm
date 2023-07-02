@@ -15,6 +15,7 @@ import Connect from '../icons/Connect.vue'
 import { useI18n } from 'vue-i18n'
 import useTabStore from '../../stores/tab.js'
 import Edit from '../icons/Edit.vue'
+import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
 const i18n = useI18n()
 const loadingConnection = ref(false)
@@ -55,9 +56,9 @@ const renderIcon = (icon) => {
 const menuOptions = {
     [ConnectionType.Group]: ({ opened }) => [
         {
-            key: 'group_reload',
-            label: i18n.t('edit_conn_group'),
-            icon: renderIcon(Config),
+            key: 'group_rename',
+            label: i18n.t('rename_conn_group'),
+            icon: renderIcon(Edit),
         },
         {
             key: 'group_delete',
@@ -182,22 +183,24 @@ const openConnection = async (name) => {
 }
 
 const dialog = useDialog()
-const removeConnection = async (name) => {
-    dialog.warning({
-        title: i18n.t('warning'),
-        content: i18n.t('remove_conn_tip', { conn: name }),
-        closable: false,
-        autoFocus: false,
-        transformOrigin: 'center',
-        positiveText: i18n.t('confirm'),
-        negativeText: i18n.t('cancel'),
-        onPositiveClick: async () => {
-            connectionStore.removeConnection(name).then(({ success, msg }) => {
-                if (!success) {
-                    message.error(msg)
-                }
-            })
-        },
+const removeConnection = (name) => {
+    confirmDialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
+        connectionStore.removeConnection(name).then(({ success, msg }) => {
+            if (!success) {
+                message.error(msg)
+            }
+        })
+    })
+}
+
+const confirmDialog = useConfirmDialog()
+const removeGroup = async (name) => {
+    confirmDialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_group'), name }), async () => {
+        connectionStore.deleteGroup(name).then(({ success, msg }) => {
+            if (!success) {
+                message.error(msg)
+            }
+        })
     })
 }
 
@@ -233,7 +236,7 @@ const renderContextLabel = (option) => {
 
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
-    const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
+    const { name, label, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
     switch (key) {
         case 'server_open':
             openConnection(name).then(() => {})
@@ -246,6 +249,12 @@ const handleSelectContextMenu = (key) => {
             break
         case 'server_close':
             connectionStore.closeConnection(name)
+            break
+        case 'group_rename':
+            dialogStore.openRenameGroupDialog(label)
+            break
+        case 'group_delete':
+            removeGroup(label)
             break
     }
     console.warn('TODO: handle context menu:' + key)

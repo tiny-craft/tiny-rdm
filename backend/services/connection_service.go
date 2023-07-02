@@ -92,7 +92,7 @@ func (c *connectionService) GetConnection(name string) (resp types.JSResp) {
 }
 
 // SaveConnection save connection config to local profile
-func (c *connectionService) SaveConnection(name string, param types.Connection) (resp types.JSResp) {
+func (c *connectionService) SaveConnection(name string, param types.ConnectionConfig) (resp types.JSResp) {
 	var err error
 	if len(name) > 0 {
 		// update connection
@@ -111,6 +111,39 @@ func (c *connectionService) SaveConnection(name string, param types.Connection) 
 // RemoveConnection remove connection by name
 func (c *connectionService) RemoveConnection(name string) (resp types.JSResp) {
 	err := c.conns.RemoveConnection(name)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
+// CreateGroup create new group
+func (c *connectionService) CreateGroup(name string) (resp types.JSResp) {
+	err := c.conns.CreateGroup(name)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
+// RenameGroup rename group
+func (c *connectionService) RenameGroup(name, newName string) (resp types.JSResp) {
+	err := c.conns.RenameGroup(name, newName)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
+// RemoveGroup remove group by name
+func (c *connectionService) RemoveGroup(name string, includeConn bool) (resp types.JSResp) {
+	err := c.conns.RemoveGroup(name, includeConn)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -195,18 +228,9 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 	if ok {
 		rdb, ctx = item.rdb, item.ctx
 	} else {
-		connGroups := c.conns.GetConnections()
-		var selConn *types.Connection
-		for _, connGroup := range connGroups {
-			for _, conn := range connGroup.Connections {
-				if conn.Name == connName {
-					selConn = &conn
-					break
-				}
-			}
-		}
+		selConn := c.conns.GetConnection(connName)
 		if selConn == nil {
-			return nil, nil, errors.New("no match connection connName")
+			return nil, nil, fmt.Errorf("no match connection \"%s\"", connName)
 		}
 
 		rdb = redis.NewClient(&redis.Options{

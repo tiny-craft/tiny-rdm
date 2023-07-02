@@ -9,6 +9,7 @@ import json from 'highlight.js/lib/languages/json'
 import plaintext from 'highlight.js/lib/languages/plaintext'
 import AddFieldsDialog from './components/dialogs/AddFieldsDialog.vue'
 import AppContent from './AppContent.vue'
+import GroupDialog from './components/dialogs/GroupDialog.vue'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
@@ -41,6 +42,7 @@ const themeOverrides = {
 
                 <!-- top modal dialogs -->
                 <connection-dialog />
+                <group-dialog />
                 <new-key-dialog />
                 <add-fields-dialog />
                 <rename-key-dialog />

@@ -16,6 +16,10 @@ const connectionStore = useConnectionStore()
 const onSort = () => {
     dialogStore.openPreferencesDialog()
 }
+
+const onDisconnectAll = () => {
+    connectionStore.closeAllConnection()
+}
 </script>
 
 <template>
@@ -38,7 +42,7 @@ const onSort = () => {
                 size="20"
                 stroke-width="4"
                 t-tooltip="new_group"
-                @click="dialogStore.openNewKeyDialog('aa:bb')"
+                @click="dialogStore.openNewGroupDialog()"
             />
             <icon-button
                 :disabled="!connectionStore.anyConnectionOpened"
@@ -47,7 +51,7 @@ const onSort = () => {
                 size="20"
                 stroke-width="4"
                 t-tooltip="disconnect_all"
-                @click="dialogStore.openNewKeyDialog('aa:bb')"
+                @click="onDisconnectAll"
             />
             <n-divider style="margin: 0 4px; --n-color: #aaa; width: 2px" vertical />
             <icon-button :icon="Sort" color="#555" size="20" stroke-width="4" t-tooltip="sort_conn" @click="onSort" />

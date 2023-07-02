@@ -4,7 +4,7 @@ import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { indexOf } from 'lodash'
+import { get, indexOf } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -15,6 +15,7 @@ import Connect from '../icons/Connect.vue'
 import useDialogStore from '../../stores/dialog.js'
 import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
 import useConnectionStore from '../../stores/connections.js'
+import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
 const i18n = useI18n()
 const loading = ref(false)
@@ -269,6 +270,7 @@ const onLoadTree = async (node) => {
     }
 }
 
+const confirmDialog = useConfirmDialog()
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
@@ -283,21 +285,12 @@ const handleSelectContextMenu = (key) => {
             break
         case 'key_remove':
         case 'value_remove':
-            dialog.warning({
-                title: i18n.t('warning'),
-                content: i18n.t('delete_key_tip', { key: redisKey }),
-                closable: false,
-                autoFocus: false,
-                transformOrigin: 'center',
-                positiveText: i18n.t('confirm'),
-                negativeText: i18n.t('cancel'),
-                onPositiveClick: () => {
-                    connectionStore.removeKey(name, db, redisKey).then((success) => {
-                        if (success) {
-                            message.success(i18n.t('delete_key_succ', { key: redisKey }))
-                        }
-                    })
-                },
+            confirmDialog.warning(i18n.t('delete_key_tip', { key: redisKey }), () => {
+                connectionStore.removeKey(name, db, redisKey).then((success) => {
+                    if (success) {
+                        message.success(i18n.t('delete_key_succ', { key: redisKey }))
+                    }
+                })
             })
             break
         case 'key_copy':

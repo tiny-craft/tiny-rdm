@@ -6,6 +6,9 @@ const useDialogStore = defineStore('dialog', {
         connDialogVisible: false,
         connParam: null,
 
+        groupDialogVisible: false,
+        editGroup: '',
+
         /**
          * @property {string} prefix
          * @property {string} server
@@ -56,6 +59,21 @@ const useDialogStore = defineStore('dialog', {
         },
         closeEditDialog() {
             this.connDialogVisible = false
+        },
+
+        openNewGroupDialog() {
+            this.groupDialogVisible = true
+        },
+        closeNewGroupDialog() {
+            this.groupDialogVisible = false
+        },
+
+        openRenameGroupDialog(name) {
+            this.editGroup = name
+            this.groupDialogVisible = true
+        },
+        closeRenameGroupDialog() {
+            this.groupDialogVisible = false
         },
 
         /**

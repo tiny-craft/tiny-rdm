@@ -2,19 +2,27 @@ package types
 
 type ConnectionCategory int
 
-type Connection struct {
-	Group         string `json:"group" yaml:"-"`
+type ConnectionConfig struct {
 	Name          string `json:"name" yaml:"name"`
-	Addr          string `json:"addr" yaml:"addr"`
-	Port          int    `json:"port" yaml:"port"`
-	Username      string `json:"username" yaml:"username"`
-	Password      string `json:"password" yaml:"password"`
-	DefaultFilter string `json:"defaultFilter" yaml:"default_filter"`
-	KeySeparator  string `json:"keySeparator" yaml:"key_separator"`
-	ConnTimeout   int    `json:"connTimeout" yaml:"conn_timeout"`
-	ExecTimeout   int    `json:"execTimeout" yaml:"exec_timeout"`
-	MarkColor     string `json:"markColor" yaml:"mark_color"`
+	Group         string `json:"group" yaml:"-"`
+	Addr          string `json:"addr,omitempty" yaml:"addr,omitempty"`
+	Port          int    `json:"port,omitempty" yaml:"port,omitempty"`
+	Username      string `json:"username,omitempty" yaml:"username,omitempty"`
+	Password      string `json:"password,omitempty" yaml:"password,omitempty"`
+	DefaultFilter string `json:"defaultFilter,omitempty" yaml:"default_filter,omitempty"`
+	KeySeparator  string `json:"keySeparator,omitempty" yaml:"key_separator,omitempty"`
+	ConnTimeout   int    `json:"connTimeout,omitempty" yaml:"conn_timeout,omitempty"`
+	ExecTimeout   int    `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
+	MarkColor     string `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 }
+
+type Connection struct {
+	ConnectionConfig `json:",inline" yaml:",inline"`
+	Type             string       `json:"type,omitempty" yaml:"type,omitempty"`
+	Connections      []Connection `json:"connections,omitempty" yaml:"connections,omitempty"`
+}
+
+type Connections []Connection
 
 type ConnectionGroup struct {
 	GroupName   string       `json:"groupName" yaml:"group_name"`
