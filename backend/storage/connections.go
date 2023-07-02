@@ -174,36 +174,39 @@ func (c *ConnectionsStorage) UpdateConnection(name string, param types.Connectio
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	var updated bool
 	conns := c.getConnections()
-	for i, conn := range conns {
-		if conn.Name == name {
-			conns[i] = types.Connection{
-				ConnectionConfig: param,
-			}
-			updated = true
-		} else if conn.Type == "group" {
-			for j, conn2 := range conn.Connections {
-				if conn2.Name == name {
-					conns[i].Connections[j] = types.Connection{
+	var updated bool
+	var retrieve func(types.Connections, string, types.ConnectionConfig) error
+	retrieve = func(conns types.Connections, name string, param types.ConnectionConfig) error {
+		for i, conn := range conns {
+			if conn.Type != "group" {
+				if name != param.Name && conn.Name == param.Name {
+					return errors.New("duplicated connection name")
+				} else if conn.Name == name && !updated {
+					conns[i] = types.Connection{
 						ConnectionConfig: param,
 					}
 					updated = true
-					break
+				}
+			} else {
+				err := retrieve(conn.Connections, name, param)
+				if err != nil {
+					return err
 				}
 			}
 		}
-
-		if updated {
-			break
-		}
+		return nil
 	}
 
-	if updated {
-		return c.saveConnections(conns)
+	err := retrieve(conns, name, param)
+	if err != nil {
+		return err
+	}
+	if !updated {
+		return errors.New("connection not found")
 	}
 
-	return errors.New("connection not found")
+	return c.saveConnections(conns)
 }
 
 // RemoveConnection remove special connection
@@ -263,15 +266,24 @@ func (c *ConnectionsStorage) RenameGroup(name, newName string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
+	groupIndex := -1
 	conns := c.getConnections()
 	for i, conn := range conns {
-		if conn.Type == "group" && conn.Name == name {
-			conns[i].Name = newName
-			return c.saveConnections(conns)
+		if conn.Type == "group" {
+			if conn.Name == newName {
+				return errors.New("duplicated group name")
+			} else if conn.Name == name {
+				groupIndex = i
+			}
 		}
 	}
 
-	return errors.New("group not found")
+	if groupIndex == -1 {
+		return errors.New("group not found")
+	}
+
+	conns[groupIndex].Name = newName
+	return c.saveConnections(conns)
 }
 
 // RemoveGroup remove special group, include all connections under it
