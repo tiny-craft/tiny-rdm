@@ -20,7 +20,7 @@ import {
     SetListItem,
     SetSetItem,
     UpdateSetItem,
-    UpdateZSetValue
+    UpdateZSetValue,
 } from '../../wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
@@ -56,7 +56,7 @@ const useConnectionStore = defineStore('connections', {
     state: () => ({
         groups: [], // all group name
         connections: [], // all connections
-        databases: {, // all databases in opened connections group by name
+        databases: {}, // all databases in opened connections group by name
     }),
     getters: {
         anyConnectionOpened() {
@@ -111,7 +111,7 @@ const useConnectionStore = defineStore('connections', {
                         key: group.groupName,
                         label: group.groupName,
                         type: ConnectionType.Group,
-                        children
+                        children,
                     })
                 }
             }
@@ -127,6 +127,7 @@ const useConnectionStore = defineStore('connections', {
         async getConnectionProfile(name) {
             try {
                 const { data, success } = await GetConnection(name)
+                console.log(JSON.stringify(data))
                 if (success) {
                     return data
                 }
@@ -152,7 +153,7 @@ const useConnectionStore = defineStore('connections', {
                 keySeparator: ':',
                 connTimeout: 60,
                 execTimeout: 60,
-                markColor: ''
+                markColor: '',
             }
         },
 

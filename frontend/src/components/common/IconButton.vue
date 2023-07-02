@@ -5,15 +5,9 @@ import { NIcon } from 'naive-ui'
 const emit = defineEmits(['click'])
 
 const props = defineProps({
-    tooltip: {
-        type: String,
-    },
-    tTooltip: {
-        type: String,
-    },
-    icon: {
-        type: [String, Object],
-    },
+    tooltip: String,
+    tTooltip: String,
+    icon: [String, Object],
     size: {
         type: [Number, String],
         default: 20,
@@ -26,6 +20,18 @@ const props = defineProps({
         type: [Number, String],
         default: 3,
     },
+    disabled: Boolean,
+})
+
+const disableColor = computed(() => {
+    const baseColor = props.color
+    const grayScale = Math.round(
+        0.299 * parseInt(baseColor.substring(1, 2), 16) +
+            0.587 * parseInt(baseColor.substring(3, 2), 16) +
+            0.114 * parseInt(baseColor.substring(5, 2), 16)
+    )
+    const color = `#${grayScale.toString(16).repeat(3)}`
+    return color
 })
 
 const hasTooltip = computed(() => {
@@ -36,15 +42,19 @@ const hasTooltip = computed(() => {
 <template>
     <n-tooltip v-if="hasTooltip">
         <template #trigger>
-            <n-icon :color="props.color" :size="props.size" class="icon-btn" @click="emit('click')">
-                <component :is="props.icon" :stroke-width="props.strokeWidth"></component>
-            </n-icon>
+            <n-button text :disabled="disabled" @click="emit('click')">
+                <n-icon :size="props.size" :color="props.color">
+                    <component :is="props.icon" :stroke-width="props.strokeWidth" />
+                </n-icon>
+            </n-button>
         </template>
         {{ props.tTooltip ? $t(props.tTooltip) : props.tooltip }}
     </n-tooltip>
-    <n-icon v-else :color="props.color" :size="props.size" class="icon-btn" @click="emit('click')">
-        <component :is="props.icon" :stroke-width="props.strokeWidth"></component>
-    </n-icon>
+    <n-button v-else text :disabled="disabled" @click="emit('click')">
+        <n-icon :size="props.size" :color="props.color">
+            <component :is="props.icon" :stroke-width="props.strokeWidth" />
+        </n-icon>
+    </n-button>
 </template>
 
 <style lang="scss"></style>

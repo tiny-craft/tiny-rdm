@@ -85,6 +85,7 @@ func (c *ConnectionsStorage) GetConnection(name string) *types.Connection {
 	for _, group := range conns {
 		for _, conn := range group.Connections {
 			if conn.Name == name {
+				conn.Group = group.GroupName
 				return &conn
 			}
 		}
