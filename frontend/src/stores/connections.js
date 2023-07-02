@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { get, isEmpty, last, remove, size, sortedIndexBy, split, uniq } from 'lodash'
+import { get, isEmpty, last, map, remove, size, sortedIndexBy, split, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -17,6 +17,7 @@ import {
     RenameGroup,
     RenameKey,
     SaveConnection,
+    SaveSortedConnection,
     SetHashValue,
     SetKeyTTL,
     SetKeyValue,
@@ -176,7 +177,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Create a new connection or update current connection profile
+         * create a new connection or update current connection profile
          * @param {string} name set null if create a new connection
          * @param {{}} param
          * @returns {Promise<{success: boolean, [msg]: string}>}
@@ -193,7 +194,34 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Check if connection is connected
+         * save connection
+         * @returns {Promise<void>}
+         */
+        async saveConnectionSort() {
+            const mapToList = (conns) => {
+                const list = []
+                for (const conn of conns) {
+                    if (conn.type === ConnectionType.Group) {
+                        const children = mapToList(conn.children)
+                        list.push({
+                            name: conn.label,
+                            type: 'group',
+                            connections: children,
+                        })
+                    } else if (conn.type === ConnectionType.Server) {
+                        list.push({
+                            name: conn.name,
+                        })
+                    }
+                }
+                return list
+            }
+            const s = mapToList(this.connections)
+            SaveSortedConnection(s)
+        },
+
+        /**
+         * check if connection is connected
          * @param name
          * @returns {boolean}
          */
@@ -203,7 +231,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Open connection
+         * open connection
          * @param {string} name
          * @returns {Promise<void>}
          */
@@ -241,7 +269,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Close connection
+         * close connection
          * @param {string} name
          * @returns {Promise<boolean>}
          */
@@ -260,7 +288,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Close all connection
+         * close all connection
          * @returns {Promise<void>}
          */
         async closeAllConnection() {
@@ -274,7 +302,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Remove connection
+         * remove connection
          * @param name
          * @returns {Promise<{success: boolean, [msg]: string}>}
          */
@@ -290,7 +318,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Create connection group
+         * create connection group
          * @param name
          * @returns {Promise<{success: boolean, [msg]: string}>}
          */
@@ -304,7 +332,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Rename connection group
+         * rename connection group
          * @param name
          * @param newName
          * @returns {Promise<{success: boolean, [msg]: string}>}
@@ -322,7 +350,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Remove group by name
+         * remove group by name
          * @param {string} name
          * @param {boolean} [includeConn]
          * @returns {Promise<{success: boolean, [msg]: string}>}
@@ -337,7 +365,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * Open database and load all keys
+         * open database and load all keys
          * @param connName
          * @param db
          * @returns {Promise<void>}

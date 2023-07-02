@@ -6,7 +6,7 @@ import { NIcon, useDialog, useMessage } from 'naive-ui'
 import { ConnectionType } from '../../consts/connection_type.js'
 import ToggleFolder from '../icons/ToggleFolder.vue'
 import ToggleServer from '../icons/ToggleServer.vue'
-import { indexOf } from 'lodash'
+import { debounce, indexOf, throttle } from 'lodash'
 import Config from '../icons/Config.vue'
 import Delete from '../icons/Delete.vue'
 import Unlink from '../icons/Unlink.vue'
@@ -27,6 +27,12 @@ const message = useMessage()
 
 const expandedKeys = ref([])
 const selectedKeys = ref([])
+
+const props = defineProps({
+    filterPattern: {
+        type: String,
+    },
+})
 
 onMounted(async () => {
     try {
@@ -152,11 +158,11 @@ const renderPrefix = ({ option }) => {
     }
 }
 
-const onUpdateExpandedKeys = (keys, option, meta) => {
+const onUpdateExpandedKeys = (keys, option) => {
     expandedKeys.value = keys
 }
 
-const onUpdateSelectedKeys = (keys, option, meta) => {
+const onUpdateSelectedKeys = (keys, option) => {
     selectedKeys.value = keys
 }
 
@@ -259,6 +265,56 @@ const handleSelectContextMenu = (key) => {
     }
     console.warn('TODO: handle context menu:' + key)
 }
+
+const findSiblingsAndIndex = (node, nodes) => {
+    if (!nodes) {
+        return [null, null]
+    }
+    for (let i = 0; i < nodes.length; ++i) {
+        const siblingNode = nodes[i]
+        if (siblingNode.key === node.key) {
+            return [nodes, i]
+        }
+        const [siblings, index] = findSiblingsAndIndex(node, siblingNode.children)
+        if (siblings && index !== null) {
+            return [siblings, index]
+        }
+    }
+    return [null, null]
+}
+
+// delay save until stop drop after 2 seconds
+const saveSort = debounce(connectionStore.saveConnectionSort, 2000, { trailing: true })
+const handleDrop = ({ node, dragNode, dropPosition }) => {
+    const [dragNodeSiblings, dragNodeIndex] = findSiblingsAndIndex(dragNode, connectionStore.connections)
+    if (dragNodeSiblings === null || dragNodeIndex === null) {
+        return
+    }
+    dragNodeSiblings.splice(dragNodeIndex, 1)
+    if (dropPosition === 'inside') {
+        if (node.children) {
+            node.children.unshift(dragNode)
+        } else {
+            node.children = [dragNode]
+        }
+    } else if (dropPosition === 'before') {
+        const [nodeSiblings, nodeIndex] = findSiblingsAndIndex(node, connectionStore.connections)
+        if (nodeSiblings === null || nodeIndex === null) {
+            return
+        }
+        nodeSiblings.splice(nodeIndex, 0, dragNode)
+    } else if (dropPosition === 'after') {
+        const [nodeSiblings, nodeIndex] = findSiblingsAndIndex(node, connectionStore.connections)
+        if (nodeSiblings === null || nodeIndex === null) {
+            return
+        }
+        nodeSiblings.splice(nodeIndex + 1, 0, dragNode)
+    }
+    connectionStore.connections = Array.from(connectionStore.connections)
+    saveSort()
+}
+
+const saveDrop = () => {}
 </script>
 
 <template>
@@ -267,15 +323,18 @@ const handleSelectContextMenu = (key) => {
         :block-line="true"
         :block-node="true"
         :cancelable="false"
+        :draggable="true"
         :data="connectionStore.connections"
         :expand-on-click="true"
         :expanded-keys="expandedKeys"
-        :on-update:selected-keys="onUpdateSelectedKeys"
+        @update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
-        :on-update:expanded-keys="onUpdateExpandedKeys"
+        @update:expanded-keys="onUpdateExpandedKeys"
         :selected-keys="selectedKeys"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
+        @drop="handleDrop"
+        :pattern="props.filterPattern"
         class="fill-height"
         virtual-scroll
     />

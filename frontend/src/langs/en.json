@@ -9,6 +9,7 @@
   "new_group": "Add New Group",
   "rename_group": "Rename Group",
   "disconnect_all": "Disconnect all connections",
+  "filter": "Filter",
   "sort_conn": "Resort Connections",
   "reload_key": "Reload Current Key",
   "close_confirm": "Confirm close this tab and connection",

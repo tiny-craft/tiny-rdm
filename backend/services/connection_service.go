@@ -119,6 +119,17 @@ func (c *connectionService) RemoveConnection(name string) (resp types.JSResp) {
 	return
 }
 
+// SaveSortedConnection save sorted connection after drag
+func (c *connectionService) SaveSortedConnection(sortedConns types.Connections) (resp types.JSResp) {
+	err := c.conns.SaveSortedConnection(sortedConns)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
 // CreateGroup create new group
 func (c *connectionService) CreateGroup(name string) (resp types.JSResp) {
 	err := c.conns.CreateGroup(name)

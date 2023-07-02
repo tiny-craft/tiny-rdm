@@ -4,7 +4,7 @@ type ConnectionCategory int
 
 type ConnectionConfig struct {
 	Name          string `json:"name" yaml:"name"`
-	Group         string `json:"group" yaml:"-"`
+	Group         string `json:"group,omitempty" yaml:"-"`
 	Addr          string `json:"addr,omitempty" yaml:"addr,omitempty"`
 	Port          int    `json:"port,omitempty" yaml:"port,omitempty"`
 	Username      string `json:"username,omitempty" yaml:"username,omitempty"`

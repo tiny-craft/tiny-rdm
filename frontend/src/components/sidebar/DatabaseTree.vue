@@ -142,7 +142,7 @@ const expandKey = (key) => {
 
 const message = useMessage()
 const dialog = useDialog()
-const onUpdateExpanded = (value, option, meta) => {
+const onUpdateExpanded = (value, option) => {
     expandedKeys.value = value
     if (!meta.node) {
         return
@@ -158,7 +158,7 @@ const onUpdateExpanded = (value, option, meta) => {
     }
 }
 
-const onUpdateSelectedKeys = (keys, option, meta) => {
+const onUpdateSelectedKeys = (keys, option) => {
     selectedKeys.value = keys
 }
 
@@ -325,10 +325,10 @@ const handleOutsideContextMenu = () => {
         :expand-on-click="false"
         :expanded-keys="expandedKeys"
         :selected-keys="selectedKeys"
-        :on-update:selected-keys="onUpdateSelectedKeys"
+        @update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
-        :on-load="onLoadTree"
-        :on-update:expanded-keys="onUpdateExpanded"
+        @load="onLoadTree"
+        @update:expanded-keys="onUpdateExpanded"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"

@@ -9,6 +9,7 @@
   "new_group": "添加新分组",
   "rename_group": "重命名分组",
   "disconnect_all": "断开所有连接",
+  "filter": "筛选",
   "sort_conn": "调整连接顺序",
   "reload_key": "重新载入此键内容",
   "close_confirm": "是否关闭当前连接",

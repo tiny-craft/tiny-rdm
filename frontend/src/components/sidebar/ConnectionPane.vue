@@ -9,13 +9,11 @@ import Filter from '../icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
 import Unlink from '../icons/Unlink.vue'
 import useConnectionStore from '../../stores/connections.js'
+import { ref } from 'vue'
 
 const dialogStore = useDialogStore()
 const connectionStore = useConnectionStore()
-
-const onSort = () => {
-    dialogStore.openPreferencesDialog()
-}
+const filterPattern = ref('')
 
 const onDisconnectAll = () => {
     connectionStore.closeAllConnection()
@@ -24,7 +22,7 @@ const onDisconnectAll = () => {
 
 <template>
     <div class="nav-pane-container flex-box-v">
-        <connection-tree />
+        <connection-tree :filter-pattern="filterPattern" />
 
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
@@ -53,9 +51,7 @@ const onDisconnectAll = () => {
                 t-tooltip="disconnect_all"
                 @click="onDisconnectAll"
             />
-            <n-divider style="margin: 0 4px; --n-color: #aaa; width: 2px" vertical />
-            <icon-button :icon="Sort" color="#555" size="20" stroke-width="4" t-tooltip="sort_conn" @click="onSort" />
-            <n-input placeholder="">
+            <n-input v-model:value="filterPattern" :placeholder="$t('filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" color="#aaa" size="20" />
                 </template>
