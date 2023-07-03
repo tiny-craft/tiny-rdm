@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useMessage } from 'naive-ui'
 import IconButton from '../common/IconButton.vue'
 import useConnectionStore from '../../stores/connections.js'
+import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
 const props = defineProps({
     server: String,
@@ -37,11 +38,15 @@ const onReloadKey = () => {
     connectionStore.loadKeyValue(props.server, props.db, props.keyPath)
 }
 
-const onConfirmDelete = async () => {
-    const success = await connectionStore.removeKey(props.server, props.db, props.keyPath)
-    if (success) {
-        message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
-    }
+const confirmDialog = useConfirmDialog()
+const onDeleteKey = () => {
+    confirmDialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
+        connectionStore.removeKey(props.server, props.db, props.keyPath).then((success) => {
+            if (success) {
+                message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
+            }
+        })
+    })
 }
 </script>
 
@@ -86,20 +91,11 @@ const onConfirmDelete = async () => {
         </n-button-group>
         <n-tooltip>
             <template #trigger>
-                <n-popconfirm
-                    :negative-text="$t('cancel')"
-                    :positive-text="$t('confirm')"
-                    @positive-click="onConfirmDelete"
-                >
-                    <template #trigger>
-                        <n-button>
-                            <template #icon>
-                                <n-icon :component="Delete" size="18" />
-                            </template>
-                        </n-button>
+                <n-button>
+                    <template #icon>
+                        <n-icon :component="Delete" size="18" @click="onDeleteKey" />
                     </template>
-                    {{ $t('delete_key_tip', { key: props.keyPath }) }}
-                </n-popconfirm>
+                </n-button>
             </template>
             {{ $t('delete_key') }}
         </n-tooltip>

@@ -233,11 +233,17 @@ const useConnectionStore = defineStore('connections', {
         /**
          * open connection
          * @param {string} name
+         * @param {boolean} [reload]
          * @returns {Promise<void>}
          */
-        async openConnection(name) {
+        async openConnection(name, reload) {
             if (this.isConnected(name)) {
-                return
+                if (reload !== true) {
+                    return
+                } else {
+                    // reload mode, try close connection first
+                    await CloseConnection(name)
+                }
             }
 
             const { data, success, msg } = await OpenConnection(name)

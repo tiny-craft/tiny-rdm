@@ -25,7 +25,7 @@ const emit = defineEmits(['edit', 'delete', 'save', 'cancel'])
             <template #trigger>
                 <icon-button :icon="Delete" />
             </template>
-            {{ $t('delete_key_tip', { key: props.bindKey }) }}
+            {{ $t('remove_tip', { name: props.bindKey }) }}
         </n-popconfirm>
     </div>
 </template>

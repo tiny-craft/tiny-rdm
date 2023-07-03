@@ -59,15 +59,4 @@ const onDisconnectAll = () => {
     </div>
 </template>
 
-<style lang="scss" scoped>
-.nav-pane-container {
-    overflow: hidden;
-    background-color: var(--bg-color);
-
-    .nav-pane-bottom {
-        align-items: center;
-        gap: 5px;
-        padding: 3px 3px 5px 5px;
-    }
-}
-</style>
+<style lang="scss" scoped></style>

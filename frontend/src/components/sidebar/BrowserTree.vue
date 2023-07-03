@@ -162,15 +162,6 @@ const onUpdateSelectedKeys = (keys, option) => {
     selectedKeys.value = keys
 }
 
-watch(
-    () => selectedKeys,
-    (keys) => {
-        if (size(keys) > 0) {
-            console.log('selected')
-        }
-    }
-)
-
 const renderPrefix = ({ option }) => {
     switch (option.type) {
         case ConnectionType.RedisDB:
@@ -290,7 +281,7 @@ const handleSelectContextMenu = (key) => {
             break
         case 'key_remove':
         case 'value_remove':
-            confirmDialog.warning(i18n.t('delete_key_tip', { key: redisKey }), () => {
+            confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
                 connectionStore.removeKey(name, db, redisKey).then((success) => {
                     if (success) {
                         message.success(i18n.t('delete_key_succ', { key: redisKey }))
