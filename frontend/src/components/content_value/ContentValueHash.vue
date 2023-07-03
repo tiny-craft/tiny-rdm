@@ -11,18 +11,6 @@ import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
 
-const filterOption = [
-    {
-        value: 1,
-        label: i18n.t('field'),
-    },
-    {
-        value: 2,
-        label: i18n.t('value'),
-    },
-]
-const filterType = ref(1)
-
 const props = defineProps({
     name: String,
     db: Number,
@@ -33,6 +21,18 @@ const props = defineProps({
     },
     value: Object,
 })
+
+const filterOption = computed(() => [
+    {
+        value: 1,
+        label: i18n.t('field'),
+    },
+    {
+        value: 2,
+        label: i18n.t('value'),
+    },
+])
+const filterType = ref(1)
 
 const connectionStore = useConnectionStore()
 const dialogStore = useDialogStore()
@@ -206,10 +206,12 @@ const filterValue = ref('')
 const onFilterInput = (val) => {
     switch (filterType.value) {
         case filterOption[0].value:
+            // filter field
             valueColumn.filterOptionValue = null
             fieldColumn.filterOptionValue = val
             break
         case filterOption[1].value:
+            // filter value
             fieldColumn.filterOptionValue = null
             valueColumn.filterOptionValue = val
             break

@@ -25,6 +25,7 @@
   "edit_value": "Edit Value",
   "save_update": "Save Update",
   "cancel_update": "Cancel Update",
+  "score_filter_tip": "Support operator list below:\n= equal\n!= not equal\n> greater than\n>= greater than or equal to\n< less than\n<= less than or equal to\nfor example you want to filter results which greater than 3, input: >3",
   "add_row": "Add Row",
   "edit_row": "Edit Row",
   "delete_row": "Delete Row",

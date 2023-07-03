@@ -6,11 +6,12 @@ import AddLink from '../icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, NInputNumber, useMessage } from 'naive-ui'
 import { types, types as redisTypes } from '../../consts/support_redis_type.js'
 import EditableTableColumn from '../common/EditableTableColumn.vue'
-import { isEmpty } from 'lodash'
+import { isEmpty, replace } from 'lodash'
 import useDialogStore from '../../stores/dialog.js'
 import useConnectionStore from '../../stores/connections.js'
 
 const i18n = useI18n()
+
 const props = defineProps({
     name: String,
     db: Number,
@@ -21,6 +22,18 @@ const props = defineProps({
     },
     value: Object,
 })
+
+const filterOption = computed(() => [
+    {
+        value: 1,
+        label: i18n.t('value'),
+    },
+    {
+        value: 2,
+        label: i18n.t('score'),
+    },
+])
+const filterType = ref(1)
 
 const connectionStore = useConnectionStore()
 const dialogStore = useDialogStore()
@@ -36,6 +49,40 @@ const scoreColumn = reactive({
     align: 'center',
     titleAlign: 'center',
     resizable: true,
+    filterOptionValue: null,
+    filter(value, row) {
+        const score = parseFloat(row.score)
+        if (isNaN(score)) {
+            return true
+        }
+
+        const regex = /^(>=|<=|>|<|=|!=)?(\d+(\.\d*)?)?$/
+        const matches = value.match(regex)
+        if (matches) {
+            const operator = matches[1] || ''
+            const filterScore = parseFloat(matches[2] || '')
+            if (!isNaN(filterScore)) {
+                switch (operator) {
+                    case '>=':
+                        return score >= filterScore
+                    case '<=':
+                        return score <= filterScore
+                    case '>':
+                        return score > filterScore
+                    case '<':
+                        return score < filterScore
+                    case '=':
+                        return score === filterScore
+                    case '!=':
+                        return score !== filterScore
+                }
+            }
+        } else {
+            return !!~row.value.indexOf(value.toString())
+        }
+
+        return true
+    },
     render: (row) => {
         const isEdit = currentEditRow.value.no === row.no
         if (isEdit) {
@@ -180,7 +227,18 @@ const onAddRow = () => {
 
 const filterValue = ref('')
 const onFilterInput = (val) => {
-    valueColumn.filterOptionValue = val
+    switch (filterType.value) {
+        case filterOption[0].value:
+            // filter value
+            scoreColumn.filterOptionValue = null
+            valueColumn.filterOptionValue = val
+            break
+        case filterOption[1].value:
+            // filter score
+            valueColumn.filterOptionValue = null
+            scoreColumn.filterOptionValue = val
+            break
+    }
 }
 
 const onChangeFilterType = (type) => {
@@ -189,10 +247,20 @@ const onChangeFilterType = (type) => {
 
 const clearFilter = () => {
     valueColumn.filterOptionValue = null
+    scoreColumn.filterOptionValue = null
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
-    valueColumn.filterOptionValue = filters[sourceColumn.key]
+    switch (filterType.value) {
+        case filterOption[0].value:
+            // filter value
+            valueColumn.filterOptionValue = filters[sourceColumn.key]
+            break
+        case filterOption[1].value:
+            // filter score
+            scoreColumn.filterOptionValue = filters[sourceColumn.key]
+            break
+    }
 }
 </script>
 
@@ -201,13 +269,27 @@ const onUpdateFilter = (filters, sourceColumn) => {
         <content-toolbar :db="props.db" :key-path="props.keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <div class="flex-box-h">
-                <n-input
-                    v-model:value="filterValue"
-                    :placeholder="$t('search')"
-                    clearable
-                    @clear="clearFilter"
-                    @update:value="onFilterInput"
-                />
+                <n-input-group>
+                    <n-select
+                        v-model:value="filterType"
+                        :consistent-menu-width="false"
+                        :options="filterOption"
+                        style="width: 120px"
+                        @update:value="onChangeFilterType"
+                    />
+                    <n-tooltip :disabled="filterType !== 2" :delay="500">
+                        <template #trigger>
+                            <n-input
+                                v-model:value="filterValue"
+                                :placeholder="$t('search')"
+                                clearable
+                                @clear="clearFilter"
+                                @update:value="onFilterInput"
+                            />
+                        </template>
+                        <div class="text-block">{{ $t('score_filter_tip') }}</div>
+                    </n-tooltip>
+                </n-input-group>
             </div>
             <div class="flex-item-expand"></div>
             <n-button plain @click="onAddRow">
