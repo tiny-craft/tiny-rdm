@@ -51,7 +51,7 @@ const onConfirmDelete = async () => {
             <redis-type-tag :type="props.keyType" size="large"></redis-type-tag>
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
-                    <icon-button :icon="Refresh" :tooltip="$t('reload_key')" size="18" @click="onReloadKey" />
+                    <icon-button :icon="Refresh" t-tooltip="reload_key" size="18" @click="onReloadKey" />
                 </template>
             </n-input>
         </n-input-group>
@@ -70,12 +70,19 @@ const onConfirmDelete = async () => {
                 </template>
                 TTL
             </n-tooltip>
-            <n-button @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)">
-                <template #icon>
-                    <n-icon :component="Edit" size="18" />
-                </template>
-                {{ $t('rename_key') }}
-            </n-button>
+            <icon-button
+                border
+                :icon="Edit"
+                t-tooltip="rename_key"
+                size="18"
+                @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)"
+            />
+            <!--            <n-button @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)">-->
+            <!--                <template #icon>-->
+            <!--                    <n-icon :component="Edit" size="18" />-->
+            <!--                </template>-->
+            <!--                {{ $t('rename_key') }}-->
+            <!--            </n-button>-->
         </n-button-group>
         <n-tooltip>
             <template #trigger>

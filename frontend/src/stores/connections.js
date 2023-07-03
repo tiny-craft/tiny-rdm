@@ -458,23 +458,6 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * select node
-         * @param key
-         * @param name
-         * @param db
-         * @param type
-         * @param redisKey
-         */
-        select({ key, name, db, type, redisKey }) {
-            if (type === ConnectionType.RedisValue) {
-                console.log(`[click]key:${key} db: ${db} redis key: ${redisKey}`)
-
-                // async get value for key
-                this.loadKeyValue(name, db, redisKey).then(() => {})
-            }
-        },
-
-        /**
          * load redis key
          * @param server
          * @param db

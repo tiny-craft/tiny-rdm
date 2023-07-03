@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -308,7 +307,6 @@ func (c *connectionService) parseDBItemInfo(info string) map[string]int {
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
 func (c *connectionService) OpenDatabase(connName string, db int) (resp types.JSResp) {
-	log.Println("open db:" + strconv.Itoa(db))
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()

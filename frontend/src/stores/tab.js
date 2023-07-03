@@ -1,4 +1,4 @@
-import { find, findIndex, size } from 'lodash'
+import { find, findIndex, get, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -44,20 +44,12 @@ const useTabStore = defineStore('tab', {
          * @returns {TabItem|null}
          */
         currentTab() {
-            return this.tabs[this.activatedIndex || 0]
+            return get(this.tabs, this.activatedIndex)
             // let current = find(this.tabs, {name: this.activatedTab})
             // if (current == null) {
             //     current = this.tabs[0]
             // }
             // return current
-        },
-
-        currentTabIndex() {
-            const len = size(this.tabs)
-            if (this.activatedIndex < 0 || this.activatedIndex >= len) {
-                this._setActivatedIndex(0)
-            }
-            return this.tabs[this.activatedIndex]
         },
     },
     actions: {
@@ -165,6 +157,12 @@ const useTabStore = defineStore('tab', {
             // }
             // this.activatedIndex = tabIndex
         },
+
+        /**
+         *
+         * @param {number} tabIndex
+         * @returns {*|null}
+         */
         removeTab(tabIndex) {
             const len = size(this.tabs)
             // ignore remove last blank tab
@@ -191,12 +189,21 @@ const useTabStore = defineStore('tab', {
 
             return size(removed) > 0 ? removed[0] : null
         },
+
+        /**
+         *
+         * @param {string} tabName
+         */
         removeTabByName(tabName) {
             const idx = findIndex(this.tabs, { name: tabName })
             if (idx !== -1) {
                 this.removeTab(idx)
             }
         },
+
+        /**
+         *
+         */
         removeAllTab() {
             this.tabList = []
             this._setActivatedIndex(-1, false)

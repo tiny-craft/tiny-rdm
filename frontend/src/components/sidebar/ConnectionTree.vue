@@ -313,8 +313,6 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
     connectionStore.connections = Array.from(connectionStore.connections)
     saveSort()
 }
-
-const saveDrop = () => {}
 </script>
 
 <template>

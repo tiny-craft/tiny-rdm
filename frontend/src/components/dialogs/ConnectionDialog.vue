@@ -167,7 +167,7 @@ const onClose = () => {
                         <n-input v-model:value="generalForm.name" :placeholder="$t('conn_name_tip')" />
                     </n-form-item>
                     <n-form-item v-if="!isEditMode" :label="$t('conn_group')" required>
-                        <n-select v-model:value="generalForm.group" :options="groupOptions"></n-select>
+                        <n-select v-model:value="generalForm.group" :options="groupOptions" />
                     </n-form-item>
                     <n-form-item :label="$t('conn_addr')" path="addr" required>
                         <n-input v-model:value="generalForm.addr" :placeholder="$t('conn_addr_tip')" />

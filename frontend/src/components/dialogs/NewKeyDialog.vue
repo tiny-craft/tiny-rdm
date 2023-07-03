@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { types } from '../../consts/support_redis_type'
 import useDialog from '../../stores/dialog'
-import { isEmpty } from 'lodash'
+import { isEmpty, keys, map } from 'lodash'
 import NewStringValue from '../new_value/NewStringValue.vue'
 import NewHashValue from '../new_value/NewHashValue.vue'
 import NewListValue from '../new_value/NewListValue.vue'
@@ -28,6 +28,12 @@ const formRules = computed(() => {
         ttl: { required: true, message: requiredMsg, trigger: 'input' },
     }
 })
+const dbOptions = computed(() =>
+    map(keys(connectionStore.databases[newForm.server]), (key) => ({
+        label: key,
+        value: parseInt(key),
+    }))
+)
 const newFormRef = ref(null)
 
 const formLabelWidth = '60px'
@@ -118,6 +124,9 @@ const onClose = () => {
             >
                 <n-form-item :label="$t('key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" />
+                </n-form-item>
+                <n-form-item label="DB" path="db" required>
+                    <n-select v-model:value="newForm.db" :options="dbOptions" />
                 </n-form-item>
                 <n-form-item :label="$t('type')" path="type" required>
                     <n-select v-model:value="newForm.type" :options="options" />
