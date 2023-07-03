@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ContentToolbar from '../ContentToolbar.vue'
+import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '../icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, useMessage } from 'naive-ui'
 import { types, types as redisTypes } from '../../consts/support_redis_type.js'

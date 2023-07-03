@@ -1,16 +1,17 @@
 <script setup>
 import { computed, h } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
-import ToggleDb from './icons/ToggleDb.vue'
+import ToggleDb from '../icons/ToggleDb.vue'
 import { useI18n } from 'vue-i18n'
-import ToggleServer from './icons/ToggleServer.vue'
-import IconButton from './common/IconButton.vue'
-import Config from './icons/Config.vue'
-import useDialogStore from '../stores/dialog.js'
-import Github from './icons/Github.vue'
-import { BrowserOpenURL } from '../../wailsjs/runtime/runtime.js'
-import Log from './icons/Log.vue'
-import useConnectionStore from '../stores/connections.js'
+import ToggleServer from '../icons/ToggleServer.vue'
+import IconButton from '../common/IconButton.vue'
+import Config from '../icons/Config.vue'
+import useDialogStore from '../../stores/dialog.js'
+import Github from '../icons/Github.vue'
+import { BrowserOpenURL } from '../../../wailsjs/runtime/runtime.js'
+import Log from '../icons/Log.vue'
+import useConnectionStore from '../../stores/connections.js'
+import Help from '../icons/Help.vue'
 
 const themeVars = useThemeVars()
 
@@ -61,6 +62,11 @@ const preferencesOptions = computed(() => {
             label: i18n.t('preferences'),
             key: 'preferences',
             icon: renderIcon(Config),
+        },
+        {
+            label: i18n.t('help'),
+            key: 'help',
+            icon: renderIcon(Help),
         },
         {
             label: i18n.t('about'),

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ContentToolbar from '../ContentToolbar.vue'
+import ContentToolbar from './ContentToolbar.vue'
 import Copy from '../icons/Copy.vue'
 import Save from '../icons/Save.vue'
 import { useMessage } from 'naive-ui'

@@ -1,15 +1,15 @@
 <script setup>
-import { validType } from '../consts/support_redis_type'
-import useDialog from '../stores/dialog'
-import Delete from './icons/Delete.vue'
-import Edit from './icons/Edit.vue'
-import Refresh from './icons/Refresh.vue'
-import Timer from './icons/Timer.vue'
-import RedisTypeTag from './common/RedisTypeTag.vue'
+import { validType } from '../../consts/support_redis_type.js'
+import useDialog from '../../stores/dialog.js'
+import Delete from '../icons/Delete.vue'
+import Edit from '../icons/Edit.vue'
+import Refresh from '../icons/Refresh.vue'
+import Timer from '../icons/Timer.vue'
+import RedisTypeTag from '../common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
 import { useMessage } from 'naive-ui'
-import IconButton from './common/IconButton.vue'
-import useConnectionStore from '../stores/connections.js'
+import IconButton from '../common/IconButton.vue'
+import useConnectionStore from '../../stores/connections.js'
 
 const props = defineProps({
     server: String,

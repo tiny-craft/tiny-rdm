@@ -1,8 +1,7 @@
 <script setup>
 import { NIcon } from 'naive-ui'
-import AddGroup from '../icons/AddGroup.vue'
 import AddLink from '../icons/AddLink.vue'
-import DatabaseTree from './DatabaseTree.vue'
+import BrowserTree from './BrowserTree.vue'
 import IconButton from '../common/IconButton.vue'
 import Filter from '../icons/Filter.vue'
 import useTabStore from '../../stores/tab.js'
@@ -10,14 +9,16 @@ import { computed } from 'vue'
 import { get } from 'lodash'
 import Delete from '../icons/Delete.vue'
 import Refresh from '../icons/Refresh.vue'
+import useDialogStore from '../../stores/dialog.js'
 
+const dialogStore = useDialogStore()
 const tabStore = useTabStore()
 const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
 </script>
 
 <template>
     <div class="nav-pane-container flex-box-v">
-        <database-tree :server="currentName" />
+        <browser-tree :server="currentName" />
 
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
