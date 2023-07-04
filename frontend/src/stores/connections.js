@@ -425,25 +425,27 @@ const useConnectionStore = defineStore('connections', {
          * scan keys with prefix
          * @param {string} connName
          * @param {number} db
-         * @param {string} prefix
+         * @param {string} [prefix] full reload database if prefix is null
          * @returns {Promise<void>}
          */
         async scanKeys(connName, db, prefix) {
-            const { data, success, msg } = await ScanKeys(connName, db, prefix)
+            const { data, success, msg } = await ScanKeys(connName, db, prefix || '*')
             if (!success) {
                 throw new Error(msg)
             }
             // remove current keys below prefix
-            const prefixPart = split(prefix, separator)
             const dbs = this.databases[connName]
             let node = dbs[db]
-            for (const key of prefixPart) {
-                const idx = findIndex(node.children, { label: key })
-                if (idx === -1) {
-                    node = null
-                    break
+            if (!isEmpty(prefix)) {
+                const prefixPart = split(prefix, separator)
+                for (const key of prefixPart) {
+                    const idx = findIndex(node.children, { label: key })
+                    if (idx === -1) {
+                        node = null
+                        break
+                    }
+                    node = node.children[idx]
                 }
-                node = node.children[idx]
             }
             if (node != null) {
                 node.children = []

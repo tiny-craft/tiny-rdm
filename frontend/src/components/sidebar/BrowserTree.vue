@@ -274,12 +274,11 @@ const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
     switch (key) {
-        // case 'server_reload':
-        // case 'db_reload':
-        //     connectionStore.loadKeyValue()
-        //     break
         case 'db_open':
             nextTick().then(() => expandKey(nodeKey))
+            break
+        case 'db_reload':
+            connectionStore.scanKeys(name, db)
             break
         case 'db_newkey':
         case 'key_newkey':

@@ -152,7 +152,7 @@ const onClose = () => {
         preset="dialog"
         transform-origin="center"
     >
-        <n-tabs v-model:value="tab" type="line">
+        <n-tabs v-model:value="tab" type="line" animated>
             <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
                 <n-form
                     ref="generalFormRef"
