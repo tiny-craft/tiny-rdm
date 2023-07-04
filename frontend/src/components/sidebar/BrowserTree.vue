@@ -1,10 +1,10 @@
 <script setup>
-import { h, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { get, indexOf, size } from 'lodash'
+import { indexOf, isEmpty } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -158,7 +158,20 @@ const onUpdateExpanded = (value, option, meta) => {
     }
 }
 
-const onUpdateSelectedKeys = (keys, option) => {
+const onUpdateSelectedKeys = (keys, options) => {
+    if (!isEmpty(options)) {
+        // prevent load duplicate key
+        for (const node of options) {
+            if (node.type === ConnectionType.RedisValue) {
+                const { key, name, db, redisKey } = node
+                if (indexOf(selectedKeys.value, key) === -1) {
+                    connectionStore.loadKeyValue(name, db, redisKey)
+                }
+                break
+            }
+        }
+    }
+
     selectedKeys.value = keys
 }
 
@@ -210,13 +223,6 @@ const renderSuffix = ({ option }) => {
 
 const nodeProps = ({ option }) => {
     return {
-        onClick() {
-            const { key, name, db, type, redisKey } = option
-            if (option.type === ConnectionType.RedisValue) {
-                connectionStore.loadKeyValue(name, db, redisKey)
-            }
-            // console.log('[click]:' + JSON.stringify(option))
-        },
         onDblclick: async () => {
             if (loading.value) {
                 console.warn('TODO: alert to ignore double click when loading')
@@ -278,6 +284,12 @@ const handleSelectContextMenu = (key) => {
         case 'db_newkey':
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, name, db)
+            break
+        case 'key_reload':
+            connectionStore.scanKeys(name, db, redisKey)
+            break
+        case 'value_reload':
+            connectionStore.loadKeyValue(name, db, redisKey)
             break
         case 'key_remove':
         case 'value_remove':

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { get, isEmpty, last, map, remove, size, sortedIndexBy, split, uniq } from 'lodash'
+import { findIndex, get, isEmpty, last, map, remove, size, sortedIndexBy, split, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -18,6 +18,7 @@ import {
     RenameKey,
     SaveConnection,
     SaveSortedConnection,
+    ScanKeys,
     SetHashValue,
     SetKeyTTL,
     SetKeyValue,
@@ -389,78 +390,8 @@ const useConnectionStore = defineStore('connections', {
                 return
             }
 
-            // insert child to children list by order
-            const sortedInsertChild = (childrenList, item) => {
-                const insertIdx = sortedIndexBy(childrenList, item, 'key')
-                childrenList.splice(insertIdx, 0, item)
-                // childrenList.push(item)
-            }
-            // update all node item's children num
-            const updateChildrenNum = (node) => {
-                let count = 0
-                const totalChildren = size(node.children)
-                if (totalChildren > 0) {
-                    for (const elem of node.children) {
-                        updateChildrenNum(elem)
-                        count += elem.keys
-                    }
-                } else {
-                    count += 1
-                }
-                node.keys = count
-                // node.children = sortBy(node.children, 'label')
-            }
-
-            const keyStruct = []
-            const mark = {}
-            for (const key in keys) {
-                const keyPart = split(key, separator)
-                // const prefixLen = size(keyPart) - 1
-                const len = size(keyPart)
-                let handlePath = ''
-                let ks = keyStruct
-                for (let i = 0; i < len; i++) {
-                    handlePath += keyPart[i]
-                    if (i !== len - 1) {
-                        // layer
-                        const treeKey = `${handlePath}@${ConnectionType.RedisKey}`
-                        if (!mark.hasOwnProperty(treeKey)) {
-                            mark[treeKey] = {
-                                key: `${connName}/db${db}/${treeKey}`,
-                                label: keyPart[i],
-                                name: connName,
-                                db,
-                                keys: 0,
-                                redisKey: handlePath,
-                                type: ConnectionType.RedisKey,
-                                children: [],
-                            }
-                            sortedInsertChild(ks, mark[treeKey])
-                        }
-                        ks = mark[treeKey].children
-                        handlePath += separator
-                    } else {
-                        // key
-                        const treeKey = `${handlePath}@${ConnectionType.RedisValue}`
-                        mark[treeKey] = {
-                            key: `${connName}/db${db}/${treeKey}`,
-                            label: keyPart[i],
-                            name: connName,
-                            db,
-                            keys: 0,
-                            redisKey: handlePath,
-                            type: ConnectionType.RedisValue,
-                        }
-                        sortedInsertChild(ks, mark[treeKey])
-                    }
-                }
-            }
-
             // append db node to current connection's children
-            const dbs = this.databases[connName]
-            dbs[db].children = keyStruct
-            dbs[db].opened = true
-            updateChildrenNum(dbs[db])
+            this._updateNodeChildren(connName, db, keys)
         },
 
         /**
@@ -491,7 +422,127 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         *
+         * scan keys with prefix
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} prefix
+         * @returns {Promise<void>}
+         */
+        async scanKeys(connName, db, prefix) {
+            const { data, success, msg } = await ScanKeys(connName, db, prefix)
+            if (!success) {
+                throw new Error(msg)
+            }
+            // remove current keys below prefix
+            const prefixPart = split(prefix, separator)
+            const dbs = this.databases[connName]
+            let node = dbs[db]
+            for (const key of prefixPart) {
+                const idx = findIndex(node.children, { label: key })
+                if (idx === -1) {
+                    node = null
+                    break
+                }
+                node = node.children[idx]
+            }
+            if (node != null) {
+                node.children = []
+            }
+
+            const { keys = [] } = data
+            this._updateNodeChildren(connName, db, keys)
+        },
+
+        /**
+         * remove keys in db
+         * @param {string} connName
+         * @param {number} db
+         * @param {Object.<string, {}>[]} keys
+         * @private
+         */
+        _updateNodeChildren(connName, db, keys) {
+            // find match key node in node list
+            const findNodeByKey = (nodes, key) => {
+                const idx = findIndex(nodes, { key })
+                return idx !== -1 ? nodes[idx] : null
+            }
+            // insert child to children list by order
+            const sortedInsertChild = (childrenList, item) => {
+                const insertIdx = sortedIndexBy(childrenList, item, 'key')
+                childrenList.splice(insertIdx, 0, item)
+                // childrenList.push(item)
+            }
+            // update all node item's children num
+            const updateChildrenNum = (node) => {
+                let count = 0
+                const totalChildren = size(node.children)
+                if (totalChildren > 0) {
+                    for (const elem of node.children) {
+                        updateChildrenNum(elem)
+                        count += elem.keys
+                    }
+                } else {
+                    count += 1
+                }
+                node.keys = count
+                // node.children = sortBy(node.children, 'label')
+            }
+
+            const dbs = this.databases[connName]
+            if (dbs[db].children == null) {
+                dbs[db].children = []
+            }
+            const keyStruct = dbs[db].children
+            for (const key in keys) {
+                const keyPart = split(key, separator)
+                // const prefixLen = size(keyPart) - 1
+                const len = size(keyPart)
+                let handlePath = ''
+                let ks = keyStruct
+                for (let i = 0; i < len; i++) {
+                    handlePath += keyPart[i]
+                    if (i !== len - 1) {
+                        // layer
+                        const curKey = `${connName}/db${db}/${handlePath}@${ConnectionType.RedisKey}`
+                        let selectedNode = findNodeByKey(ks, curKey)
+                        if (selectedNode == null) {
+                            selectedNode = {
+                                key: curKey,
+                                label: keyPart[i],
+                                name: connName,
+                                db,
+                                keys: 0,
+                                redisKey: handlePath,
+                                type: ConnectionType.RedisKey,
+                                children: [],
+                            }
+                            sortedInsertChild(ks, selectedNode)
+                        }
+                        ks = selectedNode.children
+                        handlePath += separator
+                    } else {
+                        // key
+                        const curKey = `${connName}/db${db}/${handlePath}@${ConnectionType.RedisValue}`
+                        const selectedNode = {
+                            key: curKey,
+                            label: keyPart[i],
+                            name: connName,
+                            db,
+                            keys: 0,
+                            redisKey: handlePath,
+                            type: ConnectionType.RedisValue,
+                        }
+                        sortedInsertChild(ks, selectedNode)
+                    }
+                }
+            }
+
+            dbs[db].opened = true
+            updateChildrenNum(dbs[db])
+        },
+
+        /**
+         * add key to db
          * @param {string} connName
          * @param {number} db
          * @param {string} key
@@ -521,9 +572,8 @@ const useConnectionStore = defineStore('connections', {
                 for (let j = 0; j < len + 1; j++) {
                     const treeKey = get(nodeList[j], 'key')
                     const isLast = j >= len - 1
-                    const currentKey = `${connName}/db${db}/${redisKey}@${
-                        isLastKeyPart ? ConnectionType.RedisValue : ConnectionType.RedisKey
-                    }`
+                    const keyType = isLastKeyPart ? ConnectionType.RedisValue : ConnectionType.RedisKey
+                    const currentKey = `${connName}/db${db}/${redisKey}@${keyType}`
                     if (treeKey > currentKey || isLast) {
                         // out of search range, add new item
                         if (isLastKeyPart) {
@@ -981,9 +1031,8 @@ const useConnectionStore = defineStore('connections', {
                 const isLastKeyPart = i === keyLen - 1
                 for (let j = 0; j < len; j++) {
                     const treeKey = get(nodeList[j], 'key')
-                    const currentKey = `${connName}/db${db}/${redisKey}@${
-                        isLastKeyPart ? ConnectionType.RedisValue : ConnectionType.RedisKey
-                    }`
+                    const keyType = isLastKeyPart ? ConnectionType.RedisValue : ConnectionType.RedisKey
+                    const currentKey = `${connName}/db${db}/${redisKey}@${keyType}`
                     if (treeKey > currentKey) {
                         // out of search range, target not exists
                         forceBreak = true

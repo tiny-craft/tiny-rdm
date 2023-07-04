@@ -11,7 +11,6 @@
   "disconnect_all": "断开所有连接",
   "filter": "筛选",
   "sort_conn": "调整连接顺序",
-  "reload_key": "重新载入此键内容",
   "close_confirm": "是否关闭当前连接",
   "opening_connection": "正在打开连接...",
   "remove_tip": "{type} \"{name}\" 将会被删除",

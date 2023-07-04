@@ -3,7 +3,7 @@ module tinyrdm
 go 1.20
 
 require (
-	github.com/bytedance/sonic v1.9.1
+	github.com/bytedance/sonic v1.9.2
 	github.com/google/go-cmp v0.5.9
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
@@ -22,7 +22,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/labstack/echo/v4 v4.10.2 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/leaanthony/go-ansi-parser v1.6.0 // indirect
+	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/leaanthony/gosod v1.0.3 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -38,11 +38,11 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.10.0 // indirect
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
+	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 )
 
 // replace github.com/wailsapp/wails/v2 v2.5.1 => /Users/lykin/go/pkg/mod

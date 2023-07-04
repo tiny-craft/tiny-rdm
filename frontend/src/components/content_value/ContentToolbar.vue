@@ -56,7 +56,7 @@ const onDeleteKey = () => {
             <redis-type-tag :type="props.keyType" size="large"></redis-type-tag>
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
-                    <icon-button :icon="Refresh" t-tooltip="reload_key" size="18" @click="onReloadKey" />
+                    <icon-button :icon="Refresh" t-tooltip="reload" size="18" @click="onReloadKey" />
                 </template>
             </n-input>
         </n-input-group>

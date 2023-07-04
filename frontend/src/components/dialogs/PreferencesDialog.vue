@@ -116,7 +116,7 @@ const onClose = () => {
         preset="dialog"
         transform-origin="center"
     >
-        <n-tabs v-model:value="tab">
+        <n-tabs v-model:value="tab" type="line">
             <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
                 <n-form
                     :label-width="formLabelWidth"

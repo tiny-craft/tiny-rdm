@@ -307,10 +307,19 @@ func (c *connectionService) parseDBItemInfo(info string) map[string]int {
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
 func (c *connectionService) OpenDatabase(connName string, db int) (resp types.JSResp) {
+	return c.ScanKeys(connName, db, "*")
+}
+
+// ScanKeys scan all keys below prefix
+func (c *connectionService) ScanKeys(connName string, db int, prefix string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
+	}
+
+	if !strings.HasSuffix(prefix, "*") {
+		prefix += ":*"
 	}
 
 	//var keys []string
@@ -318,7 +327,7 @@ func (c *connectionService) OpenDatabase(connName string, db int) (resp types.JS
 	var cursor uint64
 	for {
 		var loadedKey []string
-		loadedKey, cursor, err = rdb.Scan(ctx, cursor, "*", 10000).Result()
+		loadedKey, cursor, err = rdb.Scan(ctx, cursor, prefix, 10000).Result()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
