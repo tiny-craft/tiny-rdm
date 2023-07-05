@@ -191,7 +191,7 @@ const openConnection = async (name) => {
 const dialog = useDialog()
 const removeConnection = (name) => {
     confirmDialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
-        connectionStore.removeConnection(name).then(({ success, msg }) => {
+        connectionStore.deleteConnection(name).then(({ success, msg }) => {
             if (!success) {
                 message.error(msg)
             }

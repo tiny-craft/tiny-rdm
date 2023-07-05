@@ -1,19 +1,19 @@
 import { defineStore } from 'pinia'
-import { findIndex, get, isEmpty, last, map, remove, size, sortedIndexBy, split, uniq } from 'lodash'
+import { endsWith, findIndex, get, isEmpty, last, remove, size, sortedIndexBy, split, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
     AddZSetValue,
     CloseConnection,
     CreateGroup,
+    DeleteConnection,
+    DeleteGroup,
+    DeleteKey,
     GetConnection,
     GetKeyValue,
     ListConnection,
     OpenConnection,
     OpenDatabase,
-    RemoveConnection,
-    RemoveGroup,
-    RemoveKey,
     RenameGroup,
     RenameKey,
     SaveConnection,
@@ -29,6 +29,7 @@ import {
 } from '../../wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
+import { nextTick } from 'vue'
 
 const separator = ':'
 
@@ -313,10 +314,10 @@ const useConnectionStore = defineStore('connections', {
          * @param name
          * @returns {Promise<{success: boolean, [msg]: string}>}
          */
-        async removeConnection(name) {
+        async deleteConnection(name) {
             // close connection first
             await this.closeConnection(name)
-            const { success, msg } = await RemoveConnection(name)
+            const { success, msg } = await DeleteConnection(name)
             if (!success) {
                 return { success: false, msg }
             }
@@ -357,13 +358,13 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * remove group by name
+         * delete group by name
          * @param {string} name
          * @param {boolean} [includeConn]
          * @returns {Promise<{success: boolean, [msg]: string}>}
          */
         async deleteGroup(name, includeConn) {
-            const { success, msg } = await RemoveGroup(name, includeConn === true)
+            const { success, msg } = await DeleteGroup(name, includeConn === true)
             if (!success) {
                 return { success: false, msg }
             }
@@ -392,6 +393,18 @@ const useConnectionStore = defineStore('connections', {
 
             // append db node to current connection's children
             this._updateNodeChildren(connName, db, keys)
+        },
+
+        /**
+         * reopen database
+         * @param connName
+         * @param db
+         * @returns {Promise<void>}
+         */
+        async reopenDatabase(connName, db) {
+            const dbs = this.databases[connName]
+            dbs[db].children = undefined
+            dbs[db].isLeaf = false
         },
 
         /**
@@ -426,40 +439,78 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} connName
          * @param {number} db
          * @param {string} [prefix] full reload database if prefix is null
-         * @returns {Promise<void>}
+         * @returns {Promise<{keys: string[]}>}
          */
         async scanKeys(connName, db, prefix) {
             const { data, success, msg } = await ScanKeys(connName, db, prefix || '*')
             if (!success) {
                 throw new Error(msg)
             }
+            const { keys = [] } = data
+            return { keys, success }
+        },
+
+        /**
+         * load keys with prefix
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} [prefix]
+         * @returns {Promise<void>}
+         */
+        async loadKeys(connName, db, prefix) {
+            let scanPrefix = prefix
+            if (isEmpty(scanPrefix)) {
+                scanPrefix = '*'
+            } else {
+                if (!endsWith(prefix, separator + '*')) {
+                    scanPrefix = prefix + separator + '*'
+                }
+            }
+            const { keys, success } = await this.scanKeys(connName, db, scanPrefix)
+            if (!success) {
+                return
+            }
+
             // remove current keys below prefix
+            this._deleteKeyNodes(connName, db, prefix)
+            this._updateNodeChildren(connName, db, keys)
+        },
+
+        /**
+         * remove key with prefix
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} prefix
+         * @returns {boolean}
+         * @private
+         */
+        _deleteKeyNodes(connName, db, prefix) {
             const dbs = this.databases[connName]
             let node = dbs[db]
-            if (!isEmpty(prefix)) {
-                const prefixPart = split(prefix, separator)
-                for (const key of prefixPart) {
-                    const idx = findIndex(node.children, { label: key })
-                    if (idx === -1) {
-                        node = null
-                        break
-                    }
+            const prefixPart = split(prefix, separator)
+            const partLen = size(prefixPart)
+            for (let i = 0; i < partLen; i++) {
+                let idx = findIndex(node.children, { label: prefixPart[i] })
+                if (idx === -1) {
+                    node = null
+                    break
+                }
+                if (i === partLen - 1) {
+                    // remove last part from parent
+                    node.children.splice(idx, 1)
+                    return true
+                } else {
                     node = node.children[idx]
                 }
             }
-            if (node != null) {
-                node.children = []
-            }
-
-            const { keys = [] } = data
-            this._updateNodeChildren(connName, db, keys)
+            return false
         },
 
         /**
          * remove keys in db
          * @param {string} connName
          * @param {number} db
-         * @param {Object.<string, {}>[]} keys
+         * @param {string[]} keys
          * @private
          */
         _updateNodeChildren(connName, db, keys) {
@@ -495,7 +546,7 @@ const useConnectionStore = defineStore('connections', {
                 dbs[db].children = []
             }
             const keyStruct = dbs[db].children
-            for (const key in keys) {
+            for (const key of keys) {
                 const keyPart = split(key, separator)
                 // const prefixLen = size(keyPart) - 1
                 const len = size(keyPart)
@@ -1010,7 +1061,7 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} key
          * @private
          */
-        _removeKey(connName, db, key) {
+        _deleteKeyNode(connName, db, key) {
             const dbs = this.databases[connName]
             const dbDetail = get(dbs, db, {})
 
@@ -1078,22 +1129,48 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * remove redis key
+         * delete redis key
          * @param {string} connName
          * @param {number} db
          * @param {string} key
          * @returns {Promise<boolean>}
          */
-        async removeKey(connName, db, key) {
+        async deleteKey(connName, db, key) {
             try {
-                const { data, success, msg } = await RemoveKey(connName, db, key)
+                const { data, success, msg } = await DeleteKey(connName, db, [key])
                 if (success) {
                     // update tree view data
-                    this._removeKey(connName, db, key)
+                    this._deleteKeyNode(connName, db, key)
 
                     // set tab content empty
                     const tab = useTabStore()
                     tab.emptyTab(connName)
+                    return true
+                }
+            } finally {
+            }
+            return false
+        },
+
+        /**
+         * delete keys with prefix
+         * @param connName
+         * @param db
+         * @param prefix
+         * @param keys
+         * @returns {Promise<boolean>}
+         */
+        async deleteKeys(connName, db, prefix, keys) {
+            if (isEmpty(keys)) {
+                return false
+            }
+            try {
+                const { success, msg } = await DeleteKey(connName, db, keys)
+                if (success) {
+                    for (const key of keys) {
+                        await this.deleteKey(connName, db, key)
+                        await nextTick()
+                    }
                     return true
                 }
             } finally {
@@ -1113,7 +1190,7 @@ const useConnectionStore = defineStore('connections', {
             const { success = false, msg } = await RenameKey(connName, db, key, newKey)
             if (success) {
                 // delete old key and add new key struct
-                this._removeKey(connName, db, key)
+                this._deleteKeyNode(connName, db, key)
                 this._addKey(connName, db, newKey)
                 return { success: true }
             } else {

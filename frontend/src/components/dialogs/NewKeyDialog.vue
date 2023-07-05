@@ -36,7 +36,7 @@ const dbOptions = computed(() =>
 )
 const newFormRef = ref(null)
 
-const formLabelWidth = '60px'
+const formLabelWidth = '100px'
 const options = computed(() => {
     return Object.keys(types).map((t) => ({
         value: t,
@@ -125,7 +125,7 @@ const onClose = () => {
                 <n-form-item :label="$t('key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" />
                 </n-form-item>
-                <n-form-item label="DB" path="db" required>
+                <n-form-item :label="$t('db_index')" path="db" required>
                     <n-select v-model:value="newForm.db" :options="dbOptions" />
                 </n-form-item>
                 <n-form-item :label="$t('type')" path="type" required>

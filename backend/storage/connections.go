@@ -210,8 +210,8 @@ func (c *ConnectionsStorage) UpdateConnection(name string, param types.Connectio
 	return c.saveConnections(conns)
 }
 
-// RemoveConnection remove special connection
-func (c *ConnectionsStorage) RemoveConnection(name string) error {
+// DeleteConnection remove special connection
+func (c *ConnectionsStorage) DeleteConnection(name string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -328,8 +328,8 @@ func (c *ConnectionsStorage) RenameGroup(name, newName string) error {
 	return c.saveConnections(conns)
 }
 
-// RemoveGroup remove special group, include all connections under it
-func (c *ConnectionsStorage) RemoveGroup(group string, includeConnection bool) error {
+// DeleteGroup remove special group, include all connections under it
+func (c *ConnectionsStorage) DeleteGroup(group string, includeConnection bool) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 

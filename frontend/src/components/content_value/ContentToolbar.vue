@@ -41,7 +41,7 @@ const onReloadKey = () => {
 const confirmDialog = useConfirmDialog()
 const onDeleteKey = () => {
     confirmDialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
-        connectionStore.removeKey(props.server, props.db, props.keyPath).then((success) => {
+        connectionStore.deleteKey(props.server, props.db, props.keyPath).then((success) => {
             if (success) {
                 message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
             }

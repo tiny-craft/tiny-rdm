@@ -36,6 +36,13 @@ const useDialogStore = defineStore('dialog', {
         },
         renameDialogVisible: false,
 
+        deleteKeyParam: {
+            server: '',
+            db: 0,
+            key: '',
+        },
+        deleteKeyDialogVisible: false,
+
         selectTTL: -1,
         ttlDialogVisible: false,
 
@@ -90,6 +97,16 @@ const useDialogStore = defineStore('dialog', {
         },
         closeRenameKeyDialog() {
             this.renameDialogVisible = false
+        },
+
+        openDeleteKeyDialog(server, db, key) {
+            this.deleteKeyParam.server = server
+            this.deleteKeyParam.db = db
+            this.deleteKeyParam.key = key
+            this.deleteKeyDialogVisible = true
+        },
+        closeDeleteKeyDialog() {
+            this.deleteKeyDialogVisible = false
         },
 
         /**

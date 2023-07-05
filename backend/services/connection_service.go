@@ -107,9 +107,9 @@ func (c *connectionService) SaveConnection(name string, param types.ConnectionCo
 	return
 }
 
-// RemoveConnection remove connection by name
-func (c *connectionService) RemoveConnection(name string) (resp types.JSResp) {
-	err := c.conns.RemoveConnection(name)
+// DeleteConnection remove connection by name
+func (c *connectionService) DeleteConnection(name string) (resp types.JSResp) {
+	err := c.conns.DeleteConnection(name)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -151,9 +151,9 @@ func (c *connectionService) RenameGroup(name, newName string) (resp types.JSResp
 	return
 }
 
-// RemoveGroup remove group by name
-func (c *connectionService) RemoveGroup(name string, includeConn bool) (resp types.JSResp) {
-	err := c.conns.RemoveGroup(name, includeConn)
+// DeleteGroup remove group by name
+func (c *connectionService) DeleteGroup(name string, includeConn bool) (resp types.JSResp) {
+	err := c.conns.DeleteGroup(name, includeConn)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -318,12 +318,8 @@ func (c *connectionService) ScanKeys(connName string, db int, prefix string) (re
 		return
 	}
 
-	if !strings.HasSuffix(prefix, "*") {
-		prefix += ":*"
-	}
-
-	//var keys []string
-	keys := map[string]keyItem{}
+	var keys []string
+	//keys := map[string]keyItem{}
 	var cursor uint64
 	for {
 		var loadedKey []string
@@ -332,11 +328,11 @@ func (c *connectionService) ScanKeys(connName string, db int, prefix string) (re
 			resp.Msg = err.Error()
 			return
 		}
-		//c.updateDBKey(connName, db, loadedKey)
-		for _, k := range loadedKey {
-			//t, _ := rdb.Type(ctx, k).Result()
-			keys[k] = keyItem{Type: "t"}
-		}
+		keys = append(keys, loadedKey...)
+		//for _, k := range loadedKey {
+		//	//t, _ := rdb.Type(ctx, k).Result()
+		//	keys[k] = keyItem{Type: "t"}
+		//}
 		//keys = append(keys, loadedKey...)
 		// no more loadedKey
 		if cursor == 0 {
@@ -873,15 +869,15 @@ func (c *connectionService) SetKeyTTL(connName string, db int, key string, ttl i
 	return
 }
 
-// RemoveKey remove redis key
-func (c *connectionService) RemoveKey(connName string, db int, key string) (resp types.JSResp) {
+// DeleteKey remove redis key
+func (c *connectionService) DeleteKey(connName string, db int, keys []string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
-	rmCount, err := rdb.Del(ctx, key).Result()
+	rmCount, err := rdb.Del(ctx, keys...).Result()
 	if err != nil {
 		resp.Msg = err.Error()
 		return

@@ -278,22 +278,24 @@ const handleSelectContextMenu = (key) => {
             nextTick().then(() => expandKey(nodeKey))
             break
         case 'db_reload':
-            connectionStore.scanKeys(name, db)
+            connectionStore.reopenDatabase(name, db)
             break
         case 'db_newkey':
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, name, db)
             break
         case 'key_reload':
-            connectionStore.scanKeys(name, db, redisKey)
+            connectionStore.loadKeys(name, db, redisKey)
             break
         case 'value_reload':
             connectionStore.loadKeyValue(name, db, redisKey)
             break
         case 'key_remove':
+            dialogStore.openDeleteKeyDialog(name, db, redisKey + ':*')
+            break
         case 'value_remove':
             confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
-                connectionStore.removeKey(name, db, redisKey).then((success) => {
+                connectionStore.deleteKey(name, db, redisKey).then((success) => {
                     if (success) {
                         message.success(i18n.t('delete_key_succ', { key: redisKey }))
                     }

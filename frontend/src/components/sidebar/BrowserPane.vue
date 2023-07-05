@@ -38,7 +38,7 @@ const message = useMessage()
 const onDeleteKey = () => {
     const { server, db, key } = currentSelect.value
     confirmDialog.warning(i18n.t('remove_tip', { name: key }), () => {
-        connectionStore.removeKey(server, db, key).then((success) => {
+        connectionStore.deleteKey(server, db, key).then((success) => {
             if (success) {
                 message.success(i18n.t('delete_key_succ', { key }))
             }
