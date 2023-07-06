@@ -284,7 +284,7 @@ const findSiblingsAndIndex = (node, nodes) => {
 }
 
 // delay save until stop drop after 2 seconds
-const saveSort = debounce(connectionStore.saveConnectionSort, 2000, { trailing: true })
+const saveSort = debounce(connectionStore.saveConnectionSorted, 2000, { trailing: true })
 const handleDrop = ({ node, dragNode, dropPosition }) => {
     const [dragNodeSiblings, dragNodeIndex] = findSiblingsAndIndex(dragNode, connectionStore.connections)
     if (dragNodeSiblings === null || dragNodeIndex === null) {

@@ -53,7 +53,7 @@ const message = useMessage()
 const onConfirmDelete = async () => {
     try {
         const { server, db, key } = deleteForm
-        const success = await connectionStore.deleteKeys(server, db, key, deleteForm.affectedKeys)
+        const success = await connectionStore.deleteKeyPrefix(server, db, key)
         if (success) {
             message.success(i18n.t('handle_succ'))
         }

@@ -57,12 +57,12 @@ const useConnectionStore = defineStore('connections', {
 
     /**
      *
-     * @returns {{databases: Object<string, DatabaseItem[]>, connections: ConnectionItem[]}}
+     * @returns {{groups: string[], databases: Object<string, DatabaseItem[]>, connections: ConnectionItem[]}}
      */
     state: () => ({
-        groups: [], // all group name
+        groups: [], // all group name set
         connections: [], // all connections
-        databases: {}, // all databases in opened connections group by name
+        databases: {}, // all databases in opened connections group by server name
     }),
     getters: {
         anyConnectionOpened() {
@@ -196,10 +196,10 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * save connection
+         * save connection after sort
          * @returns {Promise<void>}
          */
-        async saveConnectionSort() {
+        async saveConnectionSorted() {
             const mapToList = (conns) => {
                 const list = []
                 for (const conn of conns) {
@@ -1137,7 +1137,7 @@ const useConnectionStore = defineStore('connections', {
          */
         async deleteKey(connName, db, key) {
             try {
-                const { data, success, msg } = await DeleteKey(connName, db, [key])
+                const { data, success, msg } = await DeleteKey(connName, db, key)
                 if (success) {
                     // update tree view data
                     this._deleteKeyNode(connName, db, key)
@@ -1157,18 +1157,21 @@ const useConnectionStore = defineStore('connections', {
          * @param connName
          * @param db
          * @param prefix
-         * @param keys
          * @returns {Promise<boolean>}
          */
-        async deleteKeys(connName, db, prefix, keys) {
-            if (isEmpty(keys)) {
+        async deleteKeyPrefix(connName, db, prefix) {
+            if (isEmpty(prefix)) {
                 return false
             }
             try {
-                const { success, msg } = await DeleteKey(connName, db, keys)
+                if (!endsWith(prefix, '*')) {
+                    prefix += '*'
+                }
+                const { data, success, msg } = await DeleteKey(connName, db, prefix)
                 if (success) {
+                    const { deleted: keys = [] } = data
                     for (const key of keys) {
-                        await this.deleteKey(connName, db, key)
+                        await this._deleteKeyNode(connName, db, key)
                         await nextTick()
                     }
                     return true

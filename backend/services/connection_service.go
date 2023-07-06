@@ -870,22 +870,49 @@ func (c *connectionService) SetKeyTTL(connName string, db int, key string, ttl i
 }
 
 // DeleteKey remove redis key
-func (c *connectionService) DeleteKey(connName string, db int, keys []string) (resp types.JSResp) {
+func (c *connectionService) DeleteKey(connName string, db int, key string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	var deletedKeys []string
 
-	rmCount, err := rdb.Del(ctx, keys...).Result()
-	if err != nil {
-		resp.Msg = err.Error()
-		return
+	if strings.HasSuffix(key, "*") {
+		// delete by prefix
+		var cursor uint64
+		for {
+			var loadedKey []string
+			if loadedKey, cursor, err = rdb.Scan(ctx, cursor, key, 10000).Result(); err != nil {
+				resp.Msg = err.Error()
+				return
+			} else {
+				if err = rdb.Del(ctx, loadedKey...).Err(); err != nil {
+					resp.Msg = err.Error()
+					return
+				} else {
+					deletedKeys = append(deletedKeys, loadedKey...)
+				}
+			}
+
+			// no more loadedKey
+			if cursor == 0 {
+				break
+			}
+		}
+	} else {
+		// delete key only
+		_, err = rdb.Del(ctx, key).Result()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		deletedKeys = append(deletedKeys, key)
 	}
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"effect_count": rmCount,
+		"deleted": deletedKeys,
 	}
 	return
 }
