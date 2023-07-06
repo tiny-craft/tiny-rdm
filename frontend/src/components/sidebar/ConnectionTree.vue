@@ -323,7 +323,6 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         :cancelable="false"
         :draggable="true"
         :data="connectionStore.connections"
-        :expand-on-click="true"
         :expanded-keys="expandedKeys"
         @update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"

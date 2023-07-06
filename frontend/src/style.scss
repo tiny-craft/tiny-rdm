@@ -107,6 +107,10 @@ body {
   gap: 10px;
 }
 
+.n-tree-node-content__text {
+  @extend .ellipsis;
+}
+
 .context-menu-item {
   min-width: 100px;
   padding-right: 10px;

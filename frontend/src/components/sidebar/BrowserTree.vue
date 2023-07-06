@@ -266,6 +266,10 @@ const onLoadTree = async (node) => {
                 loading.value = false
             }
             break
+        case ConnectionType.RedisKey:
+            // load all children
+            // node.children = []
+            break
     }
 }
 
