@@ -428,9 +428,9 @@ const useConnectionStore = defineStore('connections', {
         async loadKeyValue(server, db, key) {
             try {
                 const { data, success, msg } = await GetKeyValue(server, db, key)
+                const tab = useTabStore()
                 if (success) {
                     const { type, ttl, value } = data
-                    const tab = useTabStore()
                     tab.upsertTab({
                         server,
                         db,
@@ -440,7 +440,14 @@ const useConnectionStore = defineStore('connections', {
                         value,
                     })
                 } else {
-                    console.warn('TODO: handle get key fail')
+                    tab.upsertTab({
+                        server,
+                        db,
+                        type: 'none',
+                        ttl: -1,
+                        key,
+                        value: null,
+                    })
                 }
             } finally {
             }
@@ -595,6 +602,9 @@ const useConnectionStore = defineStore('connections', {
          * @private
          */
         _sortNodes(nodeList) {
+            if (nodeList == null) {
+                return
+            }
             nodeList.sort((a, b) => {
                 return a.key > b.key ? 1 : -1
             })
@@ -607,8 +617,7 @@ const useConnectionStore = defineStore('connections', {
          */
         _tidyNodeChildren(node) {
             let count = 0
-            const totalChildren = size(node.children)
-            if (totalChildren > 0) {
+            if (!isEmpty(node.children)) {
                 this._sortNodes(node.children)
 
                 for (const elem of node.children) {
@@ -619,113 +628,6 @@ const useConnectionStore = defineStore('connections', {
                 count += 1
             }
             node.keys = count
-        },
-
-        /**
-         * add key to db
-         * @param {string} connName
-         * @param {number} db
-         * @param {string} key
-         * @private
-         */
-        _addKey(connName, db, key) {
-            const dbs = this.databases[connName]
-            const dbDetail = get(dbs, db, {})
-
-            if (dbDetail == null) {
-                return
-            }
-
-            const descendantChain = [dbDetail]
-
-            const keyPart = split(key, separator)
-            let redisKey = ''
-            const keyLen = size(keyPart)
-            let added = false
-            for (let i = 0; i < keyLen; i++) {
-                redisKey += keyPart[i]
-
-                const node = last(descendantChain)
-                const nodeList = get(node, 'children', [])
-                const len = size(nodeList)
-                const isLastKeyPart = i === keyLen - 1
-                for (let j = 0; j < len + 1; j++) {
-                    const treeKey = get(nodeList[j], 'key')
-                    const isLast = j >= len - 1
-                    const keyType = isLastKeyPart ? ConnectionType.RedisValue : ConnectionType.RedisKey
-                    const curKey = `${connName}/db${db}#${keyType}/${redisKey}`
-                    if (treeKey > curKey || isLast) {
-                        // out of search range, add new item
-                        if (isLastKeyPart) {
-                            // key not exists, add new one
-                            const item = {
-                                key: curKey,
-                                label: keyPart[i],
-                                name: connName,
-                                db,
-                                keys: 1,
-                                redisKey,
-                                type: ConnectionType.RedisValue,
-                            }
-                            if (isLast) {
-                                nodeList.push(item)
-                            } else {
-                                nodeList.splice(j, 0, item)
-                            }
-                            added = true
-                        } else {
-                            // layer not exists, add new one
-                            const item = {
-                                key: curKey,
-                                label: keyPart[i],
-                                name: connName,
-                                db,
-                                keys: 0,
-                                redisKey,
-                                type: ConnectionType.RedisKey,
-                                children: [],
-                            }
-                            if (isLast) {
-                                nodeList.push(item)
-                                descendantChain.push(last(nodeList))
-                            } else {
-                                nodeList.splice(j, 0, item)
-                                descendantChain.push(nodeList[j])
-                            }
-                            redisKey += separator
-                            added = true
-                        }
-                        break
-                    } else if (treeKey === curKey) {
-                        if (isLastKeyPart) {
-                            // same key exists, do nothing
-                            console.log('TODO: same key exist, do nothing now, should replace value later')
-                        } else {
-                            // same group exists, find into it's children
-                            descendantChain.push(nodeList[j])
-                            redisKey += separator
-                        }
-                        break
-                    }
-                }
-            }
-
-            // update ancestor node's info
-            if (added) {
-                const desLen = size(descendantChain)
-                for (let i = 0; i < desLen; i++) {
-                    const children = get(descendantChain[i], 'children', [])
-                    let keys = 0
-                    for (const child of children) {
-                        if (child.type === ConnectionType.RedisKey) {
-                            keys += get(child, 'keys', 1)
-                        } else if (child.type === ConnectionType.RedisValue) {
-                            keys += get(child, 'keys', 0)
-                        }
-                    }
-                    descendantChain[i].keys = keys
-                }
-            }
         },
 
         /**
@@ -1217,7 +1119,7 @@ const useConnectionStore = defineStore('connections', {
             if (success) {
                 // delete old key and add new key struct
                 this._deleteKeyNode(connName, db, key)
-                this._addKey(connName, db, newKey)
+                this._addKeyNodes(connName, db, [newKey])
                 return { success: true }
             } else {
                 return { success: false, msg }

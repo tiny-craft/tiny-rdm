@@ -54,6 +54,18 @@ const onUpdateValue = (tabIndex) => {
     tabStore.switchTab(tabIndex)
 }
 
+/**
+ * reload current selection key
+ * @returns {Promise<null>}
+ */
+const onReloadKey = async () => {
+    const tab = tabStore.currentTab
+    if (tab == null || isEmpty(tab.key)) {
+        return null
+    }
+    await connectionStore.loadKeyValue(tab.name, tab.db, tab.key)
+}
+
 const i18n = useI18n()
 const confirmDialog = useConfirmDialog()
 const onCloseTab = (tabIndex) => {
@@ -81,21 +93,20 @@ const onCloseTab = (tabIndex) => {
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-tab>
         </n-tabs>
-        <!--        <n-tabs v-model:value="tabStore.activatedIndex" type="line" @update:value="onUpdateValue" :tabs-padding="0">-->
-        <!--            <n-tab v-for="(t, i) in tab" :key="i" :name="i">-->
-        <!--                <div class="tab-item flex-box-h">-->
-        <!--                    <div class="tab-item-label ellipsis">-->
-        <!--                        {{ t.label }}-->
-        <!--                    </div>-->
-        <!--                    <n-icon class="tab-item-close" color="gray" size="16" @click.stop="onCloseTab(i)">-->
-        <!--                        <Close :round="false" :stroke-width="5" />-->
-        <!--                    </n-icon>-->
-        <!--                </div>-->
-        <!--            </n-tab>-->
-        <!--        </n-tabs>-->
         <!-- TODO: add loading status -->
+
+        <div v-if="tabContent == null || isEmpty(tabContent.keyPath)" class="flex-item-expand flex-box-v">
+            <n-empty :description="$t('empty_tab_content')" class="empty-content" />
+        </div>
+        <div v-else-if="tabContent.value == null" class="flex-item-expand flex-box-v">
+            <n-empty :description="$t('nonexist_tab_content')" class="empty-content">
+                <template #extra>
+                    <n-button @click="onReloadKey">{{ $t('reload') }}</n-button>
+                </template>
+            </n-empty>
+        </div>
         <component
-            v-if="tabContent != null && !isEmpty(tabContent.keyPath)"
+            v-else
             :is="valueComponents[tabContent.type]"
             :db="tabContent.db"
             :key-path="tabContent.keyPath"
@@ -103,9 +114,6 @@ const onCloseTab = (tabIndex) => {
             :ttl="tabContent.ttl"
             :value="tabContent.value"
         />
-        <div v-else class="flex-item-expand flex-box-v">
-            <n-empty :description="$t('empty_tab_content')" class="empty-content" />
-        </div>
     </div>
 </template>
 

@@ -363,6 +363,11 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 		return
 	}
 
+	if keyType == "none" {
+		resp.Msg = "key not exists"
+		return
+	}
+
 	var ttl int64
 	if dur, err = rdb.TTL(ctx, key).Result(); err != nil {
 		ttl = -1
