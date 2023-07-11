@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"embed"
-	"github.com/wailsapp/wails/v2/pkg/options/mac"
-	"tinyrdm/backend/services"
-	"tinyrdm/backend/storage"
-
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
+	"tinyrdm/backend/services"
 )
 
 //go:embed all:frontend/dist
@@ -18,9 +16,8 @@ var assets embed.FS
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
-	preferences := storage.NewPreferences()
-	//connections := storage.NewConnections()
 	connSvc := services.Connection()
+	prefSvc := services.Preferences()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -42,9 +39,8 @@ func main() {
 		},
 		Bind: []interface{}{
 			app,
-			preferences,
-			//connections,
 			connSvc,
+			prefSvc,
 		},
 		Mac: &mac.Options{
 			TitleBar: &mac.TitleBar{
