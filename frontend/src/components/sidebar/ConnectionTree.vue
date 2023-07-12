@@ -18,7 +18,6 @@ import Edit from '../icons/Edit.vue'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
 const i18n = useI18n()
-const loadingConnection = ref(false)
 const openingConnection = ref(false)
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
@@ -32,16 +31,6 @@ const props = defineProps({
     filterPattern: {
         type: String,
     },
-})
-
-onMounted(async () => {
-    try {
-        loadingConnection.value = true
-        await nextTick()
-        await connectionStore.initConnections()
-    } finally {
-        loadingConnection.value = false
-    }
 })
 
 const contextMenuParam = reactive({
@@ -337,7 +326,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
     />
 
     <!-- status display modal -->
-    <n-modal :show="loadingConnection || openingConnection" transform-origin="center">
+    <n-modal :show="openingConnection" transform-origin="center">
         <n-card
             :bordered="false"
             :content-style="{ textAlign: 'center' }"
@@ -347,7 +336,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         >
             <n-spin>
                 <template #description>
-                    {{ openingConnection ? $t('opening_connection') : '' }}
+                    {{ $t('opening_connection') }}
                 </template>
             </n-spin>
         </n-card>

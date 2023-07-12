@@ -33,6 +33,7 @@ const usePreferencesStore = defineStore('preferences', {
             useSysProxy: false,
             useSysProxyHttp: false,
             checkUpdate: false,
+            navMenuWidth: 300,
         },
         editor: {
             font: '',
@@ -164,6 +165,10 @@ const usePreferencesStore = defineStore('preferences', {
                 return true
             }
             return false
+        },
+
+        setNavWidth(width) {
+            this.general.navMenuWidth = width
         },
     },
 })
