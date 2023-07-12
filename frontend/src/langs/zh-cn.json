@@ -5,6 +5,7 @@
   "success": "成功",
   "warning": "警告",
   "save": "保存",
+  "none": "无",
   "new_conn": "添加新连接",
   "new_group": "添加新分组",
   "rename_group": "重命名分组",

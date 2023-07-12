@@ -20,12 +20,13 @@ const data = reactive({
 })
 
 const tabStore = useTabStore()
+const prefStore = usePreferencesStore()
 // const preferences = ref({})
 // provide('preferences', preferences)
 const i18n = useI18n()
 
 onMounted(async () => {
-    const prefStore = usePreferencesStore()
+    await prefStore.loadFontList()
     await prefStore.loadPreferences()
     await nextTick(() => {
         i18n.locale.value = get(prefStore.general, 'language', 'en')
@@ -67,7 +68,7 @@ const dragging = computed(() => {
 
 <template>
     <!-- app content-->
-    <div id="app-container" :class="{ dragging }" class="flex-box-h">
+    <div id="app-container" :class="{ dragging }" class="flex-box-h" :style="prefStore.generalFont">
         <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
         <!-- structure page-->
         <div v-show="tabStore.nav === 'structure'" class="flex-box-h flex-item-expand">

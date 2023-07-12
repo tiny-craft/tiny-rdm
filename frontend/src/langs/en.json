@@ -5,6 +5,7 @@
   "success": "Success",
   "warning": "Warning",
   "save": "Save",
+  "none": "None",
   "new_conn": "Add New Connection",
   "new_group": "Add New Group",
   "rename_group": "Rename Group",
