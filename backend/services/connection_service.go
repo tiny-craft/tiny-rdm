@@ -184,7 +184,7 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	// get database info
 	res, err := rdb.Info(ctx, "keyspace").Result()
 	if err != nil {
-		resp.Msg = "list database fail:" + err.Error()
+		resp.Msg = "get server info fail:" + err.Error()
 		return
 	}
 	// Parse all db, response content like below
@@ -302,6 +302,26 @@ func (c *connectionService) parseDBItemInfo(info string) map[string]int {
 		}
 	}
 	return ret
+}
+
+// ServerInfo get server info
+func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
+	rdb, ctx, err := c.getRedisClient(name, 0)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	// get database info
+	res, err := rdb.Info(ctx).Result()
+	if err != nil {
+		resp.Msg = "get server info fail:" + err.Error()
+		return
+	}
+
+	resp.Success = true
+	resp.Data = c.parseInfo(res)
+	return
 }
 
 // OpenDatabase open select database, and list all keys

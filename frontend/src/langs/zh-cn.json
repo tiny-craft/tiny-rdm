@@ -136,5 +136,13 @@
   "log": "日志",
   "about": "关于",
   "help": "帮助",
-  "check_update": "检查更新..."
+  "check_update": "检查更新...",
+  "auto_refresh": "自动刷新",
+  "uptime": "运行时间",
+  "connected_clients": "已连客户端",
+  "total_keys": "键总数",
+  "memory_used": "内存使用",
+  "unit_day": "天",
+  "unit_hour": "小时",
+  "unit_minute": "分钟"
 }

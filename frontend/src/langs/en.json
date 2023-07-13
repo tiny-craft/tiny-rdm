@@ -133,5 +133,13 @@
   "log": "Log",
   "about": "About",
   "help": "Help",
-  "check_update": "Check for Updates..."
+  "check_update": "Check for Updates...",
+  "auto_refresh": "Auto Refresh",
+  "uptime": "Uptime",
+  "connected_clients": "Clients",
+  "total_keys": "Keys",
+  "memory_used": "Memory",
+  "unit_day": "D",
+  "unit_hour": "H",
+  "unit_minute": "M"
 }

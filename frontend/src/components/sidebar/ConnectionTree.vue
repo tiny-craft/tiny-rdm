@@ -1,12 +1,12 @@
 <script setup>
 import useDialogStore from '../../stores/dialog.js'
-import { h, nextTick, reactive, ref } from 'vue'
+import { h, nextTick, reactive, ref, watch } from 'vue'
 import useConnectionStore from '../../stores/connections.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import { ConnectionType } from '../../consts/connection_type.js'
 import ToggleFolder from '../icons/ToggleFolder.vue'
 import ToggleServer from '../icons/ToggleServer.vue'
-import { debounce, indexOf } from 'lodash'
+import { debounce, indexOf, size, split } from 'lodash'
 import Config from '../icons/Config.vue'
 import Delete from '../icons/Delete.vue'
 import Unlink from '../icons/Unlink.vue'
@@ -26,6 +26,18 @@ const message = useMessage()
 
 const expandedKeys = ref([])
 const selectedKeys = ref([])
+
+watch(selectedKeys, () => {
+    const key = selectedKeys.value[0]
+    // try remove group name
+    const kparts = split(key, '/')
+    const len = size(kparts)
+    if (len > 1) {
+        connectionStore.selectedServer = kparts[len - 1]
+    } else {
+        connectionStore.selectedServer = selectedKeys.value[0]
+    }
+})
 
 const props = defineProps({
     filterPattern: {

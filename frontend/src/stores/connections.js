@@ -19,6 +19,7 @@ import {
     SaveConnection,
     SaveSortedConnection,
     ScanKeys,
+    ServerInfo,
     SetHashValue,
     SetKeyTTL,
     SetKeyValue,
@@ -58,8 +59,8 @@ const useConnectionStore = defineStore('connections', {
     /**
      * @typedef {Object} ConnectionState
      * @property {string[]} groups
-     * @property {Object.<string, DatabaseItem[]>} databases
      * @property {ConnectionItem[]} connections
+     * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
      */
 
@@ -70,6 +71,8 @@ const useConnectionStore = defineStore('connections', {
     state: () => ({
         groups: [], // all group name set
         connections: [], // all connections
+        selectedServer: '', // current selected server
+        serverStats: {}, // current server status info
         databases: {}, // all databases in opened connections group by server name
         nodeMap: {}, // all node in opened connections group by server+db and key+type
     }),
@@ -417,6 +420,23 @@ const useConnectionStore = defineStore('connections', {
             dbs[db].isLeaf = false
 
             delete this.nodeMap[`${connName}#${db}`]
+        },
+
+        /**
+         *
+         * @param server
+         * @returns {Promise<{}>}
+         */
+        async getServerInfo(server) {
+            try {
+                const { success, data } = await ServerInfo(server)
+                if (success) {
+                    this.serverStats[server] = data
+                    return data
+                }
+            } finally {
+            }
+            return {}
         },
 
         /**

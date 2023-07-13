@@ -6,10 +6,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    clickToggle: {
-        type: Boolean,
-        default: false,
-    },
     strokeWidth: {
         type: [Number, String],
         default: 3,
@@ -19,12 +15,6 @@ const props = defineProps({
         default: '#dc423c',
     },
 })
-
-const onToggle = () => {
-    if (props.clickToggle) {
-        emit('update:modelValue', !props.modelValue)
-    }
-}
 </script>
 
 <template>

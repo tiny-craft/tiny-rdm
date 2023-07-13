@@ -6,10 +6,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    clickToggle: {
-        type: Boolean,
-        default: false,
-    },
     strokeWidth: {
         type: [Number, String],
         default: 3,
@@ -19,23 +15,10 @@ const props = defineProps({
         default: '#dc423c',
     },
 })
-
-const onToggle = () => {
-    if (props.clickToggle) {
-        emit('update:modelValue', !props.modelValue)
-    }
-}
 </script>
 
 <template>
-    <svg
-        v-if="props.modelValue"
-        :height="props.size"
-        :width="props.size"
-        fill="none"
-        viewBox="0 0 48 48"
-        xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg v-if="props.modelValue" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <path
             :stroke="props.fillColor"
             :stroke-width="props.strokeWidth"
@@ -74,14 +57,7 @@ const onToggle = () => {
             stroke-linejoin="round"
         />
     </svg>
-    <svg
-        v-else
-        :height="props.size"
-        :width="props.size"
-        fill="none"
-        viewBox="0 0 48 48"
-        xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg v-else fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <path
             :stroke-width="props.strokeWidth"
             d="M41 4H7C5.34315 4 4 5.34315 4 7V41C4 42.6569 5.34315 44 7 44H41C42.6569 44 44 42.6569 44 41V7C44 5.34315 42.6569 4 41 4Z"
