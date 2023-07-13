@@ -27,13 +27,14 @@ const usePreferencesStore = defineStore('preferences', {
      */
     state: () => ({
         general: {
+            theme: 'light',
             language: 'en',
             font: '',
             fontSize: 14,
             useSysProxy: false,
             useSysProxyHttp: false,
             checkUpdate: false,
-            navMenuWidth: 300,
+            asideWidth: 300,
         },
         editor: {
             font: '',
@@ -47,6 +48,24 @@ const usePreferencesStore = defineStore('preferences', {
             return ':'
         },
 
+        themeOption() {
+            const i18n = useI18n()
+            return [
+                {
+                    value: 'light',
+                    label: i18n.t('theme_light'),
+                },
+                {
+                    value: 'dark',
+                    label: i18n.t('theme_dark'),
+                },
+                {
+                    value: 'auto',
+                    label: i18n.t('theme_auto'),
+                },
+            ]
+        },
+
         /**
          * all available language
          * @returns {{label: string, value: string}[]}
@@ -58,6 +77,10 @@ const usePreferencesStore = defineStore('preferences', {
             }))
         },
 
+        /**
+         * all system font list
+         * @returns {{path: string, label: string, value: string}[]}
+         */
         fontOption() {
             const i18n = useI18n()
             const option = map(this.fontList, (font) => ({
@@ -73,6 +96,10 @@ const usePreferencesStore = defineStore('preferences', {
             return option
         },
 
+        /**
+         * current font selection
+         * @returns {{fontSize: string}}
+         */
         generalFont() {
             const fontStyle = {
                 fontSize: this.general.fontSize + 'px',
@@ -167,8 +194,8 @@ const usePreferencesStore = defineStore('preferences', {
             return false
         },
 
-        setNavWidth(width) {
-            this.general.navMenuWidth = width
+        setAsideWidth(width) {
+            this.general.asideWidth = width
         },
     },
 })

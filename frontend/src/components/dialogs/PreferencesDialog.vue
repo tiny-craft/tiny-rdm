@@ -76,6 +76,13 @@ const onClose = () => {
                     label-align="right"
                     label-placement="left"
                 >
+                    <n-form-item :label="$t('theme')" required>
+                        <n-radio-group v-model:value="prefStore.general.theme" name="theme" size="medium">
+                            <n-radio-button v-for="opt in prefStore.themeOption" :key="opt.value" :value="opt.value">
+                                {{ opt.label }}
+                            </n-radio-button>
+                        </n-radio-group>
+                    </n-form-item>
                     <n-form-item :label="$t('language')" required>
                         <n-select
                             v-model:value="prefStore.general.language"

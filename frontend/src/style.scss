@@ -1,14 +1,13 @@
 :root {
-  --bg-color: #ffffff;
-  --bg-color-page: #f2f3f5;
-  --text-color-regular: #606266;
-  --border-color: #dcdfe6;
+  //--bg-color: #ffffff;
+  //--bg-color-page: #f2f3f5;
+  //--text-color-regular: #606266;
+  //--border-color: #dcdfe6;
   --transition-duration-fast: 0.2s;
   --transition-function-ease-in-out-bezier: cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
 html {
-  background-color: #ffffff;
   //text-align: center;
   cursor: default;
   -webkit-user-select: none; /* Chrome, Safari */
@@ -82,8 +81,8 @@ body {
 }
 
 .content-wrapper {
-  background-color: var(--bg-color);
-  height: 100%;
+  //height: 100%;
+  flex-grow: 1;
   overflow: hidden;
   gap: 5px;
   padding: 5px;
@@ -96,7 +95,7 @@ body {
   }
 
   .value-wrapper {
-    border-top: var(--border-color) 1px solid;
+    //border-top: v-bind('themeVars.borderColor') 1px solid;
     padding: 5px;
     user-select: text;
   }
@@ -118,13 +117,12 @@ body {
 
 .nav-pane-container {
   overflow: hidden;
-  background-color: var(--bg-color);
 
   .nav-pane-bottom {
     align-items: center;
     gap: 8px;
     padding: 3px 5px 5px 5px;
     min-height: 35px;
-    border-top: var(--border-color) 1px solid;
+    //border-top: v-bind('themeVars.borderColor') 1px solid;
   }
 }

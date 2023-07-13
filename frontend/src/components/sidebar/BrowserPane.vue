@@ -1,9 +1,8 @@
 <script setup>
-import { NIcon, useMessage } from 'naive-ui'
+import { useMessage, useThemeVars } from 'naive-ui'
 import AddLink from '../icons/AddLink.vue'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '../common/IconButton.vue'
-import Filter from '../icons/Filter.vue'
 import useTabStore from '../../stores/tab.js'
 import { computed } from 'vue'
 import { get } from 'lodash'
@@ -14,6 +13,7 @@ import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from '../../stores/connections.js'
 
+const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
 const tabStore = useTabStore()
 const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
@@ -59,27 +59,12 @@ const onRefresh = () => {
 
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
-            <icon-button
-                :icon="AddLink"
-                color="#555"
-                size="20"
-                stroke-width="4"
-                t-tooltip="new_key"
-                @click="onNewKey"
-            />
-            <icon-button
-                :icon="Refresh"
-                color="#555"
-                size="20"
-                stroke-width="4"
-                t-tooltip="reload"
-                @click="onRefresh"
-            />
+            <icon-button :icon="AddLink" size="20" stroke-width="4" t-tooltip="new_key" @click="onNewKey" />
+            <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="reload" @click="onRefresh" />
             <div class="flex-item-expand"></div>
             <icon-button
                 :disabled="currentSelect.key == null"
                 :icon="Delete"
-                color="#555"
                 size="20"
                 stroke-width="4"
                 t-tooltip="remove_key"
@@ -94,4 +79,9 @@ const onRefresh = () => {
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style scoped lang="scss">
+.nav-pane-bottom {
+    color: v-bind('themeVars.iconColor');
+    border-top: v-bind('themeVars.borderColor') 1px solid;
+}
+</style>
