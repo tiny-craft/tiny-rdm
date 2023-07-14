@@ -29,7 +29,7 @@ const selectedKeys = ref([])
 
 watch(selectedKeys, () => {
     const key = selectedKeys.value[0]
-    // try remove group name
+    // try to remove group name
     const kparts = split(key, '/')
     const len = size(kparts)
     if (len > 1) {

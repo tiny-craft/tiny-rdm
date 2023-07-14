@@ -141,5 +141,6 @@
   "memory_used": "Memory",
   "unit_day": "D",
   "unit_hour": "H",
-  "unit_minute": "M"
+  "unit_minute": "M",
+  "all_info": "All Info"
 }

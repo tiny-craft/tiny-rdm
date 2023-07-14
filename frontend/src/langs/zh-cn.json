@@ -144,5 +144,6 @@
   "memory_used": "内存使用",
   "unit_day": "天",
   "unit_hour": "小时",
-  "unit_minute": "分钟"
+  "unit_minute": "分钟",
+  "all_info": "所有信息"
 }
