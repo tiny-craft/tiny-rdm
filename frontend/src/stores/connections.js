@@ -299,6 +299,10 @@ const useConnectionStore = defineStore('connections', {
                 return false
             }
 
+            const dbs = this.databases[name]
+            for (const db of dbs) {
+                this.nodeMap[`${db.name}#${db.db}`]?.clear()
+            }
             delete this.databases[name]
             delete this.serverStats[name]
 
@@ -317,6 +321,7 @@ const useConnectionStore = defineStore('connections', {
             }
 
             this.databases = {}
+            this.serverStats = {}
             const tabStore = useTabStore()
             tabStore.removeAllTab()
         },
@@ -419,7 +424,7 @@ const useConnectionStore = defineStore('connections', {
             dbs[db].children = undefined
             dbs[db].isLeaf = false
 
-            delete this.nodeMap[`${connName}#${db}`]
+            this.nodeMap[`${connName}#${db}`]?.clear()
         },
 
         /**
@@ -564,10 +569,9 @@ const useConnectionStore = defineStore('connections', {
             if (this.nodeMap[`${connName}#${db}`] == null) {
                 this.nodeMap[`${connName}#${db}`] = new Map()
             }
-            // construct tree node list, the format of item key likes 'server/db#type/key'
+            // construct a tree node list, the format of item key likes 'server/db#type/key'
             const nodeMap = this.nodeMap[`${connName}#${db}`]
             const rootChildren = dbs[db].children
-            let count = 0
             for (const key of keys) {
                 const keyPart = split(key, separator)
                 // const prefixLen = size(keyPart) - 1

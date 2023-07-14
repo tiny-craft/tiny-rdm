@@ -1,8 +1,8 @@
 <script setup>
 import AddLink from '../icons/AddLink.vue'
-import { useDialog } from 'naive-ui'
+import useDialogStore from '../../stores/dialog.js'
 
-const dialogStore = useDialog()
+const dialogStore = useDialogStore()
 </script>
 
 <template>

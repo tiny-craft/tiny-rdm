@@ -1,6 +1,5 @@
 {
   "lang_name": "简体中文",
-  "launching": "启动中...",
   "confirm": "确认",
   "cancel": "取消",
   "success": "成功",
@@ -137,6 +136,7 @@
   "help": "帮助",
   "check_update": "检查更新...",
   "auto_refresh": "自动刷新",
+  "refresh": "立即刷新",
   "uptime": "运行时间",
   "connected_clients": "已连客户端",
   "total_keys": "键总数",

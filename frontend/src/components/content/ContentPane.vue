@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onActivated, onMounted, onUnmounted, ref, watch } from 'vue'
 import { types } from '../../consts/support_redis_type.js'
 import ContentValueHash from '../content_value/ContentValueHash.vue'
 import ContentValueList from '../content_value/ContentValueList.vue'
@@ -60,6 +60,15 @@ const tab = computed(() =>
     }))
 )
 
+watch(
+    () => tabStore.nav,
+    (nav) => {
+        if (nav === 'structure') {
+            refreshInfo()
+        }
+    }
+)
+
 const tabContent = computed(() => {
     const tab = tabStore.currentTab
     if (tab == null) {
@@ -113,7 +122,7 @@ const onCloseTab = (tabIndex) => {
 
 <template>
     <div class="content-container flex-box-v">
-        <!--        <content-tab :model-value="tab"></content-tab>-->
+        <!--                <content-tab :model-value="tab"></content-tab>-->
         <n-tabs
             v-model:value="tabStore.activatedIndex"
             :closable="true"
@@ -130,7 +139,12 @@ const onCloseTab = (tabIndex) => {
 
         <div v-if="showServerStatus" class="content-container flex-item-expand flex-box-v">
             <!-- select nothing or select server node, display server status -->
-            <content-server-status v-model:auto-refresh="autoRefresh" :server="serverName" :info="serverInfo" />
+            <content-server-status
+                v-model:auto-refresh="autoRefresh"
+                :server="serverName"
+                :info="serverInfo"
+                @refresh="refreshInfo"
+            />
         </div>
         <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
             <n-empty :description="$t('nonexist_tab_content')" class="empty-content">

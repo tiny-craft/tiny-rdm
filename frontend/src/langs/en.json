@@ -1,6 +1,5 @@
 {
   "lang_name": "English",
-  "launching": "Launching...",
   "confirm": "Confirm",
   "cancel": "Cancel",
   "success": "Success",
@@ -134,6 +133,7 @@
   "help": "Help",
   "check_update": "Check for Updates...",
   "auto_refresh": "Auto Refresh",
+  "refresh": "Refresh",
   "uptime": "Uptime",
   "connected_clients": "Clients",
   "total_keys": "Keys",

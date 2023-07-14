@@ -5,6 +5,7 @@ import Help from '../icons/Help.vue'
 import IconButton from '../common/IconButton.vue'
 import Filter from '../icons/Filter.vue'
 import { useI18n } from 'vue-i18n'
+import Refresh from '../icons/Refresh.vue'
 
 const props = defineProps({
     server: String,
@@ -12,8 +13,9 @@ const props = defineProps({
     autoRefresh: false,
 })
 
-const emit = defineEmits(['update:autoRefresh'])
+const emit = defineEmits(['update:autoRefresh', 'refresh'])
 
+const scrollRef = ref(null)
 const redisVersion = computed(() => {
     return get(props.info, 'redis_version', '')
 })
@@ -67,7 +69,6 @@ const totalKeys = computed(() => {
     })
     return sum(toArray(nums))
 })
-
 const infoList = computed(() => map(props.info, (value, key) => ({ value, key })))
 
 const i18n = useI18n()
@@ -92,9 +93,10 @@ const onFilterInfo = (val) => {
 </script>
 
 <template>
-    <n-scrollbar>
+    <n-scrollbar ref="scrollRef">
+        <n-back-top :listen-to="scrollRef" />
         <n-space vertical>
-            <n-card :theme-override1s="{ paddingMedium: '10px 20px 10px' }">
+            <n-card>
                 <template #header>
                     {{ props.server }}
                     <n-space inline size="small">
@@ -104,9 +106,19 @@ const onFilterInfo = (val) => {
                     </n-space>
                 </template>
                 <template #header-extra>
-                    <n-space inline size="small">
+                    <n-space inline align="center">
                         {{ $t('auto_refresh') }}
                         <n-switch :value="props.autoRefresh" @update:value="(v) => emit('update:autoRefresh', v)" />
+                        <n-tooltip>
+                            {{ $t('refresh') }}
+                            <template #trigger>
+                                <n-button tertiary circle size="small" @click="emit('refresh')">
+                                    <template #icon>
+                                        <n-icon :component="Refresh" />
+                                    </template>
+                                </n-button>
+                            </template>
+                        </n-tooltip>
                     </n-space>
                 </template>
                 <n-grid x-gap="5" style="min-width: 500px">
@@ -138,7 +150,7 @@ const onFilterInfo = (val) => {
             </n-card>
             <n-card :title="$t('all_info')">
                 <template #header-extra>
-                    <n-input v-model:value="infoFilter" @update:value="onFilterInfo" placeholder="">
+                    <n-input v-model:value="infoFilter" @update:value="onFilterInfo" placeholder="" clearable>
                         <template #prefix>
                             <icon-button :icon="Filter" size="18" />
                         </template>
