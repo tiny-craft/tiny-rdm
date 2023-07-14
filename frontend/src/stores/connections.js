@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, findIndex, get, isEmpty, last, size, split, uniq } from 'lodash'
+import { endsWith, findIndex, get, isEmpty, size, split, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -71,7 +71,6 @@ const useConnectionStore = defineStore('connections', {
     state: () => ({
         groups: [], // all group name set
         connections: [], // all connections
-        selectedServer: '', // current selected server
         serverStats: {}, // current server status info
         databases: {}, // all databases in opened connections group by server name
         nodeMap: {}, // all node in opened connections group by server+db and key+type
@@ -301,6 +300,7 @@ const useConnectionStore = defineStore('connections', {
             }
 
             delete this.databases[name]
+            delete this.serverStats[name]
 
             const tabStore = useTabStore()
             tabStore.removeTabByName(name)
@@ -308,7 +308,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * close all connection
+         * close all connections
          * @returns {Promise<void>}
          */
         async closeAllConnection() {
@@ -338,7 +338,7 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * create connection group
+         * create a connection group
          * @param name
          * @returns {Promise<{success: boolean, [msg]: string}>}
          */
@@ -441,34 +441,37 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * load redis key
-         * @param server
-         * @param db
-         * @param key
+         * @param {string} server
+         * @param {number} db
+         * @param {string} [key] when key is null or blank, update tab to display normal content (blank content or server status)
          */
         async loadKeyValue(server, db, key) {
             try {
-                const { data, success, msg } = await GetKeyValue(server, db, key)
                 const tab = useTabStore()
-                if (success) {
-                    const { type, ttl, value } = data
-                    tab.upsertTab({
-                        server,
-                        db,
-                        type,
-                        ttl,
-                        key,
-                        value,
-                    })
-                } else {
-                    tab.upsertTab({
-                        server,
-                        db,
-                        type: 'none',
-                        ttl: -1,
-                        key,
-                        value: null,
-                    })
+                if (!isEmpty(key)) {
+                    const { data, success, msg } = await GetKeyValue(server, db, key)
+                    if (success) {
+                        const { type, ttl, value } = data
+                        tab.upsertTab({
+                            server,
+                            db,
+                            type,
+                            ttl,
+                            key,
+                            value,
+                        })
+                        return
+                    }
                 }
+
+                tab.upsertTab({
+                    server,
+                    db,
+                    type: 'none',
+                    ttl: -1,
+                    key: null,
+                    value: null,
+                })
             } finally {
             }
         },
@@ -582,7 +585,6 @@ const useConnectionStore = defineStore('connections', {
                             selectedNode = {
                                 key: `${connName}/db${db}${nodeKey}`,
                                 label: keyPart[i],
-                                name: connName,
                                 db,
                                 keys: 0,
                                 redisKey: handlePath,
@@ -601,7 +603,6 @@ const useConnectionStore = defineStore('connections', {
                         const selectedNode = {
                             key: `${connName}/db${db}${nodeKey}`,
                             label: keyPart[i],
-                            name: connName,
                             db,
                             keys: 0,
                             redisKey: handlePath,
@@ -612,7 +613,6 @@ const useConnectionStore = defineStore('connections', {
                         children.push(selectedNode)
                     }
                 }
-                console.log('count:', ++count)
             }
         },
 

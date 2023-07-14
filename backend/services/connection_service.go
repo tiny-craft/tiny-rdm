@@ -129,7 +129,7 @@ func (c *connectionService) SaveSortedConnection(sortedConns types.Connections) 
 	return
 }
 
-// CreateGroup create new group
+// CreateGroup create a new group
 func (c *connectionService) CreateGroup(name string) (resp types.JSResp) {
 	err := c.conns.CreateGroup(name)
 	if err != nil {
@@ -151,7 +151,7 @@ func (c *connectionService) RenameGroup(name, newName string) (resp types.JSResp
 	return
 }
 
-// DeleteGroup remove group by name
+// DeleteGroup remove a group by name
 func (c *connectionService) DeleteGroup(name string, includeConn bool) (resp types.JSResp) {
 	err := c.conns.DeleteGroup(name, includeConn)
 	if err != nil {

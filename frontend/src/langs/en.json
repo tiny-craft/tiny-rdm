@@ -124,7 +124,6 @@
   "field_required": "This item should not be blank",
   "spec_field_required": "\"{key}\" should not be blank",
   "no_connections": "No Connection",
-  "empty_tab_content": "Select the key from left list to see detail.",
   "nonexist_tab_content": "The selected key does not exist. Please retry",
   "empty_server_content": "Connect server from left list",
   "reload_when_succ": "Reload immediately after success",

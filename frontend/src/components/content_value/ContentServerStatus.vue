@@ -123,8 +123,8 @@ const onFilterInfo = (val) => {
                     </n-gi>
                     <n-gi :span="6">
                         <n-statistic :value="totalKeys">
-                            <template #label
-                                >{{ $t('total_keys') }}
+                            <template #label>
+                                {{ $t('total_keys') }}
                                 <n-icon :component="Help" />
                             </template>
                         </n-statistic>

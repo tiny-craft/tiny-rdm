@@ -1,10 +1,10 @@
 <script setup>
-import { h, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { indexOf, isEmpty } from 'lodash'
+import { get, indexOf, isEmpty } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -16,14 +16,32 @@ import useDialogStore from '../../stores/dialog.js'
 import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
 import useConnectionStore from '../../stores/connections.js'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
+import ToggleServer from '../icons/ToggleServer.vue'
+import Unlink from '../icons/Unlink.vue'
+
+const props = defineProps({
+    server: String,
+})
 
 const i18n = useI18n()
 const loading = ref(false)
 const loadingConnections = ref(false)
-const expandedKeys = ref([])
-const selectedKeys = ref([])
+const expandedKeys = ref([props.server])
+const selectedKeys = ref([props.server])
 const connectionStore = useConnectionStore()
 const dialogStore = useDialogStore()
+
+const data = computed(() => {
+    const dbs = get(connectionStore.databases, props.server, [])
+    return [
+        {
+            key: props.server,
+            label: props.server,
+            type: ConnectionType.Server,
+            children: dbs,
+        },
+    ]
+})
 
 const contextMenuParam = reactive({
     show: false,
@@ -40,6 +58,21 @@ const renderIcon = (icon) => {
     }
 }
 const menuOptions = {
+    [ConnectionType.Server]: () => {
+        console.log('open server context')
+        return [
+            {
+                key: 'server_reload',
+                label: i18n.t('reload'),
+                icon: renderIcon(Refresh),
+            },
+            {
+                key: 'server_close',
+                label: i18n.t('disconnect'),
+                icon: renderIcon(Unlink),
+            },
+        ]
+    },
     [ConnectionType.RedisDB]: ({ opened }) => {
         if (opened) {
             return [
@@ -127,10 +160,6 @@ onMounted(async () => {
     }
 })
 
-const props = defineProps({
-    server: String,
-})
-
 const expandKey = (key) => {
     const idx = indexOf(expandedKeys.value, key)
     if (idx === -1) {
@@ -159,24 +188,37 @@ const onUpdateExpanded = (value, option, meta) => {
 }
 
 const onUpdateSelectedKeys = (keys, options) => {
-    if (!isEmpty(options)) {
-        // prevent load duplicate key
-        for (const node of options) {
-            if (node.type === ConnectionType.RedisValue) {
-                const { key, name, db, redisKey } = node
-                if (indexOf(selectedKeys.value, key) === -1) {
-                    connectionStore.loadKeyValue(name, db, redisKey)
+    try {
+        if (!isEmpty(options)) {
+            // prevent load duplicate key
+            for (const node of options) {
+                if (node.type === ConnectionType.RedisValue) {
+                    const { key, db, redisKey } = node
+                    if (indexOf(selectedKeys.value, key) === -1) {
+                        connectionStore.loadKeyValue(props.server, db, redisKey)
+                    }
+                    return
                 }
-                break
             }
-        }
-    }
 
-    selectedKeys.value = keys
+            // default is load blank key to display server status
+            connectionStore.loadKeyValue(props.server, 0)
+        }
+    } finally {
+        selectedKeys.value = keys
+    }
 }
 
 const renderPrefix = ({ option }) => {
     switch (option.type) {
+        case ConnectionType.Server:
+            return h(
+                NIcon,
+                { size: 20 },
+                {
+                    default: () => h(ToggleServer, { modelValue: false }),
+                }
+            )
         case ConnectionType.RedisDB:
             return h(
                 NIcon,
@@ -258,7 +300,7 @@ const onLoadTree = async (node) => {
         case ConnectionType.RedisDB:
             loading.value = true
             try {
-                await connectionStore.openDatabase(node.name, node.db)
+                await connectionStore.openDatabase(props.server, node.db)
             } catch (e) {
                 message.error(e.message)
                 node.isLeaf = undefined
@@ -276,30 +318,38 @@ const onLoadTree = async (node) => {
 const confirmDialog = useConfirmDialog()
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
-    const { name, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
+    const { db, key: nodeKey, redisKey } = contextMenuParam.currentNode
     switch (key) {
+        case 'server_reload':
+            connectionStore.openConnection(props.server, true).then(() => {
+                message.success(i18n.t('reload_succ'))
+            })
+            break
+        case 'server_close':
+            connectionStore.closeConnection(props.server)
+            break
         case 'db_open':
             nextTick().then(() => expandKey(nodeKey))
             break
         case 'db_reload':
-            connectionStore.reopenDatabase(name, db)
+            connectionStore.reopenDatabase(props.server, db)
             break
         case 'db_newkey':
         case 'key_newkey':
-            dialogStore.openNewKeyDialog(redisKey, name, db)
+            dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
         case 'key_reload':
-            connectionStore.loadKeys(name, db, redisKey)
+            connectionStore.loadKeys(props.server, db, redisKey)
             break
         case 'value_reload':
-            connectionStore.loadKeyValue(name, db, redisKey)
+            connectionStore.loadKeyValue(props.server, db, redisKey)
             break
         case 'key_remove':
-            dialogStore.openDeleteKeyDialog(name, db, redisKey + ':*')
+            dialogStore.openDeleteKeyDialog(props.server, db, redisKey + ':*')
             break
         case 'value_remove':
             confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
-                connectionStore.deleteKey(name, db, redisKey).then((success) => {
+                connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
                         message.success(i18n.t('delete_key_succ', { key: redisKey }))
                     }
@@ -334,7 +384,7 @@ const handleOutsideContextMenu = () => {
         :block-node="true"
         :animated="false"
         :cancelable="false"
-        :data="connectionStore.databases[props.server] || []"
+        :data="data"
         :expand-on-click="false"
         :expanded-keys="expandedKeys"
         :selected-keys="selectedKeys"

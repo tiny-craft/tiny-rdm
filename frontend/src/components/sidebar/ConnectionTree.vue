@@ -27,18 +27,6 @@ const message = useMessage()
 const expandedKeys = ref([])
 const selectedKeys = ref([])
 
-watch(selectedKeys, () => {
-    const key = selectedKeys.value[0]
-    // try to remove group name
-    const kparts = split(key, '/')
-    const len = size(kparts)
-    if (len > 1) {
-        connectionStore.selectedServer = kparts[len - 1]
-    } else {
-        connectionStore.selectedServer = selectedKeys.value[0]
-    }
-})
-
 const props = defineProps({
     filterPattern: {
         type: String,

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { types } from '../../consts/support_redis_type.js'
 import ContentValueHash from '../content_value/ContentValueHash.vue'
 import ContentValueList from '../content_value/ContentValueList.vue'
@@ -12,6 +12,35 @@ import { useDialog } from 'naive-ui'
 import useConnectionStore from '../../stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
+import ContentServerStatus from '../content_value/ContentServerStatus.vue'
+
+const serverInfo = ref({})
+const autoRefresh = ref(false)
+const serverName = computed(() => {
+    if (tabContent.value != null) {
+        return tabContent.value.name
+    }
+    return ''
+})
+const refreshInfo = async () => {
+    if (!isEmpty(serverName.value) && connectionStore.isConnected(serverName.value)) {
+        serverInfo.value = await connectionStore.getServerInfo(serverName.value)
+    }
+}
+
+let intervalId
+onMounted(() => {
+    refreshInfo()
+    intervalId = setInterval(() => {
+        if (autoRefresh.value) {
+            refreshInfo()
+        }
+    }, 5000)
+})
+
+onUnmounted(() => {
+    clearInterval(intervalId)
+})
 
 const valueComponents = {
     [types.STRING]: ContentValueString,
@@ -31,10 +60,6 @@ const tab = computed(() =>
     }))
 )
 
-/**
- *
- * @type {ComputedRef<TabItem>}
- */
 const tabContent = computed(() => {
     const tab = tabStore.currentTab
     if (tab == null) {
@@ -48,6 +73,14 @@ const tabContent = computed(() => {
         ttl: tab.ttl,
         value: tab.value,
     }
+})
+
+const showServerStatus = computed(() => {
+    return tabContent.value == null || isEmpty(tabContent.value.keyPath)
+})
+
+const showNonexists = computed(() => {
+    return tabContent.value.value == null
 })
 
 const onUpdateValue = (tabIndex) => {
@@ -95,10 +128,11 @@ const onCloseTab = (tabIndex) => {
         </n-tabs>
         <!-- TODO: add loading status -->
 
-        <div v-if="tabContent == null || isEmpty(tabContent.keyPath)" class="flex-item-expand flex-box-v">
-            <n-empty :description="$t('empty_tab_content')" class="empty-content" />
+        <div v-if="showServerStatus" class="content-container flex-item-expand flex-box-v">
+            <!-- select nothing or select server node, display server status -->
+            <content-server-status v-model:auto-refresh="autoRefresh" :server="serverName" :info="serverInfo" />
         </div>
-        <div v-else-if="tabContent.value == null" class="flex-item-expand flex-box-v">
+        <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
             <n-empty :description="$t('nonexist_tab_content')" class="empty-content">
                 <template #extra>
                     <n-button @click="onReloadKey">{{ $t('reload') }}</n-button>
@@ -119,6 +153,12 @@ const onCloseTab = (tabIndex) => {
 
 <style lang="scss" scoped>
 @import 'content';
+
+.content-container {
+    padding: 5px;
+    box-sizing: border-box;
+}
+
 //.tab-item {
 //    gap: 5px;
 //    padding: 0 5px 0 10px;
