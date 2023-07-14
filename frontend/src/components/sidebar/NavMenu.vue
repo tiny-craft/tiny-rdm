@@ -134,9 +134,8 @@ const openGithub = () => {
 
 <style lang="scss">
 #app-nav-menu {
-    //width: 60px;
     height: 100vh;
-    border-right: v-bind('themeVars.borderColor') solid 1px;
+    //border-right: v-bind('themeVars.borderColor') solid 1px;
 
     .nav-menu-item {
         align-items: center;

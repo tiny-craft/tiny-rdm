@@ -100,9 +100,24 @@ const onFilterInfo = (val) => {
                 <template #header>
                     {{ props.server }}
                     <n-space inline size="small">
-                        <n-tag v-if="redisVersion" type="primary" size="small">v{{ redisVersion }}</n-tag>
-                        <n-tag v-if="redisMode" type="primary" size="small">{{ redisMode }}</n-tag>
-                        <n-tag v-if="role" type="primary" size="small">{{ role }}</n-tag>
+                        <n-tooltip v-if="redisVersion">
+                            Redis Version
+                            <template #trigger>
+                                <n-tag type="primary" size="small">v{{ redisVersion }}</n-tag>
+                            </template>
+                        </n-tooltip>
+                        <n-tooltip v-if="redisMode">
+                            Mode
+                            <template #trigger>
+                                <n-tag type="primary" size="small">{{ redisMode }}</n-tag>
+                            </template>
+                        </n-tooltip>
+                        <n-tooltip v-if="redisMode">
+                            Role
+                            <template #trigger>
+                                <n-tag type="primary" size="small">{{ role }}</n-tag>
+                            </template>
+                        </n-tooltip>
                     </n-space>
                 </template>
                 <template #header-extra>

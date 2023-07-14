@@ -89,7 +89,7 @@ const theme = computed(() => {
                 <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }">
                     <div id="launch-container" />
                 </n-spin>
-                <app-content v-if="!initializing" />
+                <app-content v-if="!initializing" class="flex-item-expand" />
 
                 <!-- top modal dialogs -->
                 <connection-dialog />
@@ -109,5 +109,12 @@ const theme = computed(() => {
 #launch-container {
     width: 100vw;
     height: 100vh;
+}
+
+#app-title {
+    text-align: center;
+    width: 100vw;
+    height: 30px;
+    line-height: 30px;
 }
 </style>
