@@ -38,8 +38,8 @@ const i18n = useI18n()
 const menuOptions = computed(() => {
     return [
         {
-            label: i18n.t('structure'),
-            key: 'structure',
+            label: i18n.t('browser'),
+            key: 'browser',
             icon: renderIcon(ToggleDb),
             show: connectionStore.anyConnectionOpened,
         },

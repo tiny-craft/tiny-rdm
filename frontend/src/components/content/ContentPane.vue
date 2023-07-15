@@ -63,7 +63,7 @@ const tab = computed(() =>
 watch(
     () => tabStore.nav,
     (nav) => {
-        if (nav === 'structure') {
+        if (nav === 'browser') {
             refreshInfo()
         }
     }

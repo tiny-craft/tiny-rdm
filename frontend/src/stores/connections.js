@@ -9,6 +9,7 @@ import {
     DeleteConnection,
     DeleteGroup,
     DeleteKey,
+    GetCmdHistory,
     GetConnection,
     GetKeyValue,
     ListConnection,
@@ -62,6 +63,13 @@ const useConnectionStore = defineStore('connections', {
      * @property {ConnectionItem[]} connections
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
+     */
+
+    /**
+     * @typedef {Object} HistoryItem
+     * @property {string} time
+     * @property {string} server
+     * @property {string} cmd
      */
 
     /**
@@ -1147,6 +1155,26 @@ const useConnectionStore = defineStore('connections', {
                 return { success: true }
             } else {
                 return { success: false, msg }
+            }
+        },
+
+        /**
+         * get command history
+         * @param {number} [pageNo]
+         * @param {number} [pageSize]
+         * @returns {Promise<HistoryItem[]>}
+         */
+        async getCmdHistory(pageNo, pageSize) {
+            if (pageNo === undefined || pageSize === undefined) {
+                pageNo = -1
+                pageSize = -1
+            }
+            try {
+                const { success, data = { list: [] } } = await GetCmdHistory(pageNo, pageSize)
+                const { list } = data
+                return list
+            } catch {
+                return []
             }
         },
     },

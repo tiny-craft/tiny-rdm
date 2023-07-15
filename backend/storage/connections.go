@@ -102,7 +102,7 @@ func (c *ConnectionsStorage) GetConnection(name string) *types.Connection {
 	return findConn(name, "", conns)
 }
 
-// GetGroup get connection group by name
+// GetGroup get one connection group by name
 func (c *ConnectionsStorage) GetGroup(name string) *types.Connection {
 	conns := c.getConnections()
 

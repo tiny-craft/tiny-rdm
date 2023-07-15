@@ -1,10 +1,9 @@
 <script setup>
 import { get, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import Help from '../icons/Help.vue'
 import IconButton from '../common/IconButton.vue'
 import Filter from '../icons/Filter.vue'
-import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 
 const props = defineProps({
@@ -70,26 +69,7 @@ const totalKeys = computed(() => {
     return sum(toArray(nums))
 })
 const infoList = computed(() => map(props.info, (value, key) => ({ value, key })))
-
-const i18n = useI18n()
-const infoColumns = [
-    reactive({
-        title: i18n.t('key'),
-        key: 'key',
-        defaultSortOrder: 'ascend',
-        sorter: 'default',
-        minWidth: 100,
-        filterOptionValue: null,
-        filter(value, row) {
-            return !!~row.key.indexOf(value.toString())
-        },
-    }),
-    { title: i18n.t('value'), key: 'value' },
-]
 const infoFilter = ref('')
-const onFilterInfo = (val) => {
-    infoColumns[0].filterOptionValue = val
-}
 </script>
 
 <template>
@@ -165,13 +145,29 @@ const onFilterInfo = (val) => {
             </n-card>
             <n-card :title="$t('all_info')">
                 <template #header-extra>
-                    <n-input v-model:value="infoFilter" @update:value="onFilterInfo" placeholder="" clearable>
+                    <n-input v-model:value="infoFilter" placeholder="" clearable>
                         <template #prefix>
                             <icon-button :icon="Filter" size="18" />
                         </template>
                     </n-input>
                 </template>
-                <n-data-table :columns="infoColumns" :data="infoList" />
+                <n-data-table
+                    :columns="[
+                        {
+                            title: $t('key'),
+                            key: 'key',
+                            defaultSortOrder: 'ascend',
+                            sorter: 'default',
+                            minWidth: 100,
+                            filterOptionValue: infoFilter,
+                            filter(value, row) {
+                                return !!~row.key.indexOf(value.toString())
+                            },
+                        },
+                        { title: $t('value'), key: 'value' },
+                    ]"
+                    :data="infoList"
+                />
             </n-card>
         </n-space>
     </n-scrollbar>

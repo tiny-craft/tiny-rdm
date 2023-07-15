@@ -10,6 +10,7 @@ import ContentServerPane from './components/content/ContentServerPane.vue'
 import useTabStore from './stores/tab.js'
 import usePreferencesStore from './stores/preferences.js'
 import useConnectionStore from './stores/connections.js'
+import ContentLogPane from './components/content/ContentLogPane.vue'
 
 const themeVars = useThemeVars()
 
@@ -60,8 +61,8 @@ const dragging = computed(() => {
     <!-- app content-->
     <div id="app-content-wrapper" :class="{ dragging }" class="flex-box-h" :style="prefStore.generalFont">
         <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
-        <!-- structure page-->
-        <div v-show="tabStore.nav === 'structure'" class="flex-box-h flex-item-expand">
+        <!-- browser page-->
+        <div v-show="tabStore.nav === 'browser'" class="flex-box-h flex-item-expand">
             <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
                 <browser-pane
                     v-for="t in tabStore.tabs"
@@ -102,7 +103,11 @@ const dragging = computed(() => {
         </div>
 
         <!-- log page -->
-        <div v-show="tabStore.nav === 'log'">display log</div>
+        <div v-if="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
+            <keep-alive>
+                <content-log-pane class="flex-item-expand" />
+            </keep-alive>
+        </div>
     </div>
 </template>
 

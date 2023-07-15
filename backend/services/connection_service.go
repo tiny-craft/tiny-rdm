@@ -12,13 +12,22 @@ import (
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	maputil "tinyrdm/backend/utils/map"
+	mathutil "tinyrdm/backend/utils/math"
 	redis2 "tinyrdm/backend/utils/redis"
 )
 
+type cmdHistoryItem struct {
+	timestamp int64
+	Time      string `json:"time"`
+	Server    string `json:"server"`
+	Cmd       string `json:"cmd"`
+}
+
 type connectionService struct {
-	ctx     context.Context
-	conns   *ConnectionsStorage
-	connMap map[string]connectionItem
+	ctx        context.Context
+	conns      *ConnectionsStorage
+	connMap    map[string]connectionItem
+	cmdHistory []cmdHistoryItem
 }
 
 type connectionItem struct {
@@ -230,7 +239,7 @@ func (c *connectionService) CloseConnection(name string) (resp types.JSResp) {
 }
 
 // get redis client from local cache or create a new open
-// if db >= 0, also switch to db index
+// if db >= 0, will also switch to db index
 func (c *connectionService) getRedisClient(connName string, db int) (*redis.Client, context.Context, error) {
 	item, ok := c.connMap[connName]
 	var rdb *redis.Client
@@ -249,7 +258,19 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 			Password:    selConn.Password,
 			ReadTimeout: -1,
 		})
-		rdb.AddHook(redis2.NewHook(connName))
+		rdb.AddHook(redis2.NewHook(connName, func(cmd string) {
+			now := time.Now()
+			last := strings.LastIndex(cmd, ":")
+			if last != -1 {
+				cmd = cmd[:last]
+			}
+			c.cmdHistory = append(c.cmdHistory, cmdHistoryItem{
+				timestamp: now.UnixMilli(),
+				Time:      now.Format("2006-01-02 15:04:05"),
+				Server:    connName,
+				Cmd:       cmd,
+			})
+		}))
 
 		if _, err := rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 			return nil, nil, errors.New("can not connect to redis server:" + err.Error())
@@ -957,6 +978,28 @@ func (c *connectionService) RenameKey(connName string, db int, key, newKey strin
 	}
 
 	resp.Success = true
+	return
+}
+
+func (c *connectionService) GetCmdHistory(pageNo, pageSize int) (resp types.JSResp) {
+	resp.Success = true
+	if pageSize <= 0 || pageNo <= 0 {
+		// return all history
+		resp.Data = map[string]any{
+			"list":     c.cmdHistory,
+			"pageNo":   1,
+			"pageSize": -1,
+		}
+	} else {
+		total := len(c.cmdHistory)
+		startIndex := total / pageSize * (pageNo - 1)
+		endIndex := mathutil.Min(startIndex+pageSize, total)
+		resp.Data = map[string]any{
+			"list":     c.cmdHistory[startIndex:endIndex],
+			"pageNo":   pageNo,
+			"pageSize": pageSize,
+		}
+	}
 	return
 }
 

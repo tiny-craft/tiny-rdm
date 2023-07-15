@@ -2,7 +2,6 @@
 import { reactive, ref, watch } from 'vue'
 import useDialog from '../../stores/dialog'
 import useTabStore from '../../stores/tab.js'
-import { useMessage } from 'naive-ui'
 import useConnectionStore from '../../stores/connections.js'
 
 const ttlForm = reactive({
@@ -42,7 +41,6 @@ const onClose = () => {
     dialogStore.closeTTLDialog()
 }
 
-const message = useMessage()
 const onConfirm = async () => {
     try {
         const tab = tabStore.currentTab

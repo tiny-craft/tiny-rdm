@@ -23,7 +23,7 @@ const props = defineProps({
             :stroke="props.fillColor"
             :stroke-width="props.strokeWidth"
             d="M41 4H7C5.34315 4 4 5.34315 4 7V41C4 42.6569 5.34315 44 7 44H41C42.6569 44 44 42.6569 44 41V7C44 5.34315 42.6569 4 41 4Z"
-            fill="#dc423c"
+            :fill="props.fillColor"
             stroke-linecap="round"
             stroke-linejoin="round"
         />

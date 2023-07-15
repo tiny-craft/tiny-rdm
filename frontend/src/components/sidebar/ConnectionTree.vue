@@ -2,7 +2,7 @@
 import useDialogStore from '../../stores/dialog.js'
 import { h, nextTick, reactive, ref, watch } from 'vue'
 import useConnectionStore from '../../stores/connections.js'
-import { NIcon, useDialog, useMessage } from 'naive-ui'
+import { NIcon, useDialog, useMessage, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '../../consts/connection_type.js'
 import ToggleFolder from '../icons/ToggleFolder.vue'
 import ToggleServer from '../icons/ToggleServer.vue'
@@ -17,6 +17,7 @@ import useTabStore from '../../stores/tab.js'
 import Edit from '../icons/Edit.vue'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 
+const themeVars = useThemeVars()
 const i18n = useI18n()
 const openingConnection = ref(false)
 const connectionStore = useConnectionStore()

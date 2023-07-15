@@ -130,7 +130,7 @@
   "empty_server_content": "可以从左边选择并打开连接",
   "reload_when_succ": "操作成功后立即重新加载",
   "server": "服务器",
-  "structure": "结构",
+  "browser": "浏览器",
   "log": "日志",
   "about": "关于",
   "help": "帮助",
@@ -144,5 +144,11 @@
   "unit_day": "天",
   "unit_hour": "小时",
   "unit_minute": "分钟",
-  "all_info": "所有信息"
+  "all_info": "所有信息",
+  "all": "所有",
+  "launch_log": "运行日志",
+  "filter_server": "筛选服务器",
+  "filter_keyword": "筛选关键字",
+  "exec_time": "执行时间",
+  "cmd": "命令"
 }
