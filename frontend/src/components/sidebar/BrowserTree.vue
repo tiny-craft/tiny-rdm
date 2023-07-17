@@ -1,10 +1,10 @@
 <script setup>
 import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '../../consts/connection_type.js'
-import { NIcon, useDialog, useMessage } from 'naive-ui'
+import { NIcon, NTag, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { get, indexOf, isEmpty } from 'lodash'
+import { get, indexOf, isEmpty, remove } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -18,6 +18,8 @@ import useConnectionStore from '../../stores/connections.js'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 import ToggleServer from '../icons/ToggleServer.vue'
 import Unlink from '../icons/Unlink.vue'
+import Filter from '../icons/Filter.vue'
+import Close from '../icons/Close.vue'
 
 const props = defineProps({
     server: String,
@@ -85,6 +87,20 @@ const menuOptions = {
                     key: 'db_newkey',
                     label: i18n.t('new_key'),
                     icon: renderIcon(Add),
+                },
+                {
+                    key: 'db_filter',
+                    label: i18n.t('filter_key'),
+                    icon: renderIcon(Filter),
+                },
+                {
+                    type: 'divider',
+                    key: 'd1',
+                },
+                {
+                    key: 'db_close',
+                    label: i18n.t('close_db'),
+                    icon: renderIcon(Close),
                 },
             ]
         } else {
@@ -261,6 +277,26 @@ const renderSuffix = ({ option }) => {
     // return h(NButton,
     //     { text: true, type: 'primary' },
     //     { default: () => h(Key) })
+    if (option.type === ConnectionType.RedisDB) {
+        const { name: server, db } = option
+        const filterPattern = connectionStore.getKeyFilter(server, db)
+        if (!isEmpty(filterPattern) && filterPattern !== '*') {
+            return h(
+                NTag,
+                {
+                    bordered: false,
+                    closable: true,
+                    size: 'small',
+                    onClose: () => {
+                        connectionStore.removeKeyFilter(server, db)
+                        connectionStore.reopenDatabase(server, db)
+                    },
+                },
+                { default: () => filterPattern }
+            )
+        }
+    }
+    return null
 }
 
 const nodeProps = ({ option }) => {
@@ -334,9 +370,17 @@ const handleSelectContextMenu = (key) => {
         case 'db_reload':
             connectionStore.reopenDatabase(props.server, db)
             break
+        case 'db_close':
+            remove(expandedKeys.value, (k) => k === `${props.server}/db${db}`)
+            connectionStore.closeDatabase(props.server, db)
+            break
         case 'db_newkey':
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
+            break
+        case 'db_filter':
+            const pattern = connectionStore.getKeyFilter(props.server, db)
+            dialogStore.openKeyFilterDialog(props.server, db, pattern)
             break
         case 'key_reload':
             connectionStore.loadKeys(props.server, db, redisKey)

@@ -59,7 +59,9 @@ const useConnectionStore = defineStore('connections', {
      * @typedef {Object} ConnectionState
      * @property {string[]} groups
      * @property {ConnectionItem[]} connections
+     * @property {Object} serverStats
      * @property {Object.<string, ConnectionProfile>} serverProfile
+     * @property {Object.<string, string>} keyFilter key is 'server#db', 'server#-1' stores default filter pattern
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
      */
@@ -87,8 +89,9 @@ const useConnectionStore = defineStore('connections', {
         connections: [], // all connections
         serverStats: {}, // current server status info
         serverProfile: {}, // all server profile
+        keyFilter: {}, // all key filters in opened connections group by server+db
         databases: {}, // all databases in opened connections group by server name
-        nodeMap: {}, // all node in opened connections group by server+db and key+type
+        nodeMap: {}, // all nodes in opened connections group by server#db and type/key
     }),
     getters: {
         anyConnectionOpened() {
@@ -151,6 +154,7 @@ const useConnectionStore = defineStore('connections', {
                         markColor: conn.markColor,
                     }
                 }
+                this.setKeyFilter(conn.name, -1, conn.defaultFilter)
             }
             this.connections = conns
             this.serverProfile = profiles
@@ -333,8 +337,10 @@ const useConnectionStore = defineStore('connections', {
 
             const dbs = this.databases[name]
             for (const db of dbs) {
-                this.nodeMap[`${db.name}#${db.db}`]?.clear()
+                this.removeKeyFilter(name, db.db)
+                this.nodeMap[`${name}#${db.db}`]?.clear()
             }
+            this.removeKeyFilter(name, -1)
             delete this.databases[name]
             delete this.serverStats[name]
 
@@ -428,7 +434,8 @@ const useConnectionStore = defineStore('connections', {
          * @returns {Promise<void>}
          */
         async openDatabase(connName, db) {
-            const { data, success, msg } = await OpenDatabase(connName, db)
+            const filterPattern = this.getKeyFilter(connName, db)
+            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern)
             if (!success) {
                 throw new Error(msg)
             }
@@ -455,6 +462,20 @@ const useConnectionStore = defineStore('connections', {
             const dbs = this.databases[connName]
             dbs[db].children = undefined
             dbs[db].isLeaf = false
+
+            this.nodeMap[`${connName}#${db}`]?.clear()
+        },
+
+        /**
+         * close database
+         * @param connName
+         * @param db
+         */
+        closeDatabase(connName, db) {
+            const dbs = this.databases[connName]
+            delete dbs[db].children
+            dbs[db].isLeaf = false
+            dbs[db].opened = false
 
             this.nodeMap[`${connName}#${db}`]?.clear()
         },
@@ -1223,6 +1244,34 @@ const useConnectionStore = defineStore('connections', {
             } catch {
                 return []
             }
+        },
+
+        /**
+         * get key filter pattern
+         * @param {string} server
+         * @param {number} db
+         * @returns {string}
+         */
+        getKeyFilter(server, db) {
+            const key = `${server}#${db}`
+            if (!this.keyFilter.hasOwnProperty(key)) {
+                return this.keyFilter[`${server}#-1`] || '*'
+            }
+            return this.keyFilter[key] || '*'
+        },
+
+        /**
+         * set key filter
+         * @param {string} server
+         * @param {number} db
+         * @param {string} pattern
+         */
+        setKeyFilter(server, db, pattern) {
+            this.keyFilter[`${server}#${db}`] = pattern || '*'
+        },
+
+        removeKeyFilter(server, db) {
+            this.keyFilter[`${server}#${db}`] = '*'
         },
     },
 })

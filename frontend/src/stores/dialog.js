@@ -21,6 +21,13 @@ const useDialogStore = defineStore('dialog', {
         },
         newKeyDialogVisible: false,
 
+        keyFilterParam: {
+            server: '',
+            db: 0,
+            pattern: '*',
+        },
+        keyFilterDialogVisible: false,
+
         addFieldParam: {
             server: '',
             db: 0,
@@ -74,6 +81,26 @@ const useDialogStore = defineStore('dialog', {
             this.groupDialogVisible = false
         },
 
+        /**
+         *
+         * @param {string} server
+         * @param {number} db
+         * @param {string} pattern
+         */
+        openKeyFilterDialog(server, db, pattern) {
+            this.keyFilterParam.server = server
+            this.keyFilterParam.db = db
+            this.keyFilterParam.pattern = '*'
+            this.keyFilterDialogVisible = true
+        },
+        closeKeyFilterDialog() {
+            this.keyFilterDialogVisible = false
+        },
+
+        /**
+         *
+         * @param {string} name
+         */
         openRenameGroupDialog(name) {
             this.editGroup = name
             this.groupDialogVisible = true

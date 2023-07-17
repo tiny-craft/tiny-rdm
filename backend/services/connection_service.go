@@ -179,7 +179,7 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 		return
 	}
 
-	// get total database
+	// get total databases
 	config, err := rdb.ConfigGet(ctx, "databases").Result()
 	if err != nil {
 		resp.Msg = err.Error()
@@ -347,12 +347,12 @@ func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
 
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
-func (c *connectionService) OpenDatabase(connName string, db int) (resp types.JSResp) {
-	return c.ScanKeys(connName, db, "*")
+func (c *connectionService) OpenDatabase(connName string, db int, match string) (resp types.JSResp) {
+	return c.ScanKeys(connName, db, match)
 }
 
-// ScanKeys scan all keys below prefix
-func (c *connectionService) ScanKeys(connName string, db int, prefix string) (resp types.JSResp) {
+// ScanKeys scan all keys
+func (c *connectionService) ScanKeys(connName string, db int, match string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -364,7 +364,7 @@ func (c *connectionService) ScanKeys(connName string, db int, prefix string) (re
 	var cursor uint64
 	for {
 		var loadedKey []string
-		loadedKey, cursor, err = rdb.Scan(ctx, cursor, prefix, 10000).Result()
+		loadedKey, cursor, err = rdb.Scan(ctx, cursor, match, 10000).Result()
 		if err != nil {
 			resp.Msg = err.Error()
 			return

@@ -17,6 +17,7 @@ import usePreferencesStore from './stores/preferences.js'
 import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { darkTheme, lightTheme, useOsTheme } from 'naive-ui'
+import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
@@ -95,6 +96,7 @@ const theme = computed(() => {
                 <connection-dialog />
                 <group-dialog />
                 <new-key-dialog />
+                <key-filter-dialog />
                 <add-fields-dialog />
                 <rename-key-dialog />
                 <delete-key-dialog />
