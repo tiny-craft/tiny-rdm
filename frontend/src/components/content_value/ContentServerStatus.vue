@@ -10,6 +10,7 @@ const props = defineProps({
     server: String,
     info: Object,
     autoRefresh: false,
+    loading: false,
 })
 
 const emit = defineEmits(['update:autoRefresh', 'refresh'])
@@ -116,32 +117,34 @@ const infoFilter = ref('')
                         </n-tooltip>
                     </n-space>
                 </template>
-                <n-grid x-gap="5" style="min-width: 500px">
-                    <n-gi :span="6">
-                        <n-statistic :label="$t('uptime')" :value="uptime[0]">
-                            <template #suffix> {{ $t(uptime[1]) }}</template>
-                        </n-statistic>
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic
-                            :label="$t('connected_clients')"
-                            :value="get(props.info, 'connected_clients', 0)"
-                        />
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic :value="totalKeys">
-                            <template #label>
-                                {{ $t('total_keys') }}
-                                <n-icon :component="Help" />
-                            </template>
-                        </n-statistic>
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic :label="$t('memory_used')" :value="usedMemory[0]">
-                            <template #suffix> {{ usedMemory[1] }}</template>
-                        </n-statistic>
-                    </n-gi>
-                </n-grid>
+                <n-spin :show="props.loading">
+                    <n-grid x-gap="5" style="min-width: 500px">
+                        <n-gi :span="6">
+                            <n-statistic :label="$t('uptime')" :value="uptime[0]">
+                                <template #suffix> {{ $t(uptime[1]) }}</template>
+                            </n-statistic>
+                        </n-gi>
+                        <n-gi :span="6">
+                            <n-statistic
+                                :label="$t('connected_clients')"
+                                :value="get(props.info, 'connected_clients', 0)"
+                            />
+                        </n-gi>
+                        <n-gi :span="6">
+                            <n-statistic :value="totalKeys">
+                                <template #label>
+                                    {{ $t('total_keys') }}
+                                    <n-icon :component="Help" />
+                                </template>
+                            </n-statistic>
+                        </n-gi>
+                        <n-gi :span="6">
+                            <n-statistic :label="$t('memory_used')" :value="usedMemory[0]">
+                                <template #suffix> {{ usedMemory[1] }}</template>
+                            </n-statistic>
+                        </n-gi>
+                    </n-grid>
+                </n-spin>
             </n-card>
             <n-card :title="$t('all_info')">
                 <template #header-extra>
@@ -151,23 +154,25 @@ const infoFilter = ref('')
                         </template>
                     </n-input>
                 </template>
-                <n-data-table
-                    :columns="[
-                        {
-                            title: $t('key'),
-                            key: 'key',
-                            defaultSortOrder: 'ascend',
-                            sorter: 'default',
-                            minWidth: 100,
-                            filterOptionValue: infoFilter,
-                            filter(value, row) {
-                                return !!~row.key.indexOf(value.toString())
+                <n-spin :show="props.loading">
+                    <n-data-table
+                        :columns="[
+                            {
+                                title: $t('key'),
+                                key: 'key',
+                                defaultSortOrder: 'ascend',
+                                sorter: 'default',
+                                minWidth: 100,
+                                filterOptionValue: infoFilter,
+                                filter(value, row) {
+                                    return !!~row.key.indexOf(value.toString())
+                                },
                             },
-                        },
-                        { title: $t('value'), key: 'value' },
-                    ]"
-                    :data="infoList"
-                />
+                            { title: $t('value'), key: 'value' },
+                        ]"
+                        :data="infoList"
+                    />
+                </n-spin>
             </n-card>
         </n-space>
     </n-scrollbar>

@@ -22,15 +22,29 @@ const serverName = computed(() => {
     }
     return ''
 })
-const refreshInfo = async () => {
+const loadingServerInfo = ref(false)
+
+/**
+ * refresh server status info
+ * @param {boolean} [force] force refresh will show loading indicator
+ * @returns {Promise<void>}
+ */
+const refreshInfo = async (force) => {
+    if (force) {
+        loadingServerInfo.value = true
+    }
     if (!isEmpty(serverName.value) && connectionStore.isConnected(serverName.value)) {
-        serverInfo.value = await connectionStore.getServerInfo(serverName.value)
+        try {
+            serverInfo.value = await connectionStore.getServerInfo(serverName.value)
+        } finally {
+            loadingServerInfo.value = false
+        }
     }
 }
 
 let intervalId
 onMounted(() => {
-    refreshInfo()
+    refreshInfo(true)
     intervalId = setInterval(() => {
         if (autoRefresh.value) {
             refreshInfo()
@@ -143,7 +157,8 @@ const onCloseTab = (tabIndex) => {
                 v-model:auto-refresh="autoRefresh"
                 :server="serverName"
                 :info="serverInfo"
-                @refresh="refreshInfo"
+                :loading="loadingServerInfo"
+                @refresh="refreshInfo(true)"
             />
         </div>
         <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
