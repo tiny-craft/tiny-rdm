@@ -13,6 +13,7 @@
   "filter": "Filter",
   "sort_conn": "Resort Connections",
   "close_confirm": "Confirm close this tab and connection",
+  "edit_close_confirm": "Please close the relevant connections before editing. Do you want to continue?",
   "opening_connection": "Opening Connection...",
   "remove_tip": "{type} \"{name}\" will be deleted",
   "ttl": "TTL",

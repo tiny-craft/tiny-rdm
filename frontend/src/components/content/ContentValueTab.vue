@@ -3,9 +3,11 @@ import { ref } from 'vue'
 import { ConnectionType } from '../../consts/connection_type.js'
 import Close from '../icons/Close.vue'
 import useConnectionStore from '../../stores/connections.js'
+import { useThemeVars } from 'naive-ui'
 
 const emit = defineEmits(['switchTab', 'closeTab', 'update:modelValue'])
 
+const themeVars = useThemeVars()
 const props = defineProps({
     selectedIndex: {
         type: Number,
@@ -13,6 +15,16 @@ const props = defineProps({
     },
     modelValue: {
         type: Object,
+        default: [
+            {
+                // label: 'tab1',
+                // key: 'key',
+                // bgColor: 'white',
+            },
+        ],
+    },
+    tabs: {
+        type: Array,
         default: [
             {
                 // label: 'tab1',
@@ -43,19 +55,6 @@ const onClickTab = (idx, key) => {
 }
 
 const onCloseTab = (idx, key) => {
-    const removed = items.value.splice(idx, 1)
-    if (removed.length <= 0) {
-        return
-    }
-
-    // Update select index if removed index equal current selected
-    if (selIndex.value === idx) {
-        selIndex.value -= 1
-        if (selIndex.value < 0 && items.value.length > 0) {
-            selIndex.value = 0
-        }
-    }
-    emit('update:modelValue', items)
     emit('closeTab', idx, key)
 }
 </script>
@@ -64,7 +63,7 @@ const onCloseTab = (idx, key) => {
     <!-- TODO: 检查标签是否太多, 左右两边显示左右切换翻页按钮 -->
     <div class="content-tab flex-box-h">
         <div
-            v-for="(item, i) in props.modelValue"
+            v-for="(item, i) in props.tabs"
             :key="item.key"
             :class="{ 'content-tab_selected': selIndex === i }"
             :style="{ backgroundColor: item.bgColor || '' }"
@@ -130,7 +129,7 @@ const onCloseTab = (idx, key) => {
     }
 
     &_selected {
-        border-top: #409eff 4px solid !important;
+        border-top: v-bind('themeVars.primaryColor') 4px solid !important;
         background-color: #ffffff;
         color: #303133;
     }

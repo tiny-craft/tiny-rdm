@@ -50,7 +50,7 @@ const onDisconnectAll = () => {
             />
             <n-input v-model:value="filterPattern" :placeholder="$t('filter')" clearable>
                 <template #prefix>
-                    <n-icon :component="Filter" color="#aaa" size="20" />
+                    <n-icon :component="Filter" size="20" />
                 </template>
             </n-input>
         </div>

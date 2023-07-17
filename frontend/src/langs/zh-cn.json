@@ -13,6 +13,7 @@
   "filter": "筛选",
   "sort_conn": "调整连接顺序",
   "close_confirm": "是否关闭当前连接",
+  "edit_close_confirm": "编辑前需要关闭相关连接，是否继续",
   "opening_connection": "正在打开连接...",
   "remove_tip": "{type} \"{name}\" 将会被删除",
   "ttl": "TTL",

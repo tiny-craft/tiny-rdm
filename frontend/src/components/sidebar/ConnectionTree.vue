@@ -238,7 +238,18 @@ const handleSelectContextMenu = (key) => {
             openConnection(name).then(() => {})
             break
         case 'server_edit':
-            dialogStore.openEditDialog(name)
+            // ask for close relevant connections before edit
+            if (connectionStore.isConnected(name)) {
+                confirmDialog.warning(i18n.t('edit_close_confirm'), () => {
+                    connectionStore.closeConnection(name).then((success) => {
+                        if (success) {
+                            dialogStore.openEditDialog(name)
+                        }
+                    })
+                })
+            } else {
+                dialogStore.openEditDialog(name)
+            }
             break
         case 'server_remove':
             removeConnection(name)

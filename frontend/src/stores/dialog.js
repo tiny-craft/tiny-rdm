@@ -58,7 +58,6 @@ const useDialogStore = defineStore('dialog', {
         },
 
         async openEditDialog(name) {
-            console.log('open edit dialog:' + name)
             const connStore = useConnectionStore()
             const profile = await connStore.getConnectionProfile(name)
             this.connParam = profile || connStore.newDefaultConnection(name)
@@ -112,8 +111,8 @@ const useDialogStore = defineStore('dialog', {
         /**
          *
          * @param {string} prefix
-         * @param {number} server
-         * @param {string} db
+         * @param {string} server
+         * @param {number} db
          */
         openNewKeyDialog(prefix, server, db) {
             this.newKeyParam.prefix = prefix
