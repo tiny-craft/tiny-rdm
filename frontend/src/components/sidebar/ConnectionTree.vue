@@ -263,8 +263,9 @@ const handleSelectContextMenu = (key) => {
         case 'group_delete':
             removeGroup(label)
             break
+        default:
+            console.warn('TODO: handle context menu:' + key)
     }
-    console.warn('TODO: handle context menu:' + key)
 }
 
 const findSiblingsAndIndex = (node, nodes) => {

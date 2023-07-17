@@ -32,8 +32,6 @@ import {
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
 
-const separator = ':'
-
 const useConnectionStore = defineStore('connections', {
     /**
      * @typedef {Object} ConnectionItem
@@ -61,6 +59,7 @@ const useConnectionStore = defineStore('connections', {
      * @typedef {Object} ConnectionState
      * @property {string[]} groups
      * @property {ConnectionItem[]} connections
+     * @property {Object.<string, ConnectionProfile>} serverProfile
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
      */
@@ -73,6 +72,13 @@ const useConnectionStore = defineStore('connections', {
      */
 
     /**
+     * @typedef {Object} ConnectionProfile
+     * @property {string} defaultFilter
+     * @property {string} keySeparator
+     * @property {string} markColor
+     */
+
+    /**
      *
      * @returns {ConnectionState}
      */
@@ -80,6 +86,7 @@ const useConnectionStore = defineStore('connections', {
         groups: [], // all group name set
         connections: [], // all connections
         serverStats: {}, // current server status info
+        serverProfile: {}, // all server profile
         databases: {}, // all databases in opened connections group by server name
         nodeMap: {}, // all node in opened connections group by server+db and key+type
     }),
@@ -100,6 +107,7 @@ const useConnectionStore = defineStore('connections', {
             }
             const conns = []
             const groups = []
+            const profiles = {}
             const { data = [{ groupName: '', connections: [] }] } = await ListConnection()
             for (const conn of data) {
                 if (conn.type !== 'group') {
@@ -111,6 +119,11 @@ const useConnectionStore = defineStore('connections', {
                         type: ConnectionType.Server,
                         // isLeaf: false,
                     })
+                    profiles[conn.name] = {
+                        defaultFilter: conn.defaultFilter,
+                        keySeparator: conn.keySeparator,
+                        markColor: conn.markColor,
+                    }
                 } else {
                     // custom group
                     groups.push(conn.name)
@@ -132,9 +145,15 @@ const useConnectionStore = defineStore('connections', {
                         type: ConnectionType.Group,
                         children,
                     })
+                    profiles[conn.name] = {
+                        defaultFilter: conn.defaultFilter,
+                        keySeparator: conn.keySeparator,
+                        markColor: conn.markColor,
+                    }
                 }
             }
             this.connections = conns
+            this.serverProfile = profiles
             this.groups = uniq(groups)
         },
 
@@ -147,6 +166,11 @@ const useConnectionStore = defineStore('connections', {
             try {
                 const { data, success } = await GetConnection(name)
                 if (success) {
+                    this.serverProfile[name] = {
+                        defaultFilter: data.defaultFilter,
+                        keySeparator: data.keySeparator,
+                        markColor: data.markColor,
+                    }
                     return data
                 }
             } finally {
@@ -517,6 +541,7 @@ const useConnectionStore = defineStore('connections', {
             if (isEmpty(scanPrefix)) {
                 scanPrefix = '*'
             } else {
+                const separator = this._getSeparator(connName)
                 if (!endsWith(prefix, separator + '*')) {
                     scanPrefix = prefix + separator + '*'
                 }
@@ -541,6 +566,7 @@ const useConnectionStore = defineStore('connections', {
          * @private
          */
         _deleteKeyNodes(connName, db, prefix) {
+            const separator = this._getSeparator(connName)
             const dbs = this.databases[connName]
             let node = dbs[db]
             const prefixPart = split(prefix, separator)
@@ -563,6 +589,20 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * get custom separator of connection
+         * @param server
+         * @returns {string}
+         * @private
+         */
+        _getSeparator(server) {
+            const { keySeparator } = this.serverProfile[server] || { keySeparator: ':' }
+            if (isEmpty(keySeparator)) {
+                return ':'
+            }
+            return keySeparator
+        },
+
+        /**
          * remove keys in db
          * @param {string} connName
          * @param {number} db
@@ -570,6 +610,7 @@ const useConnectionStore = defineStore('connections', {
          * @private
          */
         _addKeyNodes(connName, db, keys) {
+            const separator = this._getSeparator(connName)
             const dbs = this.databases[connName]
             if (dbs[db].children == null) {
                 dbs[db].children = []
@@ -612,6 +653,7 @@ const useConnectionStore = defineStore('connections', {
                     } else {
                         // key
                         const nodeKey = `#${ConnectionType.RedisValue}/${handlePath}`
+                        const replaceKey = nodeMap.has(nodeKey)
                         const selectedNode = {
                             key: `${connName}/db${db}${nodeKey}`,
                             label: keyPart[i],
@@ -622,7 +664,9 @@ const useConnectionStore = defineStore('connections', {
                             isLeaf: true,
                         }
                         nodeMap.set(nodeKey, selectedNode)
-                        children.push(selectedNode)
+                        if (!replaceKey) {
+                            children.push(selectedNode)
+                        }
                     }
                 }
             }
@@ -667,13 +711,14 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} connName
          * @param {number} db
          * @param {string} key
-         * @param {number} keyType
+         * @param {string} keyType
          * @param {any} value
          * @param {number} ttl
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async setKey(connName, db, key, keyType, value, ttl) {
             try {
+                console.log(connName, db, key, keyType, value, ttl)
                 const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl)
                 if (success) {
                     // update tree view data
@@ -1027,6 +1072,7 @@ const useConnectionStore = defineStore('connections', {
         _deleteKeyNode(connName, db, key) {
             const dbs = this.databases[connName]
             const dbDetail = get(dbs, db, {})
+            const separator = this._getSeparator(connName)
 
             if (dbDetail == null) {
                 return
@@ -1124,6 +1170,7 @@ const useConnectionStore = defineStore('connections', {
                     // for (const key of keys) {
                     //     await this._deleteKeyNode(connName, db, key)
                     // }
+                    const separator = this._getSeparator(connName)
                     if (endsWith(prefix, '*')) {
                         prefix = prefix.substring(0, prefix.length - 1)
                     }

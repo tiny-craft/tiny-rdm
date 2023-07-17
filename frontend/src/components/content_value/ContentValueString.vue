@@ -142,7 +142,7 @@ const onSaveValue = async () => {
             props.name,
             props.db,
             props.keyPath,
-            toLower(props.keyType),
+            toLower(keyType),
             editValue.value,
             -1
         )
