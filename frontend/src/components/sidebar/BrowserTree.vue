@@ -46,6 +46,18 @@ const data = computed(() => {
     ]
 })
 
+const backgroundColor = computed(() => {
+    const { markColor: hex = '' } = connectionStore.serverProfile[props.server] || {}
+    if (isEmpty(hex)) {
+        return ''
+    }
+    const bigint = parseInt(hex.slice(1), 16)
+    const r = (bigint >> 16) & 255
+    const g = (bigint >> 8) & 255
+    const b = bigint & 255
+    return `rgba(${r}, ${g}, ${b}, 0.2)`
+})
+
 const contextMenuParam = reactive({
     show: false,
     x: 0,
@@ -171,7 +183,6 @@ onMounted(async () => {
     try {
         // TODO: Show loading list status
         loadingConnections.value = true
-        // nextTick(connectionStore.initConnection)
     } finally {
         loadingConnections.value = false
     }
@@ -449,37 +460,44 @@ const handleOutsideContextMenu = () => {
 </script>
 
 <template>
-    <n-tree
-        :block-line="true"
-        :block-node="true"
-        :animated="false"
-        :cancelable="false"
-        :data="data"
-        :expand-on-click="false"
-        :expanded-keys="expandedKeys"
-        :selected-keys="selectedKeys"
-        @update:selected-keys="onUpdateSelectedKeys"
-        :node-props="nodeProps"
-        @load="onLoadTree"
-        @update:expanded-keys="onUpdateExpanded"
-        :render-label="renderLabel"
-        :render-prefix="renderPrefix"
-        :render-suffix="renderSuffix"
-        class="fill-height"
-        virtual-scroll
-    />
-    <n-dropdown
-        :animated="false"
-        :options="contextMenuParam.options"
-        :render-label="renderContextLabel"
-        :show="contextMenuParam.show"
-        :x="contextMenuParam.x"
-        :y="contextMenuParam.y"
-        placement="bottom-start"
-        trigger="manual"
-        @clickoutside="handleOutsideContextMenu"
-        @select="handleSelectContextMenu"
-    />
+    <div class="browser-tree-wrapper" :style="{ backgroundColor }">
+        <n-tree
+            :block-line="true"
+            :block-node="true"
+            :animated="false"
+            :cancelable="false"
+            :data="data"
+            :expand-on-click="false"
+            :expanded-keys="expandedKeys"
+            :selected-keys="selectedKeys"
+            @update:selected-keys="onUpdateSelectedKeys"
+            :node-props="nodeProps"
+            @load="onLoadTree"
+            @update:expanded-keys="onUpdateExpanded"
+            :render-label="renderLabel"
+            :render-prefix="renderPrefix"
+            :render-suffix="renderSuffix"
+            class="fill-height"
+            virtual-scroll
+        />
+        <n-dropdown
+            :animated="false"
+            :options="contextMenuParam.options"
+            :render-label="renderContextLabel"
+            :show="contextMenuParam.show"
+            :x="contextMenuParam.x"
+            :y="contextMenuParam.y"
+            placement="bottom-start"
+            trigger="manual"
+            @clickoutside="handleOutsideContextMenu"
+            @select="handleSelectContextMenu"
+        />
+    </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.browser-tree-wrapper {
+    height: 100%;
+    overflow: hidden;
+}
+</style>

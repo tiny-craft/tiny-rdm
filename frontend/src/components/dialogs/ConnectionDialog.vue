@@ -59,7 +59,7 @@ const showTestConnFailResult = computed(() => {
     return !isEmpty(testResult.value) && showTestResult.value === true
 })
 const formLabelWidth = computed(() => {
-    // Compatible with long english word
+    // compatible with long english word
     if (tab.value === 'advanced' && i18n.locale.value === 'en') {
         return '140px'
     }
@@ -70,21 +70,21 @@ const generalFormRef = ref(null)
 const advanceFormRef = ref(null)
 
 const onSaveConnection = async () => {
-    // Validate general form
+    // validate general form
     await generalFormRef.value?.validate((err) => {
         if (err) {
             nextTick(() => (tab.value = 'general'))
         }
     })
 
-    // Validate advance form
+    // validate advance form
     await advanceFormRef.value?.validate((err) => {
         if (err) {
             nextTick(() => (tab.value = 'advanced'))
         }
     })
 
-    // Store new connection
+    // store new connection
     const { success, msg } = await connectionStore.saveConnection(editName.value, generalForm.value)
     if (!success) {
         message.error(msg)

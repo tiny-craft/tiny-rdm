@@ -118,10 +118,20 @@ const menuOptions = {
 }
 
 const renderLabel = ({ option }) => {
-    // switch (option.type) {
-    //     case ConnectionType.Server:
-    //         return h(ConnectionTreeItem, { title: option.label })
-    // }
+    if (option.type === ConnectionType.Server) {
+        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
+        return h(
+            'div',
+            {
+                style: {
+                    // color: markColor,
+                    borderRadius: '3px',
+                    backgroundColor: markColor,
+                },
+            },
+            { default: () => option.label }
+        )
+    }
     return option.label
 }
 
