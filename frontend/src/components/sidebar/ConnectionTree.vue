@@ -241,11 +241,8 @@ const handleSelectContextMenu = (key) => {
             // ask for close relevant connections before edit
             if (connectionStore.isConnected(name)) {
                 confirmDialog.warning(i18n.t('edit_close_confirm'), () => {
-                    connectionStore.closeConnection(name).then((success) => {
-                        if (success) {
-                            dialogStore.openEditDialog(name)
-                        }
-                    })
+                    connectionStore.closeConnection(name)
+                    dialogStore.openEditDialog(name)
                 })
             } else {
                 dialogStore.openEditDialog(name)
@@ -285,7 +282,7 @@ const findSiblingsAndIndex = (node, nodes) => {
     return [null, null]
 }
 
-// delay save until stop drop after 2 seconds
+// delay save until drop stopped after 2 seconds
 const saveSort = debounce(connectionStore.saveConnectionSorted, 2000, { trailing: true })
 const handleDrop = ({ node, dragNode, dropPosition }) => {
     const [dragNodeSiblings, dragNodeIndex] = findSiblingsAndIndex(dragNode, connectionStore.connections)

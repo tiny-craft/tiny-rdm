@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '../../consts/connection_type.js'
-import { NIcon, NTag, useDialog, useMessage } from 'naive-ui'
+import { NIcon, NSpace, NTag, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
 import { get, indexOf, isEmpty, remove } from 'lodash'
@@ -20,6 +20,7 @@ import ToggleServer from '../icons/ToggleServer.vue'
 import Unlink from '../icons/Unlink.vue'
 import Filter from '../icons/Filter.vue'
 import Close from '../icons/Close.vue'
+import { typesColor } from '../../consts/support_redis_type.js'
 
 const props = defineProps({
     server: String,
@@ -274,26 +275,51 @@ const renderLabel = ({ option }) => {
 }
 
 const renderSuffix = ({ option }) => {
-    // return h(NButton,
-    //     { text: true, type: 'primary' },
-    //     { default: () => h(Key) })
     if (option.type === ConnectionType.RedisDB) {
         const { name: server, db } = option
-        const filterPattern = connectionStore.getKeyFilter(server, db)
-        if (!isEmpty(filterPattern) && filterPattern !== '*') {
-            return h(
-                NTag,
-                {
-                    bordered: false,
-                    closable: true,
-                    size: 'small',
-                    onClose: () => {
-                        connectionStore.removeKeyFilter(server, db)
-                        connectionStore.reopenDatabase(server, db)
+        let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)
+        const filterNodes = []
+        // type filter tag
+        if (!isEmpty(typeFilter)) {
+            filterNodes.push(
+                h(
+                    NTag,
+                    {
+                        size: 'small',
+                        closable: true,
+                        bordered: false,
+                        color: { color: typesColor[typeFilter], textColor: 'white' },
+                        onClose: () => {
+                            // remove type filter
+                            connectionStore.setKeyFilter(server, db, matchPattern)
+                            connectionStore.reopenDatabase(server, db)
+                        },
                     },
-                },
-                { default: () => filterPattern }
+                    { default: () => typeFilter }
+                )
             )
+        }
+        // match pattern tag
+        if (!isEmpty(matchPattern) && matchPattern !== '*') {
+            filterNodes.push(
+                h(
+                    NTag,
+                    {
+                        bordered: false,
+                        closable: true,
+                        size: 'small',
+                        onClose: () => {
+                            // remove key match pattern
+                            connectionStore.setKeyFilter(server, db, '*', typeFilter)
+                            connectionStore.reopenDatabase(server, db)
+                        },
+                    },
+                    { default: () => matchPattern }
+                )
+            )
+        }
+        if (filterNodes.length > 0) {
+            return h(NSpace, { align: 'center', inline: true, size: 2 }, () => filterNodes)
         }
     }
     return null
@@ -379,8 +405,8 @@ const handleSelectContextMenu = (key) => {
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
         case 'db_filter':
-            const pattern = connectionStore.getKeyFilter(props.server, db)
-            dialogStore.openKeyFilterDialog(props.server, db, pattern)
+            const { match: pattern, type } = connectionStore.getKeyFilter(props.server, db)
+            dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
         case 'key_reload':
             connectionStore.loadKeys(props.server, db, redisKey)

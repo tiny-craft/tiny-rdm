@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, findIndex, get, isEmpty, size, split, uniq } from 'lodash'
+import { endsWith, findIndex, get, isEmpty, size, split, toUpper, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -31,6 +31,7 @@ import {
 } from '../../wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '../consts/connection_type.js'
 import useTabStore from './tab.js'
+import { types } from '../consts/support_redis_type.js'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -62,6 +63,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {Object} serverStats
      * @property {Object.<string, ConnectionProfile>} serverProfile
      * @property {Object.<string, string>} keyFilter key is 'server#db', 'server#-1' stores default filter pattern
+     * @property {Object.<string, string>} typeFilter key is 'server#db'
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
      */
@@ -90,6 +92,7 @@ const useConnectionStore = defineStore('connections', {
         serverStats: {}, // current server status info
         serverProfile: {}, // all server profile
         keyFilter: {}, // all key filters in opened connections group by server+db
+        typeFilter: {}, // all key type filters in opened connections group by server+db
         databases: {}, // all databases in opened connections group by server name
         nodeMap: {}, // all nodes in opened connections group by server#db and type/key
     }),
@@ -434,8 +437,8 @@ const useConnectionStore = defineStore('connections', {
          * @returns {Promise<void>}
          */
         async openDatabase(connName, db) {
-            const filterPattern = this.getKeyFilter(connName, db)
-            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern)
+            const { match: filterPattern, type: keyType } = this.getKeyFilter(connName, db)
+            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern, keyType)
             if (!success) {
                 throw new Error(msg)
             }
@@ -1247,17 +1250,24 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
-         * get key filter pattern
+         * get key filter pattern and filter type
          * @param {string} server
          * @param {number} db
-         * @returns {string}
+         * @returns {{match: string, type: string}}
          */
         getKeyFilter(server, db) {
+            let match, type
             const key = `${server}#${db}`
             if (!this.keyFilter.hasOwnProperty(key)) {
-                return this.keyFilter[`${server}#-1`] || '*'
+                match = this.keyFilter[`${server}#-1`] || '*'
+            } else {
+                match = this.keyFilter[key] || '*'
             }
-            return this.keyFilter[key] || '*'
+            type = this.typeFilter[`${server}#${db}`] || ''
+            return {
+                match,
+                type: toUpper(type),
+            }
         },
 
         /**
@@ -1265,13 +1275,16 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} server
          * @param {number} db
          * @param {string} pattern
+         * @param {string} [type]
          */
-        setKeyFilter(server, db, pattern) {
+        setKeyFilter(server, db, pattern, type) {
             this.keyFilter[`${server}#${db}`] = pattern || '*'
+            this.typeFilter[`${server}#${db}`] = types[toUpper(type)] || ''
         },
 
         removeKeyFilter(server, db) {
             this.keyFilter[`${server}#${db}`] = '*'
+            delete this.typeFilter[`${server}#${db}`]
         },
     },
 })

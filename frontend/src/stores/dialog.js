@@ -24,6 +24,7 @@ const useDialogStore = defineStore('dialog', {
         keyFilterParam: {
             server: '',
             db: 0,
+            type: '',
             pattern: '*',
         },
         keyFilterDialogVisible: false,
@@ -85,12 +86,14 @@ const useDialogStore = defineStore('dialog', {
          *
          * @param {string} server
          * @param {number} db
-         * @param {string} pattern
+         * @param {string} [pattern]
+         * @param {string} [type]
          */
-        openKeyFilterDialog(server, db, pattern) {
+        openKeyFilterDialog(server, db, pattern, type) {
             this.keyFilterParam.server = server
             this.keyFilterParam.db = db
-            this.keyFilterParam.pattern = '*'
+            this.keyFilterParam.type = type || ''
+            this.keyFilterParam.pattern = pattern || '*'
             this.keyFilterDialogVisible = true
         },
         closeKeyFilterDialog() {

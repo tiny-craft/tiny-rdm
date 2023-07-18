@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { types, validType } from '../../consts/support_redis_type.js'
+import { typesColor, validType } from '../../consts/support_redis_type.js'
 
 const props = defineProps({
     type: {
@@ -12,30 +12,22 @@ const props = defineProps({
     },
     color: {
         type: String,
-        default: '',
+        default: 'white',
     },
     size: String,
 })
 
-const color = {
-    [types.STRING]: '#626aef',
-    [types.HASH]: '#576bfa',
-    [types.LIST]: '#34b285',
-    [types.SET]: '#bb7d52',
-    [types.ZSET]: '#d053a5',
-}
-
 const backgroundColor = computed(() => {
-    return color[props.type]
+    return typesColor[props.type]
 })
 </script>
 
 <template>
     <n-tag
         :bordered="false"
-        :color="{ color: backgroundColor, textColor: 'white' }"
+        :color="{ color: backgroundColor, textColor: props.color }"
         :size="props.size"
-        class="redis-type-tag"
+        :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
         strong
     >
         {{ props.type }}
@@ -46,5 +38,9 @@ const backgroundColor = computed(() => {
 <style lang="scss">
 .redis-type-tag {
     padding: 0 12px;
+}
+
+.redis-type-tag-small {
+    padding: 0 5px;
 }
 </style>

@@ -347,24 +347,30 @@ func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
 
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
-func (c *connectionService) OpenDatabase(connName string, db int, match string) (resp types.JSResp) {
-	return c.ScanKeys(connName, db, match)
+func (c *connectionService) OpenDatabase(connName string, db int, match string, keyType string) (resp types.JSResp) {
+	return c.ScanKeys(connName, db, match, keyType)
 }
 
 // ScanKeys scan all keys
-func (c *connectionService) ScanKeys(connName string, db int, match string) (resp types.JSResp) {
+func (c *connectionService) ScanKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	filterType := len(keyType) > 0
+
 	var keys []string
 	//keys := map[string]keyItem{}
 	var cursor uint64
 	for {
 		var loadedKey []string
-		loadedKey, cursor, err = rdb.Scan(ctx, cursor, match, 10000).Result()
+		if filterType {
+			loadedKey, cursor, err = rdb.ScanType(ctx, cursor, match, 10000, keyType).Result()
+		} else {
+			loadedKey, cursor, err = rdb.Scan(ctx, cursor, match, 10000).Result()
+		}
 		if err != nil {
 			resp.Msg = err.Error()
 			return
