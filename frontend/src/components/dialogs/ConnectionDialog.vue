@@ -65,7 +65,7 @@ const formLabelWidth = computed(() => {
     }
     return '80px'
 })
-const predefineColors = ref(['', '#FE5959', '#FEC230', '#FEF27F', '#6CEFAF', '#46C3FC', '#B388FC', '#B0BEC5'])
+const predefineColors = ref(['', '#F75B52', '#F7A234', '#F7CE33', '#4ECF60', '#348CF7', '#B270D3'])
 const generalFormRef = ref(null)
 const advanceFormRef = ref(null)
 
@@ -247,7 +247,7 @@ const onClose = () => {
                                 class="color-preset-item"
                                 @click="generalForm.markColor = color"
                             >
-                                <n-icon v-if="color === ''" :component="Close" size="24" />
+                                <n-icon v-if="isEmpty(color)" :component="Close" size="24" />
                             </div>
                         </n-form-item>
                     </n-form>
@@ -286,6 +286,7 @@ const onClose = () => {
     margin-right: 2px;
     border: white 3px solid;
     cursor: pointer;
+    border-radius: 50%;
 
     &_selected,
     &:hover {

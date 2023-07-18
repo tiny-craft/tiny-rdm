@@ -1,12 +1,12 @@
 <script setup>
 import useDialogStore from '../../stores/dialog.js'
-import { h, nextTick, reactive, ref, watch } from 'vue'
+import { h, nextTick, reactive, ref } from 'vue'
 import useConnectionStore from '../../stores/connections.js'
 import { NIcon, useDialog, useMessage, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '../../consts/connection_type.js'
 import ToggleFolder from '../icons/ToggleFolder.vue'
 import ToggleServer from '../icons/ToggleServer.vue'
-import { debounce, indexOf, size, split } from 'lodash'
+import { debounce, indexOf, isEmpty } from 'lodash'
 import Config from '../icons/Config.vue'
 import Delete from '../icons/Delete.vue'
 import Unlink from '../icons/Unlink.vue'
@@ -118,20 +118,6 @@ const menuOptions = {
 }
 
 const renderLabel = ({ option }) => {
-    if (option.type === ConnectionType.Server) {
-        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
-        return h(
-            'div',
-            {
-                style: {
-                    // color: markColor,
-                    borderRadius: '3px',
-                    backgroundColor: markColor,
-                },
-            },
-            { default: () => option.label }
-        )
-    }
     return option.label
 }
 
@@ -156,6 +142,25 @@ const renderPrefix = ({ option }) => {
                 }
             )
     }
+}
+
+const renderSuffix = ({ option }) => {
+    if (option.type === ConnectionType.Server) {
+        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
+        if (isEmpty(markColor)) {
+            return ''
+        }
+        return h('div', {
+            style: {
+                borderRadius: '50%',
+                backgroundColor: markColor,
+                width: '13px',
+                height: '13px',
+                border: '2px solid white',
+            },
+        })
+    }
+    return null
 }
 
 const onUpdateExpandedKeys = (keys, option) => {
@@ -339,6 +344,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         :selected-keys="selectedKeys"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
+        :render-suffix="renderSuffix"
         @drop="handleDrop"
         :pattern="props.filterPattern"
         class="fill-height"

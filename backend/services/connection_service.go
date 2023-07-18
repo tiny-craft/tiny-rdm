@@ -253,10 +253,12 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 		}
 
 		rdb = redis.NewClient(&redis.Options{
-			Addr:        fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
-			Username:    selConn.Username,
-			Password:    selConn.Password,
-			ReadTimeout: -1,
+			Addr:         fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
+			Username:     selConn.Username,
+			Password:     selConn.Password,
+			DialTimeout:  time.Duration(selConn.ConnTimeout) * time.Second,
+			ReadTimeout:  time.Duration(selConn.ExecTimeout) * time.Second,
+			WriteTimeout: time.Duration(selConn.ExecTimeout) * time.Second,
 		})
 		rdb.AddHook(redis2.NewHook(connName, func(cmd string) {
 			now := time.Now()
