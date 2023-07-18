@@ -10,6 +10,7 @@ import NewZSetValue from '../new_value/NewZSetValue.vue'
 import NewSetValue from '../new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from '../../stores/connections.js'
+import { useMessage } from 'naive-ui'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -35,6 +36,7 @@ const dbOptions = computed(() =>
     }))
 )
 const newFormRef = ref(null)
+const subFormRef = ref(null)
 
 const formLabelWidth = '100px'
 const options = computed(() => {
@@ -74,8 +76,15 @@ watch(
 )
 
 const connectionStore = useConnectionStore()
+const message = useMessage()
 const onAdd = async () => {
-    await newFormRef.value?.validate()
+    await newFormRef.value?.validate().catch((err) => {
+        message.error(err.message)
+    })
+    if (subFormRef.value?.validate && !subFormRef.value?.validate()) {
+        message.error(i18n.t('spec_field_required', { key: i18n.t('element') }))
+        return false
+    }
     try {
         const { server, db, key, type, ttl } = newForm
         let { value } = newForm
@@ -145,7 +154,7 @@ const onClose = () => {
                         <n-button secondary type="primary" @click="newForm.ttl = -1">{{ $t('persist_key') }}</n-button>
                     </n-input-group>
                 </n-form-item>
-                <component :is="addValueComponent[newForm.type]" v-model:value="newForm.value" />
+                <component ref="subFormRef" :is="addValueComponent[newForm.type]" v-model:value="newForm.value" />
                 <!--  TODO: Add import from txt file option -->
             </n-form>
         </n-scrollbar>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { flatMap, reject } from 'lodash'
+import { flatMap, isEmpty, reject } from 'lodash'
 import Add from '../icons/Add.vue'
 import Delete from '../icons/Delete.vue'
 import IconButton from '../common/IconButton.vue'
@@ -28,6 +28,12 @@ const onUpdate = (val) => {
         flatMap(val, (item) => [item.key, item.value])
     )
 }
+
+defineExpose({
+    validate: () => {
+        return !isEmpty(props.value)
+    },
+})
 </script>
 
 <template>

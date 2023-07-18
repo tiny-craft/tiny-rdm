@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -567,12 +568,8 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			return
 		} else {
 			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-				if len(strs) > 1 {
-					for _, str := range strs {
-						pipe.SAdd(ctx, key, str.(string))
-					}
-				} else {
-					pipe.SAdd(ctx, key)
+				for _, str := range strs {
+					pipe.SAdd(ctx, key, str.(string))
 				}
 				if expiration > 0 {
 					pipe.Expire(ctx, key, expiration)
@@ -585,11 +582,13 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid zset value"
 			return
 		} else {
+			log.Println(strs)
 			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 				var members []redis.Z
 				for i := 0; i < len(strs); i += 2 {
+					score, _ := strconv.ParseFloat(strs[i].(string), 64)
 					members = append(members, redis.Z{
-						Score:  strs[i].(float64),
+						Score:  score,
 						Member: strs[i+1],
 					})
 				}
