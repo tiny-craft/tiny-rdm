@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "dayjs": "^1.11.9",
     "highlight.js": "^11.8.0",
     "lodash": "^4.17.21",
     "pinia": "^2.1.4",

@@ -5,6 +5,7 @@ import Refresh from '../icons/Refresh.vue'
 import useConnectionStore from '../../stores/connections.js'
 import { map, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
+import dayjs from 'dayjs'
 
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
@@ -75,10 +76,15 @@ onActivated(() => {
                 :columns="[
                     {
                         title: $t('exec_time'),
-                        key: 'time',
+                        key: 'timestamp',
                         defaultSortOrder: 'ascend',
                         sorter: 'default',
                         width: 180,
+                        align: 'center',
+                        titleAlign: 'center',
+                        render({ timestamp }, index) {
+                            return dayjs(timestamp).locale('zh-cn').format('YYYY-MM-DD hh:mm:ss')
+                        },
                     },
                     {
                         title: $t('server'),
@@ -88,14 +94,33 @@ onActivated(() => {
                             return value === '' || row.server === value.toString()
                         },
                         width: 150,
+                        align: 'center',
+                        titleAlign: 'center',
                         ellipsis: true,
                     },
                     {
                         title: $t('cmd'),
                         key: 'cmd',
+                        titleAlign: 'center',
                         filterOptionValue: data.keyword,
+                        resizable: true,
                         filter(value, row) {
                             return value === '' || !!~row.cmd.indexOf(value.toString())
+                        },
+                    },
+                    {
+                        title: $t('cost_time'),
+                        key: 'cost',
+                        width: 100,
+                        align: 'center',
+                        titleAlign: 'center',
+                        render({ cost }, index) {
+                            const ms = dayjs.duration(cost).asMilliseconds()
+                            if (ms < 1000) {
+                                return `${ms} ms`
+                            } else {
+                                return `${Math.floor(ms / 1000)} s`
+                            }
                         },
                     },
                 ]"

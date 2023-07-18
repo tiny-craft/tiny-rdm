@@ -155,5 +155,6 @@
   "filter_server": "筛选服务器",
   "filter_keyword": "筛选关键字",
   "exec_time": "执行时间",
-  "cmd": "命令"
+  "cmd": "命令",
+  "cost_time": "耗时"
 }

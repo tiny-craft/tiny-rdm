@@ -73,6 +73,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {string} time
      * @property {string} server
      * @property {string} cmd
+     * @property {number} cost
      */
 
     /**
@@ -167,7 +168,7 @@ const useConnectionStore = defineStore('connections', {
         /**
          * get connection by name from local profile
          * @param name
-         * @returns {Promise<{}|null>}
+         * @returns {Promise<ConnectionProfile|null>}
          */
         async getConnectionProfile(name) {
             try {

@@ -17,10 +17,10 @@ import (
 )
 
 type cmdHistoryItem struct {
-	timestamp int64
-	Time      string `json:"time"`
+	Timestamp int64  `json:"timestamp"`
 	Server    string `json:"server"`
 	Cmd       string `json:"cmd"`
+	Cost      int64  `json:"cost"`
 }
 
 type connectionService struct {
@@ -260,17 +260,17 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 			ReadTimeout:  time.Duration(selConn.ExecTimeout) * time.Second,
 			WriteTimeout: time.Duration(selConn.ExecTimeout) * time.Second,
 		})
-		rdb.AddHook(redis2.NewHook(connName, func(cmd string) {
+		rdb.AddHook(redis2.NewHook(connName, func(cmd string, cost int64) {
 			now := time.Now()
-			last := strings.LastIndex(cmd, ":")
-			if last != -1 {
-				cmd = cmd[:last]
-			}
+			//last := strings.LastIndex(cmd, ":")
+			//if last != -1 {
+			//	cmd = cmd[:last]
+			//}
 			c.cmdHistory = append(c.cmdHistory, cmdHistoryItem{
-				timestamp: now.UnixMilli(),
-				Time:      now.Format("2006-01-02 15:04:05"),
+				Timestamp: now.UnixMilli(),
 				Server:    connName,
 				Cmd:       cmd,
+				Cost:      cost,
 			})
 		}))
 
@@ -287,7 +287,7 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 	}
 
 	if db >= 0 {
-		if err := rdb.Do(ctx, "SELECT", strconv.Itoa(db)).Err(); err != nil {
+		if err := rdb.Do(ctx, "select", strconv.Itoa(db)).Err(); err != nil {
 			return nil, nil, err
 		}
 	}

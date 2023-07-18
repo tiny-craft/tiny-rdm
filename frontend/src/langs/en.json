@@ -153,5 +153,6 @@
   "filter_server": "Filter Server",
   "filter_keyword": "Filter Keyword",
   "exec_time": "Exec Time",
-  "cmd": "Command"
+  "cmd": "Command",
+  "cost_time": "Cost"
 }
