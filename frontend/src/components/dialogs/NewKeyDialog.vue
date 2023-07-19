@@ -68,6 +68,7 @@ watch(
             const { prefix, server, db } = dialogStore.newKeyParam
             newForm.server = server
             newForm.key = isEmpty(prefix) ? '' : prefix
+            newForm.db = db
             newForm.type = options.value[0].value
             newForm.ttl = -1
             newForm.value = null

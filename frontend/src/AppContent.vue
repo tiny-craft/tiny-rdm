@@ -130,7 +130,7 @@ const dragging = computed(() => {
 
         .resize-divider {
             //height: 100%;
-            width: 2px;
+            width: 5px;
             border-left-width: 5px;
             background-color: v-bind('themeVars.tabColor');
         }

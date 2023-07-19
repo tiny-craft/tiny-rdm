@@ -384,10 +384,13 @@ const onLoadTree = async (node) => {
                 loading.value = false
             }
             break
-        case ConnectionType.RedisKey:
-            // load all children
-            // node.children = []
-            break
+        // case ConnectionType.RedisKey:
+        //     console.warn('load redis key', node.redisKey)
+        //     node.keys = sumBy(node.children, 'keys')
+        //     break
+        // case ConnectionType.RedisValue:
+        //     node.keys = 1
+        //     break
     }
 }
 
