@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, get, isEmpty, join, remove, size, slice, split, sumBy, toUpper, uniq } from 'lodash'
+import { endsWith, get, isEmpty, join, remove, size, slice, sortedIndexBy, split, sumBy, toUpper, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -618,11 +618,14 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} connName
          * @param {number} db
          * @param {string[]} keys
+         * @param {boolean} [sortInsert]
+         * @return {{success: boolean, newKey: number, newLayer: number, replaceKey: number}}
          * @private
          */
-        _addKeyNodes(connName, db, keys) {
+        _addKeyNodes(connName, db, keys, sortInsert) {
+            const result = { success: false, newLayer: 0, newKey: 0, replaceKey: 0 }
             if (isEmpty(keys)) {
-                return
+                return result
             }
             const separator = this._getSeparator(connName)
             const dbs = this.databases[connName]
@@ -655,7 +658,15 @@ const useConnectionStore = defineStore('connections', {
                                 children: [],
                             }
                             nodeMap.set(nodeKey, selectedNode)
-                            children.push(selectedNode)
+                            if (sortInsert) {
+                                const index = sortedIndexBy(children, selectedNode, (elem) => {
+                                    return elem.key
+                                })
+                                children.splice(index, 0, selectedNode)
+                            } else {
+                                children.push(selectedNode)
+                            }
+                            result.newLayer += 1
                         }
                         children = selectedNode.children
                         handlePath += separator
@@ -674,11 +685,22 @@ const useConnectionStore = defineStore('connections', {
                         }
                         nodeMap.set(nodeKey, selectedNode)
                         if (!replaceKey) {
-                            children.push(selectedNode)
+                            if (sortInsert) {
+                                const index = sortedIndexBy(children, selectedNode, (elem) => {
+                                    return elem.key > selectedNode.key
+                                })
+                                children.splice(index, 0, selectedNode)
+                            } else {
+                                children.push(selectedNode)
+                            }
+                            result.newKey += 1
+                        } else {
+                            result.replaceKey += 1
                         }
                     }
                 }
             }
+            return result
         },
 
         /**
@@ -708,33 +730,31 @@ const useConnectionStore = defineStore('connections', {
             const separator = this._getSeparator(connName)
             const keyParts = split(key, separator)
             const totalParts = size(keyParts)
-            const parentKey = slice(keyParts, 0, totalParts - 1)
             const dbNode = get(this.databases, [connName, db], {})
-            const isDBRoot = isEmpty(parentKey)
             let node
-            if (isDBRoot) {
-                // use db root node
-                node = dbNode
-            } else {
-                node = nodeMap.get(`${ConnectionType.RedisKey}/${join(parentKey, separator)}`)
+            // find last exists ancestor key
+            let i = totalParts - 1
+            for (; i > 0; i--) {
+                const parentKey = join(slice(keyParts, 0, i), separator)
+                node = nodeMap.get(`${ConnectionType.RedisKey}/${parentKey}`)
+                if (node != null) {
+                    break
+                }
             }
             if (node == null) {
-                return false
+                node = dbNode
             }
             const keyCountUpdated = this._tidyNodeChildren(node, skipResort)
 
             if (keyCountUpdated) {
                 // update key count of parent and above
-                if (!isDBRoot) {
-                    let i = totalParts - 1
-                    for (; i > 0; i--) {
-                        const parentKey = join(slice(keyParts, 0, i), separator)
-                        const parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${parentKey}`)
-                        if (parentNode == null) {
-                            break
-                        }
-                        parentNode.keys = sumBy(parentNode.children, 'keys')
+                for (; i > 0; i--) {
+                    const parentKey = join(slice(keyParts, 0, i), separator)
+                    const parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${parentKey}`)
+                    if (parentNode == null) {
+                        break
                     }
+                    parentNode.keys = sumBy(parentNode.children, 'keys')
                 }
                 // update key count of db
                 dbNode.keys = sumBy(dbNode.children, 'keys')
@@ -785,8 +805,10 @@ const useConnectionStore = defineStore('connections', {
                 const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl)
                 if (success) {
                     // update tree view data
-                    this._addKeyNodes(connName, db, [key])
-                    this._tidyNode(connName, db, key)
+                    const { newKey = 0 } = this._addKeyNodes(connName, db, [key], true)
+                    if (newKey > 0) {
+                        this._tidyNode(connName, db, key)
+                    }
                     return { success }
                 } else {
                     return { success, msg }
@@ -1170,14 +1192,12 @@ const useConnectionStore = defineStore('connections', {
                 const anceKey = join(slice(keyParts, 0, i), separator)
                 if (i > 0) {
                     const anceNode = nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
+                    const redisKey = join(slice(keyParts, 0, i + 1), separator)
+                    remove(anceNode.children, { type: ConnectionType.RedisKey, redisKey })
+
                     if (isEmpty(anceNode.children)) {
                         nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
                     } else {
-                        // remove last empty layer node from parent
-                        if (i !== totalParts - 1) {
-                            const redisKey = slice(keyParts, 0, i + 1)
-                            remove(anceNode.children, { type: ConnectionType.RedisKey, redisKey })
-                        }
                         break
                     }
                 } else {

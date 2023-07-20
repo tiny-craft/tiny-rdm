@@ -74,6 +74,10 @@ watch(
 )
 
 const keyType = redisTypes.STRING
+/**
+ * view value
+ * @type {ComputedRef<string>}
+ */
 const viewValue = computed(() => {
     switch (viewAs.value) {
         case types.PLAIN_TEXT:
@@ -199,7 +203,7 @@ const onSaveValue = async () => {
         </div>
         <div class="value-wrapper flex-item-expand flex-box-v">
             <n-scrollbar v-if="!inEdit" class="flex-item-expand">
-                <n-code :code="viewValue" :language="viewLanguage" show-line-numbers word-wrap />
+                <n-code :code="viewValue" :language="viewLanguage" show-line-numbers word-wrap style="cursor: text" />
             </n-scrollbar>
             <n-input
                 v-else
