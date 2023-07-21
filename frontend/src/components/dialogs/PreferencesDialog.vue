@@ -32,7 +32,7 @@ watch(
                 loading.value = false
             }
         }
-    }
+    },
 )
 
 const onSavePreferences = async () => {
@@ -46,7 +46,7 @@ const onSavePreferences = async () => {
 // Watch language and dynamically switch
 watch(
     () => prefStore.general.language,
-    (lang) => (i18n.locale.value = lang)
+    (lang) => (i18n.locale.value = prefStore.currentLanguage),
 )
 
 const onClose = () => {

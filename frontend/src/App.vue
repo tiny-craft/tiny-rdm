@@ -12,7 +12,6 @@ import AppContent from './AppContent.vue'
 import GroupDialog from './components/dialogs/GroupDialog.vue'
 import DeleteKeyDialog from './components/dialogs/DeleteKeyDialog.vue'
 import { computed, onBeforeMount, ref } from 'vue'
-import { get } from 'lodash'
 import usePreferencesStore from './stores/preferences.js'
 import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
@@ -55,7 +54,7 @@ onBeforeMount(async () => {
     try {
         initializing.value = true
         await prefStore.loadPreferences()
-        i18n.locale.value = get(prefStore.general, 'language', 'en')
+        i18n.locale.value = prefStore.currentLanguage
         await prefStore.loadFontList()
         await connectionStore.initConnections()
     } finally {

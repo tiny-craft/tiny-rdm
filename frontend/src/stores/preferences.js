@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '../langs/index.js'
-import { camelCase, clone, find, isEmpty, isObject, map, set, snakeCase, split } from 'lodash'
+import { camelCase, clone, find, get, isEmpty, isObject, map, set, snakeCase, split } from 'lodash'
 import {
     GetFontList,
     GetPreferences,
@@ -71,10 +71,16 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {{label: string, value: string}[]}
          */
         langOption() {
-            return Object.entries(lang).map(([key, value]) => ({
+            const i18n = useI18n()
+            const options = Object.entries(lang).map(([key, value]) => ({
                 value: key,
-                label: `${value['lang_name']}`,
+                label: value['lang_name'],
             }))
+            options.splice(0, 0, {
+                value: 'auto',
+                label: i18n.t('system_lang'),
+            })
+            return options
         },
 
         /**
@@ -111,6 +117,19 @@ const usePreferencesStore = defineStore('preferences', {
                 }
             }
             return fontStyle
+        },
+
+        /**
+         * get current language setting
+         * @return {string}
+         */
+        currentLanguage() {
+            let lang = get(this.general, 'language', 'auto')
+            if (lang === 'auto') {
+                const systemLang = navigator.language || navigator.userLanguage
+                lang = split(systemLang, '-')[0]
+            }
+            return lang || 'en'
         },
     },
     actions: {
