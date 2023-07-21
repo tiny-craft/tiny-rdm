@@ -1,6 +1,6 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
-import { types } from '../../consts/support_redis_type'
+import { computed, h, reactive, ref, watch } from 'vue'
+import { types, typesColor } from '../../consts/support_redis_type'
 import useDialog from '../../stores/dialog'
 import { isEmpty, keys, map } from 'lodash'
 import NewStringValue from '../new_value/NewStringValue.vue'
@@ -10,7 +10,8 @@ import NewZSetValue from '../new_value/NewZSetValue.vue'
 import NewSetValue from '../new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from '../../stores/connections.js'
-import { useMessage } from 'naive-ui'
+import { NSpace, useMessage } from 'naive-ui'
+import useTabStore from '../../stores/tab.js'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -33,7 +34,7 @@ const dbOptions = computed(() =>
     map(keys(connectionStore.databases[newForm.server]), (key) => ({
         label: key,
         value: parseInt(key),
-    }))
+    })),
 )
 const newFormRef = ref(null)
 const subFormRef = ref(null)
@@ -73,10 +74,32 @@ watch(
             newForm.ttl = -1
             newForm.value = null
         }
-    }
+    },
 )
 
+const renderTypeLabel = (option) => {
+    return h(
+        NSpace,
+        { align: 'center', inline: true, size: 3 },
+        {
+            default: () => [
+                h('div', {
+                    style: {
+                        borderRadius: '50%',
+                        backgroundColor: typesColor[option.value],
+                        width: '13px',
+                        height: '13px',
+                        border: '2px solid white',
+                    },
+                }),
+                option.value,
+            ],
+        },
+    )
+}
+
 const connectionStore = useConnectionStore()
+const tabStore = useTabStore()
 const message = useMessage()
 const onAdd = async () => {
     await newFormRef.value?.validate().catch((err) => {
@@ -92,7 +115,14 @@ const onAdd = async () => {
         if (value == null) {
             value = defaultValue[type]
         }
-        await connectionStore.setKey(server, db, key, type, value, ttl)
+        const { success, msg, nodeKey } = await connectionStore.setKey(server, db, key, type, value, ttl)
+        if (success) {
+            // select current key
+            tabStore.setSelectedKeys(server, nodeKey)
+            connectionStore.loadKeyValue(server, db, key).then(() => {})
+        } else if (!isEmpty(msg)) {
+            message.error(msg)
+        }
         dialogStore.closeNewKeyDialog()
     } catch (e) {}
 }
@@ -138,7 +168,7 @@ const onClose = () => {
                     <n-select v-model:value="newForm.db" :options="dbOptions" />
                 </n-form-item>
                 <n-form-item :label="$t('type')" path="type" required>
-                    <n-select v-model:value="newForm.type" :options="options" />
+                    <n-select v-model:value="newForm.type" :options="options" :render-label="renderTypeLabel" />
                 </n-form-item>
                 <n-form-item :label="$t('ttl')" required>
                     <n-input-group>

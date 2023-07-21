@@ -525,6 +525,9 @@ const useConnectionStore = defineStore('connections', {
                             value,
                         })
                         return
+                    } else {
+                        // key not exists, remove this key
+                        await this.deleteKey(server, db, key)
                     }
                 }
 
@@ -798,7 +801,7 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} keyType
          * @param {any} value
          * @param {number} ttl
-         * @returns {Promise<{[msg]: string, success: boolean}>}
+         * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: {string}}>}
          */
         async setKey(connName, db, key, keyType, value, ttl) {
             try {
@@ -809,7 +812,7 @@ const useConnectionStore = defineStore('connections', {
                     if (newKey > 0) {
                         this._tidyNode(connName, db, key)
                     }
-                    return { success }
+                    return { success, nodeKey: `${connName}/db${db}#${ConnectionType.RedisValue}/${key}` }
                 } else {
                     return { success, msg }
                 }

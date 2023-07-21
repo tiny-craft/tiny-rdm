@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -548,61 +547,48 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid hash value"
 			return
 		} else {
-			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-				if len(strs) > 1 {
-					for i := 0; i < len(strs); i += 2 {
-						pipe.HSetNX(ctx, key, strs[i].(string), strs[i+1])
-					}
-				} else {
-					pipe.HSet(ctx, key)
+			if len(strs) > 1 {
+				kvs := map[string]any{}
+				for i := 0; i < len(strs); i += 2 {
+					kvs[strs[i].(string)] = strs[i+1]
 				}
-				if expiration > 0 {
-					pipe.Expire(ctx, key, expiration)
+				err = rdb.HSet(ctx, key, kvs).Err()
+				if err == nil && expiration > 0 {
+					rdb.Expire(ctx, key, expiration)
 				}
-				return nil
-			})
+			}
 		}
 	case "set":
 		if strs, ok := value.([]any); !ok || len(strs) <= 0 {
 			resp.Msg = "invalid set value"
 			return
 		} else {
-			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-				for _, str := range strs {
-					pipe.SAdd(ctx, key, str.(string))
+			if len(strs) > 0 {
+				err = rdb.SAdd(ctx, key, strs...).Err()
+				if err == nil && expiration > 0 {
+					rdb.Expire(ctx, key, expiration)
 				}
-				if expiration > 0 {
-					pipe.Expire(ctx, key, expiration)
-				}
-				return nil
-			})
+			}
 		}
 	case "zset":
 		if strs, ok := value.([]any); !ok || len(strs) <= 0 {
 			resp.Msg = "invalid zset value"
 			return
 		} else {
-			log.Println(strs)
-			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+			if len(strs) > 1 {
 				var members []redis.Z
 				for i := 0; i < len(strs); i += 2 {
-					score, _ := strconv.ParseFloat(strs[i].(string), 64)
+					score, _ := strconv.ParseFloat(strs[i+1].(string), 64)
 					members = append(members, redis.Z{
 						Score:  score,
-						Member: strs[i+1],
+						Member: strs[i],
 					})
 				}
-
-				if len(members) > 0 {
-					pipe.ZAdd(ctx, key, members...)
-				} else {
-					pipe.ZAdd(ctx, key)
+				err = rdb.ZAdd(ctx, key, members...).Err()
+				if err == nil && expiration > 0 {
+					rdb.Expire(ctx, key, expiration)
 				}
-				if expiration > 0 {
-					pipe.Expire(ctx, key, expiration)
-				}
-				return nil
-			})
+			}
 		}
 	}
 

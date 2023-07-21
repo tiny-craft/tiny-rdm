@@ -4,7 +4,7 @@ import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, NSpace, NTag, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { get, indexOf, isEmpty, remove } from 'lodash'
+import { find, get, indexOf, isEmpty, remove } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -21,6 +21,7 @@ import Unlink from '../icons/Unlink.vue'
 import Filter from '../icons/Filter.vue'
 import Close from '../icons/Close.vue'
 import { typesBgColor, typesColor } from '../../consts/support_redis_type.js'
+import useTabStore from '../../stores/tab.js'
 
 const props = defineProps({
     server: String,
@@ -30,9 +31,21 @@ const i18n = useI18n()
 const loading = ref(false)
 const loadingConnections = ref(false)
 const expandedKeys = ref([props.server])
-const selectedKeys = ref([props.server])
 const connectionStore = useConnectionStore()
+const tabStore = useTabStore()
 const dialogStore = useDialogStore()
+
+/**
+ *
+ * @type {ComputedRef<string[]>}
+ */
+const selectedKeys = computed(() => {
+    const tab = find(tabStore.tabList, { name: props.server })
+    if (tab != null) {
+        return get(tab, 'selectedKeys', [props.server])
+    }
+    return [props.server]
+})
 
 const data = computed(() => {
     const dbs = get(connectionStore.databases, props.server, [])
@@ -233,7 +246,7 @@ const onUpdateSelectedKeys = (keys, options) => {
             connectionStore.loadKeyValue(props.server, 0)
         }
     } finally {
-        selectedKeys.value = keys
+        tabStore.setSelectedKeys(props.server, keys)
     }
 }
 
@@ -245,7 +258,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(ToggleServer, { modelValue: false }),
-                }
+                },
             )
         case ConnectionType.RedisDB:
             return h(
@@ -253,7 +266,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(ToggleDb, { modelValue: option.opened === true }),
-                }
+                },
             )
         case ConnectionType.RedisKey:
             return h(
@@ -261,7 +274,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(Layer),
-                }
+                },
             )
         case ConnectionType.RedisValue:
             return h(
@@ -269,7 +282,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(Key),
-                }
+                },
             )
     }
 }
@@ -309,8 +322,8 @@ const renderSuffix = ({ option }) => {
                             connectionStore.reopenDatabase(server, db)
                         },
                     },
-                    { default: () => typeFilter }
-                )
+                    { default: () => typeFilter },
+                ),
             )
         }
         // match pattern tag
@@ -328,8 +341,8 @@ const renderSuffix = ({ option }) => {
                             connectionStore.reopenDatabase(server, db)
                         },
                     },
-                    { default: () => matchPattern }
-                )
+                    { default: () => matchPattern },
+                ),
             )
         }
         if (filterNodes.length > 0) {
@@ -362,7 +375,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
-                selectedKeys.value = [option.key]
+                tabStore.setSelectedKeys(props.server, option.key)
             })
         },
         // onMouseover() {

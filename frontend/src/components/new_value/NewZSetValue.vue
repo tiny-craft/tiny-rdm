@@ -29,7 +29,7 @@ const onUpdate = () => {
     const val = reject(zset.value, (v) => v == null || isEmpty(v.value))
     emit(
         'update:value',
-        flatMap(val, (item) => [item.value, item.score.toString()])
+        flatMap(val, (item) => [item.value, item.score.toString()]),
     )
 }
 

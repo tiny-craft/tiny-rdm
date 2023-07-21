@@ -7,7 +7,8 @@ const useTabStore = defineStore('tab', {
      * @property {string} name connection name
      * @property {boolean} blank is blank tab
      * @property {string} [title] tab title
-     * @property {string} [icon] tab title
+     * @property {string} [icon] tab icon
+     * @property {string[]} selectedKeys
      * @property {string} [type] key type
      * @property {Object|Array} [value] key value
      * @property {string} [server] server name
@@ -51,20 +52,13 @@ const useTabStore = defineStore('tab', {
             // }
             // return current
         },
+
+        currentSelectedKeys() {
+            const tab = this.currentTab()
+            return get(tab, 'selectedKeys', [])
+        },
     },
     actions: {
-        /**
-         * create new blank tab to tail
-         */
-        newBlankTab() {
-            this.tabList.push({
-                name: Date.now().toString(),
-                title: 'new tab',
-                blank: true,
-            })
-            this._setActivatedIndex(size(this.tabList) - 1)
-        },
-
         /**
          *
          * @param idx
@@ -207,6 +201,21 @@ const useTabStore = defineStore('tab', {
         removeAllTab() {
             this.tabList = []
             this._setActivatedIndex(-1, false)
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {string|string[]} keys
+         */
+        setSelectedKeys(server, keys) {
+            if (typeof keys === 'string') {
+                keys = [keys]
+            }
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                tab.selectedKeys = keys
+            }
         },
     },
 })

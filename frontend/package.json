@@ -13,17 +13,17 @@
     "highlight.js": "^11.8.0",
     "lodash": "^4.17.21",
     "pinia": "^2.1.4",
-    "sass": "^1.63.6",
+    "sass": "^1.64.0",
     "vue": "^3.3.4",
     "vue-i18n": "^9.2.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
     "naive-ui": "^2.34.4",
-    "prettier": "^2.8.8",
-    "unplugin-auto-import": "^0.16.4",
-    "unplugin-icons": "^0.16.3",
+    "prettier": "^3.0.0",
+    "unplugin-auto-import": "^0.16.6",
+    "unplugin-icons": "^0.16.5",
     "unplugin-vue-components": "^0.25.1",
-    "vite": "^4.3.9"
+    "vite": "^4.4.4"
   }
 }
