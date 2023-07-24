@@ -52,7 +52,7 @@
   "remove_conn_group": "Delete Connection Group",
   "no_group": "No Group",
   "copy_path": "Copy Path",
-  "remove_path": "Remove Path",
+  "batch_delete": "Batch Delete",
   "copy_key": "Copy Key Name",
   "remove_key": "Remove Key",
   "new_conn_title": "New Connection",

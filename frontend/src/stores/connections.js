@@ -316,6 +316,7 @@ const useConnectionStore = defineStore('connections', {
             }
             const dbs = []
             for (let i = 0; i < db.length; i++) {
+                this._getNodeMap(name, i).clear()
                 dbs.push({
                     key: `${name}/${db[i].name}`,
                     label: db[i].name,
@@ -324,6 +325,7 @@ const useConnectionStore = defineStore('connections', {
                     db: i,
                     type: ConnectionType.RedisDB,
                     isLeaf: false,
+                    children: undefined,
                 })
             }
             this.databases[name] = dbs
@@ -344,7 +346,7 @@ const useConnectionStore = defineStore('connections', {
             const dbs = this.databases[name]
             for (const db of dbs) {
                 this.removeKeyFilter(name, db.db)
-                this.nodeMap[`${name}#${db.db}`]?.clear()
+                this._getNodeMap(name, db.db).clear()
             }
             this.removeKeyFilter(name, -1)
             delete this.databases[name]
@@ -469,7 +471,7 @@ const useConnectionStore = defineStore('connections', {
             dbs[db].children = undefined
             dbs[db].isLeaf = false
 
-            this.nodeMap[`${connName}#${db}`]?.clear()
+            this._getNodeMap(connName, db).clear()
         },
 
         /**
@@ -483,7 +485,7 @@ const useConnectionStore = defineStore('connections', {
             dbs[db].isLeaf = false
             dbs[db].opened = false
 
-            this.nodeMap[`${connName}#${db}`]?.clear()
+            this._getNodeMap(connName, db).clear()
         },
 
         /**

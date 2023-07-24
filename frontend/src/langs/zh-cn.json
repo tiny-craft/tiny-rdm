@@ -54,7 +54,7 @@
   "remove_conn_group": "删除连接分组",
   "no_group": "无分组",
   "copy_path": "复制路径",
-  "remove_path": "删除路径",
+  "batch_delete": "批量删除键",
   "copy_key": "复制键名",
   "remove_key": "删除键",
   "new_conn_title": "新建连接",

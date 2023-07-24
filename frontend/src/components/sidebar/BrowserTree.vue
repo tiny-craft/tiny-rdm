@@ -121,6 +121,15 @@ const menuOptions = {
                 },
                 {
                     type: 'divider',
+                    key: 'd2',
+                },
+                {
+                    key: 'key_remove',
+                    label: i18n.t('batch_delete'),
+                    icon: renderIcon(Delete),
+                },
+                {
+                    type: 'divider',
                     key: 'd1',
                 },
                 {
@@ -161,7 +170,7 @@ const menuOptions = {
         },
         {
             key: 'key_remove',
-            label: i18n.t('remove_path'),
+            label: i18n.t('batch_delete'),
             icon: renderIcon(Delete),
         },
     ],
@@ -445,7 +454,7 @@ const handleSelectContextMenu = (key) => {
             connectionStore.loadKeyValue(props.server, db, redisKey)
             break
         case 'key_remove':
-            dialogStore.openDeleteKeyDialog(props.server, db, redisKey + ':*')
+            dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
             break
         case 'value_remove':
             confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
