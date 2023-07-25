@@ -1,5 +1,5 @@
 <script setup>
-import { get, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
+import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
 import { computed, ref } from 'vue'
 import Help from '../icons/Help.vue'
 import IconButton from '../common/IconButton.vue'
@@ -17,20 +17,20 @@ const emit = defineEmits(['update:autoRefresh', 'refresh'])
 
 const scrollRef = ref(null)
 const redisVersion = computed(() => {
-    return get(props.info, 'redis_version', '')
+    return get(props.info, 'Server.redis_version', '')
 })
 
 const redisMode = computed(() => {
-    return get(props.info, 'redis_mode', '')
+    return get(props.info, 'Server.redis_mode', '')
 })
 
 const role = computed(() => {
-    return get(props.info, 'role', '')
+    return get(props.info, 'Replication.role', '')
 })
 
 const timeUnit = ['unit_minute', 'unit_hour', 'unit_day']
 const uptime = computed(() => {
-    let seconds = get(props.info, 'uptime_in_seconds', 0)
+    let seconds = get(props.info, 'Server.uptime_in_seconds', 0)
     seconds /= 60
     if (seconds < 60) {
         // minutes
@@ -46,7 +46,7 @@ const uptime = computed(() => {
 
 const units = ['B', 'KB', 'MB', 'GB', 'TB']
 const usedMemory = computed(() => {
-    let size = get(props.info, 'used_memory', 0)
+    let size = get(props.info, 'Memory.used_memory', 0)
     let unitIndex = 0
 
     while (size >= 1024 && unitIndex < units.length - 1) {
@@ -59,7 +59,7 @@ const usedMemory = computed(() => {
 
 const totalKeys = computed(() => {
     const regex = /^db\d+$/
-    const result = pickBy(props.info, (value, key) => {
+    const result = pickBy(props.info['Keyspace'], (value, key) => {
         return regex.test(key)
     })
     const nums = mapValues(result, (v) => {
@@ -70,6 +70,7 @@ const totalKeys = computed(() => {
     return sum(toArray(nums))
 })
 const infoList = computed(() => map(props.info, (value, key) => ({ value, key })))
+const infoTab = ref('')
 const infoFilter = ref('')
 </script>
 
@@ -127,7 +128,7 @@ const infoFilter = ref('')
                         <n-gi :span="6">
                             <n-statistic
                                 :label="$t('connected_clients')"
-                                :value="get(props.info, 'connected_clients', 0)"
+                                :value="get(props.info, 'Clients.connected_clients', 0)"
                             />
                         </n-gi>
                         <n-gi :span="6">
@@ -155,23 +156,27 @@ const infoFilter = ref('')
                     </n-input>
                 </template>
                 <n-spin :show="props.loading">
-                    <n-data-table
-                        :columns="[
-                            {
-                                title: $t('key'),
-                                key: 'key',
-                                defaultSortOrder: 'ascend',
-                                sorter: 'default',
-                                minWidth: 100,
-                                filterOptionValue: infoFilter,
-                                filter(value, row) {
-                                    return !!~row.key.indexOf(value.toString())
-                                },
-                            },
-                            { title: $t('value'), key: 'value' },
-                        ]"
-                        :data="infoList"
-                    />
+                    <n-tabs type="line" placement="left" default-value="CPU">
+                        <n-tab-pane v-for="(v, k) in props.info" :key="k" :name="k" :disabled="isEmpty(v)">
+                            <n-data-table
+                                :columns="[
+                                    {
+                                        title: $t('key'),
+                                        key: 'key',
+                                        defaultSortOrder: 'ascend',
+                                        sorter: 'default',
+                                        minWidth: 100,
+                                        filterOptionValue: infoFilter,
+                                        filter(value, row) {
+                                            return !!~row.key.indexOf(value.toString())
+                                        },
+                                    },
+                                    { title: $t('value'), key: 'value' },
+                                ]"
+                                :data="map(v, (value, key) => ({ value, key }))"
+                            />
+                        </n-tab-pane>
+                    </n-tabs>
                 </n-spin>
             </n-card>
         </n-space>

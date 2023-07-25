@@ -201,7 +201,7 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	info := c.parseInfo(res)
 	for i := 0; i < totaldb; i++ {
 		dbName := "db" + strconv.Itoa(i)
-		dbInfoStr := info[dbName]
+		dbInfoStr := info["Keyspace"][dbName]
 		if len(dbInfoStr) > 0 {
 			dbInfo := c.parseDBItemInfo(dbInfoStr)
 			dbs = append(dbs, types.ConnectionDB{
@@ -296,17 +296,21 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 
 // parse command response content which use "redis info"
 // # Keyspace\r\ndb0:keys=2,expires=1,avg_ttl=1877111749\r\ndb1:keys=33,expires=0,avg_ttl=0\r\ndb3:keys=17,expires=0,avg_ttl=0\r\ndb5:keys=3,expires=0,avg_ttl=0\r\n
-func (c *connectionService) parseInfo(info string) map[string]string {
-	parsedInfo := map[string]string{}
+func (c *connectionService) parseInfo(info string) map[string]map[string]string {
+	parsedInfo := map[string]map[string]string{}
 	lines := strings.Split(info, "\r\n")
 	if len(lines) > 0 {
+		var subInfo map[string]string
 		for _, line := range lines {
-			if !strings.HasPrefix(line, "#") {
+			if strings.HasPrefix(line, "#") {
+				subInfo = map[string]string{}
+				parsedInfo[strings.TrimSpace(strings.TrimLeft(line, "#"))] = subInfo
+			} else {
 				items := strings.SplitN(line, ":", 2)
 				if len(items) < 2 {
 					continue
 				}
-				parsedInfo[items[0]] = items[1]
+				subInfo[items[0]] = items[1]
 			}
 		}
 	}

@@ -98,13 +98,13 @@ const filterTypeOptions = computed(() => {
         <div class="nav-pane-bottom flex-box-h">
             <icon-button :icon="AddLink" size="20" stroke-width="4" t-tooltip="new_key" @click="onNewKey" />
             <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="reload" @click="onRefresh" />
-            <icon-button
-                :icon="Filter"
-                size="20"
-                stroke-width="4"
-                t-tooltip="filter_key"
-                @click="filterForm.showFilter = !filterForm.showFilter"
-            />
+            <!--            <icon-button-->
+            <!--                :icon="Filter"-->
+            <!--                size="20"-->
+            <!--                stroke-width="4"-->
+            <!--                t-tooltip="filter_key"-->
+            <!--                @click="filterForm.showFilter = !filterForm.showFilter"-->
+            <!--            />-->
             <div class="flex-item-expand"></div>
             <icon-button
                 :disabled="currentSelect.key == null"
