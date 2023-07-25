@@ -12,6 +12,7 @@ import { useI18n } from 'vue-i18n'
 import useConnectionStore from '../../stores/connections.js'
 import { NSpace, useMessage } from 'naive-ui'
 import useTabStore from '../../stores/tab.js'
+import NewStreamValue from '../new_value/NewStreamValue.vue'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -52,6 +53,7 @@ const addValueComponent = {
     [types.LIST]: NewListValue,
     [types.SET]: NewSetValue,
     [types.ZSET]: NewZSetValue,
+    [types.STREAM]: NewStreamValue,
 }
 const defaultValue = {
     [types.STRING]: '',
@@ -59,6 +61,7 @@ const defaultValue = {
     [types.LIST]: [],
     [types.SET]: [],
     [types.ZSET]: [],
+    [types.STREAM]: [],
 }
 
 const dialogStore = useDialog()
@@ -165,7 +168,7 @@ const onClose = () => {
                     <n-input v-model:value="newForm.key" placeholder="" />
                 </n-form-item>
                 <n-form-item :label="$t('db_index')" path="db" required>
-                    <n-select v-model:value="newForm.db" :options="dbOptions" />
+                    <n-select v-model:value="newForm.db" :options="dbOptions" filterable />
                 </n-form-item>
                 <n-form-item :label="$t('type')" path="type" required>
                     <n-select v-model:value="newForm.type" :options="options" :render-label="renderTypeLabel" />

@@ -10,6 +10,8 @@ import AddListValue from '../new_value/AddListValue.vue'
 import AddHashValue from '../new_value/AddHashValue.vue'
 import AddZSetValue from '../new_value/AddZSetValue.vue'
 import useConnectionStore from '../../stores/connections.js'
+import NewStreamValue from '../new_value/NewStreamValue.vue'
+import { size, slice } from 'lodash'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -29,6 +31,7 @@ const addValueComponent = {
     [types.LIST]: AddListValue,
     [types.SET]: NewSetValue,
     [types.ZSET]: AddZSetValue,
+    [types.STREAM]: NewStreamValue,
 }
 const defaultValue = {
     [types.STRING]: '',
@@ -36,6 +39,7 @@ const defaultValue = {
     [types.LIST]: [],
     [types.SET]: [],
     [types.ZSET]: [],
+    [types.STREAM]: ['*'],
 }
 
 /**
@@ -51,6 +55,8 @@ const title = computed(() => {
         case types.SET:
             return i18n.t('new_field')
         case types.ZSET:
+            return i18n.t('new_field')
+        case types.STREAM:
             return i18n.t('new_field')
     }
     return ''
@@ -69,7 +75,7 @@ watch(
             newForm.opType = 0
             newForm.value = null
         }
-    }
+    },
 )
 
 const connectionStore = useConnectionStore()
@@ -140,6 +146,28 @@ const onAdd = async () => {
                         message.success(i18n.t('handle_succ'))
                     } else {
                         message.error(msg)
+                    }
+                }
+                break
+
+            case types.STREAM:
+                {
+                    if (size(value) > 2) {
+                        const { success, msg } = await connectionStore.addStreamValue(
+                            server,
+                            db,
+                            key,
+                            value[0],
+                            slice(value, 1),
+                        )
+                        if (success) {
+                            if (newForm.reload) {
+                                connectionStore.loadKeyValue(server, db, key).then(() => {})
+                            }
+                            message.success(i18n.t('handle_succ'))
+                        } else {
+                            message.error(msg)
+                        }
                     }
                 }
                 break

@@ -8,6 +8,7 @@ import Save from '../icons/Save.vue'
 const props = defineProps({
     bindKey: String,
     editing: Boolean,
+    readonly: Boolean,
 })
 
 const emit = defineEmits(['edit', 'delete', 'save', 'cancel'])
@@ -20,7 +21,7 @@ const emit = defineEmits(['edit', 'delete', 'save', 'cancel'])
         <icon-button :icon="Close" @click="emit('cancel')" />
     </div>
     <div v-else class="flex-box-h edit-column-func">
-        <icon-button :icon="Edit" @click="emit('edit')" />
+        <icon-button v-if="!props.readonly" :icon="Edit" @click="emit('edit')" />
         <n-popconfirm :negative-text="$t('cancel')" :positive-text="$t('confirm')" @positive-click="emit('delete')">
             <template #trigger>
                 <icon-button :icon="Delete" />

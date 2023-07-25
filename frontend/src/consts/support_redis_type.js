@@ -4,14 +4,16 @@ export const types = {
     LIST: 'LIST',
     SET: 'SET',
     ZSET: 'ZSET',
+    STREAM: 'STREAM',
 }
 
 export const typesColor = {
     [types.STRING]: '#8256DC',
-    [types.HASH]: '#2983ED',
-    [types.LIST]: '#26A15E',
-    [types.SET]: '#EE9F33',
-    [types.ZSET]: '#CE3352',
+    [types.HASH]: '#0171F5',
+    [types.LIST]: '#23C338',
+    [types.SET]: '#F29E33',
+    [types.ZSET]: '#F53227',
+    [types.STREAM]: '#F5C201',
 }
 
 export const typesBgColor = {
@@ -20,6 +22,7 @@ export const typesBgColor = {
     [types.LIST]: '#E3F3EB',
     [types.SET]: '#FDF1DF',
     [types.ZSET]: '#FAEAED',
+    [types.STREAM]: '#FFF8DF',
 }
 
 // export const typesName = Object.fromEntries(Object.entries(types).map(([key, value]) => [key, value.name]))

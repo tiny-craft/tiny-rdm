@@ -3,6 +3,7 @@ import { endsWith, get, isEmpty, join, remove, size, slice, sortedIndexBy, split
 import {
     AddHashField,
     AddListItem,
+    AddStreamValue,
     AddZSetValue,
     CloseConnection,
     CreateGroup,
@@ -15,6 +16,7 @@ import {
     ListConnection,
     OpenConnection,
     OpenDatabase,
+    RemoveStreamValues,
     RenameGroup,
     RenameKey,
     SaveConnection,
@@ -1125,6 +1127,54 @@ const useConnectionStore = defineStore('connections', {
                 const { data, success, msg } = await UpdateZSetValue(connName, db, key, value, '', 0)
                 if (success) {
                     const { removed } = data
+                    return { success, removed }
+                } else {
+                    return { success, msg }
+                }
+            } catch (e) {
+                return { success: false, msg: e.message }
+            }
+        },
+
+        /**
+         * insert new stream field item
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} key
+         * @param {string} id
+         * @param {string[]} values field1, value1, filed2, value2...
+         * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
+         */
+        async addStreamValue(connName, db, key, id, values) {
+            try {
+                const { data = {}, success, msg } = await AddStreamValue(connName, db, key, id, values)
+                if (success) {
+                    const { updated = {} } = data
+                    return { success, updated }
+                } else {
+                    return { success: false, msg }
+                }
+            } catch (e) {
+                return { success: false, msg: e.message }
+            }
+        },
+
+        /**
+         * remove stream field
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} key
+         * @param {string[]|string} ids
+         * @returns {Promise<{[msg]: {}, success: boolean, [removed]: string[]}>}
+         */
+        async removeStreamValues(connName, db, key, ids) {
+            if (typeof ids === 'string') {
+                ids = [ids]
+            }
+            try {
+                const { data = {}, success, msg } = await RemoveStreamValues(connName, db, key, ids)
+                if (success) {
+                    const { removed = [] } = data
                     return { success, removed }
                 } else {
                     return { success, msg }

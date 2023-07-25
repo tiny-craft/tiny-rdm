@@ -11,6 +11,8 @@ import { useMessage } from 'naive-ui'
 import IconButton from '../common/IconButton.vue'
 import useConnectionStore from '../../stores/connections.js'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
+import Copy from '../icons/Copy.vue'
+import { ClipboardSetText } from '../../../wailsjs/runtime/runtime.js'
 
 const props = defineProps({
     server: String,
@@ -38,6 +40,18 @@ const onReloadKey = () => {
     connectionStore.loadKeyValue(props.server, props.db, props.keyPath)
 }
 
+const onCopyKey = () => {
+    ClipboardSetText(props.keyPath)
+        .then((succ) => {
+            if (succ) {
+                message.success(i18n.t('copy_succ'))
+            }
+        })
+        .catch((e) => {
+            message.error(e.message)
+        })
+}
+
 const confirmDialog = useConfirmDialog()
 const onDeleteKey = () => {
     confirmDialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
@@ -53,12 +67,13 @@ const onDeleteKey = () => {
 <template>
     <div class="content-toolbar flex-box-h">
         <n-input-group>
-            <redis-type-tag :type="props.keyType" size="large"></redis-type-tag>
+            <redis-type-tag :type="props.keyType" size="large" />
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
                     <icon-button :icon="Refresh" t-tooltip="reload" size="18" @click="onReloadKey" />
                 </template>
             </n-input>
+            <icon-button :icon="Copy" t-tooltip="copy_key" size="18" border @click="onCopyKey" />
         </n-input-group>
         <n-button-group>
             <n-tooltip>

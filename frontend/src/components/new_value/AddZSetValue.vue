@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { defineOptions, ref } from 'vue'
 import { isEmpty, reject } from 'lodash'
 import Add from '../icons/Add.vue'
 import Delete from '../icons/Delete.vue'
@@ -9,6 +9,9 @@ import { useI18n } from 'vue-i18n'
 const props = defineProps({
     type: Number,
     value: Object,
+})
+defineOptions({
+    inheritAttrs: false,
 })
 const emit = defineEmits(['update:value', 'update:type'])
 

@@ -497,6 +497,21 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 			}
 		}
 		value = items
+	case "stream":
+		var msgs []redis.XMessage
+		items := []types.StreamItem{}
+		msgs, err = rdb.XRevRange(ctx, key, "+", "-").Result()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		for _, msg := range msgs {
+			items = append(items, types.StreamItem{
+				ID:    msg.ID,
+				Value: msg.Values,
+			})
+		}
+		value = items
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -538,13 +553,10 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid list value"
 			return
 		} else {
-			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-				pipe.LPush(ctx, key, strs...)
-				if expiration > 0 {
-					pipe.Expire(ctx, key, expiration)
-				}
-				return nil
-			})
+			err = rdb.LPush(ctx, key, strs...).Err()
+			if err == nil && expiration > 0 {
+				rdb.Expire(ctx, key, expiration)
+			}
 		}
 	case "hash":
 		if strs, ok := value.([]any); !ok {
@@ -552,11 +564,7 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			return
 		} else {
 			if len(strs) > 1 {
-				kvs := map[string]any{}
-				for i := 0; i < len(strs); i += 2 {
-					kvs[strs[i].(string)] = strs[i+1]
-				}
-				err = rdb.HSet(ctx, key, kvs).Err()
+				err = rdb.HSet(ctx, key, strs).Err()
 				if err == nil && expiration > 0 {
 					rdb.Expire(ctx, key, expiration)
 				}
@@ -589,6 +597,22 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 					})
 				}
 				err = rdb.ZAdd(ctx, key, members...).Err()
+				if err == nil && expiration > 0 {
+					rdb.Expire(ctx, key, expiration)
+				}
+			}
+		}
+	case "stream":
+		if strs, ok := value.([]any); !ok {
+			resp.Msg = "invalid stream value"
+			return
+		} else {
+			if len(strs) > 2 {
+				err = rdb.XAdd(ctx, &redis.XAddArgs{
+					Stream: key,
+					ID:     strs[0].(string),
+					Values: strs[1:],
+				}).Err()
 				if err == nil && expiration > 0 {
 					rdb.Expire(ctx, key, expiration)
 				}
@@ -882,6 +906,41 @@ func (c *connectionService) AddZSetValue(connName string, db int, key string, ac
 		return
 	}
 
+	resp.Success = true
+	return
+}
+
+// AddStreamValue add stream field
+func (c *connectionService) AddStreamValue(connName string, db int, key, ID string, fieldItems []any) (resp types.JSResp) {
+	rdb, ctx, err := c.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	_, err = rdb.XAdd(ctx, &redis.XAddArgs{
+		Stream: key,
+		ID:     ID,
+		Values: fieldItems,
+	}).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	resp.Success = true
+	return
+}
+
+// RemoveStreamValues remove stream values by id
+func (c *connectionService) RemoveStreamValues(connName string, db int, key string, IDs []string) (resp types.JSResp) {
+	rdb, ctx, err := c.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	_, err = rdb.XDel(ctx, key, IDs...).Result()
 	resp.Success = true
 	return
 }

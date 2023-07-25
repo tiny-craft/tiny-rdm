@@ -13,6 +13,7 @@ import useConnectionStore from '../../stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { useConfirmDialog } from '../../utils/confirm_dialog.js'
 import ContentServerStatus from '../content_value/ContentServerStatus.vue'
+import ContentValueStream from '../content_value/ContentValueStream.vue'
 
 const serverInfo = ref({})
 const autoRefresh = ref(false)
@@ -62,6 +63,7 @@ const valueComponents = {
     [types.LIST]: ContentValueList,
     [types.SET]: ContentValueSet,
     [types.ZSET]: ContentValueZset,
+    [types.STREAM]: ContentValueStream,
 }
 
 const dialog = useDialog()
@@ -71,7 +73,7 @@ const tab = computed(() =>
     map(tabStore.tabs, (item) => ({
         key: item.name,
         label: item.title,
-    }))
+    })),
 )
 
 watch(
@@ -80,7 +82,7 @@ watch(
         if (nav === 'browser') {
             refreshInfo()
         }
-    }
+    },
 )
 
 const tabContent = computed(() => {
