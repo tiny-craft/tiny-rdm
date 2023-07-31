@@ -798,6 +798,28 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * get tree node by key name
+         * @param key
+         * @return {DatabaseItem|null}
+         */
+        getNode(key) {
+            const matches = key.match(/^(?<server>\w+)(?:\/db(?<db>\d+))?(?:#(?<key>[\w/]+))?$/)
+            if (matches) {
+                const { server, db, key } = matches.groups
+                if (db != null) {
+                    const dbIndex = parseInt(db)
+                    const nodeMap = this._getNodeMap(server, dbIndex)
+                    if (key != null) {
+                        return nodeMap.get(key)
+                    } else {
+                        return this.databases[server][dbIndex]
+                    }
+                }
+            }
+            return null
+        },
+
+        /**
          * set redis key
          * @param {string} connName
          * @param {number} db

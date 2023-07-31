@@ -4,7 +4,7 @@ import { ConnectionType } from '../../consts/connection_type.js'
 import { NIcon, NSpace, NTag, useDialog, useMessage } from 'naive-ui'
 import Key from '../icons/Key.vue'
 import ToggleDb from '../icons/ToggleDb.vue'
-import { find, get, indexOf, isEmpty, remove } from 'lodash'
+import { find, get, includes, indexOf, isEmpty, remove } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '../icons/Refresh.vue'
 import CopyLink from '../icons/CopyLink.vue'
@@ -22,6 +22,7 @@ import Filter from '../icons/Filter.vue'
 import Close from '../icons/Close.vue'
 import { typesBgColor, typesColor } from '../../consts/support_redis_type.js'
 import useTabStore from '../../stores/tab.js'
+import IconButton from '../common/IconButton.vue'
 
 const props = defineProps({
     server: String,
@@ -51,7 +52,7 @@ const data = computed(() => {
     const dbs = get(connectionStore.databases, props.server, [])
     return [
         {
-            key: props.server,
+            key: `${props.server}`,
             label: props.server,
             type: ConnectionType.Server,
             children: dbs,
@@ -76,7 +77,6 @@ const contextMenuParam = reactive({
     x: 0,
     y: 0,
     options: null,
-    currentNode: null,
 })
 const renderIcon = (icon) => {
     return () => {
@@ -87,7 +87,6 @@ const renderIcon = (icon) => {
 }
 const menuOptions = {
     [ConnectionType.Server]: () => {
-        console.log('open server context')
         return [
             {
                 key: 'server_reload',
@@ -121,7 +120,7 @@ const menuOptions = {
                 },
                 {
                     type: 'divider',
-                    key: 'd2',
+                    key: 'd1',
                 },
                 {
                     key: 'key_remove',
@@ -130,7 +129,7 @@ const menuOptions = {
                 },
                 {
                     type: 'divider',
-                    key: 'd1',
+                    key: 'd2',
                 },
                 {
                     key: 'db_close',
@@ -244,7 +243,7 @@ const onUpdateSelectedKeys = (keys, options) => {
             for (const node of options) {
                 if (node.type === ConnectionType.RedisValue) {
                     const { key, db, redisKey } = node
-                    if (indexOf(selectedKeys.value, key) === -1) {
+                    if (!includes(selectedKeys.value, key)) {
                         connectionStore.loadKeyValue(props.server, db, redisKey)
                     }
                     return
@@ -296,9 +295,57 @@ const renderPrefix = ({ option }) => {
     }
 }
 
+// render tree item label
 const renderLabel = ({ option }) => {
     switch (option.type) {
         case ConnectionType.RedisDB:
+            const { name: server, db } = option
+            let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)
+            const items = [`${option.label} (${option.keys || 0})`]
+            // show filter tag after label
+            // type filter tag
+            if (!isEmpty(typeFilter)) {
+                items.push(
+                    h(
+                        NTag,
+                        {
+                            size: 'small',
+                            closable: true,
+                            bordered: false,
+                            color: {
+                                color: typesBgColor[typeFilter],
+                                textColor: typesColor[typeFilter],
+                            },
+                            onClose: () => {
+                                // remove type filter
+                                connectionStore.setKeyFilter(server, db, matchPattern)
+                                connectionStore.reopenDatabase(server, db)
+                            },
+                        },
+                        { default: () => typeFilter },
+                    ),
+                )
+            }
+            // match pattern tag
+            if (!isEmpty(matchPattern) && matchPattern !== '*') {
+                items.push(
+                    h(
+                        NTag,
+                        {
+                            bordered: false,
+                            closable: true,
+                            size: 'small',
+                            onClose: () => {
+                                // remove key match pattern
+                                connectionStore.setKeyFilter(server, db, '*', typeFilter)
+                                connectionStore.reopenDatabase(server, db)
+                            },
+                        },
+                        { default: () => matchPattern },
+                    ),
+                )
+            }
+            return renderIconMenu(items)
         case ConnectionType.RedisKey:
             return `${option.label} (${option.keys || 0})`
         // case ConnectionType.RedisValue:
@@ -307,55 +354,99 @@ const renderLabel = ({ option }) => {
     return option.label
 }
 
+// render horizontal item
+const renderIconMenu = (items) => {
+    return h(
+        NSpace,
+        {
+            align: 'center',
+            inline: true,
+            size: 2,
+            wrapItem: false,
+            wrap: false,
+            style: 'margin-right: 5px',
+        },
+        () => items,
+    )
+}
+
+const getDatabaseMenu = (opened) => {
+    const btns = []
+    if (opened) {
+        btns.push(
+            h(IconButton, {
+                tTooltip: 'filter_key',
+                icon: Filter,
+                onClick: () => handleSelectContextMenu('db_filter'),
+            }),
+            h(IconButton, {
+                tTooltip: 'reload',
+                icon: Refresh,
+                onClick: () => handleSelectContextMenu('db_reload'),
+            }),
+            h(IconButton, {
+                tTooltip: 'new_key',
+                icon: Add,
+                onClick: () => handleSelectContextMenu('db_newkey'),
+            }),
+            h(IconButton, {
+                tTooltip: 'batch_delete',
+                icon: Delete,
+                onClick: () => handleSelectContextMenu('key_remove'),
+            }),
+        )
+    } else {
+        btns.push(
+            h(IconButton, {
+                tTooltip: 'open_db',
+                icon: Connect,
+                onClick: () => handleSelectContextMenu('db_open'),
+            }),
+        )
+    }
+    return btns
+}
+
+const getLayerMenu = () => {
+    return [
+        h(IconButton, {
+            tTooltip: 'reload',
+            icon: Refresh,
+            onClick: () => handleSelectContextMenu('key_reload'),
+        }),
+        h(IconButton, {
+            tTooltip: 'new_key',
+            icon: Add,
+            onClick: () => handleSelectContextMenu('key_newkey'),
+        }),
+        h(IconButton, {
+            tTooltip: 'batch_delete',
+            icon: Delete,
+            onClick: () => handleSelectContextMenu('key_remove'),
+        }),
+    ]
+}
+
+const getValueMenu = () => {
+    return [
+        h(IconButton, {
+            tTooltip: 'remove_key',
+            icon: Delete,
+            onClick: () => handleSelectContextMenu('value_remove'),
+        }),
+    ]
+}
+
+// render menu function icon
 const renderSuffix = ({ option }) => {
-    if (option.type === ConnectionType.RedisDB) {
-        const { name: server, db } = option
-        let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)
-        const filterNodes = []
-        // type filter tag
-        if (!isEmpty(typeFilter)) {
-            filterNodes.push(
-                h(
-                    NTag,
-                    {
-                        size: 'small',
-                        closable: true,
-                        bordered: false,
-                        color: {
-                            color: typesBgColor[typeFilter],
-                            textColor: typesColor[typeFilter],
-                        },
-                        onClose: () => {
-                            // remove type filter
-                            connectionStore.setKeyFilter(server, db, matchPattern)
-                            connectionStore.reopenDatabase(server, db)
-                        },
-                    },
-                    { default: () => typeFilter },
-                ),
-            )
-        }
-        // match pattern tag
-        if (!isEmpty(matchPattern) && matchPattern !== '*') {
-            filterNodes.push(
-                h(
-                    NTag,
-                    {
-                        bordered: false,
-                        closable: true,
-                        size: 'small',
-                        onClose: () => {
-                            // remove key match pattern
-                            connectionStore.setKeyFilter(server, db, '*', typeFilter)
-                            connectionStore.reopenDatabase(server, db)
-                        },
-                    },
-                    { default: () => matchPattern },
-                ),
-            )
-        }
-        if (filterNodes.length > 0) {
-            return h(NSpace, { align: 'center', inline: true, size: 2 }, () => filterNodes)
+    if (includes(selectedKeys.value, option.key)) {
+        switch (option.type) {
+            case ConnectionType.RedisDB:
+                return renderIconMenu(getDatabaseMenu(option.opened))
+            case ConnectionType.RedisKey:
+                return renderIconMenu(getLayerMenu())
+            case ConnectionType.RedisValue:
+                return renderIconMenu(getValueMenu())
         }
     }
     return null
@@ -363,7 +454,7 @@ const renderSuffix = ({ option }) => {
 
 const nodeProps = ({ option }) => {
     return {
-        onDblclick: async () => {
+        onDblclick: () => {
             if (loading.value) {
                 console.warn('TODO: alert to ignore double click when loading')
                 return
@@ -373,14 +464,12 @@ const nodeProps = ({ option }) => {
         },
         onContextmenu(e) {
             e.preventDefault()
-            const mop = menuOptions[option.type]
-            if (mop == null) {
+            if (!menuOptions.hasOwnProperty(option.type)) {
                 return
             }
             contextMenuParam.show = false
+            contextMenuParam.options = menuOptions[option.type](option)
             nextTick().then(() => {
-                contextMenuParam.options = mop(option)
-                contextMenuParam.currentNode = option
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
@@ -419,7 +508,12 @@ const onLoadTree = async (node) => {
 const confirmDialog = useConfirmDialog()
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
-    const { db, key: nodeKey, redisKey } = contextMenuParam.currentNode
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    const node = connectionStore.getNode(selectedKey)
+    const { db, key: nodeKey, redisKey } = node || {}
     switch (key) {
         case 'server_reload':
             connectionStore.openConnection(props.server, true).then(() => {

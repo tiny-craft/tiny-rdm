@@ -80,8 +80,8 @@ const infoFilter = ref('')
         <n-space vertical>
             <n-card>
                 <template #header>
-                    {{ props.server }}
-                    <n-space inline size="small">
+                    <n-space align="center" :wrap-item="false" inline size="small">
+                        {{ props.server }}
                         <n-tooltip v-if="redisVersion">
                             Redis Version
                             <template #trigger>
