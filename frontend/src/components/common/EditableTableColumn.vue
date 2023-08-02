@@ -1,9 +1,9 @@
 <script setup>
 import IconButton from './IconButton.vue'
-import Delete from '../icons/Delete.vue'
-import Edit from '../icons/Edit.vue'
-import Close from '../icons/Close.vue'
-import Save from '../icons/Save.vue'
+import Delete from '@/components/icons/Delete.vue'
+import Edit from '@/components/icons/Edit.vue'
+import Close from '@/components/icons/Close.vue'
+import Save from '@/components/icons/Save.vue'
 
 const props = defineProps({
     bindKey: String,

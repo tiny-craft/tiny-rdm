@@ -1,13 +1,13 @@
 <script setup>
-import useDialogStore from '../../stores/dialog.js'
+import useDialogStore from 'stores/dialog.js'
 import { NIcon, useThemeVars } from 'naive-ui'
-import AddGroup from '../icons/AddGroup.vue'
-import AddLink from '../icons/AddLink.vue'
-import IconButton from '../common/IconButton.vue'
-import Filter from '../icons/Filter.vue'
+import AddGroup from '@/components/icons/AddGroup.vue'
+import AddLink from '@/components/icons/AddLink.vue'
+import IconButton from '@/components/common/IconButton.vue'
+import Filter from '@/components/icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
-import Unlink from '../icons/Unlink.vue'
-import useConnectionStore from '../../stores/connections.js'
+import Unlink from '@/components/icons/Unlink.vue'
+import useConnectionStore from 'stores/connections.js'
 import { ref } from 'vue'
 
 const themeVars = useThemeVars()

@@ -134,6 +134,7 @@
   "spec_field_required": "{key} 不能为空",
   "nonexist_tab_content": "所选键不存在，请尝试刷新重试",
   "empty_server_content": "可以从左边选择并打开连接",
+  "empty_server_list": "还没添加Redis服务器",
   "reload_when_succ": "操作成功后立即重新加载",
   "server": "服务器",
   "browser": "浏览器",

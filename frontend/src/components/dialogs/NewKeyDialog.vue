@@ -1,18 +1,18 @@
 <script setup>
 import { computed, h, reactive, ref, watch } from 'vue'
-import { types, typesColor } from '../../consts/support_redis_type'
-import useDialog from '../../stores/dialog'
+import { types, typesColor } from '@/consts/support_redis_type.js'
+import useDialog from 'stores/dialog'
 import { isEmpty, keys, map } from 'lodash'
-import NewStringValue from '../new_value/NewStringValue.vue'
-import NewHashValue from '../new_value/NewHashValue.vue'
-import NewListValue from '../new_value/NewListValue.vue'
-import NewZSetValue from '../new_value/NewZSetValue.vue'
-import NewSetValue from '../new_value/NewSetValue.vue'
+import NewStringValue from '@/components/new_value/NewStringValue.vue'
+import NewHashValue from '@/components/new_value/NewHashValue.vue'
+import NewListValue from '@/components/new_value/NewListValue.vue'
+import NewZSetValue from '@/components/new_value/NewZSetValue.vue'
+import NewSetValue from '@/components/new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from '../../stores/connections.js'
+import useConnectionStore from 'stores/connections.js'
 import { NSpace, useMessage } from 'naive-ui'
-import useTabStore from '../../stores/tab.js'
-import NewStreamValue from '../new_value/NewStreamValue.vue'
+import useTabStore from 'stores/tab.js'
+import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
 
 const i18n = useI18n()
 const newForm = reactive({

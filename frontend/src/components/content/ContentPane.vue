@@ -1,19 +1,19 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { types } from '../../consts/support_redis_type.js'
-import ContentValueHash from '../content_value/ContentValueHash.vue'
-import ContentValueList from '../content_value/ContentValueList.vue'
-import ContentValueString from '../content_value/ContentValueString.vue'
-import ContentValueSet from '../content_value/ContentValueSet.vue'
-import ContentValueZset from '../content_value/ContentValueZSet.vue'
+import { types } from '@/consts/support_redis_type.js'
+import ContentValueHash from '@/components/content_value/ContentValueHash.vue'
+import ContentValueList from '@/components/content_value/ContentValueList.vue'
+import ContentValueString from '@/components/content_value/ContentValueString.vue'
+import ContentValueSet from '@/components/content_value/ContentValueSet.vue'
+import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
 import { get, isEmpty, map, toUpper } from 'lodash'
-import useTabStore from '../../stores/tab.js'
+import useTabStore from 'stores/tab.js'
 import { useDialog } from 'naive-ui'
-import useConnectionStore from '../../stores/connections.js'
+import useConnectionStore from 'stores/connections.js'
 import { useI18n } from 'vue-i18n'
-import { useConfirmDialog } from '../../utils/confirm_dialog.js'
-import ContentServerStatus from '../content_value/ContentServerStatus.vue'
-import ContentValueStream from '../content_value/ContentValueStream.vue'
+import { useConfirmDialog } from '@/utils/confirm_dialog.js'
+import ContentServerStatus from '@/components/content_value/ContentServerStatus.vue'
+import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 
 const serverInfo = ref({})
 const autoRefresh = ref(false)
@@ -183,7 +183,7 @@ const onCloseTab = (tabIndex) => {
 </template>
 
 <style lang="scss" scoped>
-@import 'content';
+@import '@/styles/content';
 
 .content-container {
     padding: 5px;

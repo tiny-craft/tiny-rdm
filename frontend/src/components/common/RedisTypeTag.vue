@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { typesBgColor, typesColor, validType } from '../../consts/support_redis_type.js'
+import { typesBgColor, typesColor, validType } from '@/consts/support_redis_type.js'
 
 const props = defineProps({
     type: {

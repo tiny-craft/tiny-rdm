@@ -2,11 +2,11 @@
 import { get, isEmpty, map } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TestConnection } from '../../../wailsjs/go/services/connectionService.js'
-import useDialog from '../../stores/dialog'
+import { TestConnection } from 'wailsjs/go/services/connectionService.js'
+import useDialog from 'stores/dialog'
 import { useMessage } from 'naive-ui'
-import Close from '../icons/Close.vue'
-import useConnectionStore from '../../stores/connections.js'
+import Close from '@/components/icons/Close.vue'
+import useConnectionStore from 'stores/connections.js'
 
 /**
  * Dialog for new or edit connection
@@ -110,7 +110,7 @@ watch(
             editName.value = get(dialogStore.connParam, 'name', '')
             generalForm.value = dialogStore.connParam || connectionStore.newDefaultConnection()
         }
-    }
+    },
 )
 
 const onTestConnection = async () => {

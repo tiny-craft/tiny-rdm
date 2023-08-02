@@ -1,8 +1,8 @@
 <script setup>
 import { computed, nextTick, onActivated, reactive, ref } from 'vue'
-import IconButton from '../common/IconButton.vue'
-import Refresh from '../icons/Refresh.vue'
-import useConnectionStore from '../../stores/connections.js'
+import IconButton from '@/components/common/IconButton.vue'
+import Refresh from '@/components/icons/Refresh.vue'
+import useConnectionStore from 'stores/connections.js'
 import { map, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
@@ -132,7 +132,7 @@ onActivated(() => {
 </template>
 
 <style scoped lang="scss">
-@import 'content';
+@import '@/styles/content';
 
 .content-container {
     padding: 5px;

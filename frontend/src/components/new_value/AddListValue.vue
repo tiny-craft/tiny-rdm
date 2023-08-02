@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import { compact } from 'lodash'
-import Add from '../icons/Add.vue'
-import Delete from '../icons/Delete.vue'
-import IconButton from '../common/IconButton.vue'
+import Add from '@/components/icons/Add.vue'
+import Delete from '@/components/icons/Delete.vue'
+import IconButton from '@/components/common/IconButton.vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({

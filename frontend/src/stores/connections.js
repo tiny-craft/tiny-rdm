@@ -30,10 +30,10 @@ import {
     SetSetItem,
     UpdateSetItem,
     UpdateZSetValue,
-} from '../../wailsjs/go/services/connectionService.js'
-import { ConnectionType } from '../consts/connection_type.js'
+} from 'wailsjs/go/services/connectionService.js'
+import { ConnectionType } from '@/consts/connection_type.js'
 import useTabStore from './tab.js'
-import { types } from '../consts/support_redis_type.js'
+import { types } from '@/consts/support_redis_type.js'
 
 const useConnectionStore = defineStore('connections', {
     /**

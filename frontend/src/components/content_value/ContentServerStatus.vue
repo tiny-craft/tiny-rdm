@@ -1,10 +1,10 @@
 <script setup>
 import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
 import { computed, ref } from 'vue'
-import Help from '../icons/Help.vue'
-import IconButton from '../common/IconButton.vue'
-import Filter from '../icons/Filter.vue'
-import Refresh from '../icons/Refresh.vue'
+import Help from '@/components/icons/Help.vue'
+import IconButton from '@/components/common/IconButton.vue'
+import Filter from '@/components/icons/Filter.vue'
+import Refresh from '@/components/icons/Refresh.vue'
 
 const props = defineProps({
     server: String,

@@ -132,6 +132,7 @@
   "spec_field_required": "\"{key}\" should not be blank",
   "nonexist_tab_content": "The selected key does not exist. Please retry",
   "empty_server_content": "Connect server from left list",
+  "empty_server_list": "No redis server",
   "reload_when_succ": "Reload immediately after success",
   "server": "Server",
   "browser": "Browser",

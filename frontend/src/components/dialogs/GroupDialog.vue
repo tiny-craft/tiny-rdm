@@ -1,9 +1,9 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import useDialog from '../../stores/dialog'
+import useDialog from 'stores/dialog'
 import { useMessage } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from '../../stores/connections.js'
+import useConnectionStore from 'stores/connections.js'
 import { isEmpty } from 'lodash'
 
 /**
@@ -25,7 +25,7 @@ watch(
         if (visible) {
             groupForm.name = editGroup.value = dialogStore.editGroup
         }
-    }
+    },
 )
 
 const i18n = useI18n()

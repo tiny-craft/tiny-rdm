@@ -17,7 +17,7 @@ import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { darkTheme, lightTheme, useOsTheme } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
-import { WindowSetDarkTheme, WindowSetLightTheme } from '../wailsjs/runtime/runtime.js'
+import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)

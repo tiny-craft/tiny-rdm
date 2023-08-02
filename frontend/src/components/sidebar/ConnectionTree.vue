@@ -1,21 +1,21 @@
 <script setup>
-import useDialogStore from '../../stores/dialog.js'
+import useDialogStore from 'stores/dialog.js'
 import { h, nextTick, reactive, ref } from 'vue'
-import useConnectionStore from '../../stores/connections.js'
+import useConnectionStore from 'stores/connections.js'
 import { NIcon, useDialog, useMessage, useThemeVars } from 'naive-ui'
-import { ConnectionType } from '../../consts/connection_type.js'
-import ToggleFolder from '../icons/ToggleFolder.vue'
-import ToggleServer from '../icons/ToggleServer.vue'
+import { ConnectionType } from '@/consts/connection_type.js'
+import ToggleFolder from '@/components/icons/ToggleFolder.vue'
+import ToggleServer from '@/components/icons/ToggleServer.vue'
 import { debounce, indexOf, isEmpty } from 'lodash'
-import Config from '../icons/Config.vue'
-import Delete from '../icons/Delete.vue'
-import Unlink from '../icons/Unlink.vue'
-import CopyLink from '../icons/CopyLink.vue'
-import Connect from '../icons/Connect.vue'
+import Config from '@/components/icons/Config.vue'
+import Delete from '@/components/icons/Delete.vue'
+import Unlink from '@/components/icons/Unlink.vue'
+import CopyLink from '@/components/icons/CopyLink.vue'
+import Connect from '@/components/icons/Connect.vue'
 import { useI18n } from 'vue-i18n'
-import useTabStore from '../../stores/tab.js'
-import Edit from '../icons/Edit.vue'
-import { useConfirmDialog } from '../../utils/confirm_dialog.js'
+import useTabStore from 'stores/tab.js'
+import Edit from '@/components/icons/Edit.vue'
+import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
@@ -130,7 +130,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(ToggleFolder, { modelValue: opened }),
-                }
+                },
             )
         case ConnectionType.Server:
             const connected = connectionStore.isConnected(option.name)
@@ -139,7 +139,7 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () => h(ToggleServer, { modelValue: !!connected }),
-                }
+                },
             )
     }
 }
@@ -330,7 +330,10 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
 </script>
 
 <template>
+    <n-empty v-if="isEmpty(connectionStore.connections)" class="empty-content" :description="$t('empty_server_list')" />
     <n-tree
+        v-else
+        class="fill-height"
         :animated="false"
         :block-line="true"
         :block-node="true"
@@ -347,7 +350,6 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         :render-suffix="renderSuffix"
         @drop="handleDrop"
         :pattern="props.filterPattern"
-        class="fill-height"
         virtual-scroll
     />
 
@@ -383,4 +385,6 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
     />
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@import '@/styles/content';
+</style>

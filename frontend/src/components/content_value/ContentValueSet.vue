@@ -2,13 +2,13 @@
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
-import AddLink from '../icons/AddLink.vue'
+import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, useMessage } from 'naive-ui'
 import { size } from 'lodash'
-import useDialogStore from '../../stores/dialog.js'
-import { types, types as redisTypes } from '../../consts/support_redis_type.js'
-import EditableTableColumn from '../common/EditableTableColumn.vue'
-import useConnectionStore from '../../stores/connections.js'
+import useDialogStore from 'stores/dialog.js'
+import { types, types as redisTypes } from '@/consts/support_redis_type.js'
+import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
+import useConnectionStore from 'stores/connections.js'
 
 const i18n = useI18n()
 const props = defineProps({
@@ -78,7 +78,7 @@ const actionColumn = {
                         props.name,
                         props.db,
                         props.keyPath,
-                        row.value
+                        row.value,
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
@@ -99,7 +99,7 @@ const actionColumn = {
                         props.db,
                         props.keyPath,
                         row.value,
-                        currentEditRow.value.value
+                        currentEditRow.value.value,
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})

@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import { flatMap, reject } from 'lodash'
-import Add from '../icons/Add.vue'
-import Delete from '../icons/Delete.vue'
-import IconButton from '../common/IconButton.vue'
+import Add from '@/components/icons/Add.vue'
+import Delete from '@/components/icons/Delete.vue'
+import IconButton from '@/components/common/IconButton.vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -39,7 +39,7 @@ const onUpdate = (val) => {
     val = reject(val, { key: '' })
     emit(
         'update:value',
-        flatMap(val, (item) => [item.key, item.value])
+        flatMap(val, (item) => [item.key, item.value]),
     )
 }
 </script>

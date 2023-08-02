@@ -1,6 +1,6 @@
 <script setup>
-import AddLink from '../icons/AddLink.vue'
-import useDialogStore from '../../stores/dialog.js'
+import AddLink from '@/components/icons/AddLink.vue'
+import useDialogStore from 'stores/dialog.js'
 
 const dialogStore = useDialogStore()
 </script>
@@ -22,7 +22,7 @@ const dialogStore = useDialogStore()
 </template>
 
 <style lang="scss" scoped>
-@import 'content';
+@import '@/styles/content';
 
 .content-container {
     justify-content: center;

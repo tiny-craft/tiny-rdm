@@ -1,9 +1,9 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import useDialog from '../../stores/dialog'
+import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from '../../stores/connections.js'
-import { types } from '../../consts/support_redis_type.js'
+import useConnectionStore from 'stores/connections.js'
+import { types } from '@/consts/support_redis_type.js'
 
 const i18n = useI18n()
 const filterForm = reactive({
@@ -37,7 +37,7 @@ watch(
             filterForm.type = type || ''
             filterForm.pattern = pattern || '*'
         }
-    }
+    },
 )
 
 const connectionStore = useConnectionStore()

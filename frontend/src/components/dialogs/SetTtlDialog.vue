@@ -1,8 +1,8 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
-import useDialog from '../../stores/dialog'
-import useTabStore from '../../stores/tab.js'
-import useConnectionStore from '../../stores/connections.js'
+import useDialog from 'stores/dialog'
+import useTabStore from 'stores/tab.js'
+import useConnectionStore from 'stores/connections.js'
 
 const ttlForm = reactive({
     ttl: -1,
@@ -34,7 +34,7 @@ watch(
                 currentKey.value = tab.key
             }
         }
-    }
+    },
 )
 
 const onClose = () => {
