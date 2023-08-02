@@ -25,7 +25,7 @@ const onUpdate = (val) => {
     val = reject(val, { key: '' })
     emit(
         'update:value',
-        flatMap(val, (item) => [item.key, item.value])
+        flatMap(val, (item) => [item.key, item.value]),
     )
 }
 

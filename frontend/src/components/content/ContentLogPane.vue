@@ -35,7 +35,7 @@ const loadHistory = () => {
     connectionStore
         .getCmdHistory()
         .then((list) => {
-            data.history = list
+            data.history = list || []
         })
         .finally(() => {
             data.loading = false

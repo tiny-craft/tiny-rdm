@@ -5,8 +5,8 @@ Tiny RDM is a modern lightweight cross-platform Redis desktop manager available 
 ![](screenshots/light_en.png)
 
 ## Feature
-* Built on Webview, no embedded browsers (Thanks to Wails).
-* More elegant UI and visualized layout (Thanks to Naive UI).
+* Built on Webview, no embedded browsers (Thanks to [Wails](https://github.com/wailsapp/wails)).
+* More elegant UI and visualized layout (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)).
 * Multi-language support (Click here to contribute and support more languages).
 * Convenient data viewing and editing.
 * More features under continuous development...

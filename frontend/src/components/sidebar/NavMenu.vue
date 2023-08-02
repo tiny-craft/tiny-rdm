@@ -69,10 +69,6 @@ const preferencesOptions = computed(() => {
             icon: renderIcon(Help),
         },
         {
-            label: i18n.t('about'),
-            key: 'about',
-        },
-        {
             label: i18n.t('check_update'),
             key: 'update',
         },

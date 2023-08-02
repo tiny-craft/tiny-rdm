@@ -96,7 +96,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             option.splice(0, 0, {
                 value: '',
-                label: i18n.t('none'),
+                label: i18n.t('default'),
                 path: '',
             })
             return option

@@ -17,6 +17,7 @@ import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { darkTheme, lightTheme, useOsTheme } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
+import { WindowSetDarkTheme, WindowSetLightTheme } from '../wailsjs/runtime/runtime.js'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
@@ -66,11 +67,14 @@ const osTheme = useOsTheme()
 const theme = computed(() => {
     if (prefStore.general.theme === 'auto') {
         if (osTheme.value === 'dark') {
+            WindowSetDarkTheme()
             return darkTheme
         }
     } else if (prefStore.general.theme === 'dark') {
+        WindowSetDarkTheme()
         return darkTheme
     }
+    WindowSetLightTheme()
     return lightTheme
 })
 </script>

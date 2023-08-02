@@ -103,7 +103,7 @@ const dragging = computed(() => {
         </div>
 
         <!-- log page -->
-        <div v-if="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
+        <div v-show="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
             <keep-alive>
                 <content-log-pane class="flex-item-expand" />
             </keep-alive>

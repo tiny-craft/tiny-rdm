@@ -5,6 +5,7 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 
+const rootPath = new URL('.', import.meta.url).pathname
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -21,4 +22,9 @@ export default defineConfig({
         }),
         Icons(),
     ],
+    resolve: {
+        alias: {
+            '@': rootPath + 'src',
+        },
+    },
 })

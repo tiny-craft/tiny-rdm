@@ -21,7 +21,7 @@ func NewPreferences() *PreferencesStorage {
 func (p *PreferencesStorage) DefaultPreferences() map[string]any {
 	return map[string]any{
 		"general": map[string]any{
-			"language":           "en",
+			"language":           "auto",
 			"font":               "",
 			"font_size":          14,
 			"use_sys_proxy":      false,

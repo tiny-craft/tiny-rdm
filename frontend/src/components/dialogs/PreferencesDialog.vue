@@ -63,6 +63,7 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
+        :auto-focus="false"
         :title="$t('preferences')"
         preset="dialog"
         transform-origin="center"
