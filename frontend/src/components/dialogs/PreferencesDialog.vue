@@ -59,17 +59,17 @@ const onClose = () => {
 <template>
     <n-modal
         v-model:show="dialogStore.preferencesDialogVisible"
+        :auto-focus="false"
         :closable="false"
         :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
-        :auto-focus="false"
         :title="$t('preferences')"
         preset="dialog"
         transform-origin="center"
     >
         <n-spin :show="loading">
-            <n-tabs v-model:value="tab" type="line" animated>
+            <n-tabs v-model:value="tab" animated type="line">
                 <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
                     <n-form
                         :label-width="formLabelWidth"
@@ -149,13 +149,13 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :disabled="loading" @click="prefStore.restorePreferences">{{
-                    $t('restore_defaults')
-                }}</n-button>
+                <n-button :disabled="loading" @click="prefStore.restorePreferences"
+                    >{{ $t('restore_defaults') }}
+                </n-button>
             </div>
             <div class="flex-item n-dialog__action">
                 <n-button :disabled="loading" @click="onClose">{{ $t('cancel') }}</n-button>
-                <n-button type="primary" :disabled="loading" @click="onSavePreferences">{{ $t('save') }}</n-button>
+                <n-button :disabled="loading" type="primary" @click="onSavePreferences">{{ $t('save') }}</n-button>
             </div>
         </template>
     </n-modal>

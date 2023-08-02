@@ -104,12 +104,12 @@ const openGithub = () => {
         class="flex-box-v"
     >
         <n-menu
-            :collapsed-width="props.width"
-            :value="props.value"
             :collapsed="true"
             :collapsed-icon-size="iconSize"
-            @update:value="(val) => emit('update:value', val)"
+            :collapsed-width="props.width"
             :options="menuOptions"
+            :value="props.value"
+            @update:value="(val) => emit('update:value', val)"
         />
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">

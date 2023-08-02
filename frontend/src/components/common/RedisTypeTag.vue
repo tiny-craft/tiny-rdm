@@ -26,9 +26,9 @@ const backgroundColor = computed(() => {
 <template>
     <n-tag
         :bordered="props.bordered"
+        :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
         :color="{ color: backgroundColor, borderColor: fontColor, textColor: fontColor }"
         :size="props.size"
-        :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
         strong
     >
         {{ props.type }}

@@ -157,9 +157,9 @@ const onCloseTab = (tabIndex) => {
             <!-- select nothing or select server node, display server status -->
             <content-server-status
                 v-model:auto-refresh="autoRefresh"
-                :server="serverName"
                 :info="serverInfo"
                 :loading="loadingServerInfo"
+                :server="serverName"
                 @refresh="refreshInfo(true)"
             />
         </div>
@@ -171,8 +171,8 @@ const onCloseTab = (tabIndex) => {
             </n-empty>
         </div>
         <component
-            v-else
             :is="valueComponents[tabContent.type]"
+            v-else
             :db="tabContent.db"
             :key-path="tabContent.keyPath"
             :name="tabContent.name"

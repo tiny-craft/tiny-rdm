@@ -92,7 +92,7 @@ const onClose = () => {
                 <n-input-group>
                     <n-tooltip trigger="focus">
                         <template #trigger>
-                            <n-input v-model:value="filterForm.pattern" placeholder="Filter Pattern" clearable />
+                            <n-input v-model:value="filterForm.pattern" clearable placeholder="Filter Pattern" />
                         </template>
                         <div class="text-block">{{ $t('filter_pattern_tip') }}</div>
                     </n-tooltip>

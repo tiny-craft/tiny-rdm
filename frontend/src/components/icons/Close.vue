@@ -35,18 +35,18 @@ const props = defineProps({
             stroke-linejoin="round"
         />
     </svg>
-    <svg v-else width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg v-else fill="none" height="24" viewBox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
         <path
+            :stroke-width="strokeWidth"
             d="M8 8L40 40"
             stroke="currentColor"
-            :stroke-width="strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round"
         />
         <path
+            :stroke-width="strokeWidth"
             d="M8 40L40 8"
             stroke="currentColor"
-            :stroke-width="strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round"
         />

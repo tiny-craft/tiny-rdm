@@ -96,12 +96,12 @@ const onClose = () => {
                 <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
             </n-form-item>
             <n-card v-if="deleteForm.showAffected" :title="$t('affected_key')" size="small">
-                <n-skeleton v-if="deleteForm.loadingAffected" text :repeat="10" />
+                <n-skeleton v-if="deleteForm.loadingAffected" :repeat="10" text />
                 <n-log
                     v-else
-                    :rows="10"
                     :line-height="1.5"
                     :lines="deleteForm.affectedKeys"
+                    :rows="10"
                     style="user-select: text; cursor: text"
                 />
             </n-card>
@@ -113,7 +113,7 @@ const onClose = () => {
                 <n-button v-if="!deleteForm.showAffected" type="primary" @click="scanAffectedKey">
                     {{ $t('show_affected_key') }}
                 </n-button>
-                <n-button v-else type="error" :disabled="isEmpty(deleteForm.affectedKeys)" @click="onConfirmDelete">
+                <n-button v-else :disabled="isEmpty(deleteForm.affectedKeys)" type="error" @click="onConfirmDelete">
                     {{ $t('confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
                 </n-button>
             </div>

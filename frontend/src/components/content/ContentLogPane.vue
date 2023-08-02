@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onActivated, reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useConnectionStore from 'stores/connections.js'
@@ -42,8 +42,9 @@ const loadHistory = () => {
             tableRef.value?.scrollTo({ top: 999999 })
         })
 }
-onActivated(() => {
-    nextTick().then(loadHistory)
+
+defineExpose({
+    refresh: () => nextTick().then(loadHistory),
 })
 </script>
 
@@ -53,17 +54,17 @@ onActivated(() => {
         class="content-container flex-box-v"
         content-style="display: flex;flex-direction: column; overflow: hidden;"
     >
-        <n-form inline :disabled="data.loading" class="flex-item">
+        <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('filter_server')">
                 <n-select
-                    style="min-width: 100px"
                     v-model:value="data.server"
-                    :options="filterServerOption"
                     :consistent-menu-width="false"
+                    :options="filterServerOption"
+                    style="min-width: 100px"
                 />
             </n-form-item>
             <n-form-item :label="$t('filter_keyword')">
-                <n-input v-model:value="data.keyword" placeholder="" clearable />
+                <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
             <n-form-item>
                 <icon-button :icon="Refresh" border t-tooltip="refresh" @click="loadHistory" />
@@ -72,7 +73,6 @@ onActivated(() => {
         <div class="fill-height flex-box-h" style="user-select: text">
             <n-data-table
                 ref="tableRef"
-                class="flex-item-expand"
                 :columns="[
                     {
                         title: $t('exec_time'),
@@ -125,13 +125,14 @@ onActivated(() => {
                     },
                 ]"
                 :data="data.history"
+                class="flex-item-expand"
                 flex-height
             />
         </div>
     </n-card>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import '@/styles/content';
 
 .content-container {

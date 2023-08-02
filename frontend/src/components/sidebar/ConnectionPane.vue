@@ -57,7 +57,7 @@ const onDisconnectAll = () => {
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .nav-pane-bottom {
     color: v-bind('themeVars.iconColor');
     border-top: v-bind('themeVars.borderColor') 1px solid;

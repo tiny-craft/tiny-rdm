@@ -159,7 +159,7 @@ const onClose = () => {
         transform-origin="center"
     >
         <n-spin :show="closingConnection">
-            <n-tabs v-model:value="tab" type="line" animated>
+            <n-tabs v-model:value="tab" animated type="line">
                 <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
                     <n-form
                         ref="generalFormRef"
@@ -265,13 +265,13 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :loading="testing" :disabled="closingConnection" @click="onTestConnection">
+                <n-button :disabled="closingConnection" :loading="testing" @click="onTestConnection">
                     {{ $t('conn_test') }}
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">
                 <n-button :disabled="closingConnection" @click="onClose">{{ $t('cancel') }}</n-button>
-                <n-button type="primary" :disabled="closingConnection" @click="onSaveConnection">
+                <n-button :disabled="closingConnection" type="primary" @click="onSaveConnection">
                     {{ isEditMode ? $t('update') : $t('confirm') }}
                 </n-button>
             </div>

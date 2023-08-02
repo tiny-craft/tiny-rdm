@@ -204,7 +204,7 @@ const onSaveValue = async () => {
         </div>
         <div class="value-wrapper flex-item-expand flex-box-v">
             <n-scrollbar v-if="!inEdit" class="flex-item-expand">
-                <n-code :code="viewValue" :language="viewLanguage" show-line-numbers word-wrap style="cursor: text" />
+                <n-code :code="viewValue" :language="viewLanguage" show-line-numbers style="cursor: text" word-wrap />
             </n-scrollbar>
             <n-input
                 v-else

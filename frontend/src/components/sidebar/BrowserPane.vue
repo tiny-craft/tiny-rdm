@@ -77,15 +77,15 @@ const filterTypeOptions = computed(() => {
     <div class="nav-pane-container flex-box-v">
         <browser-tree :server="currentName" />
 
-        <div class="nav-pane-bottom flex-box-h" v-if="filterForm.showFilter">
+        <div v-if="filterForm.showFilter" class="nav-pane-bottom flex-box-h">
             <n-input-group>
                 <n-select
                     v-model:value="filterForm.type"
+                    :consistent-menu-width="false"
                     :options="filterTypeOptions"
                     style="width: 120px"
-                    :consistent-menu-width="false"
                 />
-                <n-input placeholder="" clearable />
+                <n-input clearable placeholder="" />
                 <n-button ghost>
                     <template #icon>
                         <n-icon :component="Search" />
@@ -117,7 +117,7 @@ const filterTypeOptions = computed(() => {
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .nav-pane-bottom {
     color: v-bind('themeVars.iconColor');
     border-top: v-bind('themeVars.borderColor') 1px solid;

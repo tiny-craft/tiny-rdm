@@ -188,7 +188,7 @@ const onClose = () => {
                         <n-button secondary type="primary" @click="newForm.ttl = -1">{{ $t('persist_key') }}</n-button>
                     </n-input-group>
                 </n-form-item>
-                <component ref="subFormRef" :is="addValueComponent[newForm.type]" v-model:value="newForm.value" />
+                <component :is="addValueComponent[newForm.type]" ref="subFormRef" v-model:value="newForm.value" />
                 <!--  TODO: Add import from txt file option -->
             </n-form>
         </n-scrollbar>

@@ -32,16 +32,16 @@ const hasTooltip = computed(() => {
 <template>
     <n-tooltip v-if="hasTooltip">
         <template #trigger>
-            <n-button :text="!border" :disabled="disabled" @click.prevent="emit('click')">
-                <n-icon :size="props.size" :color="props.color">
+            <n-button :disabled="disabled" :text="!border" @click.prevent="emit('click')">
+                <n-icon :color="props.color" :size="props.size">
                     <component :is="props.icon" :stroke-width="props.strokeWidth" />
                 </n-icon>
             </n-button>
         </template>
         {{ props.tTooltip ? $t(props.tTooltip) : props.tooltip }}
     </n-tooltip>
-    <n-button v-else :text="!border" :disabled="disabled" @click.prevent="emit('click')">
-        <n-icon :size="props.size" :color="props.color">
+    <n-button v-else :disabled="disabled" :text="!border" @click.prevent="emit('click')">
+        <n-icon :color="props.color" :size="props.size">
             <component :is="props.icon" :stroke-width="props.strokeWidth" />
         </n-icon>
     </n-button>

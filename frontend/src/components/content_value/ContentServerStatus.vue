@@ -80,36 +80,36 @@ const infoFilter = ref('')
         <n-space vertical>
             <n-card>
                 <template #header>
-                    <n-space align="center" :wrap-item="false" inline size="small">
+                    <n-space :wrap-item="false" align="center" inline size="small">
                         {{ props.server }}
                         <n-tooltip v-if="redisVersion">
                             Redis Version
                             <template #trigger>
-                                <n-tag type="primary" size="small">v{{ redisVersion }}</n-tag>
+                                <n-tag size="small" type="primary">v{{ redisVersion }}</n-tag>
                             </template>
                         </n-tooltip>
                         <n-tooltip v-if="redisMode">
                             Mode
                             <template #trigger>
-                                <n-tag type="primary" size="small">{{ redisMode }}</n-tag>
+                                <n-tag size="small" type="primary">{{ redisMode }}</n-tag>
                             </template>
                         </n-tooltip>
                         <n-tooltip v-if="redisMode">
                             Role
                             <template #trigger>
-                                <n-tag type="primary" size="small">{{ role }}</n-tag>
+                                <n-tag size="small" type="primary">{{ role }}</n-tag>
                             </template>
                         </n-tooltip>
                     </n-space>
                 </template>
                 <template #header-extra>
-                    <n-space inline align="center">
+                    <n-space align="center" inline>
                         {{ $t('auto_refresh') }}
                         <n-switch :value="props.autoRefresh" @update:value="(v) => emit('update:autoRefresh', v)" />
                         <n-tooltip>
                             {{ $t('refresh') }}
                             <template #trigger>
-                                <n-button tertiary circle size="small" @click="emit('refresh')">
+                                <n-button circle size="small" tertiary @click="emit('refresh')">
                                     <template #icon>
                                         <n-icon :component="Refresh" />
                                     </template>
@@ -119,7 +119,7 @@ const infoFilter = ref('')
                     </n-space>
                 </template>
                 <n-spin :show="props.loading">
-                    <n-grid x-gap="5" style="min-width: 500px">
+                    <n-grid style="min-width: 500px" x-gap="5">
                         <n-gi :span="6">
                             <n-statistic :label="$t('uptime')" :value="uptime[0]">
                                 <template #suffix> {{ $t(uptime[1]) }}</template>
@@ -149,15 +149,15 @@ const infoFilter = ref('')
             </n-card>
             <n-card :title="$t('all_info')">
                 <template #header-extra>
-                    <n-input v-model:value="infoFilter" placeholder="" clearable>
+                    <n-input v-model:value="infoFilter" clearable placeholder="">
                         <template #prefix>
                             <icon-button :icon="Filter" size="18" />
                         </template>
                     </n-input>
                 </template>
                 <n-spin :show="props.loading">
-                    <n-tabs type="line" placement="left" default-value="CPU">
-                        <n-tab-pane v-for="(v, k) in props.info" :key="k" :name="k" :disabled="isEmpty(v)">
+                    <n-tabs default-value="CPU" placement="left" type="line">
+                        <n-tab-pane v-for="(v, k) in props.info" :key="k" :disabled="isEmpty(v)" :name="k">
                             <n-data-table
                                 :columns="[
                                     {
@@ -183,4 +183,4 @@ const infoFilter = ref('')
     </n-scrollbar>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

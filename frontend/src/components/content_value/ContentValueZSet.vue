@@ -277,7 +277,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         style="width: 120px"
                         @update:value="onChangeFilterType"
                     />
-                    <n-tooltip :disabled="filterType !== 2" :delay="500">
+                    <n-tooltip :delay="500" :disabled="filterType !== 2">
                         <template #trigger>
                             <n-input
                                 v-model:value="filterValue"

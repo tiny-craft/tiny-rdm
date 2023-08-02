@@ -70,10 +70,10 @@ const onDeleteKey = () => {
             <redis-type-tag :type="props.keyType" size="large" />
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
-                    <icon-button :icon="Refresh" t-tooltip="reload" size="18" @click="onReloadKey" />
+                    <icon-button :icon="Refresh" size="18" t-tooltip="reload" @click="onReloadKey" />
                 </template>
             </n-input>
-            <icon-button :icon="Copy" t-tooltip="copy_key" size="18" border @click="onCopyKey" />
+            <icon-button :icon="Copy" border size="18" t-tooltip="copy_key" @click="onCopyKey" />
         </n-input-group>
         <n-button-group>
             <n-tooltip>
@@ -91,10 +91,10 @@ const onDeleteKey = () => {
                 TTL
             </n-tooltip>
             <icon-button
-                border
                 :icon="Edit"
-                t-tooltip="rename_key"
+                border
                 size="18"
+                t-tooltip="rename_key"
                 @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)"
             />
             <!--            <n-button @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)">-->

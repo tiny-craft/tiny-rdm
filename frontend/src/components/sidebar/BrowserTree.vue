@@ -582,25 +582,25 @@ const handleOutsideContextMenu = () => {
 </script>
 
 <template>
-    <div class="browser-tree-wrapper" :style="{ backgroundColor }">
+    <div :style="{ backgroundColor }" class="browser-tree-wrapper">
         <n-tree
+            :animated="false"
             :block-line="true"
             :block-node="true"
-            :animated="false"
             :cancelable="false"
             :data="data"
             :expand-on-click="false"
             :expanded-keys="expandedKeys"
-            :selected-keys="selectedKeys"
-            @update:selected-keys="onUpdateSelectedKeys"
             :node-props="nodeProps"
-            @load="onLoadTree"
-            @update:expanded-keys="onUpdateExpanded"
             :render-label="renderLabel"
             :render-prefix="renderPrefix"
             :render-suffix="renderSuffix"
+            :selected-keys="selectedKeys"
             class="fill-height"
             virtual-scroll
+            @load="onLoadTree"
+            @update:selected-keys="onUpdateSelectedKeys"
+            @update:expanded-keys="onUpdateExpanded"
         />
         <n-dropdown
             :animated="false"

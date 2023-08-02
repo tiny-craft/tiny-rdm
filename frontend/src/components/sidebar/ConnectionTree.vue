@@ -330,27 +330,27 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
 </script>
 
 <template>
-    <n-empty v-if="isEmpty(connectionStore.connections)" class="empty-content" :description="$t('empty_server_list')" />
+    <n-empty v-if="isEmpty(connectionStore.connections)" :description="$t('empty_server_list')" class="empty-content" />
     <n-tree
         v-else
-        class="fill-height"
         :animated="false"
         :block-line="true"
         :block-node="true"
         :cancelable="false"
-        :draggable="true"
         :data="connectionStore.connections"
+        :draggable="true"
         :expanded-keys="expandedKeys"
-        @update:selected-keys="onUpdateSelectedKeys"
         :node-props="nodeProps"
-        @update:expanded-keys="onUpdateExpandedKeys"
-        :selected-keys="selectedKeys"
+        :pattern="props.filterPattern"
         :render-label="renderLabel"
         :render-prefix="renderPrefix"
         :render-suffix="renderSuffix"
-        @drop="handleDrop"
-        :pattern="props.filterPattern"
+        :selected-keys="selectedKeys"
+        class="fill-height"
         virtual-scroll
+        @drop="handleDrop"
+        @update:selected-keys="onUpdateSelectedKeys"
+        @update:expanded-keys="onUpdateExpandedKeys"
     />
 
     <!-- status display modal -->
