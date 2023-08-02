@@ -1,7 +1,7 @@
 <script setup>
 import ContentPane from './components/content/ContentPane.vue'
 import BrowserPane from './components/sidebar/BrowserPane.vue'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { debounce, get } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import NavMenu from './components/sidebar/NavMenu.vue'
@@ -24,6 +24,7 @@ const data = reactive({
 const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
+const logPaneRef = ref(null)
 // const preferences = ref({})
 // provide('preferences', preferences)
 
@@ -55,11 +56,20 @@ const asideWidthVal = computed(() => {
 const dragging = computed(() => {
     return data.hoverResize || data.resizing
 })
+
+watch(
+    () => tabStore.nav,
+    (nav) => {
+        if (nav === 'log') {
+            logPaneRef.value?.refresh()
+        }
+    },
+)
 </script>
 
 <template>
     <!-- app content-->
-    <div id="app-content-wrapper" :class="{ dragging }" class="flex-box-h" :style="prefStore.generalFont">
+    <div id="app-content-wrapper" :class="{ dragging }" :style="prefStore.generalFont" class="flex-box-h">
         <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
         <!-- browser page-->
         <div v-show="tabStore.nav === 'browser'" class="flex-box-h flex-item-expand">
@@ -104,14 +114,12 @@ const dragging = computed(() => {
 
         <!-- log page -->
         <div v-show="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
-            <keep-alive>
-                <content-log-pane class="flex-item-expand" />
-            </keep-alive>
+            <content-log-pane ref="logPaneRef" class="flex-item-expand" />
         </div>
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 #app-content-wrapper {
     height: 100%;
     overflow: hidden;
