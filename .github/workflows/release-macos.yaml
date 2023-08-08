@@ -1,8 +1,9 @@
 name: Release macOS App
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   release:
@@ -60,8 +61,8 @@ jobs:
         shell: bash
         run: |
           npm install -g npm
-          npm install -g json
-          json -I -f wails.json -e "this.info.productVersion='${{ steps.normalise_version.outputs.version }}'"
+          jq '.info.productVersion = "${{ steps.normalise_version.outputs.version }}"' wails.json > tmp.json
+          mv tmp.json wails.json
           cd frontend && npm install
 
       - name: Build wails app for macOS
@@ -79,21 +80,24 @@ jobs:
         shell: bash
         run: cd build/bin && zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip TinyRDM.app
 
-      - name: Get latest release from API
-        id: get_upload_url
-        shell: bash
-        run: |
-          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" > /tmp/releases.json
-          url=$(jq -r '.[0].upload_url' /tmp/releases.json)
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
 
-      - name: Upload artifact
+      - name: Upload Release Asset
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARTIFACT_NAME: TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}
         with:
-          upload_url:  ${{ steps.get_upload_url.outputs.url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
-          asset_name: ${{ env.ARTIFACT_NAME }}.zip
+          asset_name: TinyRDM_{{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip
           asset_content_type: application/zip
