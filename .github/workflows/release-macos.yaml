@@ -23,14 +23,14 @@ jobs:
         shell: bash
         run: |
           tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
-          echo "tag={$tag}" >> GITHUB_OUTPUT
+          echo "tag={$tag}" >> "$GITHUB_OUTPUT"
 
       - name: Normalise version tag
         id: normalise_version
         shell: bash
         run: |
           version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
-          echo "version={$version}" >> GITHUB_OUTPUT
+          echo "version={$version}" >> "$GITHUB_OUTPUT"
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -83,9 +83,9 @@ jobs:
         id: get_upload_url
         shell: bash
         run: |
-          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/tiny-craft/tiny-rdm/releases" > /tmp/releases.json
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" > /tmp/releases.json
           url=$(jq -r '.[0].upload_url' /tmp/releases.json)
-          echo "{url}={$url}" >> GITHUB_OUTPUT
+          echo "url={$url}" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1.0.2
