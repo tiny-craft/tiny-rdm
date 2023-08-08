@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         platform:
-          - darwin/amd64
-          - darwin/arm64
+#          - darwin/amd64
+#          - darwin/arm64
           - darwin/universal
     steps:
       - name: Checkout source code
@@ -60,7 +60,8 @@ jobs:
         shell: bash
         run: |
           npm install -g npm
-          node version.js ${{ github.event.release.tag_name }}
+          npm install -g json
+          json -I -f wails.json -e "this.info.productVersion='${{ github.event.release.tag_name }}'"
           cd frontend && npm install
 
       - name: Build wails app for macOS
