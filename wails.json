@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "Tiny RDM",
+  "name": "tinyrdm",
   "outputfilename": "Tiny RDM",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
@@ -13,7 +13,7 @@
   "info": {
     "companyName": "Tiny Craft",
     "productName": "Tiny RDM",
-    "productVersion": "1.0.0",
+    "productVersion": "0.9.0",
     "copyright": "Copyright © 2023",
     "comments": "Tiny Redis Desktop Manager"
   }

@@ -7,6 +7,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"runtime"
 	"tinyrdm/backend/services"
@@ -71,6 +72,10 @@ func main() {
 			},
 			//WebviewIsTransparent: true,
 			//WindowIsTranslucent:  true,
+		},
+		Linux: &linux.Options{
+			Icon:             icon,
+			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
 		},
 	})
 

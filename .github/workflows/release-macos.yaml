@@ -1,0 +1,98 @@
+name: Release macOS App
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Release macOS App
+    runs-on: macos-latest # We can cross compile but need to be on macOS to notarise
+    strategy:
+      matrix:
+        platform:
+          - darwin/amd64
+          - darwin/arm64
+          - darwin/universal
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Normalise platform tag
+        id: normalise_platform
+        shell: bash
+        run: |
+          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          echo "tag={$tag}" >> GITHUB_OUTPUT
+
+      - name: Normalise version tag
+        id: normalise_version
+        shell: bash
+        run: |
+          version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
+          echo "version={$version}" >> GITHUB_OUTPUT
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
+
+#      - name: Install gon for macOS notarisation
+#        shell: bash
+#        run: wget https://github.com/mitchellh/gon/releases/download/v0.2.5/gon_macos.zip && unzip gon_macos.zip && mv gon /usr/local/bin
+#
+#      - name: Import code signing certificate from Github Secrets
+#        uses: Apple-Actions/import-codesign-certs@v1
+#        with:
+#          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
+#          p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
+
+      - name: Install wails
+        shell: bash
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install -g npm
+          node version.js ${{ github.event.release.tag_name }}
+          cd frontend && npm install
+
+      - name: Build wails app for macOS
+        shell: bash
+        run: CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+
+#      - name: Notarise macOS app + create dmg
+#        shell: bash
+#        run: gon -log-level=info gon.config.json
+#        env:
+#          AC_USERNAME: ${{ secrets.AC_USERNAME }}
+#          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+
+      - name: Compress macOS app
+        shell: bash
+        run: cd build/bin && zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip TinyRDM.app
+
+      - name: Get latest release from API
+        id: get_upload_url
+        shell: bash
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/tiny-craft/tiny-rdm/releases" > /tmp/releases.json
+          url=$(jq -r '.[0].upload_url' /tmp/releases.json)
+          echo "{url}={$url}" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACT_NAME: TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}
+        with:
+          upload_url:  ${{ steps.get_upload_url.outputs.url }}
+          asset_path: ./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
+          asset_name: ${{ env.ARTIFACT_NAME }}.zip
+          asset_content_type: application/zip
