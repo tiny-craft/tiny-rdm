@@ -61,7 +61,7 @@ jobs:
         run: |
           npm install -g npm
           npm install -g json
-          json -I -f wails.json -e "this.info.productVersion='${{ github.event.release.tag_name }}'"
+          json -I -f wails.json -e "this.info.productVersion='${{ steps.normalise_version.outputs.version }}'"
           cd frontend && npm install
 
       - name: Build wails app for macOS
@@ -85,7 +85,7 @@ jobs:
         run: |
           curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/tiny-craft/tiny-rdm/releases" > /tmp/releases.json
           url=$(jq -r '.[0].upload_url' /tmp/releases.json)
-          echo "{url}={$url}" >> $GITHUB_OUTPUT
+          echo "{url}={$url}" >> GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1.0.2
