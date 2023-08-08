@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         platform:
-#          - darwin/amd64
-#          - darwin/arm64
+          #          - darwin/amd64
+          #          - darwin/arm64
           - darwin/universal
     steps:
       - name: Checkout source code
@@ -23,29 +23,29 @@ jobs:
         shell: bash
         run: |
           tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
-          echo "tag={$tag}" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Normalise version tag
         id: normalise_version
         shell: bash
         run: |
           version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
-          echo "version={$version}" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: stable
 
-#      - name: Install gon for macOS notarisation
-#        shell: bash
-#        run: wget https://github.com/mitchellh/gon/releases/download/v0.2.5/gon_macos.zip && unzip gon_macos.zip && mv gon /usr/local/bin
-#
-#      - name: Import code signing certificate from Github Secrets
-#        uses: Apple-Actions/import-codesign-certs@v1
-#        with:
-#          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
-#          p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
+      #      - name: Install gon for macOS notarisation
+      #        shell: bash
+      #        run: wget https://github.com/mitchellh/gon/releases/download/v0.2.5/gon_macos.zip && unzip gon_macos.zip && mv gon /usr/local/bin
+      #
+      #      - name: Import code signing certificate from Github Secrets
+      #        uses: Apple-Actions/import-codesign-certs@v1
+      #        with:
+      #          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
+      #          p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
 
       - name: Install wails
         shell: bash
@@ -68,12 +68,12 @@ jobs:
         shell: bash
         run: CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
-#      - name: Notarise macOS app + create dmg
-#        shell: bash
-#        run: gon -log-level=info gon.config.json
-#        env:
-#          AC_USERNAME: ${{ secrets.AC_USERNAME }}
-#          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+      #      - name: Notarise macOS app + create dmg
+      #        shell: bash
+      #        run: gon -log-level=info gon.config.json
+      #        env:
+      #          AC_USERNAME: ${{ secrets.AC_USERNAME }}
+      #          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
 
       - name: Compress macOS app
         shell: bash
@@ -85,7 +85,7 @@ jobs:
         run: |
           curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" > /tmp/releases.json
           url=$(jq -r '.[0].upload_url' /tmp/releases.json)
-          echo "url={$url}" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact
         uses: actions/upload-release-asset@v1.0.2
