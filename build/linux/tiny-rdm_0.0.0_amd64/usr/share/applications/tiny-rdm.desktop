@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name={{.Info.ProductName}}
+Exec=/usr/local/bin/tiny-rdm %U
+Terminal=false
+Type=Application
+Icon=tiny-rdm
+StartupWMClass=tinyrdm
+Comment={{.Info.Comments}}
+MimeType=x-scheme-handler/tinyrdm;
+Categories=Office;

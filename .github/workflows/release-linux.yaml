@@ -1,0 +1,101 @@
+name: Release Linux App
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  release:
+    name: Release Linux App
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Normalise platform tag
+        id: normalise_platform
+        shell: bash
+        run: |
+          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Normalise version tag
+        id: normalise_version
+        shell: bash
+        run: |
+          version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
+
+      - name: Install wails
+        shell: bash
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install Ubuntu prerequisites
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install -g npm
+          jq '.info.productVersion = "${{ steps.normalise_version.outputs.version }}"' wails.json > tmp.json
+          mv tmp.json wails.json
+          cd frontend && npm install
+
+      - name: Build wails app for Linux
+        shell: bash
+        run: CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}" -o tiny-rdm
+
+      - name: Setup control template
+        shell: bash
+        run: |
+          content=$(cat build/linux/tiny-rdm_0.0.0_amd64/DEBIAN/control)
+          content=$(echo "$content" | sed -e "s/{{.Name}}/$(jq -r '.name' wails.json)/g")
+          content=$(echo "$content" | sed -e "s/{{.Info.ProductVersion}}/$(jq -r '.info.productVersion' wails.json)/g")
+          content=$(echo "$content" | sed -e "s/{{.Author.Name}}/$(jq -r '.author.name' wails.json)/g")
+          content=$(echo "$content" | sed -e "s/{{.Author.Email}}/$(jq -r '.author.email' wails.json)/g")
+          content=$(echo "$content" | sed -e "s/{{.Info.Comments}}/$(jq -r '.info.comments' wails.json)/g")
+          echo $content
+          echo "$content" > build/linux/tiny-rdm_0.0.0_amd64/DEBIAN/control
+
+      - name: Setup app template
+        shell: bash
+        run: |
+          content=$(cat build/linux/tiny-rdm_0.0.0_amd64/usr/share/applications/tiny-rdm.desktop)
+          content=$(echo "$content" | sed -e "s/{{.Info.ProductName}}/$(jq -r '.info.productName' wails.json)/g")
+          content=$(echo "$content" | sed -e "s/{{.Info.Comments}}/$(jq -r '.info.comments' wails.json)/g")
+          echo $content
+          echo "$content" > build/linux/tiny-rdm_0.0.0_amd64/usr/share/applications/tiny-rdm.desktop
+
+      - name: Package up deb file
+        shell: bash
+        run: |
+          mv build/bin/tiny-rdm build/linux/tiny-rdm_0.0.0_amd64/usr/local/bin/
+          cd build/linux
+          mv tiny-rdm_0.0.0_amd64 "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+          sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
+          dpkg-deb --build "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+
+      - name: Upload release asset
+        shell: bash
+        run: |
+          filepath="./build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb"
+          filename="tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
+          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
