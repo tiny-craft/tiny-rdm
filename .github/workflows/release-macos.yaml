@@ -1,9 +1,8 @@
 name: Release macOS App
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  release:
+    types: [ published ]
 
 jobs:
   release:
@@ -12,12 +11,12 @@ jobs:
     strategy:
       matrix:
         platform:
-          #          - darwin/amd64
-          #          - darwin/arm64
-          - darwin/universal
+          - darwin/amd64
+        #          - darwin/arm64
+    #          - darwin/universal
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Normalise platform tag
         id: normalise_platform
@@ -78,26 +77,34 @@ jobs:
 
       - name: Compress macOS app
         shell: bash
-        run: cd build/bin && zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip TinyRDM.app
+        run: |
+          cd build/bin
+          mv tinyrdm.app "Tiny RDM.app"
+          zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip "Tiny RDM.app"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: false
+      - name: Get latest release from API
+        id: get_upload_url
+        shell: bash
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" > /tmp/releases.json
+          url=$(jq -r '.[0].upload_url' /tmp/releases.json)
+          echo "url=${url/%{?name,label}/}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
-          asset_name: TinyRDM_{{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip
-          asset_content_type: application/zip
+      - name: Upload release asset
+        shell: bash
+        run: |
+          filepath="./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip"
+          filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
+          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
+
+#      - name: Upload artifact
+#        uses: actions/upload-release-asset@v1.0.2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          ARTIFACT_NAME: TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}
+#        with:
+#          upload_url: ${{ steps.get_upload_url.outputs.url }}
+#          asset_path: ./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
+#          asset_name: ${{ env.ARTIFACT_NAME }}.zip
+#          asset_content_type: application/zip

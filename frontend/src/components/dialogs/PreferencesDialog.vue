@@ -15,22 +15,26 @@ const i18n = useI18n()
 const message = useMessage()
 const loading = ref(false)
 
+const initPreferences = async () => {
+    try {
+        loading.value = true
+        tab.value = 'general'
+        await prefStore.loadFontList()
+        await prefStore.loadPreferences()
+        prevPreferences.value = {
+            general: prefStore.general,
+            editor: prefStore.editor,
+        }
+    } finally {
+        loading.value = false
+    }
+}
+
 watch(
     () => dialogStore.preferencesDialogVisible,
-    async (visible) => {
+    (visible) => {
         if (visible) {
-            try {
-                loading.value = true
-                tab.value = 'general'
-                await prefStore.loadFontList()
-                await prefStore.loadPreferences()
-                prevPreferences.value = {
-                    general: prefStore.general,
-                    editor: prefStore.editor,
-                }
-            } finally {
-                loading.value = false
-            }
+            nextTick().then(async () => initPreferences())
         }
     },
 )
