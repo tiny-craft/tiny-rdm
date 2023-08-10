@@ -12,7 +12,7 @@ jobs:
       matrix:
         platform:
           - darwin/amd64
-        #          - darwin/arm64
+          - darwin/arm64
     #          - darwin/universal
     steps:
       - name: Checkout source code
@@ -93,18 +93,8 @@ jobs:
       - name: Upload release asset
         shell: bash
         run: |
-          filepath="./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip"
+          filepath="TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip"
           filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
           upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
-
-#      - name: Upload artifact
-#        uses: actions/upload-release-asset@v1.0.2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          ARTIFACT_NAME: TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}
-#        with:
-#          upload_url: ${{ steps.get_upload_url.outputs.url }}
-#          asset_path: ./build/bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
-#          asset_name: ${{ env.ARTIFACT_NAME }}.zip
-#          asset_content_type: application/zip
+        working-directory: ./build/bin/

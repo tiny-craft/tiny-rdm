@@ -1,0 +1,98 @@
+name: Release Windows App
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  release:
+    name: Release Windows App
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        platform:
+          - windows/amd64
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Normalise platform tag
+        id: normalise_platform
+        shell: bash
+        run: |
+          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Normalise version tag
+        id: normalise_version
+        shell: bash
+        run: |
+          version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
+
+      - name: Install makensis
+        uses: crazy-max/ghaction-chocolatey@v2
+        with:
+          args: install nsis jq
+
+      - name: Install wails
+        shell: bash
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Build frontend assets
+        shell: bash
+        run: |
+          npm install -g npm
+          jq '.info.productVersion = "${{ steps.normalise_version.outputs.version }}"' wails.json > tmp.json
+          mv tmp.json wails.json
+          cd frontend && npm install
+
+      - name: Build Windows portable app
+        shell: bash
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+
+      - name: Compress portable binary
+        run: Compress-Archive "Tiny RDM.exe" tiny-rdm.zip
+        working-directory: ./build/bin
+
+      - name: Upload release asset (Portable)
+        shell: bash
+        run: |
+          filepath="tiny-rdm.zip"
+          filename="TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
+          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
+        working-directory: ./build/bin
+
+      - name: Build Windows NSIS installer
+        shell: bash
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+
+      - name: Codesign Windows NSIS installer
+        run: |
+          echo "Creating certificate file"
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_SIGNING_CERT }}'
+          certutil -decode certificate\certificate.txt certificate\certificate.pfx
+          echo "Signing TinyRDM installer"
+          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' TinyRDM-amd64-installer.exe
+        working-directory: ./build/bin
+
+      - name: Upload release asset (Installer)
+        shell: bash
+        run: |
+          filepath="TinyRDM-amd64-installer.exe"
+          filename="TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
+          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
+        working-directory: ./build/bin/
