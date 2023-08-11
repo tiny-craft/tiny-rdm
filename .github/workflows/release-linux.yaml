@@ -99,4 +99,4 @@ jobs:
           filename="tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
           upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
-        working-directory: ./build/bin/
+        working-directory: ./build/linux/
