@@ -22,7 +22,7 @@ jobs:
         id: normalise_platform
         shell: bash
         run: |
-          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g' -e 's/darwin/mac/g')
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Normalise version tag
@@ -52,9 +52,9 @@ jobs:
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: 16
 
       - name: Build frontend assets
         shell: bash
