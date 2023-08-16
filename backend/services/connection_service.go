@@ -12,7 +12,6 @@ import (
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	maputil "tinyrdm/backend/utils/map"
-	mathutil "tinyrdm/backend/utils/math"
 	redis2 "tinyrdm/backend/utils/redis"
 )
 
@@ -1049,7 +1048,7 @@ func (c *connectionService) GetCmdHistory(pageNo, pageSize int) (resp types.JSRe
 	} else {
 		total := len(c.cmdHistory)
 		startIndex := total / pageSize * (pageNo - 1)
-		endIndex := mathutil.Min(startIndex+pageSize, total)
+		endIndex := min(startIndex+pageSize, total)
 		resp.Data = map[string]any{
 			"list":     c.cmdHistory[startIndex:endIndex],
 			"pageNo":   pageNo,

@@ -20,11 +20,6 @@ func MaxWithIndex[T Hashable](items ...T) (T, int) {
 	return items[selIndex], selIndex
 }
 
-func Max[T Hashable](items ...T) T {
-	val, _ := MaxWithIndex(items...)
-	return val
-}
-
 // MinWithIndex 查找所有元素中的最小值
 func MinWithIndex[T Hashable](items ...T) (T, int) {
 	selIndex := -1
@@ -38,11 +33,6 @@ func MinWithIndex[T Hashable](items ...T) (T, int) {
 		}
 	}
 	return items[selIndex], selIndex
-}
-
-func Min[T Hashable](items ...T) T {
-	val, _ := MinWithIndex(items...)
-	return val
 }
 
 // Clamp 返回限制在minVal和maxVal范围内的value

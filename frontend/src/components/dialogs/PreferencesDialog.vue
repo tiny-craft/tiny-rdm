@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import useDialog from 'stores/dialog'
 import usePreferencesStore from 'stores/preferences.js'
@@ -34,7 +34,7 @@ watch(
     () => dialogStore.preferencesDialogVisible,
     (visible) => {
         if (visible) {
-            nextTick().then(async () => initPreferences())
+            nextTick().then(initPreferences)
         }
     },
 )
