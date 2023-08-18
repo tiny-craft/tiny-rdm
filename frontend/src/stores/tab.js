@@ -208,13 +208,17 @@ const useTabStore = defineStore('tab', {
          * @param {string} server
          * @param {string|string[]} keys
          */
-        setSelectedKeys(server, keys) {
-            if (typeof keys === 'string') {
-                keys = [keys]
-            }
+        setSelectedKeys(server, keys = null) {
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
-                tab.selectedKeys = keys
+                if (keys == null) {
+                    // select nothing
+                    tab.selectedKeys = [server]
+                } else if (typeof keys === 'string') {
+                    tab.selectedKeys = [keys]
+                } else {
+                    tab.selectedKeys = keys
+                }
             }
         },
     },
