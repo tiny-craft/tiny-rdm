@@ -4,7 +4,7 @@ import AddLink from '@/components/icons/AddLink.vue'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { get } from 'lodash'
 import Delete from '@/components/icons/Delete.vue'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -19,6 +19,7 @@ const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
 const tabStore = useTabStore()
 const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
+const browserTreeRef = ref(null)
 /**
  *
  * @type {ComputedRef<{server: string, db: number, key: string}>}
@@ -35,23 +36,13 @@ const onNewKey = () => {
 
 const i18n = useI18n()
 const connectionStore = useConnectionStore()
-const confirmDialog = useConfirmDialog()
 const message = useMessage()
 const onDeleteKey = () => {
-    const { server, db, key } = currentSelect.value
-    confirmDialog.warning(i18n.t('remove_tip', { name: key }), () => {
-        connectionStore.deleteKey(server, db, key).then((success) => {
-            if (success) {
-                message.success(i18n.t('delete_key_succ', { key }))
-            }
-        })
-    })
+    browserTreeRef.value?.handleSelectContextMenu('value_remove')
 }
 
 const onRefresh = () => {
-    connectionStore.openConnection(currentSelect.value.server, true).then(() => {
-        message.success(i18n.t('reload_succ'))
-    })
+    browserTreeRef.value?.handleSelectContextMenu('server_reload')
 }
 
 const filterForm = reactive({
@@ -75,7 +66,7 @@ const filterTypeOptions = computed(() => {
 
 <template>
     <div class="nav-pane-container flex-box-v">
-        <browser-tree :server="currentName" />
+        <browser-tree ref="browserTreeRef" :server="currentName" />
 
         <div v-if="filterForm.showFilter" class="nav-pane-bottom flex-box-h">
             <n-input-group>
