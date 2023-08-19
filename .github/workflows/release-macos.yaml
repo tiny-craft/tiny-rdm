@@ -77,24 +77,33 @@ jobs:
 
       - name: Compress macOS app
         shell: bash
+        working-directory: ./build/bin
         run: |
-          cd build/bin
           mv tinyrdm.app "Tiny RDM.app"
           zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip "Tiny RDM.app"
 
-      - name: Get latest release from API
-        id: get_upload_url
+      - name: Upload release asset (ZIP Package)
         shell: bash
-        run: |
-          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" > /tmp/releases.json
-          url=$(jq -r '.[0].upload_url' /tmp/releases.json)
-          echo "url=${url/%{?name,label}/}" >> "$GITHUB_OUTPUT"
-
-      - name: Upload release asset
-        shell: bash
+        working-directory: ./build/bin/
         run: |
           filepath="TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip"
           filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
           upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
+
+      - name: Build macOS DMG
+        shell: bash
+        working-directory: ./build/bin
+        run: |
+          rm TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
+          ln -s /Applications Applications
+          hdiutil create -volname "Tiny RDM" -srcfolder . -ov -format UDBZ TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg
+
+      - name: Upload release asset (DMG Package)
+        shell: bash
         working-directory: ./build/bin/
+        run: |
+          filepath="TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg"
+          filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.dmg"
+          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/x-apple-diskimage" --data-binary @$filepath "$upload_url?name=$filename"

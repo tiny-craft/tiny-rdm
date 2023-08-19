@@ -1,6 +1,7 @@
 Package: {{.Name}}
 Version: {{.Info.ProductVersion}}
 Section: base
+Depends: libc6 (>= 2.34), libc6 (>= 2.32)
 Priority: optional
 Architecture: amd64
 Maintainer: {{.Author.Name}} <{{.Author.Email}}>

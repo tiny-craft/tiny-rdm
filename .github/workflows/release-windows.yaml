@@ -62,23 +62,24 @@ jobs:
         run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Compress portable binary
-        run: Compress-Archive "Tiny RDM.exe" tiny-rdm.zip
         working-directory: ./build/bin
+        run: Compress-Archive "Tiny RDM.exe" tiny-rdm.zip
 
       - name: Upload release asset (Portable)
         shell: bash
+        working-directory: ./build/bin
         run: |
           filepath="tiny-rdm.zip"
           filename="TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
           upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
-        working-directory: ./build/bin
 
       - name: Build Windows NSIS installer
         shell: bash
         run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Codesign Windows NSIS installer
+        working-directory: ./build/bin
         run: |
           echo "Creating certificate file"
           New-Item -ItemType directory -Path certificate
@@ -86,13 +87,12 @@ jobs:
           certutil -decode certificate\certificate.txt certificate\certificate.pfx
           echo "Signing TinyRDM installer"
           & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' TinyRDM-amd64-installer.exe
-        working-directory: ./build/bin
 
       - name: Upload release asset (Installer)
         shell: bash
+        working-directory: ./build/bin/
         run: |
           filepath="TinyRDM-amd64-installer.exe"
           filename="TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
           upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
-        working-directory: ./build/bin/
