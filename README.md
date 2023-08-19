@@ -1,9 +1,17 @@
-<h4 align="right"><strong>English</strong> | <a href="/README_zh.md">简体中文</a></h4>
-<p align="center">
-    <img src=build/appicon.png width=120 />
-</p>
-<h1 align="center">Tiny RDM</h1>
-<p align="center"><strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong></p>
+<h4 align="right"><strong>English</strong> | <a href="https://github.com/tiny-craft/tiny-rdm/blob/main/README_zh.md">简体中文</a></h4>
+<div style="text-align: center;">
+<a href="https://github.com/tiny-craft/tiny-rdm/"><img src="build/appicon.png" width="120"/></a>
+</div>
+<h1 style="text-align: center;">Tiny RDM</h1>
+<div style="text-align: center;">
+
+[![License](https://img.shields.io/github/license/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/blob/main/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/releases)
+[![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+
+<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong>
+</div>
 
 ![](screenshots/light_en.png)
 
