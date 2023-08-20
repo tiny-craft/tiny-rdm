@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
-import { useMessage } from 'naive-ui'
+import { useMessage } from '@/utils/message.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 import { isEmpty } from 'lodash'

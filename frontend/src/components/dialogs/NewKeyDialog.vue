@@ -10,9 +10,10 @@ import NewZSetValue from '@/components/new_value/NewZSetValue.vue'
 import NewSetValue from '@/components/new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
-import { NSpace, useMessage } from 'naive-ui'
+import { NSpace } from 'naive-ui'
 import useTabStore from 'stores/tab.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
+import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
 const newForm = reactive({

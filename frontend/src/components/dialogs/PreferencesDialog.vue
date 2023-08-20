@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import useDialog from 'stores/dialog'
 import usePreferencesStore from 'stores/preferences.js'
-import { useMessage } from 'naive-ui'
+import { useMessage } from '@/utils/message.js'
 
 const prefStore = usePreferencesStore()
 

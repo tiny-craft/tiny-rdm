@@ -3,15 +3,16 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useMessage } from 'naive-ui'
+import { NButton, NCode, NIcon, NInput } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
 import useConnectionStore from 'stores/connections.js'
 import { includes, keys, some, values } from 'lodash'
+import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
-
+const message = useMessage()
 const props = defineProps({
     name: String,
     db: Number,
@@ -120,7 +121,7 @@ const tableData = computed(() => {
     }
     return data
 })
-const message = useMessage()
+
 const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, types.STREAM)
 }

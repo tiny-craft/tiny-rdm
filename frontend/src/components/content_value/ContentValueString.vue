@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
-import { useMessage, useThemeVars } from 'naive-ui'
+import { useThemeVars } from 'naive-ui'
 import { types } from '@/consts/value_view_type.js'
 import Close from '@/components/icons/Close.vue'
 import Edit from '@/components/icons/Edit.vue'
@@ -13,7 +13,10 @@ import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
+import { useMessage } from '@/utils/message.js'
 
+const i18n = useI18n()
+const message = useMessage()
 const themeVars = useThemeVars()
 
 const props = defineProps({
@@ -106,8 +109,6 @@ const viewLanguage = computed(() => {
             return 'plaintext'
     }
 })
-const i18n = useI18n()
-const message = useMessage()
 
 /**
  * Copy value

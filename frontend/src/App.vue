@@ -88,25 +88,23 @@ const theme = computed(() => {
         class="fill-height"
     >
         <n-global-style />
-        <n-message-provider>
-            <n-dialog-provider>
-                <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }">
-                    <div id="launch-container" />
-                </n-spin>
-                <app-content v-if="!initializing" class="flex-item-expand" />
+        <n-dialog-provider>
+            <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }">
+                <div id="launch-container" />
+            </n-spin>
+            <app-content v-if="!initializing" class="flex-item-expand" />
 
-                <!-- top modal dialogs -->
-                <connection-dialog />
-                <group-dialog />
-                <new-key-dialog />
-                <key-filter-dialog />
-                <add-fields-dialog />
-                <rename-key-dialog />
-                <delete-key-dialog />
-                <set-ttl-dialog />
-                <preferences-dialog />
-            </n-dialog-provider>
-        </n-message-provider>
+            <!-- top modal dialogs -->
+            <connection-dialog />
+            <group-dialog />
+            <new-key-dialog />
+            <key-filter-dialog />
+            <add-fields-dialog />
+            <rename-key-dialog />
+            <delete-key-dialog />
+            <set-ttl-dialog />
+            <preferences-dialog />
+        </n-dialog-provider>
     </n-config-provider>
 </template>
 

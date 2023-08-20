@@ -1,5 +1,5 @@
 <script setup>
-import { useMessage, useThemeVars } from 'naive-ui'
+import { useThemeVars } from 'naive-ui'
 import AddLink from '@/components/icons/AddLink.vue'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
@@ -9,7 +9,6 @@ import { get } from 'lodash'
 import Delete from '@/components/icons/Delete.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
@@ -36,7 +35,6 @@ const onNewKey = () => {
 
 const i18n = useI18n()
 const connectionStore = useConnectionStore()
-const message = useMessage()
 const onDeleteKey = () => {
     browserTreeRef.value?.handleSelectContextMenu('value_remove')
 }

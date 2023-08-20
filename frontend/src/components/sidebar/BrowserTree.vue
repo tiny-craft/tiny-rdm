@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { NIcon, NSpace, NTag, useDialog, useMessage } from 'naive-ui'
+import { NIcon, NSpace, NTag, useDialog } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
 import { find, get, includes, indexOf, isEmpty, remove } from 'lodash'
@@ -23,6 +23,7 @@ import Close from '@/components/icons/Close.vue'
 import { typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
+import { useMessage } from '@/utils/message.js'
 
 const props = defineProps({
     server: String,
@@ -217,6 +218,82 @@ const expandKey = (key) => {
         expandedKeys.value.splice(idx, 1)
     }
 }
+
+const confirmDialog = useConfirmDialog()
+const handleSelectContextMenu = (key) => {
+    contextMenuParam.show = false
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    const node = connectionStore.getNode(selectedKey)
+    const { db, key: nodeKey, redisKey } = node || {}
+    switch (key) {
+        case 'server_reload':
+            expandedKeys.value = [props.server]
+            tabStore.setSelectedKeys(props.server)
+            connectionStore.openConnection(props.server, true).then(() => {
+                message.success(i18n.t('reload_succ'))
+            })
+            break
+        case 'server_close':
+            connectionStore.closeConnection(props.server)
+            break
+        case 'db_open':
+            nextTick().then(() => expandKey(nodeKey))
+            break
+        case 'db_reload':
+            connectionStore.reopenDatabase(props.server, db)
+            break
+        case 'db_close':
+            remove(expandedKeys.value, (k) => k === `${props.server}/db${db}`)
+            connectionStore.closeDatabase(props.server, db)
+            break
+        case 'db_newkey':
+        case 'key_newkey':
+            dialogStore.openNewKeyDialog(redisKey, props.server, db)
+            break
+        case 'db_filter':
+            const { match: pattern, type } = connectionStore.getKeyFilter(props.server, db)
+            dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
+            break
+        case 'key_reload':
+            connectionStore.loadKeys(props.server, db, redisKey)
+            break
+        case 'value_reload':
+            connectionStore.loadKeyValue(props.server, db, redisKey)
+            break
+        case 'key_remove':
+            dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
+            break
+        case 'value_remove':
+            confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
+                connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
+                    if (success) {
+                        message.success(i18n.t('delete_key_succ', { key: redisKey }))
+                    }
+                })
+            })
+            break
+        case 'key_copy':
+        case 'value_copy':
+            ClipboardSetText(redisKey)
+                .then((succ) => {
+                    if (succ) {
+                        message.success(i18n.t('copy_succ'))
+                    }
+                })
+                .catch((e) => {
+                    message.error(e.message)
+                })
+            break
+        default:
+            console.warn('TODO: handle context menu:' + key)
+    }
+}
+defineExpose({
+    handleSelectContextMenu,
+})
 
 const message = useMessage()
 const dialog = useDialog()
@@ -504,81 +581,6 @@ const onLoadTree = async (node) => {
         //     break
     }
 }
-
-const confirmDialog = useConfirmDialog()
-defineExpose({
-    handleSelectContextMenu: (key) => {
-        contextMenuParam.show = false
-        const selectedKey = get(selectedKeys.value, 0)
-        if (selectedKey == null) {
-            return
-        }
-        const node = connectionStore.getNode(selectedKey)
-        const { db, key: nodeKey, redisKey } = node || {}
-        switch (key) {
-            case 'server_reload':
-                expandedKeys.value = [props.server]
-                tabStore.setSelectedKeys(props.server)
-                connectionStore.openConnection(props.server, true).then(() => {
-                    message.success(i18n.t('reload_succ'))
-                })
-                break
-            case 'server_close':
-                connectionStore.closeConnection(props.server)
-                break
-            case 'db_open':
-                nextTick().then(() => expandKey(nodeKey))
-                break
-            case 'db_reload':
-                connectionStore.reopenDatabase(props.server, db)
-                break
-            case 'db_close':
-                remove(expandedKeys.value, (k) => k === `${props.server}/db${db}`)
-                connectionStore.closeDatabase(props.server, db)
-                break
-            case 'db_newkey':
-            case 'key_newkey':
-                dialogStore.openNewKeyDialog(redisKey, props.server, db)
-                break
-            case 'db_filter':
-                const { match: pattern, type } = connectionStore.getKeyFilter(props.server, db)
-                dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
-                break
-            case 'key_reload':
-                connectionStore.loadKeys(props.server, db, redisKey)
-                break
-            case 'value_reload':
-                connectionStore.loadKeyValue(props.server, db, redisKey)
-                break
-            case 'key_remove':
-                dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
-                break
-            case 'value_remove':
-                confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
-                    connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
-                        if (success) {
-                            message.success(i18n.t('delete_key_succ', { key: redisKey }))
-                        }
-                    })
-                })
-                break
-            case 'key_copy':
-            case 'value_copy':
-                ClipboardSetText(redisKey)
-                    .then((succ) => {
-                        if (succ) {
-                            message.success(i18n.t('copy_succ'))
-                        }
-                    })
-                    .catch((e) => {
-                        message.error(e.message)
-                    })
-                break
-            default:
-                console.warn('TODO: handle context menu:' + key)
-        }
-    },
-})
 
 const handleOutsideContextMenu = () => {
     contextMenuParam.show = false

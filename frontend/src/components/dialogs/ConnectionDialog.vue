@@ -4,7 +4,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TestConnection } from 'wailsjs/go/services/connectionService.js'
 import useDialog from 'stores/dialog'
-import { useMessage } from 'naive-ui'
+import { useMessage } from '@/utils/message.js'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
 

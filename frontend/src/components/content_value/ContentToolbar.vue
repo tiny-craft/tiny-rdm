@@ -7,12 +7,12 @@ import Refresh from '@/components/icons/Refresh.vue'
 import Timer from '@/components/icons/Timer.vue'
 import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
-import { useMessage } from 'naive-ui'
 import IconButton from '@/components/common/IconButton.vue'
 import useConnectionStore from 'stores/connections.js'
 import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
+import { useMessage } from '@/utils/message.js'
 
 const props = defineProps({
     server: String,
