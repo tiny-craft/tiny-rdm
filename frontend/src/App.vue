@@ -18,34 +18,10 @@ import { useI18n } from 'vue-i18n'
 import { darkTheme, lightTheme, useOsTheme } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
+import { themeOverrides } from '@/utils/theme.js'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
-
-/**
- *
- * @type import('naive-ui').GlobalThemeOverrides
- */
-const themeOverrides = {
-    common: {
-        primaryColor: '#D33A31',
-        primaryColorHover: '#FF6B6B',
-        primaryColorPressed: '#D5271C',
-        primaryColorSuppl: '#FF6B6B',
-        borderRadius: '4px',
-        borderRadiusSmall: '3px',
-        lineHeight: 1.5,
-        scrollbarWidth: '8px',
-    },
-    Tag: {
-        // borderRadius: '3px'
-    },
-    Tabs: {
-        tabGapSmallCard: '1px',
-        tabGapMediumCard: '1px',
-        tabGapLargeCard: '1px',
-    },
-}
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -58,6 +34,9 @@ onBeforeMount(async () => {
         i18n.locale.value = prefStore.currentLanguage
         await prefStore.loadFontList()
         await connectionStore.initConnections()
+        if (prefStore.autoCheckUpdate) {
+            prefStore.checkForUpdate()
+        }
     } finally {
         initializing.value = false
     }

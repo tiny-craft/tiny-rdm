@@ -1,6 +1,11 @@
 import { createDiscreteApi } from 'naive-ui'
+import { themeOverrides } from '@/utils/theme.js'
 
-const { message } = createDiscreteApi(['message'])
+const { message } = createDiscreteApi(['message'], {
+    configProviderProps: {
+        themeOverrides,
+    },
+})
 
 export function useMessage() {
     return {

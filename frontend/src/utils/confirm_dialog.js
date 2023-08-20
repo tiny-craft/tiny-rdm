@@ -1,7 +1,12 @@
 import { createDiscreteApi } from 'naive-ui'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { themeOverrides } from '@/utils/theme.js'
 
-const { dialog } = createDiscreteApi(['dialog'])
+const { dialog } = createDiscreteApi(['dialog'], {
+    configProviderProps: {
+        themeOverrides,
+    },
+})
 
 export function useConfirmDialog() {
     return {
