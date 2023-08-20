@@ -142,6 +142,8 @@
   "help": "Help",
   "check_update": "Check for Updates...",
   "auto_refresh": "Auto Refresh",
+  "new_version_tip": "A new version is available. Download now?",
+  "no_update": "You're update to date",
   "refresh": "Refresh",
   "uptime": "Uptime",
   "connected_clients": "Clients",

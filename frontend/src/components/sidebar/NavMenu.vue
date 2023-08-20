@@ -12,6 +12,7 @@ import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import Log from '@/components/icons/Log.vue'
 import useConnectionStore from 'stores/connections.js'
 import Help from '@/components/icons/Help.vue'
+import usePreferencesStore from 'stores/preferences.js'
 
 const themeVars = useThemeVars()
 
@@ -80,12 +81,14 @@ const renderContextLabel = (option) => {
 }
 
 const dialogStore = useDialogStore()
+const preferencesStore = usePreferencesStore()
 const onSelectPreferenceMenu = (key) => {
     switch (key) {
         case 'preferences':
             dialogStore.openPreferencesDialog()
             break
         case 'update':
+            preferencesStore.checkForUpdate(true)
             break
     }
 }

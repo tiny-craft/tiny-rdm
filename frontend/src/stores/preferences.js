@@ -131,6 +131,10 @@ const usePreferencesStore = defineStore('preferences', {
             }
             return lang || 'en'
         },
+
+        autoCheckUpdate() {
+            return get(this.general, 'checkUpdate', false)
+        },
     },
     actions: {
         _applyPreferences(data) {
@@ -215,6 +219,37 @@ const usePreferencesStore = defineStore('preferences', {
 
         setAsideWidth(width) {
             this.general.asideWidth = width
+        },
+
+        async checkForUpdate(manual = false) {
+            const message = useMessage()
+            const confirmDialog = useConfirmDialog()
+            let msgRef = null
+            if (manual) {
+                msgRef = message.loading('Retrieving for new version', { duration: 0 })
+            }
+            let respObj = null
+            try {
+                const resp = await fetch('https://api.github.com/repos/tiny-craft/tiny-rdm/releases/latest')
+                if (resp.status === 200) {
+                    respObj = await resp.json()
+                }
+            } finally {
+                if (msgRef != null) {
+                    msgRef.destroy()
+                    msgRef = null
+                }
+            }
+
+            if (respObj != null && !isEmpty(respObj['html_url'])) {
+                confirmDialog.warning(i18nGlobal.t('new_version_tip'), () => {
+                    BrowserOpenURL(respObj['html_url'])
+                })
+            } else {
+                if (manual) {
+                    message.info(i18nGlobal.t('no_update'))
+                }
+            }
         },
     },
 })
