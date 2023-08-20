@@ -803,9 +803,9 @@ const useConnectionStore = defineStore('connections', {
          * @return {DatabaseItem|null}
          */
         getNode(key) {
-            const idx = key.indexOf('#')
+            let idx = key.indexOf('#')
             if (idx < 0) {
-                return null
+                idx = size(key)
             }
             const dbPart = key.substring(0, idx)
             // parse server and db index
