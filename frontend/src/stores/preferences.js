@@ -7,7 +7,10 @@ import {
     RestorePreferences,
     SetPreferences,
 } from 'wailsjs/go/services/preferencesService.js'
-import { useI18n } from 'vue-i18n'
+import { useMessage } from '@/utils/message.js'
+import { useConfirmDialog } from '@/utils/confirm_dialog.js'
+import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
+import { i18nGlobal } from '@/utils/i18n.js'
 
 const usePreferencesStore = defineStore('preferences', {
     /**
@@ -49,19 +52,18 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         themeOption() {
-            const i18n = useI18n()
             return [
                 {
                     value: 'light',
-                    label: i18n.t('theme_light'),
+                    label: i18nGlobal.t('theme_light'),
                 },
                 {
                     value: 'dark',
-                    label: i18n.t('theme_dark'),
+                    label: i18nGlobal.t('theme_dark'),
                 },
                 {
                     value: 'auto',
-                    label: i18n.t('theme_auto'),
+                    label: i18nGlobal.t('theme_auto'),
                 },
             ]
         },
@@ -71,14 +73,13 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {{label: string, value: string}[]}
          */
         langOption() {
-            const i18n = useI18n()
             const options = Object.entries(lang).map(([key, value]) => ({
                 value: key,
                 label: value['lang_name'],
             }))
             options.splice(0, 0, {
                 value: 'auto',
-                label: i18n.t('system_lang'),
+                label: i18nGlobal.t('system_lang'),
             })
             return options
         },
@@ -88,7 +89,6 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {{path: string, label: string, value: string}[]}
          */
         fontOption() {
-            const i18n = useI18n()
             const option = map(this.fontList, (font) => ({
                 value: font.name,
                 label: font.name,
@@ -96,7 +96,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             option.splice(0, 0, {
                 value: '',
-                label: i18n.t('default'),
+                label: i18nGlobal.t('default'),
                 path: '',
             })
             return option
