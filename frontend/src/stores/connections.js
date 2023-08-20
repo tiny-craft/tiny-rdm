@@ -1,20 +1,5 @@
 import { defineStore } from 'pinia'
-import {
-    endsWith,
-    findLastIndex,
-    get,
-    isEmpty,
-    join,
-    lastIndexOf,
-    remove,
-    size,
-    slice,
-    sortedIndexBy,
-    split,
-    sumBy,
-    toUpper,
-    uniq,
-} from 'lodash'
+import { endsWith, get, isEmpty, join, remove, size, slice, sortedIndexBy, split, sumBy, toUpper, uniq } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -818,24 +803,27 @@ const useConnectionStore = defineStore('connections', {
          * @return {DatabaseItem|null}
          */
         getNode(key) {
-            const p1 = split(key, '#', 1)
-            let redisKey = null
-            // parse server and db index
-            const idx = p1[0].lastIndexOf('/db')
+            const idx = key.indexOf('#')
             if (idx < 0) {
                 return null
             }
-            const server = p1[0].substring(0, idx)
-            const db = parseInt(p1[0].substring(idx + 3))
+            const dbPart = key.substring(0, idx)
+            // parse server and db index
+            const idx2 = dbPart.lastIndexOf('/db')
+            if (idx2 < 0) {
+                return null
+            }
+            const server = dbPart.substring(0, idx2)
+            const db = parseInt(dbPart.substring(idx2 + 3))
             if (isNaN(db)) {
                 return null
             }
 
-            if (size(p1) > 1) {
+            if (size(key) > idx + 1) {
+                const keyPart = key.substring(idx + 1)
                 // contains redis key
-                redisKey = p1[1]
                 const nodeMap = this._getNodeMap(server, db)
-                return nodeMap.get(key)
+                return nodeMap.get(keyPart)
             } else {
                 return this.databases[server][db]
             }
