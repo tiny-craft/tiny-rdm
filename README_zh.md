@@ -28,6 +28,32 @@
 
 提供Mac、Windows和Linux下载安装，可[免费下载](https://github.com/tiny-craft/tiny-rdm/releases)。
 
+## 构建项目
+### 运行环境要求
+* Go >= 1.21
+* Node.js >= 16
+* NPM
+
+### 安装wails
+```bash
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+```
+
+### 拉取代码
+```bash
+git clone https://github.com/tiny-craft/tiny-rdm --depth=1
+```
+
+### 构建前端代码
+```bash
+npm install --prefix ./frontend
+```
+
+### 编译运行开发版本
+```bash
+wails dev
+```
+
 ## 关于
 此APP由我个人开发，也作为本人第一个开源项目的尝试，由于精力有限，可能会存在BUG或者使用体验上的问题，欢迎提交issue和PR。
 同时本人也在探索开源代码、独立开发和盈利性商业应用之间的平衡关系，欢迎有共同意向的小伙伴加入群聊探讨和交换想法。

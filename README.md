@@ -29,6 +29,32 @@
 We publish binaries for Mac, Windows, and Linux.
 Available to download for free from [here](https://github.com/tiny-craft/tiny-rdm/releases).
 
+## Build
+### Prerequisites
+* Go >= 1.21
+* Node.js >= 16
+* NPM
+
+### Install wails
+```bash
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+```
+
+### Clone the code
+```bash
+git clone https://github.com/tiny-craft/tiny-rdm --depth=1
+```
+
+### Build frontend
+```bash
+npm install --prefix ./frontend
+```
+
+### Compile and run
+```bash
+wails dev
+```
+
 ## License
 
 Tiny RDM is licensed under [GNU General Public](/LICENSE) license.

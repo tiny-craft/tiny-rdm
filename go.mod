@@ -6,7 +6,7 @@ require (
 	github.com/adrg/sysfont v0.1.2
 	github.com/bytedance/sonic v1.10.0
 	github.com/google/go-cmp v0.5.9
-	github.com/redis/go-redis/v9 v9.0.5
+	github.com/redis/go-redis/v9 v9.1.0
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.5.1
 	gopkg.in/yaml.v3 v3.0.1
