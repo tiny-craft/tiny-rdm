@@ -241,6 +241,7 @@ const usePreferencesStore = defineStore('preferences', {
                 }
             }
 
+            // TODO: check current version is older then remote
             if (respObj != null && !isEmpty(respObj['html_url'])) {
                 confirmDialog.warning(i18nGlobal.t('new_version_tip'), () => {
                     BrowserOpenURL(respObj['html_url'])
