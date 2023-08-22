@@ -35,10 +35,10 @@ jobs:
         with:
           go-version: stable
 
-      - name: Install makensis
+      - name: Install chocolatey
         uses: crazy-max/ghaction-chocolatey@v2
         with:
-          args: install nsis jq
+          args: install nsis jq upx
 
       - name: Install wails
         shell: bash
@@ -59,7 +59,7 @@ jobs:
 
       - name: Build Windows portable app
         shell: bash
-        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -upx -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Compress portable binary
         working-directory: ./build/bin
@@ -76,7 +76,7 @@ jobs:
 
       - name: Build Windows NSIS installer
         shell: bash
-        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -upx -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Codesign Windows NSIS installer
         working-directory: ./build/bin
