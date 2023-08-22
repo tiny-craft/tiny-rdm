@@ -1,11 +1,10 @@
 package coll
 
 import (
+	"encoding/json"
 	"fmt"
-	json "github.com/bytedance/sonic"
 	"sort"
 	. "tinyrdm/backend/utils"
-	"tinyrdm/backend/utils/rand"
 )
 
 type Void struct{}
@@ -165,31 +164,6 @@ func (s Set[T]) Filter(filterFunc func(i T) bool) []T {
 		}
 	}
 	return ret
-}
-
-// RandomElem 随机抽取一个元素
-// @param remove 随机出来的元素是否同时从集合中移除
-// @return 抽取的元素
-// @return 是否抽取成功
-func (s Set[T]) RandomElem(remove bool) (T, bool) {
-	size := s.Size()
-	if size > 0 {
-		selIdx := rand.Intn(size)
-		idx := 0
-		for elem := range s {
-			if idx == selIdx {
-				if remove {
-					delete(s, elem)
-				}
-				return elem, true
-			} else {
-				idx++
-			}
-		}
-	}
-
-	var r T
-	return r, false
 }
 
 // Size 集合长度

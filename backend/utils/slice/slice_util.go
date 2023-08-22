@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	. "tinyrdm/backend/utils"
-	"tinyrdm/backend/utils/rand"
 )
 
 // Get 获取指定索引的值, 如果不存在则返回默认值
@@ -375,74 +374,6 @@ func RemoveRight[S ~[]T, T comparable](arr S, val T) S {
 		}
 	}
 	return arr
-}
-
-// RandomElem 从切片中随机抽一个
-func RandomElem[S ~[]T, T any](arr S) T {
-	l := len(arr)
-	if l <= 0 {
-		var r T
-		return r
-	}
-	return arr[rand.Intn(l)]
-}
-
-// RandomElems 从切片中随机抽多个
-// 如果切片长度为空, 则返回空切片
-func RandomElems[S ~[]T, T any](arr S, count int) []T {
-	l := len(arr)
-	ret := make([]T, 0, l)
-	if l <= 0 {
-		return ret
-	}
-
-	idxList := rand.IntnCount(l, count)
-	for _, idx := range idxList {
-		ret = append(ret, arr[idx])
-	}
-	return ret
-}
-
-// RandomUniqElems 从切片中随机抽多个不同的元素
-// 如果切片长度为空, 则返回空切片
-// 如果所需数量大于切片唯一元素数量, 则返回整个切片
-func RandomUniqElems[S ~[]T, T Hashable](arr S, count int) []T {
-	if len(arr) <= 0 {
-		// 可选列表为空, 返回空切片
-		return []T{}
-	}
-	// 转换为集合
-	uniqList := Unique(arr)
-	uniqLen := len(uniqList)
-	if uniqLen <= count {
-		// 可选集合总数<=所需元素数量, 直接返回整个可选集合
-		return uniqList
-	}
-
-	if count >= uniqLen/2 {
-		// 所需唯一元素大于可选集合一半, 随机筛掉(uniqLen-count)个元素
-		for i := 0; i < uniqLen-count; i++ {
-			uniqList = Remove(uniqList, rand.Intn(uniqLen-i))
-		}
-		return uniqList
-	} else {
-		// 所需唯一元素小于可选集合一半, 随机抽取count个元素
-		res := make([]T, count)
-		var idx int
-		for i := 0; i < count; i++ {
-			idx = rand.Intn(uniqLen - i)
-			res[i] = uniqList[idx]
-			uniqList = Remove(uniqList, idx)
-		}
-		return res
-	}
-}
-
-// Clone 复制切片
-func Clone[S ~[]T, T any](src S) S {
-	dest := make(S, len(src))
-	copy(dest, src)
-	return dest
 }
 
 // Count 统计制定条件元素数量
