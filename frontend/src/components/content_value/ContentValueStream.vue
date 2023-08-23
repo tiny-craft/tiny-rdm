@@ -22,7 +22,7 @@ const props = defineProps({
     value: Object,
 })
 
-const filterOption = computed(() => [
+const filterOption = [
     {
         value: 1,
         label: i18n.t('field'),
@@ -31,7 +31,7 @@ const filterOption = computed(() => [
         value: 2,
         label: i18n.t('value'),
     },
-])
+]
 const filterType = ref(1)
 
 const connectionStore = useConnectionStore()
