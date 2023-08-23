@@ -1,7 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
-import { useMessage } from '@/utils/message.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 import { isEmpty } from 'lodash'
@@ -29,27 +28,26 @@ watch(
 )
 
 const i18n = useI18n()
-const message = useMessage()
 const onConfirm = async () => {
     try {
         const { name } = groupForm
         if (isRenameMode.value) {
             const { success, msg } = await connectionStore.renameGroup(editGroup.value, name)
             if (success) {
-                message.success(i18n.t('handle_succ'))
+                $message.success(i18n.t('handle_succ'))
             } else {
-                message.error(msg)
+                $message.error(msg)
             }
         } else {
             const { success, msg } = await connectionStore.createGroup(name)
             if (success) {
-                message.success(i18n.t('handle_succ'))
+                $message.success(i18n.t('handle_succ'))
             } else {
-                message.error(msg)
+                $message.error(msg)
             }
         }
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
     }
     onClose()
 }

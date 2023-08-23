@@ -9,10 +9,8 @@ import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
 import useConnectionStore from 'stores/connections.js'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { useMessage } from '@/utils/message.js'
 
 const props = defineProps({
     server: String,
@@ -33,7 +31,6 @@ const props = defineProps({
 
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
-const message = useMessage()
 const i18n = useI18n()
 
 const onReloadKey = () => {
@@ -44,20 +41,19 @@ const onCopyKey = () => {
     ClipboardSetText(props.keyPath)
         .then((succ) => {
             if (succ) {
-                message.success(i18n.t('copy_succ'))
+                $message.success(i18n.t('copy_succ'))
             }
         })
         .catch((e) => {
-            message.error(e.message)
+            $message.error(e.message)
         })
 }
 
-const confirmDialog = useConfirmDialog()
 const onDeleteKey = () => {
-    confirmDialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
+    $dialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
         connectionStore.deleteKey(props.server, props.db, props.keyPath).then((success) => {
             if (success) {
-                message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
+                $message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
             }
         })
     })

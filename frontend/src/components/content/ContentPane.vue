@@ -11,7 +11,6 @@ import useTabStore from 'stores/tab.js'
 import { useDialog } from 'naive-ui'
 import useConnectionStore from 'stores/connections.js'
 import { useI18n } from 'vue-i18n'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import ContentServerStatus from '@/components/content_value/ContentServerStatus.vue'
 import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 
@@ -125,9 +124,8 @@ const onReloadKey = async () => {
 }
 
 const i18n = useI18n()
-const confirmDialog = useConfirmDialog()
 const onCloseTab = (tabIndex) => {
-    confirmDialog.warning(i18n.t('close_confirm'), () => {
+    $dialog.warning(i18n.t('close_confirm'), () => {
         const tab = get(tabStore.tabs, tabIndex)
         if (tab != null) {
             connectionStore.closeConnection(tab.name)

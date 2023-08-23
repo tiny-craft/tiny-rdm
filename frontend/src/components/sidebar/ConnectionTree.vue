@@ -15,8 +15,6 @@ import Connect from '@/components/icons/Connect.vue'
 import { useI18n } from 'vue-i18n'
 import useTabStore from 'stores/tab.js'
 import Edit from '@/components/icons/Edit.vue'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
-import { useMessage } from '@/utils/message.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
@@ -24,7 +22,6 @@ const openingConnection = ref(false)
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
-const message = useMessage()
 
 const expandedKeys = ref([])
 const selectedKeys = ref([])
@@ -187,7 +184,7 @@ const openConnection = async (name) => {
             server: name,
         })
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
         // node.isLeaf = undefined
     } finally {
         openingConnection.value = false
@@ -196,21 +193,20 @@ const openConnection = async (name) => {
 
 const dialog = useDialog()
 const removeConnection = (name) => {
-    confirmDialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
+    $dialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
         connectionStore.deleteConnection(name).then(({ success, msg }) => {
             if (!success) {
-                message.error(msg)
+                $message.error(msg)
             }
         })
     })
 }
 
-const confirmDialog = useConfirmDialog()
 const removeGroup = async (name) => {
-    confirmDialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_group'), name }), async () => {
+    $dialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_group'), name }), async () => {
         connectionStore.deleteGroup(name).then(({ success, msg }) => {
             if (!success) {
-                message.error(msg)
+                $message.error(msg)
             }
         })
     })
@@ -268,7 +264,7 @@ const handleSelectContextMenu = (key) => {
         case 'server_edit':
             // ask for close relevant connections before edit
             if (connectionStore.isConnected(name)) {
-                confirmDialog.warning(i18n.t('edit_close_confirm'), () => {
+                $dialog.warning(i18n.t('edit_close_confirm'), () => {
                     connectionStore.closeConnection(name)
                     dialogStore.openEditDialog(name)
                 })

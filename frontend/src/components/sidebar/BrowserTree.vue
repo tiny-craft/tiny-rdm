@@ -15,7 +15,6 @@ import Connect from '@/components/icons/Connect.vue'
 import useDialogStore from 'stores/dialog.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import ToggleServer from '@/components/icons/ToggleServer.vue'
 import Unlink from '@/components/icons/Unlink.vue'
 import Filter from '@/components/icons/Filter.vue'
@@ -23,7 +22,6 @@ import Close from '@/components/icons/Close.vue'
 import { typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
-import { useMessage } from '@/utils/message.js'
 
 const props = defineProps({
     server: String,
@@ -219,7 +217,6 @@ const expandKey = (key) => {
     }
 }
 
-const confirmDialog = useConfirmDialog()
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -233,7 +230,7 @@ const handleSelectContextMenu = (key) => {
             expandedKeys.value = [props.server]
             tabStore.setSelectedKeys(props.server)
             connectionStore.openConnection(props.server, true).then(() => {
-                message.success(i18n.t('reload_succ'))
+                $message.success(i18n.t('reload_succ'))
             })
             break
         case 'server_close':
@@ -267,10 +264,10 @@ const handleSelectContextMenu = (key) => {
             dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
             break
         case 'value_remove':
-            confirmDialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
+            $dialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
                 connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
-                        message.success(i18n.t('delete_key_succ', { key: redisKey }))
+                        $message.success(i18n.t('delete_key_succ', { key: redisKey }))
                     }
                 })
             })
@@ -280,11 +277,11 @@ const handleSelectContextMenu = (key) => {
             ClipboardSetText(redisKey)
                 .then((succ) => {
                     if (succ) {
-                        message.success(i18n.t('copy_succ'))
+                        $message.success(i18n.t('copy_succ'))
                     }
                 })
                 .catch((e) => {
-                    message.error(e.message)
+                    $message.error(e.message)
                 })
             break
         default:
@@ -295,7 +292,6 @@ defineExpose({
     handleSelectContextMenu,
 })
 
-const message = useMessage()
 const dialog = useDialog()
 const onUpdateExpanded = (value, option, meta) => {
     expandedKeys.value = value
@@ -566,7 +562,7 @@ const onLoadTree = async (node) => {
             try {
                 await connectionStore.openDatabase(props.server, node.db)
             } catch (e) {
-                message.error(e.message)
+                $message.error(e.message)
                 node.isLeaf = undefined
             } finally {
                 loading.value = false

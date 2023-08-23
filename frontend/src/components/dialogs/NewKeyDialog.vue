@@ -13,7 +13,6 @@ import useConnectionStore from 'stores/connections.js'
 import { NSpace } from 'naive-ui'
 import useTabStore from 'stores/tab.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
-import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -103,13 +102,12 @@ const renderTypeLabel = (option) => {
 
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
-const message = useMessage()
 const onAdd = async () => {
     await newFormRef.value?.validate().catch((err) => {
-        message.error(err.message)
+        $message.error(err.message)
     })
     if (subFormRef.value?.validate && !subFormRef.value?.validate()) {
-        message.error(i18n.t('spec_field_required', { key: i18n.t('element') }))
+        $message.error(i18n.t('spec_field_required', { key: i18n.t('element') }))
         return false
     }
     try {
@@ -124,7 +122,7 @@ const onAdd = async () => {
             tabStore.setSelectedKeys(server, nodeKey)
             connectionStore.loadKeyValue(server, db, key).then(() => {})
         } else if (!isEmpty(msg)) {
-            message.error(msg)
+            $message.error(msg)
         }
         dialogStore.closeNewKeyDialog()
     } catch (e) {}

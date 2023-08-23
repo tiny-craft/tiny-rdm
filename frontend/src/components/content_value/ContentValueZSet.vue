@@ -9,10 +9,8 @@ import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import { isEmpty } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import useConnectionStore from 'stores/connections.js'
-import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
-const message = useMessage()
 const props = defineProps({
     name: String,
     db: Number,
@@ -155,19 +153,19 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        message.success(i18n.t('delete_key_succ', { key: row.value }))
+                        $message.success(i18n.t('delete_key_succ', { key: row.value }))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 } catch (e) {
-                    message.error(e.message)
+                    $message.error(e.message)
                 }
             },
             onSave: async () => {
                 try {
                     const newValue = currentEditRow.value.value
                     if (isEmpty(newValue)) {
-                        message.error(i18n.t('spec_field_required', { key: i18n.t('value') }))
+                        $message.error(i18n.t('spec_field_required', { key: i18n.t('value') }))
                         return
                     }
                     const { success, msg } = await connectionStore.updateZSetItem(
@@ -180,12 +178,12 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        message.success(i18n.t('save_value_succ'))
+                        $message.success(i18n.t('save_value_succ'))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 } catch (e) {
-                    message.error(e.message)
+                    $message.error(e.message)
                 } finally {
                     currentEditRow.value.no = 0
                 }

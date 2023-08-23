@@ -5,7 +5,6 @@ import useDialog from 'stores/dialog'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
 import NewSetValue from '@/components/new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
-import { useMessage } from '@/utils/message.js'
 import AddListValue from '@/components/new_value/AddListValue.vue'
 import AddHashValue from '@/components/new_value/AddHashValue.vue'
 import AddZSetValue from '@/components/new_value/AddZSetValue.vue'
@@ -78,7 +77,6 @@ watch(
 )
 
 const connectionStore = useConnectionStore()
-const message = useMessage()
 const onAdd = async () => {
     try {
         const { server, db, key, type } = newForm
@@ -100,9 +98,9 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('handle_succ'))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 }
                 break
@@ -114,9 +112,9 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('handle_succ'))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 }
                 break
@@ -128,9 +126,9 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('handle_succ'))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 }
                 break
@@ -142,9 +140,9 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('handle_succ'))
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 }
                 break
@@ -163,9 +161,9 @@ const onAdd = async () => {
                             if (newForm.reload) {
                                 connectionStore.loadKeyValue(server, db, key).then(() => {})
                             }
-                            message.success(i18n.t('handle_succ'))
+                            $message.success(i18n.t('handle_succ'))
                         } else {
-                            message.error(msg)
+                            $message.error(msg)
                         }
                     }
                 }
@@ -173,7 +171,7 @@ const onAdd = async () => {
         }
         dialogStore.closeAddFieldsDialog()
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
     }
 }
 

@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
-import { useMessage } from '@/utils/message.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 import { isEmpty, size } from 'lodash'
@@ -49,16 +48,15 @@ const resetAffected = () => {
 }
 
 const i18n = useI18n()
-const message = useMessage()
 const onConfirmDelete = async () => {
     try {
         const { server, db, key } = deleteForm
         const success = await connectionStore.deleteKeyPrefix(server, db, key)
         if (success) {
-            message.success(i18n.t('handle_succ'))
+            $message.success(i18n.t('handle_succ'))
         }
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
     }
     dialogStore.closeDeleteKeyDialog()
 }

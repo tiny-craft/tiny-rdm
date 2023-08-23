@@ -9,10 +9,8 @@ import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
 import useConnectionStore from 'stores/connections.js'
 import { includes, keys, some, values } from 'lodash'
-import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
-const message = useMessage()
 const props = defineProps({
     name: String,
     db: Number,
@@ -92,7 +90,7 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        message.success(i18n.t('delete_key_succ', { key: row.id }))
+                        $message.success(i18n.t('delete_key_succ', { key: row.id }))
                         // update display value
                         // if (!isEmpty(removed)) {
                         //     for (const elem of removed) {
@@ -100,10 +98,10 @@ const actionColumn = {
                         //     }
                         // }
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 } catch (e) {
-                    message.error(e.message)
+                    $message.error(e.message)
                 }
             },
         })

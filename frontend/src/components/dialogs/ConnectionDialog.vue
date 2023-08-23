@@ -4,7 +4,6 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TestConnection } from 'wailsjs/go/services/connectionService.js'
 import useDialog from 'stores/dialog'
-import { useMessage } from '@/utils/message.js'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
 
@@ -14,7 +13,6 @@ import useConnectionStore from 'stores/connections.js'
 
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
-const message = useMessage()
 const i18n = useI18n()
 
 const editName = ref('')
@@ -74,11 +72,11 @@ const onSaveConnection = async () => {
     // store new connection
     const { success, msg } = await connectionStore.saveConnection(editName.value, generalForm.value)
     if (!success) {
-        message.error(msg)
+        $message.error(msg)
         return
     }
 
-    message.success(i18n.t('handle_succ'))
+    $message.success(i18n.t('handle_succ'))
     onClose()
 }
 

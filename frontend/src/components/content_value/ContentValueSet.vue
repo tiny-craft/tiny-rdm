@@ -9,10 +9,8 @@ import useDialogStore from 'stores/dialog.js'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useConnectionStore from 'stores/connections.js'
-import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
-const message = useMessage()
 const props = defineProps({
     name: String,
     db: Number,
@@ -84,14 +82,14 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        message.success(i18n.t('delete_key_succ', { key: row.value }))
+                        $message.success(i18n.t('delete_key_succ', { key: row.value }))
                         // update display value
                         // props.value.splice(row.no - 1, 1)
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 } catch (e) {
-                    message.error(e.message)
+                    $message.error(e.message)
                 }
             },
             onSave: async () => {
@@ -105,14 +103,14 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        message.success(i18n.t('save_value_succ'))
+                        $message.success(i18n.t('save_value_succ'))
                         // update display value
                         // props.value[row.no - 1] = currentEditRow.value.value
                     } else {
-                        message.error(msg)
+                        $message.error(msg)
                     }
                 } catch (e) {
-                    message.error(e.message)
+                    $message.error(e.message)
                 } finally {
                     currentEditRow.value.no = 0
                 }

@@ -7,11 +7,11 @@ import {
     RestorePreferences,
     SetPreferences,
 } from 'wailsjs/go/services/preferencesService.js'
-import { useMessage } from '@/utils/message.js'
-import { useConfirmDialog } from '@/utils/confirm_dialog.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { useOsTheme } from 'naive-ui'
 
+const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
     /**
      * @typedef {Object} FontItem
@@ -132,6 +132,18 @@ const usePreferencesStore = defineStore('preferences', {
             return lang || 'en'
         },
 
+        isDark() {
+            const th = get(this.general, 'theme', 'auto')
+            if (th === 'auto') {
+                if (osTheme.value === 'dark') {
+                    return true
+                }
+            } else if (th === 'dark') {
+                return true
+            }
+            return false
+        },
+
         autoCheckUpdate() {
             return get(this.general, 'checkUpdate', false)
         },
@@ -222,11 +234,9 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         async checkForUpdate(manual = false) {
-            const message = useMessage()
-            const confirmDialog = useConfirmDialog()
             let msgRef = null
             if (manual) {
-                msgRef = message.loading('Retrieving for new version', { duration: 0 })
+                msgRef = $message.loading('Retrieving for new version', { duration: 0 })
             }
             let respObj = null
             try {
@@ -243,12 +253,12 @@ const usePreferencesStore = defineStore('preferences', {
 
             // TODO: check current version is older then remote
             if (respObj != null && !isEmpty(respObj['html_url'])) {
-                confirmDialog.warning(i18nGlobal.t('new_version_tip'), () => {
+                $dialog.warning(i18nGlobal.t('new_version_tip'), () => {
                     BrowserOpenURL(respObj['html_url'])
                 })
             } else {
                 if (manual) {
-                    message.info(i18nGlobal.t('no_update'))
+                    $message.info(i18nGlobal.t('no_update'))
                 }
             }
         },

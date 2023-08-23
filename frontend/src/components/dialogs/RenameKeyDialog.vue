@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
-import { useMessage } from '@/utils/message.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 
@@ -28,19 +27,18 @@ watch(
 )
 
 const i18n = useI18n()
-const message = useMessage()
 const onRename = async () => {
     try {
         const { server, db, key, newKey } = renameForm
         const { success, msg } = await connectionStore.renameKey(server, db, key, newKey)
         if (success) {
             await connectionStore.loadKeyValue(server, db, newKey)
-            message.success(i18n.t('handle_succ'))
+            $message.success(i18n.t('handle_succ'))
         } else {
-            message.error(msg)
+            $message.error(msg)
         }
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
     }
     dialogStore.closeRenameKeyDialog()
 }

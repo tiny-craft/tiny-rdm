@@ -13,10 +13,8 @@ import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
-import { useMessage } from '@/utils/message.js'
 
 const i18n = useI18n()
-const message = useMessage()
 const themeVars = useThemeVars()
 
 const props = defineProps({
@@ -117,11 +115,11 @@ const onCopyValue = () => {
     ClipboardSetText(viewValue.value)
         .then((succ) => {
             if (succ) {
-                message.success(i18n.t('copy_succ'))
+                $message.success(i18n.t('copy_succ'))
             }
         })
         .catch((e) => {
-            message.error(e.message)
+            $message.error(e.message)
         })
 }
 
@@ -154,12 +152,12 @@ const onSaveValue = async () => {
         )
         if (success) {
             await connectionStore.loadKeyValue(props.name, props.db, props.keyPath)
-            message.success(i18n.t('save_value_succ'))
+            $message.success(i18n.t('save_value_succ'))
         } else {
-            message.error(msg)
+            $message.error(msg)
         }
     } catch (e) {
-        message.error(e.message)
+        $message.error(e.message)
     } finally {
         inEdit.value = false
         saving.value = false

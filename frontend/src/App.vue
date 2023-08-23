@@ -11,11 +11,11 @@ import AddFieldsDialog from './components/dialogs/AddFieldsDialog.vue'
 import AppContent from './AppContent.vue'
 import GroupDialog from './components/dialogs/GroupDialog.vue'
 import DeleteKeyDialog from './components/dialogs/DeleteKeyDialog.vue'
-import { computed, onBeforeMount, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import usePreferencesStore from './stores/preferences.js'
 import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
-import { darkTheme, lightTheme, useOsTheme } from 'naive-ui'
+import { darkTheme } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 import { themeOverrides } from '@/utils/theme.js'
@@ -27,12 +27,10 @@ const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
 const initializing = ref(false)
-onBeforeMount(async () => {
+onMounted(async () => {
     try {
         initializing.value = true
-        await prefStore.loadPreferences()
         i18n.locale.value = prefStore.currentLanguage
-        await prefStore.loadFontList()
         await connectionStore.initConnections()
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
@@ -42,27 +40,17 @@ onBeforeMount(async () => {
     }
 })
 
-const osTheme = useOsTheme()
-const theme = computed(() => {
-    if (prefStore.general.theme === 'auto') {
-        if (osTheme.value === 'dark') {
-            WindowSetDarkTheme()
-            return darkTheme
-        }
-    } else if (prefStore.general.theme === 'dark') {
-        WindowSetDarkTheme()
-        return darkTheme
-    }
-    WindowSetLightTheme()
-    return lightTheme
-})
+watch(
+    () => prefStore.isDark,
+    (isDark) => (isDark ? WindowSetDarkTheme() : WindowSetLightTheme()),
+)
 </script>
 
 <template>
     <n-config-provider
         :hljs="hljs"
         :inline-theme-disabled="true"
-        :theme="theme"
+        :theme="prefStore.isDark ? darkTheme : undefined"
         :theme-overrides="themeOverrides"
         class="fill-height"
     >

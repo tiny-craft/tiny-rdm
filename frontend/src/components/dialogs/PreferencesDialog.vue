@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import useDialog from 'stores/dialog'
 import usePreferencesStore from 'stores/preferences.js'
-import { useMessage } from '@/utils/message.js'
 
 const prefStore = usePreferencesStore()
 
@@ -11,7 +10,6 @@ const prevPreferences = ref({})
 const tab = ref('general')
 const dialogStore = useDialog()
 const i18n = useI18n()
-const message = useMessage()
 const loading = ref(false)
 
 const initPreferences = async () => {
@@ -41,7 +39,7 @@ watch(
 const onSavePreferences = async () => {
     const success = await prefStore.savePreferences()
     if (success) {
-        message.success(i18n.t('handle_succ'))
+        $message.success(i18n.t('handle_succ'))
         dialogStore.closePreferencesDialog()
     }
 }
