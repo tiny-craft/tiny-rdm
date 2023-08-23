@@ -70,9 +70,9 @@ const onClose = () => {
         <n-form
             :model="renameForm"
             :show-require-mark="false"
+            :show-label="false"
             label-align="left"
-            label-placement="left"
-            label-width="auto"
+            label-placement="top"
         >
             <n-form-item :label="$t('new_key_name')" required>
                 <n-input v-model:value="renameForm.newKey" />

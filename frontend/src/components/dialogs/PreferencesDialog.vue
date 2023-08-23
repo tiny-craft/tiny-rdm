@@ -9,7 +9,6 @@ const prefStore = usePreferencesStore()
 
 const prevPreferences = ref({})
 const tab = ref('general')
-const formLabelWidth = '80px'
 const dialogStore = useDialog()
 const i18n = useI18n()
 const message = useMessage()
@@ -76,14 +75,7 @@ const onClose = () => {
         <!-- <n-spin :show="loading"> -->
         <n-tabs v-model:value="tab" animated type="line">
             <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
-                <n-form
-                    :disabled="loading"
-                    :label-width="formLabelWidth"
-                    :model="prefStore.general"
-                    :show-require-mark="false"
-                    label-align="right"
-                    label-placement="left"
-                >
+                <n-form :disabled="loading" :model="prefStore.general" :show-require-mark="false" label-placement="top">
                     <n-form-item :label="$t('theme')" required>
                         <n-radio-group v-model:value="prefStore.general.theme" name="theme" size="medium">
                             <n-radio-button v-for="opt in prefStore.themeOption" :key="opt.value" :value="opt.value">
@@ -123,14 +115,7 @@ const onClose = () => {
             </n-tab-pane>
 
             <n-tab-pane :tab="$t('editor')" display-directive="show" name="editor">
-                <n-form
-                    :disabled="loading"
-                    :label-width="formLabelWidth"
-                    :model="prefStore.editor"
-                    :show-require-mark="false"
-                    label-align="right"
-                    label-placement="left"
-                >
+                <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
                     <n-form-item :label="$t('font')" required>
                         <n-select v-model:value="prefStore.editor.font" :options="prefStore.fontOption" filterable />
                     </n-form-item>
@@ -144,8 +129,8 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :disabled="loading" @click="prefStore.restorePreferences"
-                    >{{ $t('restore_defaults') }}
+                <n-button :disabled="loading" @click="prefStore.restorePreferences">
+                    {{ $t('restore_defaults') }}
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">

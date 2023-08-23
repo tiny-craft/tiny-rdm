@@ -32,7 +32,6 @@
   "copy_value": "复制值",
   "edit_value": "修改值",
   "save_update": "保存修改",
-  "cancel_update": "取消修改",
   "score_filter_tip": "支持如下运算符比较匹配范围\n＝：等于\n!=：不等于\n>：大于\n<：小于\n>=：大于等于\n<=：小于等于\n如查询分值大于3的结果，则输入：>3",
   "add_row": "插入行",
   "edit_row": "编辑行",

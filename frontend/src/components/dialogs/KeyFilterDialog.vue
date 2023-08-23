@@ -25,7 +25,6 @@ const typeOptions = computed(() => {
     return options
 })
 
-const formLabelWidth = '100px'
 const dialogStore = useDialog()
 watch(
     () => dialogStore.keyFilterDialogVisible,
@@ -72,11 +71,9 @@ const onClose = () => {
     >
         <n-form
             ref="filterFormRef"
-            :label-width="formLabelWidth"
             :model="filterForm"
             :show-require-mark="false"
-            label-align="right"
-            label-placement="left"
+            label-placement="top"
             style="padding-right: 15px"
         >
             <n-form-item :label="$t('server')" path="key">

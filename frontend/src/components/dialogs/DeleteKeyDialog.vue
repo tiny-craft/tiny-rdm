@@ -79,13 +79,7 @@ const onClose = () => {
         preset="dialog"
         transform-origin="center"
     >
-        <n-form
-            :model="deleteForm"
-            :show-require-mark="false"
-            label-align="right"
-            label-placement="left"
-            label-width="auto"
-        >
+        <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('server')">
                 <n-input :value="deleteForm.server" readonly />
             </n-form-item>

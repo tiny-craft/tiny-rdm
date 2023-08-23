@@ -8,7 +8,6 @@ const ttlForm = reactive({
     ttl: -1,
 })
 
-const formLabelWidth = '80px'
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
@@ -74,13 +73,7 @@ const onConfirm = async () => {
         preset="dialog"
         transform-origin="center"
     >
-        <n-form
-            :label-width="formLabelWidth"
-            :model="ttlForm"
-            :show-require-mark="false"
-            label-align="right"
-            label-placement="left"
-        >
+        <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('key')">
                 <n-input :value="currentKey" readonly />
             </n-form-item>

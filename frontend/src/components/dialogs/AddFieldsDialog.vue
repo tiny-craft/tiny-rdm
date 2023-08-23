@@ -24,7 +24,6 @@ const newForm = reactive({
     reload: true,
 })
 
-const formLabelWidth = '60px'
 const addValueComponent = {
     [types.STRING]: NewStringValue,
     [types.HASH]: AddHashValue,
@@ -202,14 +201,7 @@ const onClose = () => {
         @negative-click="onClose"
     >
         <n-scrollbar style="max-height: 500px">
-            <n-form
-                :label-width="formLabelWidth"
-                :model="newForm"
-                :show-require-mark="false"
-                label-align="right"
-                label-placement="left"
-                style="padding-right: 15px"
-            >
+            <n-form :model="newForm" :show-require-mark="false" label-placement="top" style="padding-right: 15px">
                 <n-form-item :label="$t('key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" readonly />
                 </n-form-item>

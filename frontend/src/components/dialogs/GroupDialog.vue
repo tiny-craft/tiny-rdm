@@ -80,13 +80,7 @@ const onClose = () => {
         @positive-click="onConfirm"
         @negative-click="onClose"
     >
-        <n-form
-            :model="groupForm"
-            :show-require-mark="false"
-            label-align="left"
-            label-placement="left"
-            label-width="auto"
-        >
+        <n-form :model="groupForm" :show-label="false" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('group_name')" required>
                 <n-input v-model:value="groupForm.name" placeholder="" />
             </n-form-item>

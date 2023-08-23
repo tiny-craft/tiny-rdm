@@ -52,19 +52,6 @@ const tab = ref('general')
 const testing = ref(false)
 const showTestResult = ref(false)
 const testResult = ref('')
-const showTestConnSuccResult = computed(() => {
-    return isEmpty(testResult.value) && showTestResult.value === true
-})
-const showTestConnFailResult = computed(() => {
-    return !isEmpty(testResult.value) && showTestResult.value === true
-})
-const formLabelWidth = computed(() => {
-    // compatible with long english word
-    if (tab.value === 'advanced' && i18n.locale.value === 'en') {
-        return '140px'
-    }
-    return '80px'
-})
 const predefineColors = ref(['', '#F75B52', '#F7A234', '#F7CE33', '#4ECF60', '#348CF7', '#B270D3'])
 const generalFormRef = ref(null)
 const advanceFormRef = ref(null)
@@ -163,12 +150,10 @@ const onClose = () => {
                 <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
                     <n-form
                         ref="generalFormRef"
-                        :label-width="formLabelWidth"
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
-                        label-align="right"
-                        label-placement="left"
+                        label-placement="top"
                     >
                         <n-form-item :label="$t('conn_name')" path="name" required>
                             <n-input v-model:value="generalForm.name" :placeholder="$t('conn_name_tip')" />
@@ -203,12 +188,10 @@ const onClose = () => {
                 <n-tab-pane :tab="$t('advanced')" display-directive="show" name="advanced">
                     <n-form
                         ref="advanceFormRef"
-                        :label-width="formLabelWidth"
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
-                        label-align="right"
-                        label-placement="left"
+                        label-placement="top"
                     >
                         <n-form-item :label="$t('conn_advn_filter')" path="defaultFilter">
                             <n-input

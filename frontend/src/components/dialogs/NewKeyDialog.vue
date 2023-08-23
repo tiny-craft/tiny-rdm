@@ -41,7 +41,6 @@ const dbOptions = computed(() =>
 const newFormRef = ref(null)
 const subFormRef = ref(null)
 
-const formLabelWidth = '100px'
 const options = computed(() => {
     return Object.keys(types).map((t) => ({
         value: t,
@@ -157,12 +156,10 @@ const onClose = () => {
         <n-scrollbar style="max-height: 500px">
             <n-form
                 ref="newFormRef"
-                :label-width="formLabelWidth"
                 :model="newForm"
                 :rules="formRules"
                 :show-require-mark="false"
-                label-align="right"
-                label-placement="left"
+                label-placement="top"
                 style="padding-right: 15px"
             >
                 <n-form-item :label="$t('key')" path="key" required>

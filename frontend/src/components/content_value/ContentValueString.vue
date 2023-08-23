@@ -199,7 +199,7 @@ const onSaveValue = async () => {
                     <template #icon>
                         <n-icon :component="Close" size="18" />
                     </template>
-                    {{ $t('cancel_update') }}
+                    {{ $t('cancel') }}
                 </n-button>
             </n-button-group>
         </div>
