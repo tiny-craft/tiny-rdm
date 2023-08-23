@@ -216,11 +216,23 @@ const removeGroup = async (name) => {
     })
 }
 
+const expandKey = (key) => {
+    const idx = indexOf(expandedKeys.value, key)
+    if (idx === -1) {
+        expandedKeys.value.push(key)
+    } else {
+        expandedKeys.value.splice(idx, 1)
+    }
+}
+
 const nodeProps = ({ option }) => {
     return {
         onDblclick: async () => {
             if (option.type === ConnectionType.Server) {
                 openConnection(option.name).then(() => {})
+            } else if (option.type === ConnectionType.Group) {
+                // toggle expand
+                nextTick().then(() => expandKey(option.key))
             }
         },
         onContextmenu(e) {
