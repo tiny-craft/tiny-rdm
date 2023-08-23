@@ -238,11 +238,13 @@ const onClose = () => {
             </n-tabs>
 
             <!-- test result alert-->
-            <n-alert v-if="showTestConnSuccResult" title="" type="success">
-                {{ $t('conn_test_succ') }}
-            </n-alert>
-            <n-alert v-if="showTestConnFailResult" title="" type="error">
-                {{ $t('conn_test_fail') }}: {{ testResult }}
+            <n-alert
+                v-if="showTestResult"
+                :title="isEmpty(testResult) ? '' : $t('conn_test_fail')"
+                :type="isEmpty(testResult) ? 'success' : 'error'"
+            >
+                <template v-if="isEmpty(testResult)"> {{ $t('conn_test_succ') }}</template>
+                <template v-else>{{ testResult }}</template>
             </n-alert>
         </n-spin>
 
