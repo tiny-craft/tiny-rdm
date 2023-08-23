@@ -6,13 +6,13 @@ import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
 import { computed, reactive, ref } from 'vue'
 import { get } from 'lodash'
-import Delete from '@/components/icons/Delete.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
+import Unlink from '@/components/icons/Unlink.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
@@ -35,8 +35,8 @@ const onNewKey = () => {
 
 const i18n = useI18n()
 const connectionStore = useConnectionStore()
-const onDeleteKey = () => {
-    browserTreeRef.value?.handleSelectContextMenu('value_remove')
+const onDisconnect = () => {
+    browserTreeRef.value?.handleSelectContextMenu('server_close')
 }
 
 const onRefresh = () => {
@@ -94,14 +94,7 @@ const filterTypeOptions = computed(() => {
             <!--                @click="filterForm.showFilter = !filterForm.showFilter"-->
             <!--            />-->
             <div class="flex-item-expand"></div>
-            <icon-button
-                :disabled="currentSelect.key == null"
-                :icon="Delete"
-                size="20"
-                stroke-width="4"
-                t-tooltip="remove_key"
-                @click="onDeleteKey"
-            />
+            <icon-button :icon="Unlink" size="20" stroke-width="4" t-tooltip="disconnect" @click="onDisconnect" />
         </div>
     </div>
 </template>
