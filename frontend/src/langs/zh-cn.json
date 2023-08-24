@@ -132,6 +132,7 @@
   "reload_succ": "已重新载入",
   "field_required": "此项不能为空",
   "spec_field_required": "{key} 不能为空",
+  "illegal_characters": "包含非法字符",
   "nonexist_tab_content": "所选键不存在，请尝试刷新重试",
   "empty_server_content": "可以从左边选择并打开连接",
   "empty_server_list": "还没添加Redis服务器",

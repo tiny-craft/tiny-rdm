@@ -132,6 +132,7 @@
   "reload_succ": "Reloaded!",
   "field_required": "This item should not be blank",
   "spec_field_required": "\"{key}\" should not be blank",
+  "illegal_characters": "Include illegal characters",
   "nonexist_tab_content": "Selected key does not exist. Please retry",
   "empty_server_content": "Select and open a connection from the left",
   "empty_server_list": "No redis server",

@@ -101,11 +101,15 @@ func (c *connectionService) GetConnection(name string) (resp types.JSResp) {
 // SaveConnection save connection config to local profile
 func (c *connectionService) SaveConnection(name string, param types.ConnectionConfig) (resp types.JSResp) {
 	var err error
-	if len(name) > 0 {
-		// update connection
-		err = c.conns.UpdateConnection(name, param)
+	if strings.ContainsAny(param.Name, "/") {
+		err = errors.New("connection name contains illegal characters")
 	} else {
-		err = c.conns.CreateConnection(param)
+		if len(name) > 0 {
+			// update connection
+			err = c.conns.UpdateConnection(name, param)
+		} else {
+			err = c.conns.CreateConnection(param)
+		}
 	}
 	if err != nil {
 		resp.Msg = err.Error()

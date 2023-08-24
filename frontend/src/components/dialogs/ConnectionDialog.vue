@@ -1,5 +1,5 @@
 <script setup>
-import { get, isEmpty, map } from 'lodash'
+import { every, get, includes, isEmpty, map } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TestConnection } from 'wailsjs/go/services/connectionService.js'
@@ -19,8 +19,18 @@ const editName = ref('')
 const generalForm = ref(null)
 const generalFormRules = () => {
     const requiredMsg = i18n.t('field_required')
+    const illegalChars = ['/', '\\']
     return {
-        name: { required: true, message: requiredMsg, trigger: 'input' },
+        name: [
+            { required: true, message: requiredMsg, trigger: 'input' },
+            {
+                validator: (rule, value) => {
+                    return every(illegalChars, (c) => !includes(value, c))
+                },
+                message: i18n.t('illegal_characters'),
+                trigger: 'input',
+            },
+        ],
         addr: { required: true, message: requiredMsg, trigger: 'input' },
         defaultFilter: { required: true, message: requiredMsg, trigger: 'input' },
         keySeparator: { required: true, message: requiredMsg, trigger: 'input' },
@@ -232,7 +242,7 @@ const onClose = () => {
                 v-if="showTestResult"
                 :title="isEmpty(testResult) ? '' : $t('conn_test_fail')"
                 :type="isEmpty(testResult) ? 'success' : 'error'">
-                <template v-if="isEmpty(testResult)"> {{ $t('conn_test_succ') }}</template>
+                <template v-if="isEmpty(testResult)">{{ $t('conn_test_succ') }}</template>
                 <template v-else>{{ testResult }}</template>
             </n-alert>
         </n-spin>
