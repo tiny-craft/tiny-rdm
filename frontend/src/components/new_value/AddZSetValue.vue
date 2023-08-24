@@ -65,8 +65,7 @@ const onUpdate = () => {
                     v-model:value="value.value"
                     :placeholder="$t('enter_elem')"
                     type="text"
-                    @update:value="onUpdate"
-                />
+                    @update:value="onUpdate" />
                 <n-input-number v-model:value="value.score" :placeholder="$t('enter_score')" @update:value="onUpdate" />
             </template>
             <template #action="{ index, create, remove, move }">

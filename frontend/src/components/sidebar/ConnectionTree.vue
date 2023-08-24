@@ -359,8 +359,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         virtual-scroll
         @drop="handleDrop"
         @update:selected-keys="onUpdateSelectedKeys"
-        @update:expanded-keys="onUpdateExpandedKeys"
-    />
+        @update:expanded-keys="onUpdateExpandedKeys" />
 
     <!-- status display modal -->
     <n-modal :show="openingConnection" transform-origin="center">
@@ -369,8 +368,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
             :content-style="{ textAlign: 'center' }"
             aria-model="true"
             role="dialog"
-            style="width: 400px"
-        >
+            style="width: 400px">
             <n-spin>
                 <template #description>
                     {{ $t('opening_connection') }}
@@ -390,8 +388,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         placement="bottom-start"
         trigger="manual"
         @clickoutside="contextMenuParam.show = false"
-        @select="handleSelectContextMenu"
-    />
+        @select="handleSelectContextMenu" />
 </template>
 
 <style lang="scss" scoped>

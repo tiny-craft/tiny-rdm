@@ -211,8 +211,7 @@ const onSaveValue = async () => {
                 :disabled="saving"
                 :resizable="false"
                 class="flex-item-expand"
-                type="textarea"
-            />
+                type="textarea" />
         </div>
     </div>
 </template>

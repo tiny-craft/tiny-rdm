@@ -141,8 +141,7 @@ const onClose = () => {
         :show-icon="false"
         :title="isEditMode ? $t('edit_conn_title') : $t('new_conn_title')"
         preset="dialog"
-        transform-origin="center"
-    >
+        transform-origin="center">
         <n-spin :show="closingConnection">
             <n-tabs v-model:value="tab" animated type="line">
                 <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
@@ -151,8 +150,7 @@ const onClose = () => {
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
-                        label-placement="top"
-                    >
+                        label-placement="top">
                         <n-form-item :label="$t('conn_name')" path="name" required>
                             <n-input v-model:value="generalForm.name" :placeholder="$t('conn_name_tip')" />
                         </n-form-item>
@@ -166,16 +164,14 @@ const onClose = () => {
                                 v-model:value="generalForm.port"
                                 :max="65535"
                                 :min="1"
-                                style="width: 200px"
-                            />
+                                style="width: 200px" />
                         </n-form-item>
                         <n-form-item :label="$t('conn_pwd')" path="password">
                             <n-input
                                 v-model:value="generalForm.password"
                                 :placeholder="$t('conn_pwd_tip')"
                                 show-password-on="click"
-                                type="password"
-                            />
+                                type="password" />
                         </n-form-item>
                         <n-form-item :label="$t('conn_usr')" path="username">
                             <n-input v-model="generalForm.username" :placeholder="$t('conn_usr_tip')" />
@@ -189,19 +185,16 @@ const onClose = () => {
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
-                        label-placement="top"
-                    >
+                        label-placement="top">
                         <n-form-item :label="$t('conn_advn_filter')" path="defaultFilter">
                             <n-input
                                 v-model:value="generalForm.defaultFilter"
-                                :placeholder="$t('conn_advn_filter_tip')"
-                            />
+                                :placeholder="$t('conn_advn_filter_tip')" />
                         </n-form-item>
                         <n-form-item :label="$t('conn_advn_separator')" path="keySeparator">
                             <n-input
                                 v-model:value="generalForm.keySeparator"
-                                :placeholder="$t('conn_advn_separator_tip')"
-                            />
+                                :placeholder="$t('conn_advn_separator_tip')" />
                         </n-form-item>
                         <n-form-item :label="$t('conn_advn_conn_timeout')" path="connTimeout">
                             <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
@@ -226,8 +219,7 @@ const onClose = () => {
                                 }"
                                 :style="{ backgroundColor: color }"
                                 class="color-preset-item"
-                                @click="generalForm.markColor = color"
-                            >
+                                @click="generalForm.markColor = color">
                                 <n-icon v-if="isEmpty(color)" :component="Close" size="24" />
                             </div>
                         </n-form-item>
@@ -239,8 +231,7 @@ const onClose = () => {
             <n-alert
                 v-if="showTestResult"
                 :title="isEmpty(testResult) ? '' : $t('conn_test_fail')"
-                :type="isEmpty(testResult) ? 'success' : 'error'"
-            >
+                :type="isEmpty(testResult) ? 'success' : 'error'">
                 <template v-if="isEmpty(testResult)"> {{ $t('conn_test_succ') }}</template>
                 <template v-else>{{ testResult }}</template>
             </n-alert>

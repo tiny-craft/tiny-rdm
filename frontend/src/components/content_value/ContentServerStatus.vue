@@ -128,8 +128,7 @@ const infoFilter = ref('')
                         <n-gi :span="6">
                             <n-statistic
                                 :label="$t('connected_clients')"
-                                :value="get(props.info, 'Clients.connected_clients', 0)"
-                            />
+                                :value="get(props.info, 'Clients.connected_clients', 0)" />
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic :value="totalKeys">
@@ -173,8 +172,7 @@ const infoFilter = ref('')
                                     },
                                     { title: $t('value'), key: 'value' },
                                 ]"
-                                :data="map(v, (value, key) => ({ value, key }))"
-                            />
+                                :data="map(v, (value, key) => ({ value, key }))" />
                         </n-tab-pane>
                     </n-tabs>
                 </n-spin>

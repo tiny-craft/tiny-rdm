@@ -143,8 +143,7 @@ const onCloseTab = (tabIndex) => {
             size="small"
             type="card"
             @close="onCloseTab"
-            @update:value="onUpdateValue"
-        >
+            @update:value="onUpdateValue">
             <n-tab v-for="(t, i) in tab" :key="i" :name="i">
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-tab>
@@ -158,8 +157,7 @@ const onCloseTab = (tabIndex) => {
                 :info="serverInfo"
                 :loading="loadingServerInfo"
                 :server="serverName"
-                @refresh="refreshInfo(true)"
-            />
+                @refresh="refreshInfo(true)" />
         </div>
         <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
             <n-empty :description="$t('nonexist_tab_content')" class="empty-content">
@@ -175,8 +173,7 @@ const onCloseTab = (tabIndex) => {
             :key-path="tabContent.keyPath"
             :name="tabContent.name"
             :ttl="tabContent.ttl"
-            :value="tabContent.value"
-        />
+            :value="tabContent.value" />
     </div>
 </template>
 

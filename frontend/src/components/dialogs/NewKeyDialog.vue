@@ -149,8 +149,7 @@ const onClose = () => {
         style="width: 600px"
         transform-origin="center"
         @positive-click="onAdd"
-        @negative-click="onClose"
-    >
+        @negative-click="onClose">
         <n-scrollbar style="max-height: 500px">
             <n-form
                 ref="newFormRef"
@@ -158,8 +157,7 @@ const onClose = () => {
                 :rules="formRules"
                 :show-require-mark="false"
                 label-placement="top"
-                style="padding-right: 15px"
-            >
+                style="padding-right: 15px">
                 <n-form-item :label="$t('key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" />
                 </n-form-item>
@@ -175,8 +173,7 @@ const onClose = () => {
                             v-model:value="newForm.ttl"
                             :max="Number.MAX_SAFE_INTEGER"
                             :min="-1"
-                            placeholder="TTL"
-                        >
+                            placeholder="TTL">
                             <template #suffix>
                                 {{ $t('second') }}
                             </template>

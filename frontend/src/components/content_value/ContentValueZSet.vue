@@ -274,8 +274,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         :consistent-menu-width="false"
                         :options="filterOption"
                         style="width: 120px"
-                        @update:value="onChangeFilterType"
-                    />
+                        @update:value="onChangeFilterType" />
                     <n-tooltip :delay="500" :disabled="filterType !== 2">
                         <template #trigger>
                             <n-input
@@ -283,8 +282,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                                 :placeholder="$t('search')"
                                 clearable
                                 @clear="clearFilter"
-                                @update:value="onFilterInput"
-                            />
+                                @update:value="onFilterInput" />
                         </template>
                         <div class="text-block">{{ $t('score_filter_tip') }}</div>
                     </n-tooltip>
@@ -310,8 +308,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 size="small"
                 striped
                 virtual-scroll
-                @update:filters="onUpdateFilter"
-            />
+                @update:filters="onUpdateFilter" />
         </div>
     </div>
 </template>

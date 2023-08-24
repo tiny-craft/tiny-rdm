@@ -78,8 +78,7 @@ watch(
                     v-for="t in tabStore.tabs"
                     v-show="get(tabStore.currentTab, 'name') === t.name"
                     :key="t.name"
-                    class="flex-item-expand"
-                />
+                    class="flex-item-expand" />
                 <div
                     :class="{
                         'resize-divider-hover': data.hoverResize,
@@ -88,8 +87,7 @@ watch(
                     class="resize-divider"
                     @mousedown="startResize"
                     @mouseout="data.hoverResize = false"
-                    @mouseover="data.hoverResize = true"
-                />
+                    @mouseover="data.hoverResize = true" />
             </div>
             <content-pane class="flex-item-expand" />
         </div>
@@ -106,8 +104,7 @@ watch(
                     class="resize-divider"
                     @mousedown="startResize"
                     @mouseout="data.hoverResize = false"
-                    @mouseover="data.hoverResize = true"
-                />
+                    @mouseover="data.hoverResize = true" />
             </div>
             <content-server-pane class="flex-item-expand" />
         </div>

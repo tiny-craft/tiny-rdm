@@ -52,16 +52,14 @@ defineExpose({
     <n-card
         :title="$t('launch_log')"
         class="content-container flex-box-v"
-        content-style="display: flex;flex-direction: column; overflow: hidden;"
-    >
+        content-style="display: flex;flex-direction: column; overflow: hidden;">
         <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('filter_server')">
                 <n-select
                     v-model:value="data.server"
                     :consistent-menu-width="false"
                     :options="filterServerOption"
-                    style="min-width: 100px"
-                />
+                    style="min-width: 100px" />
             </n-form-item>
             <n-form-item :label="$t('filter_keyword')">
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
@@ -126,8 +124,7 @@ defineExpose({
                 ]"
                 :data="data.history"
                 class="flex-item-expand"
-                flex-height
-            />
+                flex-height />
         </div>
     </n-card>
 </template>

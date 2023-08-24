@@ -31,23 +31,20 @@ const onDisconnectAll = () => {
                 size="20"
                 stroke-width="4"
                 t-tooltip="new_conn"
-                @click="dialogStore.openNewDialog()"
-            />
+                @click="dialogStore.openNewDialog()" />
             <icon-button
                 :icon="AddGroup"
                 size="20"
                 stroke-width="4"
                 t-tooltip="new_group"
-                @click="dialogStore.openNewGroupDialog()"
-            />
+                @click="dialogStore.openNewGroupDialog()" />
             <icon-button
                 :disabled="!connectionStore.anyConnectionOpened"
                 :icon="Unlink"
                 size="20"
                 stroke-width="4"
                 t-tooltip="disconnect_all"
-                @click="onDisconnectAll"
-            />
+                @click="onDisconnectAll" />
             <n-input v-model:value="filterPattern" :placeholder="$t('filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" size="20" />

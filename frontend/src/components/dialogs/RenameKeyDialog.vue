@@ -63,15 +63,13 @@ const onClose = () => {
         preset="dialog"
         transform-origin="center"
         @positive-click="onRename"
-        @negative-click="onClose"
-    >
+        @negative-click="onClose">
         <n-form
             :model="renameForm"
             :show-require-mark="false"
             :show-label="false"
             label-align="left"
-            label-placement="top"
-        >
+            label-placement="top">
             <n-form-item :label="$t('new_key_name')" required>
                 <n-input v-model:value="renameForm.newKey" />
             </n-form-item>

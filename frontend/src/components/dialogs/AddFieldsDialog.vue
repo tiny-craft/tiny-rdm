@@ -196,8 +196,7 @@ const onClose = () => {
         style="width: 600px"
         transform-origin="center"
         @positive-click="onAdd"
-        @negative-click="onClose"
-    >
+        @negative-click="onClose">
         <n-scrollbar style="max-height: 500px">
             <n-form :model="newForm" :show-require-mark="false" label-placement="top" style="padding-right: 15px">
                 <n-form-item :label="$t('key')" path="key" required>
@@ -206,8 +205,7 @@ const onClose = () => {
                 <component
                     :is="addValueComponent[newForm.type]"
                     v-model:type="newForm.opType"
-                    v-model:value="newForm.value"
-                />
+                    v-model:value="newForm.value" />
                 <n-form-item label=" " path="key" required>
                     <n-checkbox v-model:checked="newForm.reload">
                         {{ $t('reload_when_succ') }}

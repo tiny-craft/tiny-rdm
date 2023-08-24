@@ -67,15 +67,13 @@ const onClose = () => {
         style="width: 450px"
         transform-origin="center"
         @positive-click="onConfirm"
-        @negative-click="onClose"
-    >
+        @negative-click="onClose">
         <n-form
             ref="filterFormRef"
             :model="filterForm"
             :show-require-mark="false"
             label-placement="top"
-            style="padding-right: 15px"
-        >
+            style="padding-right: 15px">
             <n-form-item :label="$t('server')" path="key">
                 <n-text>{{ filterForm.server }}</n-text>
             </n-form-item>

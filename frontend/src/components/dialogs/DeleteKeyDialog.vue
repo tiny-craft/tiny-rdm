@@ -75,8 +75,7 @@ const onClose = () => {
         :show-icon="false"
         :title="$t('batch_delete_key')"
         preset="dialog"
-        transform-origin="center"
-    >
+        transform-origin="center">
         <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('server')">
                 <n-input :value="deleteForm.server" readonly />
@@ -94,8 +93,7 @@ const onClose = () => {
                     :line-height="1.5"
                     :lines="deleteForm.affectedKeys"
                     :rows="10"
-                    style="user-select: text; cursor: text"
-                />
+                    style="user-select: text; cursor: text" />
             </n-card>
         </n-form>
 

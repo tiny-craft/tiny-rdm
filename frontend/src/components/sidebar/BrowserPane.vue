@@ -72,8 +72,7 @@ const filterTypeOptions = computed(() => {
                     v-model:value="filterForm.type"
                     :consistent-menu-width="false"
                     :options="filterTypeOptions"
-                    style="width: 120px"
-                />
+                    style="width: 120px" />
                 <n-input clearable placeholder="" />
                 <n-button ghost>
                     <template #icon>

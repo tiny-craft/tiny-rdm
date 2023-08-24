@@ -17,29 +17,25 @@ const props = defineProps({
             stroke-linejoin="round"
             width="28"
             x="13"
-            y="10"
-        />
+            y="10" />
         <path
             :stroke-width="strokeWidth"
             d="M35 10V4H8C7.44772 4 7 4.44772 7 5V38H13"
             stroke="currentColor"
             stroke-linecap="round"
-            stroke-linejoin="round"
-        />
+            stroke-linejoin="round" />
         <path
             :stroke-width="strokeWidth"
             d="M21 22H33"
             stroke="currentColor"
             stroke-linecap="round"
-            stroke-linejoin="round"
-        />
+            stroke-linejoin="round" />
         <path
             :stroke-width="strokeWidth"
             d="M21 30H33"
             stroke="currentColor"
             stroke-linecap="round"
-            stroke-linejoin="round"
-        />
+            stroke-linejoin="round" />
     </svg>
 </template>
 

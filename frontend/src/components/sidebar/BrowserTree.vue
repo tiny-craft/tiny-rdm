@@ -602,8 +602,7 @@ const handleOutsideContextMenu = () => {
             virtual-scroll
             @load="onLoadTree"
             @update:selected-keys="onUpdateSelectedKeys"
-            @update:expanded-keys="onUpdateExpanded"
-        />
+            @update:expanded-keys="onUpdateExpanded" />
         <n-dropdown
             :animated="false"
             :options="contextMenuParam.options"
@@ -614,8 +613,7 @@ const handleOutsideContextMenu = () => {
             placement="bottom-start"
             trigger="manual"
             @clickoutside="handleOutsideContextMenu"
-            @select="handleSelectContextMenu"
-        />
+            @select="handleSelectContextMenu" />
     </div>
 </template>
 

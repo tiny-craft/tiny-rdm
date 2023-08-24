@@ -175,8 +175,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                     :placeholder="$t('search')"
                     clearable
                     @clear="clearFilter"
-                    @update:value="onFilterInput"
-                />
+                    @update:value="onFilterInput" />
             </div>
             <div class="flex-item-expand"></div>
             <n-button plain @click="onAddValue">
@@ -198,8 +197,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 size="small"
                 striped
                 virtual-scroll
-                @update:filters="onUpdateFilter"
-            />
+                @update:filters="onUpdateFilter" />
         </div>
     </div>
 </template>

@@ -91,8 +91,7 @@ const onDeleteKey = () => {
                 border
                 size="18"
                 t-tooltip="rename_key"
-                @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)"
-            />
+                @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)" />
             <!--            <n-button @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)">-->
             <!--                <template #icon>-->
             <!--                    <n-icon :component="Edit" size="18" />-->

@@ -52,8 +52,7 @@ watch(
         :inline-theme-disabled="true"
         :theme="prefStore.isDark ? darkTheme : undefined"
         :theme-overrides="themeOverrides"
-        class="fill-height"
-    >
+        class="fill-height">
         <n-global-style />
         <n-dialog-provider>
             <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }">

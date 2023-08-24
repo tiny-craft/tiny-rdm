@@ -29,8 +29,7 @@ const backgroundColor = computed(() => {
         :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
         :color="{ color: backgroundColor, borderColor: fontColor, textColor: fontColor }"
         :size="props.size"
-        strong
-    >
+        strong>
         {{ props.type }}
     </n-tag>
     <!--  <div class="redis-type-tag flex-box-h" :style="{backgroundColor: backgroundColor}">{{ props.type }}</div>-->

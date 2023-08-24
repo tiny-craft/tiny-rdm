@@ -104,16 +104,14 @@ const openGithub = () => {
         :style="{
             width: props.width + 'px',
         }"
-        class="flex-box-v"
-    >
+        class="flex-box-v">
         <n-menu
             :collapsed="true"
             :collapsed-icon-size="iconSize"
             :collapsed-width="props.width"
             :options="menuOptions"
             :value="props.value"
-            @update:value="(val) => emit('update:value', val)"
-        />
+            @update:value="(val) => emit('update:value', val)" />
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">
             <n-dropdown
@@ -122,8 +120,7 @@ const openGithub = () => {
                 :options="preferencesOptions"
                 :render-label="renderContextLabel"
                 trigger="click"
-                @select="onSelectPreferenceMenu"
-            >
+                @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" class="nav-menu-button" />
             </n-dropdown>
             <icon-button :icon="Github" :size="iconSize" class="nav-menu-button" @click="openGithub" />

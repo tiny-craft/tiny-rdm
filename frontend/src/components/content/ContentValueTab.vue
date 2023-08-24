@@ -69,8 +69,7 @@ const onCloseTab = (idx, key) => {
             :style="{ backgroundColor: item.bgColor || '' }"
             :title="item.label"
             class="content-tab_item flex-item-expand icon-btn flex-box-h"
-            @click="onClickTab(i, item.key)"
-        >
+            @click="onClickTab(i, item.key)">
             <n-icon :component="Close" class="content-tab_item-close" size="20" @click.stop="onCloseTab(i, item.key)" />
             <div class="content-tab_item-label ellipsis flex-item-expand">
                 {{ item.label }}

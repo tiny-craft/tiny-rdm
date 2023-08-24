@@ -248,15 +248,13 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         :consistent-menu-width="false"
                         :options="filterOption"
                         style="width: 120px"
-                        @update:value="onChangeFilterType"
-                    />
+                        @update:value="onChangeFilterType" />
                     <n-input
                         v-model:value="filterValue"
                         :placeholder="$t('search')"
                         clearable
                         @clear="clearFilter"
-                        @update:value="onFilterInput"
-                    />
+                        @update:value="onFilterInput" />
                 </n-input-group>
             </div>
             <div class="flex-item-expand"></div>
@@ -279,8 +277,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 size="small"
                 striped
                 virtual-scroll
-                @update:filters="onUpdateFilter"
-            />
+                @update:filters="onUpdateFilter" />
         </div>
     </div>
 </template>

@@ -67,8 +67,7 @@ const onClose = () => {
         :show-icon="false"
         :title="$t('preferences')"
         preset="dialog"
-        transform-origin="center"
-    >
+        transform-origin="center">
         <!-- FIXME: set loading will slow down appear animation of dialog in linux -->
         <!-- <n-spin :show="loading"> -->
         <n-tabs v-model:value="tab" animated type="line">
@@ -85,8 +84,7 @@ const onClose = () => {
                         <n-select
                             v-model:value="prefStore.general.language"
                             :options="prefStore.langOption"
-                            filterable
-                        />
+                            filterable />
                     </n-form-item>
                     <n-form-item :label="$t('font')" required>
                         <n-select v-model:value="prefStore.general.font" :options="prefStore.fontOption" filterable />

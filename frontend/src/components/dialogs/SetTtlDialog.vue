@@ -71,8 +71,7 @@ const onConfirm = async () => {
         :show-icon="false"
         :title="$t('set_ttl')"
         preset="dialog"
-        transform-origin="center"
-    >
+        transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('key')">
                 <n-input :value="currentKey" readonly />
@@ -82,8 +81,7 @@ const onConfirm = async () => {
                     v-model:value="ttlForm.ttl"
                     :max="Number.MAX_SAFE_INTEGER"
                     :min="-1"
-                    style="width: 100%"
-                >
+                    style="width: 100%">
                     <template #suffix>
                         {{ $t('second') }}
                     </template>

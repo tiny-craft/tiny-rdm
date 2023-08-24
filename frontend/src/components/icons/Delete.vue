@@ -13,8 +13,7 @@ const props = defineProps({
             :stroke-width="props.strokeWidth"
             d="M15 12L16.2 5H31.8L33 12"
             stroke="currentColor"
-            stroke-linejoin="round"
-        />
+            stroke-linejoin="round" />
         <path :stroke-width="props.strokeWidth" d="M6 12H42" stroke="currentColor" stroke-linecap="round" />
         <path
             :stroke-width="props.strokeWidth"
@@ -24,8 +23,7 @@ const props = defineProps({
             fill-rule="evenodd"
             stroke="currentColor"
             stroke-linecap="round"
-            stroke-linejoin="round"
-        />
+            stroke-linejoin="round" />
         <path :stroke-width="props.strokeWidth" d="M20 22V34" stroke="currentColor" stroke-linecap="round" />
         <path :stroke-width="props.strokeWidth" d="M28 22V34" stroke="currentColor" stroke-linecap="round" />
     </svg>
