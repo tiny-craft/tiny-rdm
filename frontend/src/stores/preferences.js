@@ -30,7 +30,7 @@ const usePreferencesStore = defineStore('preferences', {
      */
     state: () => ({
         general: {
-            theme: 'light',
+            theme: 'auto',
             language: 'en',
             font: '',
             fontSize: 14,
@@ -134,14 +134,11 @@ const usePreferencesStore = defineStore('preferences', {
 
         isDark() {
             const th = get(this.general, 'theme', 'auto')
-            if (th === 'auto') {
-                if (osTheme.value === 'dark') {
-                    return true
-                }
-            } else if (th === 'dark') {
-                return true
+            if (th !== 'auto') {
+                return th === 'dark'
+            } else {
+                return osTheme.value === 'dark'
             }
-            return false
         },
 
         autoCheckUpdate() {
