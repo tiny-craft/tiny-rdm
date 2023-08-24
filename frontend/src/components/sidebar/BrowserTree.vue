@@ -62,6 +62,9 @@ const data = computed(() => {
 
 const backgroundColor = computed(() => {
     const { markColor: hex = '' } = connectionStore.serverProfile[props.server] || {}
+    if (isEmpty(hex)) {
+        return ''
+    }
     const { r, g, b } = parseHexColor(hex)
     return `rgba(${r}, ${g}, ${b}, 0.2)`
 })

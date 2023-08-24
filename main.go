@@ -67,7 +67,7 @@ func main() {
 			},
 			About: &mac.AboutInfo{
 				Title:   "Tiny RDM",
-				Message: "A modern lightweight cross-platform Redis desktop client\nCopyright © 2023",
+				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2023",
 				Icon:    icon,
 			},
 			//WebviewIsTransparent: true,

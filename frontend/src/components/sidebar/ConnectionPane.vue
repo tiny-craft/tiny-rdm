@@ -14,10 +14,6 @@ const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
 const connectionStore = useConnectionStore()
 const filterPattern = ref('')
-
-const onDisconnectAll = () => {
-    connectionStore.closeAllConnection()
-}
 </script>
 
 <template>
@@ -38,13 +34,6 @@ const onDisconnectAll = () => {
                 stroke-width="4"
                 t-tooltip="new_group"
                 @click="dialogStore.openNewGroupDialog()" />
-            <icon-button
-                :disabled="!connectionStore.anyConnectionOpened"
-                :icon="Unlink"
-                size="20"
-                stroke-width="4"
-                t-tooltip="disconnect_all"
-                @click="onDisconnectAll" />
             <n-input v-model:value="filterPattern" :placeholder="$t('filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" size="20" />

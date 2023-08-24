@@ -117,18 +117,29 @@ const menuOptions = {
     },
 }
 
+/**
+ * get mark color of server saved in preferences
+ * @param name
+ * @return {null|string}
+ */
+const getServerMarkColor = (name) => {
+    const { markColor = '' } = connectionStore.serverProfile[name] || {}
+    if (!isEmpty(markColor)) {
+        const rgb = parseHexColor(markColor)
+        const rgb2 = hexGammaCorrection(rgb, 0.75)
+        return toHexColor(rgb2)
+    }
+    return null
+}
+
 const renderLabel = ({ option }) => {
     if (option.type === ConnectionType.Server) {
-        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
-        if (!isEmpty(markColor)) {
-            const rgb = parseHexColor(markColor)
-            const rgb2 = hexGammaCorrection(rgb, 0.75)
+        const color = getServerMarkColor(option.name)
+        if (color != null) {
             return h(
                 NText,
                 {
-                    style: {
-                        color: toHexColor(rgb2),
-                    },
+                    style: { color },
                 },
                 () => option.label,
             )
@@ -166,9 +177,10 @@ const renderPrefix = ({ option }) => {
             )
         case ConnectionType.Server:
             const connected = connectionStore.isConnected(option.name)
+            const color = getServerMarkColor(option.name)
             return h(
                 NIcon,
-                { size: 20 },
+                { size: 20, color },
                 {
                     default: () => h(ToggleServer, { modelValue: !!connected }),
                 },
@@ -362,9 +374,11 @@ const handleSelectContextMenu = (key) => {
             removeConnection(name)
             break
         case 'server_close':
-            if (!isEmpty(group)) {
-                connectionStore.closeConnection(name)
-            }
+            connectionStore.closeConnection(name).then((closed) => {
+                if (closed) {
+                    $message.success(i18n.t('handle_succ'))
+                }
+            })
             break
         case 'group_rename':
             if (!isEmpty(group)) {
@@ -372,7 +386,9 @@ const handleSelectContextMenu = (key) => {
             }
             break
         case 'group_delete':
-            removeGroup(group)
+            if (!isEmpty(group)) {
+                removeGroup(group)
+            }
             break
         default:
             console.warn('TODO: handle context menu:' + key)
