@@ -76,6 +76,7 @@ const useDialogStore = defineStore('dialog', {
         },
 
         openNewGroupDialog() {
+            this.editGroup = ''
             this.groupDialogVisible = true
         },
         closeNewGroupDialog() {

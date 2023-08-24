@@ -4,5 +4,6 @@
   "singleQuote": true,
   "semi": false,
   "bracketSameLine": true,
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "htmlWhitespaceSensitivity": "ignore"
 }

@@ -18,6 +18,7 @@
   "edit_close_confirm": "Please close the relevant connections before editing. Do you want to continue?",
   "opening_connection": "Opening Connection...",
   "remove_tip": "{type} \"{name}\" will be deleted",
+  "remove_group_tip": "Group \"{name}\" and all connections in it will be deleted",
   "ttl": "TTL",
   "forever": "Forever",
   "rename_key": "Rename Key",

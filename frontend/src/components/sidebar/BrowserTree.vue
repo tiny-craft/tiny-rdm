@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { NIcon, NSpace, NTag, useDialog } from 'naive-ui'
+import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
 import { find, get, includes, indexOf, isEmpty, remove } from 'lodash'
@@ -22,6 +22,7 @@ import Close from '@/components/icons/Close.vue'
 import { typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
+import { parseHexColor } from '@/utils/rgb.js'
 
 const props = defineProps({
     server: String,
@@ -61,13 +62,7 @@ const data = computed(() => {
 
 const backgroundColor = computed(() => {
     const { markColor: hex = '' } = connectionStore.serverProfile[props.server] || {}
-    if (isEmpty(hex)) {
-        return ''
-    }
-    const bigint = parseInt(hex.slice(1), 16)
-    const r = (bigint >> 16) & 255
-    const g = (bigint >> 8) & 255
-    const b = bigint & 255
+    const { r, g, b } = parseHexColor(hex)
     return `rgba(${r}, ${g}, ${b}, 0.2)`
 })
 
@@ -292,7 +287,6 @@ defineExpose({
     handleSelectContextMenu,
 })
 
-const dialog = useDialog()
 const onUpdateExpanded = (value, option, meta) => {
     expandedKeys.value = value
     if (!meta.node) {

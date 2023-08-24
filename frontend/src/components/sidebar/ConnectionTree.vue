@@ -2,11 +2,11 @@
 import useDialogStore from 'stores/dialog.js'
 import { h, nextTick, reactive, ref } from 'vue'
 import useConnectionStore from 'stores/connections.js'
-import { NIcon, useDialog, useThemeVars } from 'naive-ui'
+import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '@/consts/connection_type.js'
 import ToggleFolder from '@/components/icons/ToggleFolder.vue'
 import ToggleServer from '@/components/icons/ToggleServer.vue'
-import { debounce, indexOf, isEmpty } from 'lodash'
+import { debounce, get, includes, indexOf, isEmpty, split } from 'lodash'
 import Config from '@/components/icons/Config.vue'
 import Delete from '@/components/icons/Delete.vue'
 import Unlink from '@/components/icons/Unlink.vue'
@@ -15,6 +15,8 @@ import Connect from '@/components/icons/Connect.vue'
 import { useI18n } from 'vue-i18n'
 import useTabStore from 'stores/tab.js'
 import Edit from '@/components/icons/Edit.vue'
+import { hexGammaCorrection, parseHexColor, toHexColor } from '@/utils/rgb.js'
+import IconButton from '@/components/common/IconButton.vue'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
@@ -116,7 +118,39 @@ const menuOptions = {
 }
 
 const renderLabel = ({ option }) => {
+    if (option.type === ConnectionType.Server) {
+        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
+        if (!isEmpty(markColor)) {
+            const rgb = parseHexColor(markColor)
+            const rgb2 = hexGammaCorrection(rgb, 0.75)
+            return h(
+                NText,
+                {
+                    style: {
+                        color: toHexColor(rgb2),
+                    },
+                },
+                () => option.label,
+            )
+        }
+    }
     return option.label
+}
+
+// render horizontal item
+const renderIconMenu = (items) => {
+    return h(
+        NSpace,
+        {
+            align: 'center',
+            inline: true,
+            size: 2,
+            wrapItem: false,
+            wrap: false,
+            style: 'margin-right: 5px',
+        },
+        () => items,
+    )
 }
 
 const renderPrefix = ({ option }) => {
@@ -142,21 +176,67 @@ const renderPrefix = ({ option }) => {
     }
 }
 
+const getServerMenu = (connected) => {
+    const btns = []
+    if (connected) {
+        btns.push(
+            h(IconButton, {
+                tTooltip: 'disconnect',
+                icon: Unlink,
+                onClick: () => handleSelectContextMenu('server_close'),
+            }),
+            h(IconButton, {
+                tTooltip: 'edit_conn',
+                icon: Config,
+                onClick: () => handleSelectContextMenu('server_edit'),
+            }),
+        )
+    } else {
+        btns.push(
+            h(IconButton, {
+                tTooltip: 'open_connection',
+                icon: Connect,
+                onClick: () => handleSelectContextMenu('server_open'),
+            }),
+            h(IconButton, {
+                tTooltip: 'edit_conn',
+                icon: Config,
+                onClick: () => handleSelectContextMenu('server_edit'),
+            }),
+            h(IconButton, {
+                tTooltip: 'remove_conn',
+                icon: Delete,
+                onClick: () => handleSelectContextMenu('server_remove'),
+            }),
+        )
+    }
+    return btns
+}
+
+const getGroupMenu = () => {
+    return [
+        h(IconButton, {
+            tTooltip: 'edit_conn',
+            icon: Config,
+            onClick: () => handleSelectContextMenu('group_rename'),
+        }),
+        h(IconButton, {
+            tTooltip: 'remove_conn',
+            icon: Delete,
+            onClick: () => handleSelectContextMenu('group_delete'),
+        }),
+    ]
+}
+
 const renderSuffix = ({ option }) => {
-    if (option.type === ConnectionType.Server) {
-        const { markColor = '' } = connectionStore.serverProfile[option.name] || {}
-        if (isEmpty(markColor)) {
-            return ''
+    if (includes(selectedKeys.value, option.key)) {
+        switch (option.type) {
+            case ConnectionType.Server:
+                const connected = connectionStore.isConnected(option.name)
+                return renderIconMenu(getServerMenu(connected))
+            case ConnectionType.Group:
+                return renderIconMenu(getGroupMenu())
         }
-        return h('div', {
-            style: {
-                borderRadius: '50%',
-                backgroundColor: markColor,
-                width: '13px',
-                height: '13px',
-                border: '2px solid white',
-            },
-        })
     }
     return null
 }
@@ -191,7 +271,6 @@ const openConnection = async (name) => {
     }
 }
 
-const dialog = useDialog()
 const removeConnection = (name) => {
     $dialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
         connectionStore.deleteConnection(name).then(({ success, msg }) => {
@@ -203,7 +282,7 @@ const removeConnection = (name) => {
 }
 
 const removeGroup = async (name) => {
-    $dialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_group'), name }), async () => {
+    $dialog.warning(i18n.t('remove_group_tip', { name }), async () => {
         connectionStore.deleteGroup(name).then(({ success, msg }) => {
             if (!success) {
                 $message.error(msg)
@@ -256,7 +335,14 @@ const renderContextLabel = (option) => {
 
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
-    const { name, label, db, key: nodeKey, redisKey } = contextMenuParam.currentNode
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    const [group, name] = split(selectedKey, '/')
+    if (isEmpty(group) && isEmpty(name)) {
+        return
+    }
     switch (key) {
         case 'server_open':
             openConnection(name).then(() => {})
@@ -276,13 +362,17 @@ const handleSelectContextMenu = (key) => {
             removeConnection(name)
             break
         case 'server_close':
-            connectionStore.closeConnection(name)
+            if (!isEmpty(group)) {
+                connectionStore.closeConnection(name)
+            }
             break
         case 'group_rename':
-            dialogStore.openRenameGroupDialog(label)
+            if (!isEmpty(group)) {
+                dialogStore.openRenameGroupDialog(group)
+            }
             break
         case 'group_delete':
-            removeGroup(label)
+            removeGroup(group)
             break
         default:
             console.warn('TODO: handle context menu:' + key)

@@ -134,7 +134,6 @@ const infoFilter = ref('')
                             <n-statistic :value="totalKeys">
                                 <template #label>
                                     {{ $t('total_keys') }}
-                                    <n-icon :component="Help" />
                                 </template>
                             </n-statistic>
                         </n-gi>

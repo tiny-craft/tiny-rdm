@@ -18,6 +18,7 @@
   "edit_close_confirm": "编辑前需要关闭相关连接，是否继续",
   "opening_connection": "正在打开连接...",
   "remove_tip": "{type} \"{name}\" 将会被删除",
+  "remove_group_tip": "分组 \"{name}\"及其所有连接将会被删除",
   "ttl": "TTL",
   "forever": "永久",
   "rename_key": "重命名键",

@@ -65,7 +65,6 @@ const valueComponents = {
     [types.STREAM]: ContentValueStream,
 }
 
-const dialog = useDialog()
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const tab = computed(() =>

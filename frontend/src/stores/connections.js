@@ -124,7 +124,7 @@ const useConnectionStore = defineStore('connections', {
                 if (conn.type !== 'group') {
                     // top level
                     conns.push({
-                        key: conn.name,
+                        key: '/' + conn.name,
                         label: conn.name,
                         name: conn.name,
                         type: ConnectionType.Server,
@@ -151,7 +151,7 @@ const useConnectionStore = defineStore('connections', {
                         })
                     }
                     conns.push({
-                        key: conn.name,
+                        key: conn.name + '/',
                         label: conn.name,
                         type: ConnectionType.Group,
                         children,
@@ -346,9 +346,11 @@ const useConnectionStore = defineStore('connections', {
             }
 
             const dbs = this.databases[name]
-            for (const db of dbs) {
-                this.removeKeyFilter(name, db.db)
-                this._getNodeMap(name, db.db).clear()
+            if (!isEmpty(dbs)) {
+                for (const db of dbs) {
+                    this.removeKeyFilter(name, db.db)
+                    this._getNodeMap(name, db.db).clear()
+                }
             }
             this.removeKeyFilter(name, -1)
             delete this.databases[name]
