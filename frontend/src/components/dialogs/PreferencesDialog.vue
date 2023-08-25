@@ -44,12 +44,6 @@ const onSavePreferences = async () => {
     }
 }
 
-// Watch language and dynamically switch
-watch(
-    () => prefStore.general.language,
-    (lang) => (i18n.locale.value = prefStore.currentLanguage),
-)
-
 const onClose = () => {
     // restore to old preferences
     prefStore.resetToLastPreferences()

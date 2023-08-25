@@ -75,7 +75,7 @@ const usePreferencesStore = defineStore('preferences', {
         langOption() {
             const options = Object.entries(lang).map(([key, value]) => ({
                 value: key,
-                label: value['lang_name'],
+                label: value['name'],
             }))
             options.splice(0, 0, {
                 value: 'auto',
@@ -162,6 +162,7 @@ const usePreferencesStore = defineStore('preferences', {
             if (success) {
                 this.lastPref = clone(data)
                 this._applyPreferences(data)
+                i18nGlobal.locale.value = this.currentLanguage
             }
         },
 

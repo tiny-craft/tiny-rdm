@@ -30,7 +30,6 @@ const initializing = ref(false)
 onMounted(async () => {
     try {
         initializing.value = true
-        i18n.locale.value = prefStore.currentLanguage
         await connectionStore.initConnections()
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
@@ -40,9 +39,16 @@ onMounted(async () => {
     }
 })
 
+// watch theme and dynamically switch
 watch(
     () => prefStore.isDark,
     (isDark) => (isDark ? WindowSetDarkTheme() : WindowSetLightTheme()),
+)
+
+// watch language and dynamically switch
+watch(
+    () => prefStore.general.language,
+    (lang) => (i18n.locale.value = prefStore.currentLanguage),
 )
 </script>
 

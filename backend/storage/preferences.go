@@ -79,6 +79,26 @@ func (p *PreferencesStorage) GetPreferences() (ret map[string]any) {
 	return
 }
 
+func (p *PreferencesStorage) Value(keys ...string) any {
+	kv := p.getPreferences()
+	var ok bool
+	var a any
+	total := len(keys)
+	for i, key := range keys {
+		if a, ok = kv[key]; !ok {
+			return nil
+		}
+		if i == total-1 {
+			// last key, return value
+			return a
+		}
+		if kv, ok = a.(map[string]any); !ok {
+			return nil
+		}
+	}
+	return nil
+}
+
 func (p *PreferencesStorage) setPreferences(pf map[string]any, key string, value any) error {
 	keyPath := strings.Split(key, ".")
 	if len(keyPath) <= 0 {

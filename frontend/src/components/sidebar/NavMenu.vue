@@ -32,7 +32,7 @@ const emit = defineEmits(['update:value'])
 
 const iconSize = computed(() => Math.floor(props.width * 0.4))
 const renderIcon = (icon) => {
-    return () => h(NIcon, null, { default: () => h(icon) })
+    return () => h(NIcon, null, { default: () => h(icon, { strokeWidth: 4 }) })
 }
 
 const connectionStore = useConnectionStore()
@@ -122,7 +122,7 @@ const openGithub = () => {
                 :render-label="renderContextLabel"
                 trigger="click"
                 @select="onSelectPreferenceMenu">
-                <icon-button :icon="Config" :size="iconSize" class="nav-menu-button" />
+                <icon-button :icon="Config" :size="iconSize" stroke-width="4" class="nav-menu-button" />
             </n-dropdown>
             <icon-button :icon="Github" :size="iconSize" class="nav-menu-button" @click="openGithub" />
         </div>
