@@ -56,7 +56,10 @@ jobs:
           npm install -g npm
           jq '.info.productVersion = "${{ steps.normalise_version.outputs.version }}"' wails.json > tmp.json
           mv tmp.json wails.json
-          cd frontend && npm install
+          cd frontend
+          jq '.version = "${{ steps.normalise_version.outputs.version }}"' package.json > tmp.json
+          mv tmp.json package.json
+          npm install
 
       - name: Build wails app for Linux
         shell: bash
