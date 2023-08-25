@@ -1,7 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"github.com/adrg/sysfont"
+	"io"
+	"net/http"
 	"sort"
 	"strings"
 	"sync"
@@ -11,7 +14,8 @@ import (
 )
 
 type preferencesService struct {
-	pref *storage2.PreferencesStorage
+	pref          *storage2.PreferencesStorage
+	clientVersion string
 }
 
 var preferences *preferencesService
@@ -21,7 +25,8 @@ func Preferences() *preferencesService {
 	if preferences == nil {
 		oncePreferences.Do(func() {
 			preferences = &preferencesService{
-				pref: storage2.NewPreferences(),
+				pref:          storage2.NewPreferences(),
+				clientVersion: "",
 			}
 		})
 	}
@@ -78,5 +83,46 @@ func (p *preferencesService) GetFontList() (resp types.JSResp) {
 		"fonts": fontList,
 	}
 	resp.Success = true
+	return
+}
+
+func (p *preferencesService) SetClientVersion(ver string) {
+	p.clientVersion = ver
+}
+
+type latestRelease struct {
+	Name    string `json:"name"`
+	TagName string `json:"tag_name"`
+	Url     string `json:"url"`
+	HtmlUrl string `json:"html_url"`
+}
+
+func (p *preferencesService) CheckForUpdate() (resp types.JSResp) {
+	// request latest version
+	res, err := http.Get("https://api.github.com/repos/tiny-craft/tiny-rdm/releases/latest")
+	if err != nil || res.StatusCode != http.StatusOK {
+		resp.Msg = "network error"
+		return
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		resp.Msg = "invalid content"
+		return
+	}
+	var respObj latestRelease
+	err = json.Unmarshal(body, &respObj)
+	if err != nil {
+		resp.Msg = "invalid content"
+		return
+	}
+
+	// compare with current version
+	resp.Success = true
+	resp.Data = map[string]any{
+		"version":  p.clientVersion,
+		"latest":   respObj.TagName,
+		"page_url": respObj.HtmlUrl,
+	}
 	return
 }

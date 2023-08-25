@@ -19,6 +19,8 @@ var assets embed.FS
 //go:embed build/appicon.png
 var icon []byte
 
+var version = "0.0.0"
+
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
@@ -66,7 +68,7 @@ func main() {
 				HideToolbarSeparator:       true,
 			},
 			About: &mac.AboutInfo{
-				Title:   "Tiny RDM",
+				Title:   "Tiny RDM " + version,
 				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2023",
 				Icon:    icon,
 			},

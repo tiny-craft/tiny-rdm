@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
 import { camelCase, clone, find, get, isEmpty, isObject, map, set, snakeCase, split } from 'lodash'
 import {
+    CheckForUpdate,
     GetFontList,
     GetPreferences,
     RestorePreferences,
@@ -236,27 +237,25 @@ const usePreferencesStore = defineStore('preferences', {
             if (manual) {
                 msgRef = $message.loading('Retrieving for new version', { duration: 0 })
             }
-            let respObj = null
             try {
-                const resp = await fetch('https://api.github.com/repos/tiny-craft/tiny-rdm/releases/latest')
-                if (resp.status === 200) {
-                    respObj = await resp.json()
+                const { success, data = {} } = await CheckForUpdate()
+                if (success) {
+                    const { version, latest, pageUrl } = data
+                    if (latest > version) {
+                        $dialog.warning(i18nGlobal.t('new_version_tip'), () => {
+                            BrowserOpenURL(pageUrl)
+                        })
+                        return
+                    }
+                }
+
+                if (manual) {
+                    $message.info(i18nGlobal.t('no_update'))
                 }
             } finally {
                 if (msgRef != null) {
                     msgRef.destroy()
                     msgRef = null
-                }
-            }
-
-            // TODO: check current version is older then remote
-            if (respObj != null && !isEmpty(respObj['html_url'])) {
-                $dialog.warning(i18nGlobal.t('new_version_tip'), () => {
-                    BrowserOpenURL(respObj['html_url'])
-                })
-            } else {
-                if (manual) {
-                    $message.info(i18nGlobal.t('no_update'))
                 }
             }
         },

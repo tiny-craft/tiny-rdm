@@ -53,7 +53,12 @@ export async function setupDiscreteApi() {
         theme: prefStore.isDark ? darkTheme : undefined,
         themeOverrides,
     }))
-    const { message, dialog } = createDiscreteApi(['message', 'dialog'], { configProviderProps })
+    const { message, dialog } = createDiscreteApi(['message', 'dialog'], {
+        configProviderProps,
+        messageProviderProps: {
+            placement: 'bottom-right',
+        },
+    })
 
     window.$message = setupMessage(message)
     window.$dialog = setupDialog(dialog)
