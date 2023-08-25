@@ -10,25 +10,19 @@ const props = defineProps({
 <template>
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
-            d="M25.8927 16.0307L18.1145 8.2525C15.2506 5.38866 10.7031 5.29302 7.9572 8.0389C5.21132 10.7848 5.30696 15.3323 8.1708 18.1962L15.949 25.9744"
+            d="M5.81836 6.72729V14H13.0911"
             stroke="currentColor"
             :stroke-width="strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
-            d="M31.9161 22.0707L39.6943 29.8489C42.5581 32.7127 42.9291 37.1233 39.9079 40.0062C36.8867 42.8891 32.6144 42.6564 29.7506 39.7926L21.9724 32.0144"
+            d="M4 24C4 35.0457 12.9543 44 24 44V44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C16.598 4 10.1351 8.02111 6.67677 13.9981"
             stroke="currentColor"
             :stroke-width="strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
-            d="M21.2384 21.0759L17.3493 17.1868"
-            stroke="currentColor"
-            :stroke-width="strokeWidth"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path
-            d="M30.3131 30.1504L26.424 26.2613"
+            d="M24.005 12L24.0038 24.0088L32.4832 32.4882"
             stroke="currentColor"
             :stroke-width="strokeWidth"
             stroke-linecap="round"

@@ -13,6 +13,7 @@ import Log from '@/components/icons/Log.vue'
 import useConnectionStore from 'stores/connections.js'
 import Help from '@/components/icons/Help.vue'
 import usePreferencesStore from 'stores/preferences.js'
+import Record from '@/components/icons/Record.vue'
 
 const themeVars = useThemeVars()
 
@@ -52,7 +53,7 @@ const menuOptions = computed(() => {
         {
             label: i18n.t('log'),
             key: 'log',
-            icon: renderIcon(Log),
+            icon: renderIcon(Record),
         },
     ]
 })

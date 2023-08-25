@@ -101,7 +101,7 @@ const menuOptions = {
                 {
                     key: 'server_edit',
                     label: i18n.t('edit_conn'),
-                    icon: renderIcon(Edit),
+                    icon: renderIcon(Config),
                 },
                 {
                     type: 'divider',
@@ -139,7 +139,10 @@ const renderLabel = ({ option }) => {
             return h(
                 NText,
                 {
-                    style: { color },
+                    style: {
+                        color,
+                        fontWeight: '450',
+                    },
                 },
                 () => option.label,
             )
