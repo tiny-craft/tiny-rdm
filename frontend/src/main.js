@@ -20,6 +20,18 @@ async function setupApp() {
     const prefStore = usePreferencesStore()
     await prefStore.loadPreferences()
     await setupDiscreteApi()
+    app.config.errorHandler = (err, instance, info) => {
+        // TODO: add "send error message to author" later
+        $notification.error({
+            title: i18n.global.t('error'),
+            content: err.toString(),
+            // meta: err.stack,
+        })
+        console.error(err)
+    }
+    app.config.warnHandler = (message) => {
+        console.warn(message)
+    }
     app.mount('#app')
 }
 

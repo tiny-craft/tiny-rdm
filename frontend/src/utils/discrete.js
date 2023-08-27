@@ -13,6 +13,8 @@ function setupMessage(message) {
             return message.info(content, option)
         },
         loading: (content, option = null) => {
+            option.duration = option.duration || 30000
+            option.keepAliveOnHover = option.keepAliveOnHover !== undefined ? option.keepAliveOnHover : true
             return message.loading(content, option)
         },
         success: (content, option = null) => {
@@ -20,6 +22,26 @@ function setupMessage(message) {
         },
         warning: (content, option = null) => {
             return message.warning(content, option)
+        },
+    }
+}
+
+function setupNotification(notification) {
+    return {
+        error: (content, option = null) => {
+            option.title = option.title || i18nGlobal.t('error')
+            return notification.error(content, option)
+        },
+        info: (content, option = null) => {
+            return notification.info(content, option)
+        },
+        success: (content, option = null) => {
+            option.title = option.title || i18nGlobal.t('success')
+            return notification.success(content, option)
+        },
+        warning: (content, option = null) => {
+            option.title = option.title || i18nGlobal.t('warning')
+            return notification.warning(content, option)
         },
     }
 }
@@ -53,13 +75,18 @@ export async function setupDiscreteApi() {
         theme: prefStore.isDark ? darkTheme : undefined,
         themeOverrides,
     }))
-    const { message, dialog } = createDiscreteApi(['message', 'dialog'], {
+    const { message, dialog, notification } = createDiscreteApi(['message', 'notification', 'dialog'], {
         configProviderProps,
         messageProviderProps: {
             placement: 'bottom-right',
         },
+        notificationProviderProps: {
+            placement: 'top-right',
+            keepAliveOnHover: true,
+        },
     })
 
     window.$message = setupMessage(message)
+    window.$notification = setupNotification(notification)
     window.$dialog = setupDialog(dialog)
 }
