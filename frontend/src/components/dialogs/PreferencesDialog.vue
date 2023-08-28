@@ -16,7 +16,6 @@ const initPreferences = async () => {
     try {
         loading.value = true
         tab.value = 'general'
-        await prefStore.loadFontList()
         await prefStore.loadPreferences()
         prevPreferences.value = {
             general: prefStore.general,

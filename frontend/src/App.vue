@@ -30,6 +30,7 @@ const initializing = ref(false)
 onMounted(async () => {
     try {
         initializing.value = true
+        await prefStore.loadFontList()
         await connectionStore.initConnections()
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
