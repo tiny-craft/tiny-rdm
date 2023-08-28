@@ -59,6 +59,7 @@ watch(
         :inline-theme-disabled="true"
         :theme="prefStore.isDark ? darkTheme : undefined"
         :theme-overrides="themeOverrides"
+        :locale="prefStore.themeLocale"
         class="fill-height">
         <n-global-style />
         <n-dialog-provider>

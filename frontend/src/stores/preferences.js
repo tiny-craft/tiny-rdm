@@ -10,7 +10,7 @@ import {
 } from 'wailsjs/go/services/preferencesService.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
-import { useOsTheme } from 'naive-ui'
+import { zhCN, enUS, useOsTheme } from 'naive-ui'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -139,6 +139,16 @@ const usePreferencesStore = defineStore('preferences', {
                 return th === 'dark'
             } else {
                 return osTheme.value === 'dark'
+            }
+        },
+
+        themeLocale() {
+            const lang = this.currentLanguage
+            switch (lang) {
+                case 'zh':
+                    return zhCN
+                default:
+                    return enUS
             }
         },
 

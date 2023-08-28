@@ -64,7 +64,7 @@ defineExpose({
             <n-form-item :label="$t('filter_keyword')">
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
-            <n-form-item>
+            <n-form-item label="&nbsp;">
                 <icon-button :icon="Refresh" border t-tooltip="refresh" @click="loadHistory" />
             </n-form-item>
         </n-form>
