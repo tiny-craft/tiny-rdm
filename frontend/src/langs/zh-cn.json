@@ -159,6 +159,8 @@
   "launch_log": "运行日志",
   "filter_server": "筛选服务器",
   "filter_keyword": "筛选关键字",
+  "clean_log": "清空运行日志",
+  "confirm_clean_log": "确定清空运行日志",
   "exec_time": "执行时间",
   "cmd": "命令",
   "cost_time": "耗时"

@@ -12,8 +12,8 @@ function setupMessage(message) {
         info: (content, option = null) => {
             return message.info(content, option)
         },
-        loading: (content, option = null) => {
-            option.duration = option.duration || 30000
+        loading: (content, option = {}) => {
+            option.duration = option.duration != null ? option.duration : 30000
             option.keepAliveOnHover = option.keepAliveOnHover !== undefined ? option.keepAliveOnHover : true
             return message.loading(content, option)
         },
@@ -28,20 +28,24 @@ function setupMessage(message) {
 
 function setupNotification(notification) {
     return {
-        error: (content, option = null) => {
+        error: (content, option = {}) => {
+            option.content = content
             option.title = option.title || i18nGlobal.t('error')
-            return notification.error(content, option)
+            return notification.error(option)
         },
-        info: (content, option = null) => {
-            return notification.info(content, option)
+        info: (content, option = {}) => {
+            option.content = content
+            return notification.info(option)
         },
-        success: (content, option = null) => {
+        success: (content, option = {}) => {
+            option.content = content
             option.title = option.title || i18nGlobal.t('success')
-            return notification.success(content, option)
+            return notification.success(option)
         },
-        warning: (content, option = null) => {
+        warning: (content, option = {}) => {
+            option.content = content
             option.title = option.title || i18nGlobal.t('warning')
-            return notification.warning(content, option)
+            return notification.warning(option)
         },
     }
 }
@@ -81,6 +85,7 @@ export async function setupDiscreteApi() {
             placement: 'bottom-right',
         },
         notificationProviderProps: {
+            max: 5,
             placement: 'top-right',
             keepAliveOnHover: true,
         },

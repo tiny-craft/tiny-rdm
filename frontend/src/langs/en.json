@@ -159,6 +159,8 @@
   "launch_log": "Launch Log",
   "filter_server": "Filter Server",
   "filter_keyword": "Filter Keyword",
+  "clean_log": "Clean Launch Log",
+  "confirm_clean_log": "Confirm clean launch log",
   "exec_time": "Exec Time",
   "cmd": "Command",
   "cost_time": "Cost"

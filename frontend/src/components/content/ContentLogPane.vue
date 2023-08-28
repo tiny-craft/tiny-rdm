@@ -5,6 +5,7 @@ import Refresh from '@/components/icons/Refresh.vue'
 import useConnectionStore from 'stores/connections.js'
 import { map, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
+import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
 
 const connectionStore = useConnectionStore()
@@ -43,6 +44,20 @@ const loadHistory = () => {
         })
 }
 
+const cleanHistory = async () => {
+    $dialog.warning(i18n.t('confirm_clean_log'), () => {
+        data.loading = true
+        connectionStore.cleanCmdHistory().then((success) => {
+            if (success) {
+                data.history = []
+                data.loading = false
+                tableRef.value?.scrollTo({ top: 0 })
+                $message.success(i18n.t('success'))
+            }
+        })
+    })
+}
+
 defineExpose({
     refresh: () => nextTick().then(loadHistory),
 })
@@ -67,6 +82,9 @@ defineExpose({
             <n-form-item label="&nbsp;">
                 <icon-button :icon="Refresh" border t-tooltip="refresh" @click="loadHistory" />
             </n-form-item>
+            <n-form-item label="&nbsp;">
+                <icon-button :icon="Delete" border t-tooltip="clean_log" @click="cleanHistory" />
+            </n-form-item>
         </n-form>
         <div class="fill-height flex-box-h" style="user-select: text">
             <n-data-table
@@ -81,7 +99,7 @@ defineExpose({
                         align: 'center',
                         titleAlign: 'center',
                         render({ timestamp }, index) {
-                            return dayjs(timestamp).locale('zh-cn').format('YYYY-MM-DD hh:mm:ss')
+                            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
                         },
                     },
                     {

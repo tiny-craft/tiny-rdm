@@ -1040,6 +1040,7 @@ func (c *connectionService) RenameKey(connName string, db int, key, newKey strin
 	return
 }
 
+// GetCmdHistory get redis command history
 func (c *connectionService) GetCmdHistory(pageNo, pageSize int) (resp types.JSResp) {
 	resp.Success = true
 	if pageSize <= 0 || pageNo <= 0 {
@@ -1059,6 +1060,13 @@ func (c *connectionService) GetCmdHistory(pageNo, pageSize int) (resp types.JSRe
 			"pageSize": pageSize,
 		}
 	}
+	return
+}
+
+// CleanCmdHistory clean redis command history
+func (c *connectionService) CleanCmdHistory() (resp types.JSResp) {
+	c.cmdHistory = []cmdHistoryItem{}
+	resp.Success = true
 	return
 }
 

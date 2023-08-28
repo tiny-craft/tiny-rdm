@@ -5,6 +5,7 @@ import {
     AddListItem,
     AddStreamValue,
     AddZSetValue,
+    CleanCmdHistory,
     CloseConnection,
     CreateGroup,
     DeleteConnection,
@@ -1420,6 +1421,19 @@ const useConnectionStore = defineStore('connections', {
                 return list
             } catch {
                 return []
+            }
+        },
+
+        /**
+         * clean cmd history
+         * @return {Promise<boolean>}
+         */
+        async cleanCmdHistory() {
+            try {
+                const { success } = await CleanCmdHistory()
+                return success === true
+            } catch {
+                return false
             }
         },
 
