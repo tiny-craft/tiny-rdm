@@ -47,14 +47,18 @@ const loadHistory = () => {
 const cleanHistory = async () => {
     $dialog.warning(i18n.t('confirm_clean_log'), () => {
         data.loading = true
-        connectionStore.cleanCmdHistory().then((success) => {
-            if (success) {
-                data.history = []
+        connectionStore
+            .cleanCmdHistory()
+            .then((success) => {
+                if (success) {
+                    data.history = []
+                    tableRef.value?.scrollTo({ top: 0 })
+                    $message.success(i18n.t('success'))
+                }
+            })
+            .finally(() => {
                 data.loading = false
-                tableRef.value?.scrollTo({ top: 0 })
-                $message.success(i18n.t('success'))
-            }
-        })
+            })
     })
 }
 
