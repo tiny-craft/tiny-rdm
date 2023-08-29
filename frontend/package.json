@@ -22,7 +22,7 @@
     "naive-ui": "^2.34.4",
     "prettier": "^3.0.2",
     "unplugin-auto-import": "^0.16.6",
-    "unplugin-icons": "^0.16.5",
+    "unplugin-icons": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.9"
   }

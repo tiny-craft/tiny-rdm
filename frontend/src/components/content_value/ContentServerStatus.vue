@@ -1,7 +1,6 @@
 <script setup>
 import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
 import { computed, ref } from 'vue'
-import Help from '@/components/icons/Help.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -69,8 +68,6 @@ const totalKeys = computed(() => {
     })
     return sum(toArray(nums))
 })
-const infoList = computed(() => map(props.info, (value, key) => ({ value, key })))
-const infoTab = ref('')
 const infoFilter = ref('')
 </script>
 
@@ -122,7 +119,7 @@ const infoFilter = ref('')
                     <n-grid style="min-width: 500px" x-gap="5">
                         <n-gi :span="6">
                             <n-statistic :label="$t('uptime')" :value="uptime[0]">
-                                <template #suffix> {{ $t(uptime[1]) }}</template>
+                                <template #suffix>{{ $t(uptime[1]) }}</template>
                             </n-statistic>
                         </n-gi>
                         <n-gi :span="6">
@@ -139,7 +136,7 @@ const infoFilter = ref('')
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic :label="$t('memory_used')" :value="usedMemory[0]">
-                                <template #suffix> {{ usedMemory[1] }}</template>
+                                <template #suffix>{{ usedMemory[1] }}</template>
                             </n-statistic>
                         </n-gi>
                     </n-grid>

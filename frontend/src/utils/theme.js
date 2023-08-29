@@ -17,9 +17,9 @@ export const themeOverrides = {
         // borderRadius: '3px'
     },
     Tabs: {
-        tabGapSmallCard: '1px',
-        tabGapMediumCard: '1px',
-        tabGapLargeCard: '1px',
+        tabGapSmallCard: '2px',
+        tabGapMediumCard: '2px',
+        tabGapLargeCard: '2px',
     },
     Form: {
         labelFontSizeTopSmall: '12px',

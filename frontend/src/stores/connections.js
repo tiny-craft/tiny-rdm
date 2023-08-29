@@ -150,6 +150,11 @@ const useConnectionStore = defineStore('connections', {
                             type: ConnectionType.Server,
                             // isLeaf: false,
                         })
+                        profiles[item.name] = {
+                            defaultFilter: item.defaultFilter,
+                            keySeparator: item.keySeparator,
+                            markColor: item.markColor,
+                        }
                     }
                     conns.push({
                         key: conn.name + '/',
@@ -157,11 +162,6 @@ const useConnectionStore = defineStore('connections', {
                         type: ConnectionType.Group,
                         children,
                     })
-                    profiles[conn.name] = {
-                        defaultFilter: conn.defaultFilter,
-                        keySeparator: conn.keySeparator,
-                        markColor: conn.markColor,
-                    }
                 }
                 this.setKeyFilter(conn.name, -1, conn.defaultFilter)
             }
