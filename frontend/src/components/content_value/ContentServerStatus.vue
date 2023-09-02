@@ -10,6 +10,7 @@ const props = defineProps({
     info: Object,
     autoRefresh: false,
     loading: false,
+    autoLoading: false,
 })
 
 const emit = defineEmits(['update:autoRefresh', 'refresh'])
@@ -102,11 +103,19 @@ const infoFilter = ref('')
                 <template #header-extra>
                     <n-space align="center" inline>
                         {{ $t('auto_refresh') }}
-                        <n-switch :value="props.autoRefresh" @update:value="(v) => emit('update:autoRefresh', v)" />
+                        <n-switch
+                            :value="props.autoRefresh"
+                            :loading="props.autoLoading"
+                            @update:value="(v) => emit('update:autoRefresh', v)" />
                         <n-tooltip>
                             {{ $t('refresh') }}
                             <template #trigger>
-                                <n-button circle size="small" tertiary @click="emit('refresh')">
+                                <n-button
+                                    circle
+                                    size="small"
+                                    tertiary
+                                    @click="emit('refresh')"
+                                    :loading="props.autoLoading">
                                     <template #icon>
                                         <n-icon :component="Refresh" />
                                     </template>

@@ -21,6 +21,7 @@ const serverName = computed(() => {
     return ''
 })
 const loadingServerInfo = ref(false)
+const autoLoadingServerInfo = ref(false)
 
 /**
  * refresh server status info
@@ -30,12 +31,15 @@ const loadingServerInfo = ref(false)
 const refreshInfo = async (force) => {
     if (force) {
         loadingServerInfo.value = true
+    } else {
+        autoLoadingServerInfo.value = true
     }
     if (!isEmpty(serverName.value) && connectionStore.isConnected(serverName.value)) {
         try {
             serverInfo.value = await connectionStore.getServerInfo(serverName.value)
         } finally {
             loadingServerInfo.value = false
+            autoLoadingServerInfo.value = false
         }
     }
 }
@@ -129,6 +133,7 @@ const onReloadKey = async () => {
                 v-model:auto-refresh="autoRefresh"
                 :info="serverInfo"
                 :loading="loadingServerInfo"
+                :auto-loading="autoLoadingServerInfo"
                 :server="serverName"
                 @refresh="refreshInfo(true)" />
         </div>
