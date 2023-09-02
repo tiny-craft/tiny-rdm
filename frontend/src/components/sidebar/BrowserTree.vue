@@ -50,14 +50,15 @@ const selectedKeys = computed(() => {
 
 const data = computed(() => {
     const dbs = get(connectionStore.databases, props.server, [])
-    return [
-        {
-            key: `${props.server}`,
-            label: props.server,
-            type: ConnectionType.Server,
-            children: dbs,
-        },
-    ]
+    return dbs
+    // return [
+    //     {
+    //         key: `${props.server}`,
+    //         label: props.server,
+    //         type: ConnectionType.Server,
+    //         children: dbs,
+    //     },
+    // ]
 })
 
 const backgroundColor = computed(() => {
@@ -368,6 +369,8 @@ const renderPrefix = ({ option }) => {
 // render tree item label
 const renderLabel = ({ option }) => {
     switch (option.type) {
+        case ConnectionType.Server:
+            return h('b', {}, { default: () => option.label })
         case ConnectionType.RedisDB:
             const { name: server, db } = option
             let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)

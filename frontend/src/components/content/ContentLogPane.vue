@@ -90,7 +90,7 @@ defineExpose({
                 <icon-button :icon="Delete" border t-tooltip="clean_log" @click="cleanHistory" />
             </n-form-item>
         </n-form>
-        <div class="fill-height flex-box-h" style="user-select: text">
+        <div class="content-value fill-height flex-box-h">
             <n-data-table
                 ref="tableRef"
                 :columns="[

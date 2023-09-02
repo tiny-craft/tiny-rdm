@@ -189,13 +189,15 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 {{ $t('add_row') }}
             </n-button>
         </div>
-        <div class="fill-height flex-box-h" style="user-select: text">
+        <div class="value-wrapper fill-height flex-box-h">
             <n-data-table
                 :key="(row) => row.no"
                 :columns="columns"
                 :data="tableData"
                 :single-column="true"
                 :single-line="false"
+                :bordered="false"
+                :bottom-bordered="false"
                 flex-height
                 max-height="100%"
                 size="small"

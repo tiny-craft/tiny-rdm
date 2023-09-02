@@ -63,7 +63,7 @@ watch(
         class="fill-height">
         <n-global-style />
         <n-dialog-provider>
-            <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }">
+            <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }" style="--wails-draggable: drag">
                 <div id="launch-container" />
             </n-spin>
             <app-content v-if="!initializing" class="flex-item-expand" />

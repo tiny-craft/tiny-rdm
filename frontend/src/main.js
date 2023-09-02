@@ -8,6 +8,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { i18n } from '@/utils/i18n.js'
 import { setupDiscreteApi } from '@/utils/discrete.js'
 import usePreferencesStore from 'stores/preferences.js'
+import { loadEnvironment } from '@/utils/platform.js'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -17,6 +18,7 @@ async function setupApp() {
     app.use(i18n)
     app.use(createPinia())
 
+    await loadEnvironment()
     const prefStore = usePreferencesStore()
     await prefStore.loadPreferences()
     await setupDiscreteApi()

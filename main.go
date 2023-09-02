@@ -41,6 +41,7 @@ func main() {
 		Height:    768,
 		MinWidth:  1024,
 		MinHeight: 768,
+		Frameless: runtime.GOOS != "darwin",
 		Menu:      appMenu,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -59,14 +60,7 @@ func main() {
 			prefSvc,
 		},
 		Mac: &mac.Options{
-			TitleBar: &mac.TitleBar{
-				TitlebarAppearsTransparent: false,
-				HideTitle:                  false,
-				HideTitleBar:               false,
-				FullSizeContent:            false,
-				UseToolbar:                 false,
-				HideToolbarSeparator:       true,
-			},
+			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{
 				Title:   "Tiny RDM " + version,
 				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2023",

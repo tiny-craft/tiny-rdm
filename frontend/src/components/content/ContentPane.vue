@@ -121,34 +121,10 @@ const onReloadKey = async () => {
     }
     await connectionStore.loadKeyValue(tab.name, tab.db, tab.key)
 }
-
-const i18n = useI18n()
-const onCloseTab = (tabIndex) => {
-    $dialog.warning(i18n.t('close_confirm'), () => {
-        const tab = get(tabStore.tabs, tabIndex)
-        if (tab != null) {
-            connectionStore.closeConnection(tab.name)
-        }
-    })
-}
 </script>
 
 <template>
     <div class="content-container flex-box-v">
-        <!--        <content-value-tab :tabs="tab" />-->
-        <n-tabs
-            v-model:value="tabStore.activatedIndex"
-            :closable="true"
-            size="small"
-            type="card"
-            @close="onCloseTab"
-            @update:value="onUpdateValue">
-            <n-tab v-for="(t, i) in tab" :key="i" :name="i">
-                <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
-            </n-tab>
-        </n-tabs>
-        <!-- TODO: add loading status -->
-
         <div v-if="showServerStatus" class="content-container flex-item-expand flex-box-v">
             <!-- select nothing or select server node, display server status -->
             <content-server-status

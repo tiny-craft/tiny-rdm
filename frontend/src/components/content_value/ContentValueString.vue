@@ -220,5 +220,6 @@ const onSaveValue = async () => {
 .value-wrapper {
     overflow: hidden;
     border-top: v-bind('themeVars.borderColor') 1px solid;
+    padding: 5px;
 }
 </style>

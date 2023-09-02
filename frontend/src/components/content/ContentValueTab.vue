@@ -1,136 +1,88 @@
 <script setup>
-import { ref } from 'vue'
-import { ConnectionType } from '@/consts/connection_type.js'
-import Close from '@/components/icons/Close.vue'
-import useConnectionStore from 'stores/connections.js'
+import ToggleServer from '@/components/icons/ToggleServer.vue'
+import useTabStore from 'stores/tab.js'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { get, map } from 'lodash'
 import { useThemeVars } from 'naive-ui'
-
-const emit = defineEmits(['switchTab', 'closeTab', 'update:modelValue'])
+import useConnectionStore from 'stores/connections.js'
 
 const themeVars = useThemeVars()
+const i18n = useI18n()
+const tabStore = useTabStore()
+const connectionStore = useConnectionStore()
+
 const props = defineProps({
-    selectedIndex: {
-        type: Number,
-        default: 0,
-    },
-    modelValue: {
-        type: Object,
-        default: [
-            {
-                // label: 'tab1',
-                // key: 'key',
-                // bgColor: 'white',
-            },
-        ],
-    },
-    tabs: {
-        type: Array,
-        default: [
-            {
-                // label: 'tab1',
-                // key: 'key',
-                // bgColor: 'white',
-            },
-        ],
-    },
+    backgroundColor: String,
 })
 
-const connectionStore = useConnectionStore()
-const onCurrentSelectChange = ({ type, group = '', server = '', db = 0, key = '' }) => {
-    console.log(`group: ${group}\n server: ${server}\n db: ${db}\n key: ${key}`)
-    if (type === ConnectionType.RedisValue) {
-        // load and update content value
-    }
-}
-// watch(() => databaseStore.currentSelect, throttle(onCurrentSelectChange, 1000))
-
-const items = ref(props.modelValue)
-const selIndex = ref(props.selectedIndex)
-
-const onClickTab = (idx, key) => {
-    if (idx !== selIndex.value) {
-        selIndex.value = idx
-        emit('update:modelValue', idx, key)
-    }
+const onCloseTab = (tabIndex) => {
+    $dialog.warning(i18n.t('close_confirm'), () => {
+        const tab = get(tabStore.tabs, tabIndex)
+        if (tab != null) {
+            connectionStore.closeConnection(tab.name)
+        }
+    })
 }
 
-const onCloseTab = (idx, key) => {
-    emit('closeTab', idx, key)
-}
+const activeTabStyle = computed(() => ({
+    backgroundColor: themeVars.value.baseColor,
+    borderTopWidth: '1px',
+    borderTopColor: themeVars.value.borderColor,
+    borderBottomColor: themeVars.value.baseColor,
+    borderTopLeftRadius: themeVars.value.borderRadius,
+    borderTopRightRadius: themeVars.value.borderRadius,
+}))
+const inactiveTabStyle = computed(() => ({
+    borderWidth: '0 0 1px',
+    borderBottomColor: themeVars.value.borderColor,
+    borderTopLeftRadius: themeVars.value.borderRadius,
+    borderTopRightRadius: themeVars.value.borderRadius,
+}))
+
+const tab = computed(() =>
+    map(tabStore.tabs, (item) => ({
+        key: item.name,
+        label: item.title,
+    })),
+)
 </script>
 
 <template>
-    <!-- TODO: 检查标签是否太多, 左右两边显示左右切换翻页按钮 -->
-    <div class="content-tab flex-box-h">
-        <div
-            v-for="(item, i) in props.tabs"
-            :key="item.key"
-            :class="{ 'content-tab_selected': selIndex === i }"
-            :style="{ backgroundColor: item.bgColor || '' }"
-            :title="item.label"
-            class="content-tab_item flex-item-expand icon-btn flex-box-h"
-            @click="onClickTab(i, item.key)">
-            <n-icon :component="Close" class="content-tab_item-close" size="20" @click.stop="onCloseTab(i, item.key)" />
-            <div class="content-tab_item-label ellipsis flex-item-expand">
-                {{ item.label }}
-            </div>
-        </div>
-    </div>
+    <n-tabs
+        v-model:value="tabStore.activatedIndex"
+        :closable="true"
+        :tab-style="{
+            borderStyle: 'solid',
+            borderWidth: '1px',
+        }"
+        size="small"
+        type="card"
+        @close="onCloseTab"
+        @update:value="(tabIndex) => tabStore.switchTab(tabIndex)"
+        :theme-overrides="{
+            tabFontWeightActive: 800,
+            tabBorderRadius: 0,
+            tabGapSmallCard: 0,
+            tabGapMediumCard: 0,
+            tabGapLargeCard: 0,
+            tabColor: '#0000',
+            tabBorderColor: themeVars.borderColor,
+        }">
+        <n-tab
+            v-for="(t, i) in tab"
+            :key="i"
+            :name="i"
+            :closable="tabStore.activatedIndex === i"
+            :style="tabStore.activatedIndex === i ? activeTabStyle : inactiveTabStyle"
+            style="--wails-draggable: none"
+            @dblclick.stop="() => {}">
+            <n-space align="center" justify="center" :wrap-item="false" :size="5" inline>
+                <n-icon :component="ToggleServer" size="18" />
+                <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
+            </n-space>
+        </n-tab>
+    </n-tabs>
 </template>
 
-<style lang="scss" scoped>
-.content-tab {
-    align-items: center;
-    //justify-content: center;
-    width: 100%;
-    height: 40px;
-    overflow: hidden;
-    font-size: 14px;
-
-    &_item {
-        flex: 1 0;
-        overflow: hidden;
-        align-items: center;
-        justify-content: center;
-        gap: 3px;
-        height: 100%;
-        box-sizing: border-box;
-        background-color: var(--bg-color-page);
-        color: var(--text-color-secondary);
-        padding: 0 5px;
-
-        //border-top: var(--el-border-color) 1px solid;
-        border-right: var(--border-color) 1px solid;
-        transition: all var(--transition-duration-fast) var(--transition-function-ease-in-out-bezier);
-
-        &-label {
-            text-align: center;
-        }
-
-        &-close {
-            //display: none;
-            display: inline-flex;
-            width: 0;
-            transition: width 0.3s;
-
-            &:hover {
-                background-color: rgb(176, 177, 182, 0.4);
-            }
-        }
-
-        &:hover {
-            .content-tab_item-close {
-                //display: block;
-                width: 20px;
-                transition: width 0.3s;
-            }
-        }
-    }
-
-    &_selected {
-        border-top: v-bind('themeVars.primaryColor') 4px solid !important;
-        background-color: #ffffff;
-        color: #303133;
-    }
-}
-</style>
+<style scoped lang="scss"></style>

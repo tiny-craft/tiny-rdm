@@ -20,6 +20,7 @@ export const themeOverrides = {
         tabGapSmallCard: '2px',
         tabGapMediumCard: '2px',
         tabGapLargeCard: '2px',
+        tabFontWeightActive: 450,
     },
     Form: {
         labelFontSizeTopSmall: '12px',
