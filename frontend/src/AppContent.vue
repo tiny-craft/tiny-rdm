@@ -87,7 +87,7 @@ watch(
             <div
                 id="app-toolbar-title"
                 :style="{
-                    width: `${data.navMenuWidth + prefStore.general.asideWidth}px`,
+                    width: `${data.navMenuWidth + prefStore.general.asideWidth - 4}px`,
                     paddingLeft: isMacOS() ? '70px' : '10px',
                 }">
                 <n-space align="center" :wrap-item="false" :wrap="false" :size="3">
@@ -100,6 +100,15 @@ watch(
                     </transition>
                 </n-space>
             </div>
+            <div
+                :class="{
+                    'resize-divider-hover': data.hoverResize,
+                    'resize-divider-drag': data.resizing,
+                }"
+                class="resize-divider resize-divider-hide"
+                @mousedown="startResize"
+                @mouseout="data.hoverResize = false"
+                @mouseover="data.hoverResize = true" />
             <!-- browser tabs -->
             <div v-show="tabStore.nav === 'browser'" class="app-toolbar-tab flex-item-expand">
                 <content-value-tab />
@@ -180,6 +189,7 @@ watch(
     .app-toolbar-tab {
         align-self: flex-end;
         margin-bottom: -1px;
+        margin-left: 3px;
     }
 
     #app-content {
@@ -190,26 +200,27 @@ watch(
         //overflow: hidden;
         height: 100%;
         background-color: v-bind('themeVars.tabColor');
-
-        .resize-divider {
-            //height: 100%;
-            width: 5px;
-            border-left-width: 5px;
-            background-color: v-bind('themeVars.tabColor');
-        }
-
-        .resize-divider-hover {
-            width: 5px;
-            background-color: v-bind('themeVars.borderColor');
-        }
-
-        .resize-divider-drag {
-            //background-color: rgb(0, 105, 218);
-            width: 5px;
-            //background-color: var(--el-color-primary);
-            background-color: v-bind('themeVars.primaryColor');
-        }
     }
+}
+
+.resize-divider {
+    width: 3px;
+    border-right: 1px solid v-bind('themeVars.borderColor');
+}
+
+.resize-divider-hide {
+    background-color: #0000;
+    border-right-color: #0000;
+}
+
+.resize-divider-hover {
+    background-color: v-bind('themeVars.borderColor');
+    border-right-color: v-bind('themeVars.borderColor');
+}
+
+.resize-divider-drag {
+    background-color: v-bind('themeVars.primaryColor');
+    border-right-color: v-bind('themeVars.primaryColor');
 }
 
 .dragging {
