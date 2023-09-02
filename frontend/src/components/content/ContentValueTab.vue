@@ -25,17 +25,17 @@ const activeTabStyle = computed(() => {
     const { name } = tabStore.currentTab
     const { markColor = '' } = connectionStore.serverProfile[name] || {}
     return {
-        backgroundColor: themeVars.value.baseColor,
+        backgroundColor: themeVars.value.bodyColor,
         borderTopWidth: markColor ? '3px' : '1px',
         borderTopColor: markColor || themeVars.value.borderColor,
-        borderBottomColor: themeVars.value.baseColor,
+        borderBottomColor: themeVars.value.bodyColor,
         borderTopLeftRadius: themeVars.value.borderRadius,
         borderTopRightRadius: themeVars.value.borderRadius,
     }
 })
 const inactiveTabStyle = computed(() => ({
     borderWidth: '0 0 1px',
-    borderBottomColor: themeVars.value.borderColor,
+    // borderBottomColor: themeVars.value.borderColor,
     borderTopLeftRadius: themeVars.value.borderRadius,
     borderTopRightRadius: themeVars.value.borderRadius,
 }))
@@ -55,6 +55,8 @@ const tab = computed(() =>
         :tab-style="{
             borderStyle: 'solid',
             borderWidth: '1px',
+            borderLeftColor: themeVars.borderColor,
+            borderRightColor: themeVars.borderColor,
         }"
         size="small"
         type="card"
@@ -67,7 +69,9 @@ const tab = computed(() =>
             tabGapMediumCard: 0,
             tabGapLargeCard: 0,
             tabColor: '#0000',
-            tabBorderColor: themeVars.borderColor,
+            // tabBorderColor: themeVars.borderColor,
+            tabBorderColor: '#0000',
+            tabTextColorCard: themeVars.closeIconColor,
         }">
         <n-tab
             v-for="(t, i) in tab"
