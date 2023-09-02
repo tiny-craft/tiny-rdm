@@ -81,7 +81,7 @@ const onDeleteKey = () => {
                         <template v-if="ttl < 0">
                             {{ $t('forever') }}
                         </template>
-                        <template v-else> {{ ttl }} {{ $t('second') }}</template>
+                        <template v-else>{{ ttl }} {{ $t('second') }}</template>
                     </n-button>
                 </template>
                 TTL

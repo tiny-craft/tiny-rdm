@@ -6,7 +6,6 @@ import AddLink from '@/components/icons/AddLink.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
-import Unlink from '@/components/icons/Unlink.vue'
 import useConnectionStore from 'stores/connections.js'
 import { ref } from 'vue'
 
