@@ -26,7 +26,7 @@ hljs.registerLanguage('plaintext', plaintext)
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
-const initializing = ref(false)
+const initializing = ref(true)
 onMounted(async () => {
     try {
         initializing.value = true
@@ -61,12 +61,8 @@ watch(
         :theme-overrides="themeOverrides"
         :locale="prefStore.themeLocale"
         class="fill-height">
-        <n-global-style />
         <n-dialog-provider>
-            <n-spin v-show="initializing" :theme-overrides="{ opacitySpinning: 0 }" style="--wails-draggable: drag">
-                <div id="launch-container" />
-            </n-spin>
-            <app-content v-if="!initializing" class="flex-item-expand" />
+            <app-content :loading="initializing" />
 
             <!-- top modal dialogs -->
             <connection-dialog />
@@ -82,16 +78,4 @@ watch(
     </n-config-provider>
 </template>
 
-<style lang="scss">
-#launch-container {
-    width: 100vw;
-    height: 100vh;
-}
-
-#app-title {
-    text-align: center;
-    width: 100vw;
-    height: 30px;
-    line-height: 30px;
-}
-</style>
+<style lang="scss"></style>

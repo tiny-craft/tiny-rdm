@@ -19,8 +19,11 @@ import iconUrl from '@/assets/images/icon.png'
 
 const themeVars = useThemeVars()
 
+const props = defineProps({
+    loading: Boolean,
+})
+
 const data = reactive({
-    initializing: false,
     navMenuWidth: 60,
     hoverResize: false,
     resizing: false,
@@ -75,103 +78,117 @@ watch(
 
 <template>
     <!-- app content-->
-    <div id="app-content-wrapper" class="flex-box-v">
-        <!-- title bar -->
+    <n-spin
+        :show="props.loading"
+        :theme-overrides="{ opacitySpinning: 0 }"
+        style="--wails-draggable: drag; border-radius: 10px"
+        :style="{ backgroundColor: themeVars.bodyColor }">
         <div
-            id="app-toolbar"
-            class="flex-box-h"
-            style="--wails-draggable: drag"
-            :style="{ height: data.toolbarHeight + 'px' }"
-            @dblclick="WindowToggleMaximise">
-            <!-- title -->
+            id="app-content-wrapper"
+            class="flex-box-v"
+            :style="{
+                backgroundColor: themeVars.bodyColor,
+                color: themeVars.textColorBase,
+            }">
+            <!-- title bar -->
             <div
-                id="app-toolbar-title"
-                :style="{
-                    width: `${data.navMenuWidth + prefStore.general.asideWidth - 4}px`,
-                    paddingLeft: isMacOS() ? '70px' : '10px',
-                }">
-                <n-space align="center" :wrap-item="false" :wrap="false" :size="3">
-                    <n-avatar :src="iconUrl" color="#0000" :size="35" style="min-width: 35px" />
-                    <div style="min-width: 68px; font-weight: 800">Tiny RDM</div>
-                    <transition name="fade">
-                        <n-text v-if="tabStore.nav === 'browser'" strong class="ellipsis" style="font-size: 13px">
-                            - {{ get(tabStore.currentTab, 'name') }}
-                        </n-text>
-                    </transition>
-                </n-space>
-            </div>
-            <div
-                :class="{
-                    'resize-divider-hover': data.hoverResize,
-                    'resize-divider-drag': data.resizing,
-                }"
-                class="resize-divider resize-divider-hide"
-                @mousedown="startResize"
-                @mouseout="data.hoverResize = false"
-                @mouseover="data.hoverResize = true" />
-            <!-- browser tabs -->
-            <div v-show="tabStore.nav === 'browser'" class="app-toolbar-tab flex-item-expand">
-                <content-value-tab />
-            </div>
-            <div class="flex-item-expand"></div>
-            <!-- simulate window control buttons -->
-            <toolbar-control-widget v-if="!isMacOS()" :size="data.toolbarHeight" style="align-self: flex-start" />
-        </div>
-
-        <!-- content -->
-        <div id="app-content" :style="prefStore.generalFont" class="flex-box-h flex-item-expand">
-            <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
-            <!-- browser page-->
-            <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
-                    <browser-pane
-                        v-for="t in tabStore.tabs"
-                        v-show="get(tabStore.currentTab, 'name') === t.name"
-                        :key="t.name"
-                        class="flex-item-expand" />
-                    <div
-                        :class="{
-                            'resize-divider-hover': data.hoverResize,
-                            'resize-divider-drag': data.resizing,
-                        }"
-                        class="resize-divider"
-                        @mousedown="startResize"
-                        @mouseout="data.hoverResize = false"
-                        @mouseover="data.hoverResize = true" />
+                id="app-toolbar"
+                class="flex-box-h"
+                style="--wails-draggable: drag"
+                :style="{ height: data.toolbarHeight + 'px' }"
+                @dblclick="WindowToggleMaximise">
+                <!-- title -->
+                <div
+                    id="app-toolbar-title"
+                    :style="{
+                        width: `${data.navMenuWidth + prefStore.general.asideWidth - 4}px`,
+                        paddingLeft: isMacOS() ? '70px' : '10px',
+                    }">
+                    <n-space align="center" :wrap-item="false" :wrap="false" :size="3">
+                        <n-avatar :src="iconUrl" color="#0000" :size="35" style="min-width: 35px" />
+                        <div style="min-width: 68px; font-weight: 800">Tiny RDM</div>
+                        <transition name="fade">
+                            <n-text v-if="tabStore.nav === 'browser'" strong class="ellipsis" style="font-size: 13px">
+                                - {{ get(tabStore.currentTab, 'name') }}
+                            </n-text>
+                        </transition>
+                    </n-space>
                 </div>
-                <content-pane class="flex-item-expand" />
-            </div>
-
-            <!-- server list page -->
-            <div v-show="tabStore.nav === 'server'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
-                    <connection-pane class="flex-item-expand" />
-                    <div
-                        :class="{
-                            'resize-divider-hover': data.hoverResize,
-                            'resize-divider-drag': data.resizing,
-                        }"
-                        class="resize-divider"
-                        @mousedown="startResize"
-                        @mouseout="data.hoverResize = false"
-                        @mouseover="data.hoverResize = true" />
+                <div
+                    :class="{
+                        'resize-divider-hover': data.hoverResize,
+                        'resize-divider-drag': data.resizing,
+                    }"
+                    class="resize-divider resize-divider-hide"
+                    @mousedown="startResize"
+                    @mouseout="data.hoverResize = false"
+                    @mouseover="data.hoverResize = true" />
+                <!-- browser tabs -->
+                <div v-show="tabStore.nav === 'browser'" class="app-toolbar-tab flex-item-expand">
+                    <content-value-tab />
                 </div>
-                <content-server-pane class="flex-item-expand" />
+                <div class="flex-item-expand"></div>
+                <!-- simulate window control buttons -->
+                <toolbar-control-widget v-if="!isMacOS()" :size="data.toolbarHeight" style="align-self: flex-start" />
             </div>
 
-            <!-- log page -->
-            <div v-show="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
-                <content-log-pane ref="logPaneRef" class="flex-item-expand" />
+            <!-- content -->
+            <div id="app-content" :style="prefStore.generalFont" class="flex-box-h flex-item-expand">
+                <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
+                <!-- browser page-->
+                <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">
+                    <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                        <browser-pane
+                            v-for="t in tabStore.tabs"
+                            v-show="get(tabStore.currentTab, 'name') === t.name"
+                            :key="t.name"
+                            class="flex-item-expand" />
+                        <div
+                            :class="{
+                                'resize-divider-hover': data.hoverResize,
+                                'resize-divider-drag': data.resizing,
+                            }"
+                            class="resize-divider"
+                            @mousedown="startResize"
+                            @mouseout="data.hoverResize = false"
+                            @mouseover="data.hoverResize = true" />
+                    </div>
+                    <content-pane class="flex-item-expand" />
+                </div>
+
+                <!-- server list page -->
+                <div v-show="tabStore.nav === 'server'" :class="{ dragging }" class="flex-box-h flex-item-expand">
+                    <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                        <connection-pane class="flex-item-expand" />
+                        <div
+                            :class="{
+                                'resize-divider-hover': data.hoverResize,
+                                'resize-divider-drag': data.resizing,
+                            }"
+                            class="resize-divider"
+                            @mousedown="startResize"
+                            @mouseout="data.hoverResize = false"
+                            @mouseover="data.hoverResize = true" />
+                    </div>
+                    <content-server-pane class="flex-item-expand" />
+                </div>
+
+                <!-- log page -->
+                <div v-show="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
+                    <content-log-pane ref="logPaneRef" class="flex-item-expand" />
+                </div>
             </div>
         </div>
-    </div>
+    </n-spin>
 </template>
 
 <style lang="scss" scoped>
 #app-content-wrapper {
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
+    border-radius: 10px;
 
     #app-toolbar {
         background-color: v-bind('themeVars.tabColor');

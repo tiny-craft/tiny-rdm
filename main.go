@@ -9,6 +9,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"runtime"
 	"tinyrdm/backend/services"
 )
@@ -46,7 +47,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 0},
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			connSvc.Start(ctx)
@@ -66,12 +67,18 @@ func main() {
 				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2023",
 				Icon:    icon,
 			},
-			//WebviewIsTransparent: true,
-			//WindowIsTranslucent:  true,
+			WebviewIsTransparent: false,
+			WindowIsTranslucent:  false,
+		},
+		Windows: &windows.Options{
+			WebviewIsTransparent:              true,
+			WindowIsTranslucent:               true,
+			DisableFramelessWindowDecorations: true,
 		},
 		Linux: &linux.Options{
-			Icon:             icon,
-			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
+			Icon:                icon,
+			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
+			WindowIsTranslucent: true,
 		},
 	})
 

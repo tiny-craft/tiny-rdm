@@ -59,7 +59,7 @@ jobs:
       - name: Build frontend assets
         shell: bash
         run: |
-          npm install -g npm@8
+          npm install -g npm@9
           jq '.info.productVersion = "${{ steps.normalise_version.outputs.version }}"' wails.json > tmp.json
           mv tmp.json wails.json
           cd frontend
