@@ -28,11 +28,16 @@
 
 提供Mac、Windows和Linux下载安装，可[免费下载](https://github.com/tiny-craft/tiny-rdm/releases)。
 
+> 如果安装后无法打开，报错**不受信任**或者**移到垃圾箱**，执行下面命令后再启动即可：
+> ``` shell
+>  sudo xattr -d com.apple.quarantine /Applications/Tiny\ RDM.app
+> ```
+
 ## 构建项目
 ### 运行环境要求
 * Go >= 1.21
 * Node.js >= 16
-* NPM
+* NPM >= 9
 
 ### 安装wails
 ```bash

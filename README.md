@@ -29,11 +29,16 @@
 We publish binaries for Mac, Windows, and Linux.
 Available to download for free from [here](https://github.com/tiny-craft/tiny-rdm/releases).
 
+> If you can't open it after installation, exec the following command then reopen:
+> ``` shell
+>  sudo xattr -d com.apple.quarantine /Applications/Tiny\ RDM.app
+> ```
+
 ## Build
 ### Prerequisites
 * Go >= 1.21
 * Node.js >= 16
-* NPM
+* NPM >= 9
 
 ### Install wails
 ```bash
