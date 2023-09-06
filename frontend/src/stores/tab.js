@@ -204,7 +204,7 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         *
+         * set selected keys of current display browser tree
          * @param {string} server
          * @param {string|string[]} keys
          */

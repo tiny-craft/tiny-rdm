@@ -178,7 +178,9 @@ const onClose = () => {
                                 {{ $t('second') }}
                             </template>
                         </n-input-number>
-                        <n-button secondary type="primary" @click="newForm.ttl = -1">{{ $t('persist_key') }}</n-button>
+                        <n-button secondary type="primary" :focusable="false" @click="newForm.ttl = -1">
+                            {{ $t('persist_key') }}
+                        </n-button>
                     </n-input-group>
                 </n-form-item>
                 <component :is="addValueComponent[newForm.type]" ref="subFormRef" v-model:value="newForm.value" />

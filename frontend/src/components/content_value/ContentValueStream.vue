@@ -171,7 +171,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 </n-input-group>
             </div>
             <div class="flex-item-expand"></div>
-            <n-button plain @click="onAddRow">
+            <n-button plain :focusable="false" @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
                 </template>

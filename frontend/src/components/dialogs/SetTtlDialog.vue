@@ -91,11 +91,11 @@ const onConfirm = async () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button @click="ttlForm.ttl = -1">{{ $t('persist_key') }}</n-button>
+                <n-button :focusable="false" @click="ttlForm.ttl = -1">{{ $t('persist_key') }}</n-button>
             </div>
             <div class="flex-item n-dialog__action">
-                <n-button @click="onClose">{{ $t('cancel') }}</n-button>
-                <n-button type="primary" @click="onConfirm">{{ $t('save') }}</n-button>
+                <n-button :focusable="false" @click="onClose">{{ $t('cancel') }}</n-button>
+                <n-button type="primary" :focusable="false" @click="onConfirm">{{ $t('save') }}</n-button>
             </div>
         </template>
     </n-modal>

@@ -10,7 +10,7 @@ const dialogStore = useDialogStore()
         <!-- TODO: replace icon to app icon -->
         <n-empty :description="$t('empty_server_content')">
             <template #extra>
-                <n-button @click="dialogStore.openNewDialog()">
+                <n-button :focusable="false" @click="dialogStore.openNewDialog()">
                     <template #icon>
                         <n-icon :component="AddLink" size="18" />
                     </template>

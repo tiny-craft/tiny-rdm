@@ -133,7 +133,11 @@ watch(
             </div>
 
             <!-- content -->
-            <div id="app-content" :style="prefStore.generalFont" class="flex-box-h flex-item-expand">
+            <div
+                id="app-content"
+                :style="prefStore.generalFont"
+                style="--wails-draggable: none"
+                class="flex-box-h flex-item-expand">
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page-->
                 <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">

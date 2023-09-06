@@ -173,13 +173,13 @@ const onSaveValue = async () => {
             <n-select v-model:value="viewAs" :options="viewOption" style="width: 200px" />
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
-                <n-button @click="onCopyValue">
+                <n-button :focusable="false" @click="onCopyValue">
                     <template #icon>
                         <n-icon :component="Copy" size="18" />
                     </template>
                     {{ $t('copy_value') }}
                 </n-button>
-                <n-button plain @click="onEditValue">
+                <n-button plain :focusable="false" @click="onEditValue">
                     <template #icon>
                         <n-icon :component="Edit" size="18" />
                     </template>
@@ -187,13 +187,13 @@ const onSaveValue = async () => {
                 </n-button>
             </n-button-group>
             <n-button-group v-else>
-                <n-button :loading="saving" plain @click="onSaveValue">
+                <n-button :loading="saving" :focusable="false" plain @click="onSaveValue">
                     <template #icon>
                         <n-icon :component="Save" size="18" />
                     </template>
                     {{ $t('save_update') }}
                 </n-button>
-                <n-button :loading="saving" plain @click="onCancelEdit">
+                <n-button :loading="saving" :focusable="false" plain @click="onCancelEdit">
                     <template #icon>
                         <n-icon :component="Close" size="18" />
                     </template>

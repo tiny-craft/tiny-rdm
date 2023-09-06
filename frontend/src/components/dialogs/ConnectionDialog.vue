@@ -249,13 +249,15 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :disabled="closingConnection" :loading="testing" @click="onTestConnection">
+                <n-button :focusable="false" :disabled="closingConnection" :loading="testing" @click="onTestConnection">
                     {{ $t('conn_test') }}
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">
-                <n-button :disabled="closingConnection" @click="onClose">{{ $t('cancel') }}</n-button>
-                <n-button :disabled="closingConnection" type="primary" @click="onSaveConnection">
+                <n-button :focusable="false" :disabled="closingConnection" @click="onClose">
+                    {{ $t('cancel') }}
+                </n-button>
+                <n-button :focusable="false" :disabled="closingConnection" type="primary" @click="onSaveConnection">
                     {{ isEditMode ? $t('update') : $t('confirm') }}
                 </n-button>
             </div>

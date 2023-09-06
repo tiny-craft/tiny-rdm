@@ -182,7 +182,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                     @update:value="onFilterInput" />
             </div>
             <div class="flex-item-expand"></div>
-            <n-button plain @click="onAddValue">
+            <n-button plain :focusable="false" @click="onAddValue">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
                 </template>

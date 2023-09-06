@@ -74,7 +74,7 @@ const onDeleteKey = () => {
         <n-button-group>
             <n-tooltip>
                 <template #trigger>
-                    <n-button @click="dialogStore.openTTLDialog(props.ttl)">
+                    <n-button :focusable="false" @click="dialogStore.openTTLDialog(props.ttl)">
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
@@ -92,12 +92,6 @@ const onDeleteKey = () => {
                 size="18"
                 t-tooltip="rename_key"
                 @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)" />
-            <!--            <n-button @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)">-->
-            <!--                <template #icon>-->
-            <!--                    <n-icon :component="Edit" size="18" />-->
-            <!--                </template>-->
-            <!--                {{ $t('rename_key') }}-->
-            <!--            </n-button>-->
         </n-button-group>
         <n-tooltip>
             <template #trigger>

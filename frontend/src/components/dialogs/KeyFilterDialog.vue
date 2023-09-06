@@ -91,7 +91,7 @@ const onClose = () => {
                         </template>
                         <div class="text-block">{{ $t('filter_pattern_tip') }}</div>
                     </n-tooltip>
-                    <n-button secondary type="primary" @click="filterForm.pattern = '*'">
+                    <n-button secondary type="primary" :focusable="false" @click="filterForm.pattern = '*'">
                         {{ $t('restore_defaults') }}
                     </n-button>
                 </n-input-group>
