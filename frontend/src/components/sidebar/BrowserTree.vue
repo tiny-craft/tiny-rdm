@@ -225,6 +225,10 @@ const handleSelectContextMenu = (key) => {
     const node = connectionStore.getNode(selectedKey)
     const { db, key: nodeKey, redisKey } = node || {}
     switch (key) {
+        case 'server_info':
+            tabStore.setSelectedKeys(props.server)
+            onUpdateSelectedKeys()
+            break
         case 'server_reload':
             expandedKeys.value = [props.server]
             tabStore.setSelectedKeys(props.server)
@@ -320,10 +324,9 @@ const onUpdateSelectedKeys = (keys, options) => {
                     return
                 }
             }
-
-            // default is load blank key to display server status
-            connectionStore.loadKeyValue(props.server, 0)
         }
+        // default is load blank key to display server status
+        connectionStore.loadKeyValue(props.server, 0)
     } finally {
         tabStore.setSelectedKeys(props.server, keys)
     }

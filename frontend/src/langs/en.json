@@ -13,6 +13,7 @@
   "new_group": "Add New Group",
   "rename_group": "Rename Group",
   "disconnect_all": "Disconnect all",
+  "status": "Status",
   "filter": "Filter",
   "sort_conn": "Sort Connections",
   "close_confirm": "Confirm close this tab and connection",

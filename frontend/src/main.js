@@ -24,12 +24,15 @@ async function setupApp() {
     await setupDiscreteApi()
     app.config.errorHandler = (err, instance, info) => {
         // TODO: add "send error message to author" later
-        $notification.error({
-            title: i18n.global.t('error'),
-            content: err.toString(),
-            // meta: err.stack,
-        })
-        console.error(err)
+        try {
+            const content = err.toString()
+            $notification.error({
+                title: i18n.global.t('error'),
+                content,
+                // meta: err.stack,
+            })
+            console.error(err)
+        } catch (e) {}
     }
     app.config.warnHandler = (message) => {
         console.warn(message)

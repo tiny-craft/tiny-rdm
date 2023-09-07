@@ -17,12 +17,14 @@ import useTabStore from 'stores/tab.js'
 import Edit from '@/components/icons/Edit.vue'
 import { hexGammaCorrection, parseHexColor, toHexColor } from '@/utils/rgb.js'
 import IconButton from '@/components/common/IconButton.vue'
+import usePreferencesStore from 'stores/preferences.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const openingConnection = ref(false)
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
+const prefStore = usePreferencesStore()
 const dialogStore = useDialogStore()
 
 const expandedKeys = ref([])
@@ -168,6 +170,7 @@ const renderIconMenu = (items) => {
 }
 
 const renderPrefix = ({ option }) => {
+    const iconTransparency = prefStore.isDark ? 0.75 : 1
     switch (option.type) {
         case ConnectionType.Group:
             const opened = indexOf(expandedKeys.value, option.key) !== -1
@@ -175,7 +178,11 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(ToggleFolder, { modelValue: opened }),
+                    default: () =>
+                        h(ToggleFolder, {
+                            modelValue: opened,
+                            fillColor: `rgba(255,206,120,${iconTransparency})`,
+                        }),
                 },
             )
         case ConnectionType.Server:
@@ -183,9 +190,13 @@ const renderPrefix = ({ option }) => {
             const color = getServerMarkColor(option.name)
             return h(
                 NIcon,
-                { size: 20, color },
+                { size: 20, color: !!!connected ? color : undefined },
                 {
-                    default: () => h(ToggleServer, { modelValue: !!connected }),
+                    default: () =>
+                        h(ToggleServer, {
+                            modelValue: !!connected,
+                            fillColor: `rgba(220,66,60,${iconTransparency})`,
+                        }),
                 },
             )
     }

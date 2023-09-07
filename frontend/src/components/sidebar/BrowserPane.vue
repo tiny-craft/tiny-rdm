@@ -13,6 +13,7 @@ import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
+import Status from '@/components/icons/Status.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
@@ -28,9 +29,8 @@ const currentSelect = computed(() => {
     return { server, db, key }
 })
 
-const onNewKey = () => {
-    const { server, key, db = 0 } = currentSelect.value
-    dialogStore.openNewKeyDialog(key, server, db)
+const onInfo = () => {
+    browserTreeRef.value?.handleSelectContextMenu('server_info')
 }
 
 const i18n = useI18n()
@@ -74,7 +74,7 @@ const filterTypeOptions = computed(() => {
                     :options="filterTypeOptions"
                     style="width: 120px" />
                 <n-input clearable placeholder="" />
-                <n-button ghost>
+                <n-button ghost :focusable="false">
                     <template #icon>
                         <n-icon :component="Search" />
                     </template>
@@ -83,15 +83,8 @@ const filterTypeOptions = computed(() => {
         </div>
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
-            <icon-button :icon="AddLink" size="20" stroke-width="4" t-tooltip="new_key" @click="onNewKey" />
+            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="status" @click="onInfo" />
             <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="reload" @click="onRefresh" />
-            <!--            <icon-button-->
-            <!--                :icon="Filter"-->
-            <!--                size="20"-->
-            <!--                stroke-width="4"-->
-            <!--                t-tooltip="filter_key"-->
-            <!--                @click="filterForm.showFilter = !filterForm.showFilter"-->
-            <!--            />-->
             <div class="flex-item-expand"></div>
             <icon-button :icon="Unlink" size="20" stroke-width="4" t-tooltip="disconnect" @click="onDisconnect" />
         </div>
