@@ -7,7 +7,7 @@ const emit = defineEmits(['update:value'])
 </script>
 
 <template>
-    <n-form-item :label="$t('value')">
+    <n-form-item :label="$t('common.value')">
         <n-input
             :rows="6"
             :value="props.value"

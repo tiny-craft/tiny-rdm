@@ -41,7 +41,7 @@ const onCopyKey = () => {
     ClipboardSetText(props.keyPath)
         .then((succ) => {
             if (succ) {
-                $message.success(i18n.t('copy_succ'))
+                $message.success(i18n.t('dialogue.copy_succ'))
             }
         })
         .catch((e) => {
@@ -50,10 +50,10 @@ const onCopyKey = () => {
 }
 
 const onDeleteKey = () => {
-    $dialog.warning(i18n.t('remove_tip', { name: props.keyPath }), () => {
+    $dialog.warning(i18n.t('dialogue.remove_tip', { name: props.keyPath }), () => {
         connectionStore.deleteKey(props.server, props.db, props.keyPath).then((success) => {
             if (success) {
-                $message.success(i18n.t('delete_key_succ', { key: props.keyPath }))
+                $message.success(i18n.t('dialogue.delete_key_succ', { key: props.keyPath }))
             }
         })
     })
@@ -66,10 +66,10 @@ const onDeleteKey = () => {
             <redis-type-tag :type="props.keyType" size="large" />
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
-                    <icon-button :icon="Refresh" size="18" t-tooltip="reload" @click="onReloadKey" />
+                    <icon-button :icon="Refresh" size="18" t-tooltip="interface.reload" @click="onReloadKey" />
                 </template>
             </n-input>
-            <icon-button :icon="Copy" border size="18" t-tooltip="copy_key" @click="onCopyKey" />
+            <icon-button :icon="Copy" border size="18" t-tooltip="interface.copy_key" @click="onCopyKey" />
         </n-input-group>
         <n-button-group>
             <n-tooltip>
@@ -79,9 +79,9 @@ const onDeleteKey = () => {
                             <n-icon :component="Timer" size="18" />
                         </template>
                         <template v-if="ttl < 0">
-                            {{ $t('forever') }}
+                            {{ $t('interface.forever') }}
                         </template>
-                        <template v-else>{{ ttl }} {{ $t('second') }}</template>
+                        <template v-else>{{ ttl }} {{ $t('common.second') }}</template>
                     </n-button>
                 </template>
                 TTL
@@ -90,7 +90,7 @@ const onDeleteKey = () => {
                 :icon="Edit"
                 border
                 size="18"
-                t-tooltip="rename_key"
+                t-tooltip="interface.rename_key"
                 @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)" />
         </n-button-group>
         <n-tooltip>
@@ -101,7 +101,7 @@ const onDeleteKey = () => {
                     </template>
                 </n-button>
             </template>
-            {{ $t('delete_key') }}
+            {{ $t('interface.delete_key') }}
         </n-tooltip>
     </div>
 </template>

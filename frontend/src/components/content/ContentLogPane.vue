@@ -23,7 +23,7 @@ const filterServerOption = computed(() => {
         value: server,
     }))
     options.splice(0, 0, {
-        label: i18n.t('all'),
+        label: i18n.t('common.all'),
         value: '',
     })
     return options
@@ -45,7 +45,7 @@ const loadHistory = () => {
 }
 
 const cleanHistory = async () => {
-    $dialog.warning(i18n.t('confirm_clean_log'), () => {
+    $dialog.warning(i18n.t('log.confirm_clean_log'), () => {
         data.loading = true
         connectionStore
             .cleanCmdHistory()
@@ -53,7 +53,7 @@ const cleanHistory = async () => {
                 if (success) {
                     data.history = []
                     tableRef.value?.scrollTo({ top: 0 })
-                    $message.success(i18n.t('success'))
+                    $message.success(i18n.t('common.success'))
                 }
             })
             .finally(() => {
@@ -69,26 +69,26 @@ defineExpose({
 
 <template>
     <n-card
-        :title="$t('launch_log')"
+        :title="$t('log.launch_log')"
         :bordered="false"
         class="content-container flex-box-v"
         content-style="display: flex;flex-direction: column; overflow: hidden;">
         <n-form :disabled="data.loading" class="flex-item" inline>
-            <n-form-item :label="$t('filter_server')">
+            <n-form-item :label="$t('log.filter_server')">
                 <n-select
                     v-model:value="data.server"
                     :consistent-menu-width="false"
                     :options="filterServerOption"
                     style="min-width: 100px" />
             </n-form-item>
-            <n-form-item :label="$t('filter_keyword')">
+            <n-form-item :label="$t('log.filter_keyword')">
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
             <n-form-item label="&nbsp;">
-                <icon-button :icon="Refresh" border t-tooltip="refresh" @click="loadHistory" />
+                <icon-button :icon="Refresh" border t-tooltip="log.refresh" @click="loadHistory" />
             </n-form-item>
             <n-form-item label="&nbsp;">
-                <icon-button :icon="Delete" border t-tooltip="clean_log" @click="cleanHistory" />
+                <icon-button :icon="Delete" border t-tooltip="log.clean_log" @click="cleanHistory" />
             </n-form-item>
         </n-form>
         <div class="content-value fill-height flex-box-h">
@@ -96,7 +96,7 @@ defineExpose({
                 ref="tableRef"
                 :columns="[
                     {
-                        title: $t('exec_time'),
+                        title: $t('log.exec_time'),
                         key: 'timestamp',
                         defaultSortOrder: 'ascend',
                         sorter: 'default',
@@ -108,7 +108,7 @@ defineExpose({
                         },
                     },
                     {
-                        title: $t('server'),
+                        title: $t('log.server'),
                         key: 'server',
                         filterOptionValue: data.server,
                         filter(value, row) {
@@ -120,7 +120,7 @@ defineExpose({
                         ellipsis: true,
                     },
                     {
-                        title: $t('cmd'),
+                        title: $t('log.cmd'),
                         key: 'cmd',
                         titleAlign: 'center',
                         filterOptionValue: data.keyword,
@@ -130,7 +130,7 @@ defineExpose({
                         },
                     },
                     {
-                        title: $t('cost_time'),
+                        title: $t('log.cost_time'),
                         key: 'cost',
                         width: 100,
                         align: 'center',

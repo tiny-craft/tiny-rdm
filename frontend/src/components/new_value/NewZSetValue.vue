@@ -41,15 +41,18 @@ defineExpose({
 </script>
 
 <template>
-    <n-form-item :label="$t('element')" required>
+    <n-form-item :label="$t('dialogue.field.element')" required>
         <n-dynamic-input v-model:value="zset" @create="onCreate" @update:value="onUpdate">
             <template #default="{ value }">
                 <n-input
                     v-model:value="value.value"
-                    :placeholder="$t('enter_member')"
+                    :placeholder="$t('dialogue.field.enter_member')"
                     type="text"
                     @update:value="onUpdate" />
-                <n-input-number v-model:value="value.score" :placeholder="$t('enter_score')" @update:value="onUpdate" />
+                <n-input-number
+                    v-model:value="value.score"
+                    :placeholder="$t('dialogue.field.enter_score')"
+                    @update:value="onUpdate" />
             </template>
             <template #action="{ index, create, remove, move }">
                 <icon-button v-if="zset.length > 1" :icon="Delete" size="18" @click="() => remove(index)" />

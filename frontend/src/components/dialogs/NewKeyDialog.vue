@@ -24,7 +24,7 @@ const newForm = reactive({
     value: null,
 })
 const formRules = computed(() => {
-    const requiredMsg = i18n.t('field_required')
+    const requiredMsg = i18n.t('dialogue.field_required')
     return {
         key: { required: true, message: requiredMsg, trigger: 'input' },
         type: { required: true, message: requiredMsg, trigger: 'input' },
@@ -107,7 +107,7 @@ const onAdd = async () => {
         $message.error(err.message)
     })
     if (subFormRef.value?.validate && !subFormRef.value?.validate()) {
-        $message.error(i18n.t('spec_field_required', { key: i18n.t('element') }))
+        $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('dialogue.field.element') }))
         return false
     }
     try {
@@ -140,11 +140,11 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('cancel')"
+        :negative-text="$t('common.cancel')"
         :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('confirm')"
+        :positive-text="$t('common.confirm')"
         :show-icon="false"
-        :title="$t('new_key')"
+        :title="$t('dialogue.key.new')"
         preset="dialog"
         style="width: 600px"
         transform-origin="center"
@@ -158,16 +158,16 @@ const onClose = () => {
                 :show-require-mark="false"
                 label-placement="top"
                 style="padding-right: 15px">
-                <n-form-item :label="$t('key')" path="key" required>
+                <n-form-item :label="$t('common.key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" />
                 </n-form-item>
-                <n-form-item :label="$t('db_index')" path="db" required>
+                <n-form-item :label="$t('dialogue.key.db_index')" path="db" required>
                     <n-select v-model:value="newForm.db" :options="dbOptions" filterable />
                 </n-form-item>
-                <n-form-item :label="$t('type')" path="type" required>
+                <n-form-item :label="$t('interface.type')" path="type" required>
                     <n-select v-model:value="newForm.type" :options="options" :render-label="renderTypeLabel" />
                 </n-form-item>
-                <n-form-item :label="$t('ttl')" required>
+                <n-form-item :label="$t('interface.ttl')" required>
                     <n-input-group>
                         <n-input-number
                             v-model:value="newForm.ttl"
@@ -175,11 +175,11 @@ const onClose = () => {
                             :min="-1"
                             placeholder="TTL">
                             <template #suffix>
-                                {{ $t('second') }}
+                                {{ $t('common.second') }}
                             </template>
                         </n-input-number>
                         <n-button secondary type="primary" :focusable="false" @click="newForm.ttl = -1">
-                            {{ $t('persist_key') }}
+                            {{ $t('dialogue.key.persist_key') }}
                         </n-button>
                     </n-input-group>
                 </n-form-item>

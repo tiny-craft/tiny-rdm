@@ -28,7 +28,7 @@ const role = computed(() => {
     return get(props.info, 'Replication.role', '')
 })
 
-const timeUnit = ['unit_minute', 'unit_hour', 'unit_day']
+const timeUnit = ['common.unit_minute', 'common.unit_hour', 'common.unit_day']
 const uptime = computed(() => {
     let seconds = get(props.info, 'Server.uptime_in_seconds', 0)
     seconds /= 60
@@ -102,13 +102,13 @@ const infoFilter = ref('')
                 </template>
                 <template #header-extra>
                     <n-space align="center" inline>
-                        {{ $t('auto_refresh') }}
+                        {{ $t('status.auto_refresh') }}
                         <n-switch
                             :value="props.autoRefresh"
                             :loading="props.autoLoading"
                             @update:value="(v) => emit('update:autoRefresh', v)" />
                         <n-tooltip>
-                            {{ $t('refresh') }}
+                            {{ $t('status.refresh') }}
                             <template #trigger>
                                 <n-button
                                     circle
@@ -127,31 +127,31 @@ const infoFilter = ref('')
                 <n-spin :show="props.loading">
                     <n-grid style="min-width: 500px" x-gap="5">
                         <n-gi :span="6">
-                            <n-statistic :label="$t('uptime')" :value="uptime[0]">
+                            <n-statistic :label="$t('status.uptime')" :value="uptime[0]">
                                 <template #suffix>{{ $t(uptime[1]) }}</template>
                             </n-statistic>
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic
-                                :label="$t('connected_clients')"
+                                :label="$t('status.connected_clients')"
                                 :value="get(props.info, 'Clients.connected_clients', 0)" />
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic :value="totalKeys">
                                 <template #label>
-                                    {{ $t('total_keys') }}
+                                    {{ $t('status.total_keys') }}
                                 </template>
                             </n-statistic>
                         </n-gi>
                         <n-gi :span="6">
-                            <n-statistic :label="$t('memory_used')" :value="usedMemory[0]">
+                            <n-statistic :label="$t('status.memory_used')" :value="usedMemory[0]">
                                 <template #suffix>{{ usedMemory[1] }}</template>
                             </n-statistic>
                         </n-gi>
                     </n-grid>
                 </n-spin>
             </n-card>
-            <n-card :title="$t('all_info')">
+            <n-card :title="$t('status.all_info')">
                 <template #header-extra>
                     <n-input v-model:value="infoFilter" clearable placeholder="">
                         <template #prefix>
@@ -165,7 +165,7 @@ const infoFilter = ref('')
                             <n-data-table
                                 :columns="[
                                     {
-                                        title: $t('key'),
+                                        title: $t('common.key'),
                                         key: 'key',
                                         defaultSortOrder: 'ascend',
                                         sorter: 'default',
@@ -175,7 +175,7 @@ const infoFilter = ref('')
                                             return !!~row.key.indexOf(value.toString())
                                         },
                                     },
-                                    { title: $t('value'), key: 'value' },
+                                    { title: $t('common.value'), key: 'value' },
                                 ]"
                                 :data="map(v, (value, key) => ({ value, key }))" />
                         </n-tab-pane>

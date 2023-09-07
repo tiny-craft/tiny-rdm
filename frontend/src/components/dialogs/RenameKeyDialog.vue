@@ -33,7 +33,7 @@ const onRename = async () => {
         const { success, msg } = await connectionStore.renameKey(server, db, key, newKey)
         if (success) {
             await connectionStore.loadKeyValue(server, db, newKey)
-            $message.success(i18n.t('handle_succ'))
+            $message.success(i18n.t('dialogue.handle_succ'))
         } else {
             $message.error(msg)
         }
@@ -55,11 +55,11 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('cancel')"
+        :negative-text="$t('common.cancel')"
         :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('confirm')"
+        :positive-text="$t('common.confirm')"
         :show-icon="false"
-        :title="$t('rename_key')"
+        :title="$t('interface.rename_key')"
         preset="dialog"
         transform-origin="center"
         @positive-click="onRename"
@@ -70,7 +70,7 @@ const onClose = () => {
             :show-label="false"
             label-align="left"
             label-placement="top">
-            <n-form-item :label="$t('new_key_name')" required>
+            <n-form-item :label="$t('dialogue.key.new_name')" required>
                 <n-input v-model:value="renameForm.newKey" />
             </n-form-item>
         </n-form>

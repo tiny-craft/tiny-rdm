@@ -25,15 +25,15 @@ const filterPattern = ref('')
                 :icon="AddLink"
                 size="20"
                 stroke-width="4"
-                t-tooltip="new_conn"
+                t-tooltip="interface.new_conn"
                 @click="dialogStore.openNewDialog()" />
             <icon-button
                 :icon="AddGroup"
                 size="20"
                 stroke-width="4"
-                t-tooltip="new_group"
+                t-tooltip="interface.new_group"
                 @click="dialogStore.openNewGroupDialog()" />
-            <n-input v-model:value="filterPattern" :placeholder="$t('filter')" clearable>
+            <n-input v-model:value="filterPattern" :placeholder="$t('interface.filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" size="20" />
                 </template>

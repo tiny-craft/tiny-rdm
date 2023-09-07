@@ -19,11 +19,11 @@ const i18n = useI18n()
 const updateOption = [
     {
         value: 0,
-        label: i18n.t('overwrite_field'),
+        label: i18n.t('dialogue.field.overwrite_field'),
     },
     {
         value: 1,
-        label: i18n.t('ignore_field'),
+        label: i18n.t('dialogue.field.ignore_field'),
     },
 ]
 
@@ -53,20 +53,23 @@ const onUpdate = () => {
 </script>
 
 <template>
-    <n-form-item :label="$t('type')">
+    <n-form-item :label="$t('interface.type')">
         <n-radio-group :value="props.type" @update:value="(val) => emit('update:type', val)">
             <n-radio-button v-for="(op, i) in updateOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>
     </n-form-item>
-    <n-form-item :label="$t('element')" required>
+    <n-form-item :label="$t('dialogue.field.element')" required>
         <n-dynamic-input v-model:value="zset" @create="onCreate" @update:value="onUpdate">
             <template #default="{ value }">
                 <n-input
                     v-model:value="value.value"
-                    :placeholder="$t('enter_elem')"
+                    :placeholder="$t('dialogue.field.enter_elem')"
                     type="text"
                     @update:value="onUpdate" />
-                <n-input-number v-model:value="value.score" :placeholder="$t('enter_score')" @update:value="onUpdate" />
+                <n-input-number
+                    v-model:value="value.score"
+                    :placeholder="$t('dialogue.field.enter_score')"
+                    @update:value="onUpdate" />
             </template>
             <template #action="{ index, create, remove, move }">
                 <icon-button v-if="zset.length > 1" :icon="Delete" size="18" @click="() => remove(index)" />

@@ -30,7 +30,7 @@ function setupNotification(notification) {
     return {
         error: (content, option = {}) => {
             option.content = content
-            option.title = option.title || i18nGlobal.t('error')
+            option.title = option.title || i18nGlobal.t('common.error')
             return notification.error(option)
         },
         info: (content, option = {}) => {
@@ -39,12 +39,12 @@ function setupNotification(notification) {
         },
         success: (content, option = {}) => {
             option.content = content
-            option.title = option.title || i18nGlobal.t('success')
+            option.title = option.title || i18nGlobal.t('common.success')
             return notification.success(option)
         },
         warning: (content, option = {}) => {
             option.content = content
-            option.title = option.title || i18nGlobal.t('warning')
+            option.title = option.title || i18nGlobal.t('common.warning')
             return notification.warning(option)
         },
     }
@@ -54,13 +54,13 @@ function setupDialog(dialog) {
     return {
         warning: (content, onConfirm) => {
             return dialog.warning({
-                title: i18nGlobal.t('warning'),
+                title: i18nGlobal.t('common.warning'),
                 content: content,
                 closable: false,
                 autoFocus: false,
                 transformOrigin: 'center',
-                positiveText: i18nGlobal.t('confirm'),
-                negativeText: i18nGlobal.t('cancel'),
+                positiveText: i18nGlobal.t('common.confirm'),
+                negativeText: i18nGlobal.t('common.cancel'),
                 onPositiveClick: () => {
                     onConfirm && onConfirm()
                 },

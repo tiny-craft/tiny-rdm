@@ -43,11 +43,11 @@ defineExpose({
     <n-form-item label="ID">
         <n-input v-model:value="id" />
     </n-form-item>
-    <n-form-item :label="$t('element')" required>
+    <n-form-item :label="$t('dialogue.field.element')" required>
         <n-dynamic-input
             v-model:value="kvList"
-            :key-placeholder="$t('enter_field')"
-            :value-placeholder="$t('enter_value')"
+            :key-placeholder="$t('dialogue.field.enter_field')"
+            :value-placeholder="$t('dialogue.field.enter_value')"
             preset="pair"
             @update:value="onUpdate">
             <template #action="{ index, create, remove, move }">

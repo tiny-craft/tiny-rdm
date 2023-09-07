@@ -138,9 +138,9 @@ const onReloadKey = async () => {
                 @refresh="refreshInfo(true)" />
         </div>
         <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
-            <n-empty :description="$t('nonexist_tab_content')" class="empty-content">
+            <n-empty :description="$t('interface.nonexist_tab_content')" class="empty-content">
                 <template #extra>
-                    <n-button :focusable="false" @click="onReloadKey">{{ $t('reload') }}</n-button>
+                    <n-button :focusable="false" @click="onReloadKey">{{ $t('interface.reload') }}</n-button>
                 </template>
             </n-empty>
         </div>

@@ -25,11 +25,11 @@ const props = defineProps({
 const filterOption = [
     {
         value: 1,
-        label: i18n.t('value'),
+        label: i18n.t('common.value'),
     },
     {
         value: 2,
-        label: i18n.t('score'),
+        label: i18n.t('interface.score'),
     },
 ]
 const filterType = ref(1)
@@ -44,7 +44,7 @@ const currentEditRow = ref({
 })
 const scoreColumn = reactive({
     key: 'score',
-    title: i18n.t('score'),
+    title: i18n.t('interface.score'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
@@ -98,7 +98,7 @@ const scoreColumn = reactive({
 })
 const valueColumn = reactive({
     key: 'value',
-    title: i18n.t('value'),
+    title: i18n.t('common.value'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
@@ -129,7 +129,7 @@ const valueColumn = reactive({
 })
 const actionColumn = {
     key: 'action',
-    title: i18n.t('action'),
+    title: i18n.t('interface.action'),
     width: 100,
     align: 'center',
     titleAlign: 'center',
@@ -153,7 +153,7 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        $message.success(i18n.t('delete_key_succ', { key: row.value }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.value }))
                     } else {
                         $message.error(msg)
                     }
@@ -165,7 +165,7 @@ const actionColumn = {
                 try {
                     const newValue = currentEditRow.value.value
                     if (isEmpty(newValue)) {
-                        $message.error(i18n.t('spec_field_required', { key: i18n.t('value') }))
+                        $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('common.value') }))
                         return
                     }
                     const { success, msg } = await connectionStore.updateZSetItem(
@@ -178,7 +178,7 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        $message.success(i18n.t('save_value_succ'))
+                        $message.success(i18n.t('dialogue.save_value_succ'))
                     } else {
                         $message.error(msg)
                     }
@@ -279,12 +279,12 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         <template #trigger>
                             <n-input
                                 v-model:value="filterValue"
-                                :placeholder="$t('search')"
+                                :placeholder="$t('interface.search')"
                                 clearable
                                 @clear="clearFilter"
                                 @update:value="onFilterInput" />
                         </template>
-                        <div class="text-block">{{ $t('score_filter_tip') }}</div>
+                        <div class="text-block">{{ $t('interface.score_filter_tip') }}</div>
                     </n-tooltip>
                 </n-input-group>
             </div>
@@ -293,7 +293,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
                 </template>
-                {{ $t('add_row') }}
+                {{ $t('interface.add_row') }}
             </n-button>
         </div>
         <div class="value-wrapper fill-height flex-box-h">

@@ -115,7 +115,7 @@ const onCopyValue = () => {
     ClipboardSetText(viewValue.value)
         .then((succ) => {
             if (succ) {
-                $message.success(i18n.t('copy_succ'))
+                $message.success(i18n.t('dialogue.copy_succ'))
             }
         })
         .catch((e) => {
@@ -152,7 +152,7 @@ const onSaveValue = async () => {
         )
         if (success) {
             await connectionStore.loadKeyValue(props.name, props.db, props.keyPath)
-            $message.success(i18n.t('save_value_succ'))
+            $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
         }
@@ -169,7 +169,7 @@ const onSaveValue = async () => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar :db="props.db" :key-path="keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
         <div class="tb2 flex-box-h">
-            <n-text>{{ $t('view_as') }}</n-text>
+            <n-text>{{ $t('interface.view_as') }}</n-text>
             <n-select v-model:value="viewAs" :options="viewOption" style="width: 200px" />
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
@@ -177,13 +177,13 @@ const onSaveValue = async () => {
                     <template #icon>
                         <n-icon :component="Copy" size="18" />
                     </template>
-                    {{ $t('copy_value') }}
+                    {{ $t('interface.copy_value') }}
                 </n-button>
                 <n-button plain :focusable="false" @click="onEditValue">
                     <template #icon>
                         <n-icon :component="Edit" size="18" />
                     </template>
-                    {{ $t('edit_value') }}
+                    {{ $t('interface.edit_value') }}
                 </n-button>
             </n-button-group>
             <n-button-group v-else>
@@ -191,13 +191,13 @@ const onSaveValue = async () => {
                     <template #icon>
                         <n-icon :component="Save" size="18" />
                     </template>
-                    {{ $t('save_update') }}
+                    {{ $t('interface.save_update') }}
                 </n-button>
                 <n-button :loading="saving" :focusable="false" plain @click="onCancelEdit">
                     <template #icon>
                         <n-icon :component="Close" size="18" />
                     </template>
-                    {{ $t('cancel') }}
+                    {{ $t('common.cancel') }}
                 </n-button>
             </n-button-group>
         </div>

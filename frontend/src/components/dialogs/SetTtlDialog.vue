@@ -69,21 +69,21 @@ const onConfirm = async () => {
         :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
-        :title="$t('set_ttl')"
+        :title="$t('dialogue.ttl.title')"
         preset="dialog"
         transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
-            <n-form-item :label="$t('key')">
+            <n-form-item :label="$t('common.key')">
                 <n-input :value="currentKey" readonly />
             </n-form-item>
-            <n-form-item :label="$t('ttl')" required>
+            <n-form-item :label="$t('interface.ttl')" required>
                 <n-input-number
                     v-model:value="ttlForm.ttl"
                     :max="Number.MAX_SAFE_INTEGER"
                     :min="-1"
                     style="width: 100%">
                     <template #suffix>
-                        {{ $t('second') }}
+                        {{ $t('common.second') }}
                     </template>
                 </n-input-number>
             </n-form-item>
@@ -91,11 +91,11 @@ const onConfirm = async () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :focusable="false" @click="ttlForm.ttl = -1">{{ $t('persist_key') }}</n-button>
+                <n-button :focusable="false" @click="ttlForm.ttl = -1">{{ $t('dialogue.key.persist_key') }}</n-button>
             </div>
             <div class="flex-item n-dialog__action">
-                <n-button :focusable="false" @click="onClose">{{ $t('cancel') }}</n-button>
-                <n-button type="primary" :focusable="false" @click="onConfirm">{{ $t('save') }}</n-button>
+                <n-button :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
+                <n-button type="primary" :focusable="false" @click="onConfirm">{{ $t('common.save') }}</n-button>
             </div>
         </template>
     </n-modal>

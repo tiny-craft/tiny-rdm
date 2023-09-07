@@ -56,7 +56,7 @@ const filterTypeOptions = computed(() => {
     }))
     options.splice(0, 0, {
         value: '',
-        label: i18n.t('all'),
+        label: i18n.t('common.all'),
     })
     return options
 })
@@ -83,10 +83,15 @@ const filterTypeOptions = computed(() => {
         </div>
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
-            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="status" @click="onInfo" />
-            <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="reload" @click="onRefresh" />
+            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="interface.status" @click="onInfo" />
+            <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="interface.reload" @click="onRefresh" />
             <div class="flex-item-expand"></div>
-            <icon-button :icon="Unlink" size="20" stroke-width="4" t-tooltip="disconnect" @click="onDisconnect" />
+            <icon-button
+                :icon="Unlink"
+                size="20"
+                stroke-width="4"
+                t-tooltip="interface.disconnect"
+                @click="onDisconnect" />
         </div>
     </div>
 </template>

@@ -88,12 +88,12 @@ const menuOptions = {
         return [
             {
                 key: 'server_reload',
-                label: i18n.t('reload'),
+                label: i18n.t('interface.reload'),
                 icon: renderIcon(Refresh),
             },
             {
                 key: 'server_close',
-                label: i18n.t('disconnect'),
+                label: i18n.t('interface.disconnect'),
                 icon: renderIcon(Unlink),
             },
         ]
@@ -103,17 +103,17 @@ const menuOptions = {
             return [
                 {
                     key: 'db_reload',
-                    label: i18n.t('reload'),
+                    label: i18n.t('interface.reload'),
                     icon: renderIcon(Refresh),
                 },
                 {
                     key: 'db_newkey',
-                    label: i18n.t('new_key'),
+                    label: i18n.t('interface.new_key'),
                     icon: renderIcon(Add),
                 },
                 {
                     key: 'db_filter',
-                    label: i18n.t('filter_key'),
+                    label: i18n.t('interface.filter_key'),
                     icon: renderIcon(Filter),
                 },
                 {
@@ -122,7 +122,7 @@ const menuOptions = {
                 },
                 {
                     key: 'key_remove',
-                    label: i18n.t('batch_delete'),
+                    label: i18n.t('interface.batch_delete'),
                     icon: renderIcon(Delete),
                 },
                 {
@@ -131,7 +131,7 @@ const menuOptions = {
                 },
                 {
                     key: 'db_close',
-                    label: i18n.t('close_db'),
+                    label: i18n.t('interface.close_db'),
                     icon: renderIcon(Close),
                 },
             ]
@@ -139,7 +139,7 @@ const menuOptions = {
             return [
                 {
                     key: 'db_open',
-                    label: i18n.t('open_db'),
+                    label: i18n.t('interface.open_db'),
                     icon: renderIcon(Connect),
                 },
             ]
@@ -148,17 +148,17 @@ const menuOptions = {
     [ConnectionType.RedisKey]: () => [
         {
             key: 'key_reload',
-            label: i18n.t('reload'),
+            label: i18n.t('interface.reload'),
             icon: renderIcon(Refresh),
         },
         {
             key: 'key_newkey',
-            label: i18n.t('new_key'),
+            label: i18n.t('interface.new_key'),
             icon: renderIcon(Add),
         },
         {
             key: 'key_copy',
-            label: i18n.t('copy_path'),
+            label: i18n.t('interface.copy_path'),
             icon: renderIcon(CopyLink),
         },
         {
@@ -167,19 +167,19 @@ const menuOptions = {
         },
         {
             key: 'key_remove',
-            label: i18n.t('batch_delete'),
+            label: i18n.t('interface.batch_delete'),
             icon: renderIcon(Delete),
         },
     ],
     [ConnectionType.RedisValue]: () => [
         {
             key: 'value_reload',
-            label: i18n.t('reload'),
+            label: i18n.t('interface.reload'),
             icon: renderIcon(Refresh),
         },
         {
             key: 'value_copy',
-            label: i18n.t('copy_key'),
+            label: i18n.t('interface.copy_key'),
             icon: renderIcon(CopyLink),
         },
         {
@@ -188,7 +188,7 @@ const menuOptions = {
         },
         {
             key: 'value_remove',
-            label: i18n.t('remove_key'),
+            label: i18n.t('interface.remove_key'),
             icon: renderIcon(Delete),
         },
     ],
@@ -233,7 +233,7 @@ const handleSelectContextMenu = (key) => {
             expandedKeys.value = [props.server]
             tabStore.setSelectedKeys(props.server)
             connectionStore.openConnection(props.server, true).then(() => {
-                $message.success(i18n.t('reload_succ'))
+                $message.success(i18n.t('dialogue.reload_succ'))
             })
             break
         case 'server_close':
@@ -267,10 +267,10 @@ const handleSelectContextMenu = (key) => {
             dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
             break
         case 'value_remove':
-            $dialog.warning(i18n.t('remove_tip', { name: redisKey }), () => {
+            $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKey }), () => {
                 connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
-                        $message.success(i18n.t('delete_key_succ', { key: redisKey }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: redisKey }))
                     }
                 })
             })
@@ -280,7 +280,7 @@ const handleSelectContextMenu = (key) => {
             ClipboardSetText(redisKey)
                 .then((succ) => {
                     if (succ) {
-                        $message.success(i18n.t('copy_succ'))
+                        $message.success(i18n.t('dialogue.copy_succ'))
                     }
                 })
                 .catch((e) => {
@@ -451,22 +451,22 @@ const getDatabaseMenu = (opened) => {
     if (opened) {
         btns.push(
             h(IconButton, {
-                tTooltip: 'filter_key',
+                tTooltip: 'interface.filter_key',
                 icon: Filter,
                 onClick: () => handleSelectContextMenu('db_filter'),
             }),
             h(IconButton, {
-                tTooltip: 'reload',
+                tTooltip: 'interface.reload',
                 icon: Refresh,
                 onClick: () => handleSelectContextMenu('db_reload'),
             }),
             h(IconButton, {
-                tTooltip: 'new_key',
+                tTooltip: 'interface.new_key',
                 icon: Add,
                 onClick: () => handleSelectContextMenu('db_newkey'),
             }),
             h(IconButton, {
-                tTooltip: 'batch_delete',
+                tTooltip: 'interface.batch_delete',
                 icon: Delete,
                 onClick: () => handleSelectContextMenu('key_remove'),
             }),
@@ -474,7 +474,7 @@ const getDatabaseMenu = (opened) => {
     } else {
         btns.push(
             h(IconButton, {
-                tTooltip: 'open_db',
+                tTooltip: 'interface.open_db',
                 icon: Connect,
                 onClick: () => handleSelectContextMenu('db_open'),
             }),
@@ -486,17 +486,17 @@ const getDatabaseMenu = (opened) => {
 const getLayerMenu = () => {
     return [
         h(IconButton, {
-            tTooltip: 'reload',
+            tTooltip: 'interface.reload',
             icon: Refresh,
             onClick: () => handleSelectContextMenu('key_reload'),
         }),
         h(IconButton, {
-            tTooltip: 'new_key',
+            tTooltip: 'interface.new_key',
             icon: Add,
             onClick: () => handleSelectContextMenu('key_newkey'),
         }),
         h(IconButton, {
-            tTooltip: 'batch_delete',
+            tTooltip: 'interface.batch_delete',
             icon: Delete,
             onClick: () => handleSelectContextMenu('key_remove'),
         }),
@@ -506,7 +506,7 @@ const getLayerMenu = () => {
 const getValueMenu = () => {
     return [
         h(IconButton, {
-            tTooltip: 'remove_key',
+            tTooltip: 'interface.remove_key',
             icon: Delete,
             onClick: () => handleSelectContextMenu('value_remove'),
         }),

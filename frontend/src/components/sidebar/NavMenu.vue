@@ -39,18 +39,18 @@ const i18n = useI18n()
 const menuOptions = computed(() => {
     return [
         {
-            label: i18n.t('browser'),
+            label: i18n.t('ribbon.browser'),
             key: 'browser',
             icon: renderIcon(ToggleDb),
             show: connectionStore.anyConnectionOpened,
         },
         {
-            label: i18n.t('server'),
+            label: i18n.t('ribbon.server'),
             key: 'server',
             icon: renderIcon(ToggleServer),
         },
         {
-            label: i18n.t('log'),
+            label: i18n.t('ribbon.log'),
             key: 'log',
             icon: renderIcon(Record),
         },
@@ -60,17 +60,17 @@ const menuOptions = computed(() => {
 const preferencesOptions = computed(() => {
     return [
         {
-            label: i18n.t('preferences'),
+            label: i18n.t('menu.preferences'),
             key: 'preferences',
             icon: renderIcon(Config),
         },
+        // {
+        //     label: i18n.t('menu.help'),
+        //     key: 'help',
+        //     icon: renderIcon(Help),
+        // },
         {
-            label: i18n.t('help'),
-            key: 'help',
-            icon: renderIcon(Help),
-        },
-        {
-            label: i18n.t('check_update'),
+            label: i18n.t('menu.check_update'),
             key: 'update',
         },
     ]

@@ -55,12 +55,12 @@ const menuOptions = {
     [ConnectionType.Group]: ({ opened }) => [
         {
             key: 'group_rename',
-            label: i18n.t('rename_conn_group'),
+            label: i18n.t('interface.rename_conn_group'),
             icon: renderIcon(Edit),
         },
         {
             key: 'group_delete',
-            label: i18n.t('remove_conn_group'),
+            label: i18n.t('interface.remove_conn_group'),
             icon: renderIcon(Delete),
         },
     ],
@@ -70,17 +70,17 @@ const menuOptions = {
             return [
                 {
                     key: 'server_close',
-                    label: i18n.t('disconnect'),
+                    label: i18n.t('interface.disconnect'),
                     icon: renderIcon(Unlink),
                 },
                 {
                     key: 'server_dup',
-                    label: i18n.t('dup_conn'),
+                    label: i18n.t('interface.dup_conn'),
                     icon: renderIcon(CopyLink),
                 },
                 {
                     key: 'server_edit',
-                    label: i18n.t('edit_conn'),
+                    label: i18n.t('interface.edit_conn'),
                     icon: renderIcon(Config),
                 },
                 {
@@ -89,7 +89,7 @@ const menuOptions = {
                 },
                 {
                     key: 'server_remove',
-                    label: i18n.t('remove_conn'),
+                    label: i18n.t('interface.remove_conn'),
                     icon: renderIcon(Delete),
                 },
             ]
@@ -97,12 +97,12 @@ const menuOptions = {
             return [
                 {
                     key: 'server_open',
-                    label: i18n.t('open_connection'),
+                    label: i18n.t('interface.open_connection'),
                     icon: renderIcon(Connect),
                 },
                 {
                     key: 'server_edit',
-                    label: i18n.t('edit_conn'),
+                    label: i18n.t('interface.edit_conn'),
                     icon: renderIcon(Config),
                 },
                 {
@@ -111,7 +111,7 @@ const menuOptions = {
                 },
                 {
                     key: 'server_remove',
-                    label: i18n.t('remove_conn'),
+                    label: i18n.t('interface.remove_conn'),
                     icon: renderIcon(Delete),
                 },
             ]
@@ -207,12 +207,12 @@ const getServerMenu = (connected) => {
     if (connected) {
         btns.push(
             h(IconButton, {
-                tTooltip: 'disconnect',
+                tTooltip: 'interface.disconnect',
                 icon: Unlink,
                 onClick: () => handleSelectContextMenu('server_close'),
             }),
             h(IconButton, {
-                tTooltip: 'edit_conn',
+                tTooltip: 'interface.edit_conn',
                 icon: Config,
                 onClick: () => handleSelectContextMenu('server_edit'),
             }),
@@ -220,17 +220,17 @@ const getServerMenu = (connected) => {
     } else {
         btns.push(
             h(IconButton, {
-                tTooltip: 'open_connection',
+                tTooltip: 'interface.open_connection',
                 icon: Connect,
                 onClick: () => handleSelectContextMenu('server_open'),
             }),
             h(IconButton, {
-                tTooltip: 'edit_conn',
+                tTooltip: 'interface.edit_conn',
                 icon: Config,
                 onClick: () => handleSelectContextMenu('server_edit'),
             }),
             h(IconButton, {
-                tTooltip: 'remove_conn',
+                tTooltip: 'interface.remove_conn',
                 icon: Delete,
                 onClick: () => handleSelectContextMenu('server_remove'),
             }),
@@ -242,12 +242,12 @@ const getServerMenu = (connected) => {
 const getGroupMenu = () => {
     return [
         h(IconButton, {
-            tTooltip: 'edit_conn',
+            tTooltip: 'interface.edit_conn',
             icon: Config,
             onClick: () => handleSelectContextMenu('group_rename'),
         }),
         h(IconButton, {
-            tTooltip: 'remove_conn',
+            tTooltip: 'interface.remove_conn',
             icon: Delete,
             onClick: () => handleSelectContextMenu('group_delete'),
         }),
@@ -298,17 +298,20 @@ const openConnection = async (name) => {
 }
 
 const removeConnection = (name) => {
-    $dialog.warning(i18n.t('remove_tip', { type: i18n.t('conn_name'), name }), async () => {
-        connectionStore.deleteConnection(name).then(({ success, msg }) => {
-            if (!success) {
-                $message.error(msg)
-            }
-        })
-    })
+    $dialog.warning(
+        i18n.t('dialogue.remove_tip', { type: i18n.t('dialogue.connection.conn_name'), name }),
+        async () => {
+            connectionStore.deleteConnection(name).then(({ success, msg }) => {
+                if (!success) {
+                    $message.error(msg)
+                }
+            })
+        },
+    )
 }
 
 const removeGroup = async (name) => {
-    $dialog.warning(i18n.t('remove_group_tip', { name }), async () => {
+    $dialog.warning(i18n.t('dialogue.remove_group_tip', { name }), async () => {
         connectionStore.deleteGroup(name).then(({ success, msg }) => {
             if (!success) {
                 $message.error(msg)
@@ -376,7 +379,7 @@ const handleSelectContextMenu = (key) => {
         case 'server_edit':
             // ask for close relevant connections before edit
             if (connectionStore.isConnected(name)) {
-                $dialog.warning(i18n.t('edit_close_confirm'), () => {
+                $dialog.warning(i18n.t('dialogue.edit_close_confirm'), () => {
                     connectionStore.closeConnection(name)
                     dialogStore.openEditDialog(name)
                 })
@@ -390,7 +393,7 @@ const handleSelectContextMenu = (key) => {
         case 'server_close':
             connectionStore.closeConnection(name).then((closed) => {
                 if (closed) {
-                    $message.success(i18n.t('handle_succ'))
+                    $message.success(i18n.t('dialogue.handle_succ'))
                 }
             })
             break
@@ -459,7 +462,10 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
 </script>
 
 <template>
-    <n-empty v-if="isEmpty(connectionStore.connections)" :description="$t('empty_server_list')" class="empty-content" />
+    <n-empty
+        v-if="isEmpty(connectionStore.connections)"
+        :description="$t('interface.empty_server_list')"
+        class="empty-content" />
     <n-tree
         v-else
         :animated="false"
@@ -491,7 +497,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
             style="width: 400px">
             <n-spin>
                 <template #description>
-                    {{ $t('opening_connection') }}
+                    {{ $t('dialogue.opening_connection') }}
                 </template>
             </n-spin>
         </n-card>

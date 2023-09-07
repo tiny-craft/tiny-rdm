@@ -20,7 +20,7 @@ const typeOptions = computed(() => {
     }))
     options.splice(0, 0, {
         value: '',
-        label: i18n.t('all'),
+        label: i18n.t('common.all'),
     })
     return options
 })
@@ -58,11 +58,11 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('cancel')"
+        :negative-text="$t('common.cancel')"
         :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('confirm')"
+        :positive-text="$t('common.confirm')"
         :show-icon="false"
-        :title="$t('set_key_filter')"
+        :title="$t('dialogue.filter.set_key_filter')"
         preset="dialog"
         style="width: 450px"
         transform-origin="center"
@@ -77,22 +77,22 @@ const onClose = () => {
             <n-form-item :label="$t('server')" path="key">
                 <n-text>{{ filterForm.server }}</n-text>
             </n-form-item>
-            <n-form-item :label="$t('db_index')" path="db">
+            <n-form-item :label="$t('dialogue.key.db_index')" path="db">
                 <n-text>{{ filterForm.db }}</n-text>
             </n-form-item>
-            <n-form-item :label="$t('type')" path="type" required>
+            <n-form-item :label="$t('interface.type')" path="type" required>
                 <n-select v-model:value="filterForm.type" :options="typeOptions" />
             </n-form-item>
-            <n-form-item :label="$t('filter_pattern')" required>
+            <n-form-item :label="$t('dialogue.filter.filter_pattern')" required>
                 <n-input-group>
                     <n-tooltip trigger="focus">
                         <template #trigger>
                             <n-input v-model:value="filterForm.pattern" clearable placeholder="Filter Pattern" />
                         </template>
-                        <div class="text-block">{{ $t('filter_pattern_tip') }}</div>
+                        <div class="text-block">{{ $t('dialogue.filter.filter_pattern_tip') }}</div>
                     </n-tooltip>
                     <n-button secondary type="primary" :focusable="false" @click="filterForm.pattern = '*'">
-                        {{ $t('restore_defaults') }}
+                        {{ $t('preferences.restore_defaults') }}
                     </n-button>
                 </n-input-group>
             </n-form-item>

@@ -16,11 +16,11 @@ const i18n = useI18n()
 const updateOption = [
     {
         value: 0,
-        label: i18n.t('overwrite_field'),
+        label: i18n.t('dialogue.field.overwrite_field'),
     },
     {
         value: 1,
-        label: i18n.t('ignore_field'),
+        label: i18n.t('dialogue.field.ignore_field'),
     },
 ]
 
@@ -45,16 +45,16 @@ const onUpdate = (val) => {
 </script>
 
 <template>
-    <n-form-item :label="$t('type')">
+    <n-form-item :label="$t('interface.type')">
         <n-radio-group :value="props.type" @update:value="(val) => emit('update:type', val)">
             <n-radio-button v-for="(op, i) in updateOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>
     </n-form-item>
-    <n-form-item :label="$t('element')" required>
+    <n-form-item :label="$t('dialogue.field.element')" required>
         <n-dynamic-input
             v-model:value="kvList"
-            :key-placeholder="$t('enter_field')"
-            :value-placeholder="$t('enter_value')"
+            :key-placeholder="$t('dialogue.field.enter_field')"
+            :value-placeholder="$t('dialogue.field.enter_value')"
             preset="pair"
             @update:value="onUpdate">
             <template #action="{ index, create, remove, move }">

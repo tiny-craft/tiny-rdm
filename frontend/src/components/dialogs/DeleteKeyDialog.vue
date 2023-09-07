@@ -53,7 +53,7 @@ const onConfirmDelete = async () => {
         const { server, db, key } = deleteForm
         const success = await connectionStore.deleteKeyPrefix(server, db, key)
         if (success) {
-            $message.success(i18n.t('handle_succ'))
+            $message.success(i18n.t('dialogue.handle_succ'))
         }
     } catch (e) {
         $message.error(e.message)
@@ -73,20 +73,20 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
-        :title="$t('batch_delete_key')"
+        :title="$t('interface.batch_delete_key')"
         preset="dialog"
         transform-origin="center">
         <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
-            <n-form-item :label="$t('server')">
+            <n-form-item :label="$t('dialogue.key.server')">
                 <n-input :value="deleteForm.server" readonly />
             </n-form-item>
-            <n-form-item :label="$t('db_index')">
+            <n-form-item :label="$t('dialogue.key.db_index')">
                 <n-input :value="deleteForm.db.toString()" readonly />
             </n-form-item>
-            <n-form-item :label="$t('key_expression')" required>
+            <n-form-item :label="$t('dialogue.key.key_expression')" required>
                 <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
             </n-form-item>
-            <n-card v-if="deleteForm.showAffected" :title="$t('affected_key')" size="small">
+            <n-card v-if="deleteForm.showAffected" :title="$t('dialogue.key.affected_key')" size="small">
                 <n-skeleton v-if="deleteForm.loadingAffected" :repeat="10" text />
                 <n-log
                     v-else
@@ -99,9 +99,9 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item n-dialog__action">
-                <n-button :focusable="false" @click="onClose">{{ $t('cancel') }}</n-button>
+                <n-button :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
                 <n-button v-if="!deleteForm.showAffected" type="primary" :focusable="false" @click="scanAffectedKey">
-                    {{ $t('show_affected_key') }}
+                    {{ $t('dialogue.key.show_affected_key') }}
                 </n-button>
                 <n-button
                     v-else
@@ -109,7 +109,7 @@ const onClose = () => {
                     :disabled="isEmpty(deleteForm.affectedKeys)"
                     type="error"
                     @click="onConfirmDelete">
-                    {{ $t('confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
+                    {{ $t('dialogue.key.confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
                 </n-button>
             </div>
         </template>

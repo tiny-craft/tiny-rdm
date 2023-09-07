@@ -34,14 +34,14 @@ const onConfirm = async () => {
         if (isRenameMode.value) {
             const { success, msg } = await connectionStore.renameGroup(editGroup.value, name)
             if (success) {
-                $message.success(i18n.t('handle_succ'))
+                $message.success(i18n.t('dialogue.handle_succ'))
             } else {
                 $message.error(msg)
             }
         } else {
             const { success, msg } = await connectionStore.createGroup(name)
             if (success) {
-                $message.success(i18n.t('handle_succ'))
+                $message.success(i18n.t('dialogue.handle_succ'))
             } else {
                 $message.error(msg)
             }
@@ -68,17 +68,17 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('cancel')"
+        :negative-text="$t('common.cancel')"
         :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('confirm')"
+        :positive-text="$t('common.confirm')"
         :show-icon="false"
-        :title="isRenameMode ? $t('rename_group') : $t('new_group')"
+        :title="isRenameMode ? $t('dialogue.group.rename') : $t('dialogue.group.new')"
         preset="dialog"
         transform-origin="center"
         @positive-click="onConfirm"
         @negative-click="onClose">
         <n-form :model="groupForm" :show-label="false" :show-require-mark="false" label-placement="top">
-            <n-form-item :label="$t('group_name')" required>
+            <n-form-item :label="$t('dialogue.group.name')" required>
                 <n-input v-model:value="groupForm.name" placeholder="" />
             </n-form-item>
         </n-form>

@@ -13,7 +13,7 @@ const tabStore = useTabStore()
 const connectionStore = useConnectionStore()
 
 const onCloseTab = (tabIndex) => {
-    $dialog.warning(i18n.t('close_confirm'), () => {
+    $dialog.warning(i18n.t('dialogue.close_confirm'), () => {
         const tab = get(tabStore.tabs, tabIndex)
         if (tab != null) {
             connectionStore.closeConnection(tab.name)

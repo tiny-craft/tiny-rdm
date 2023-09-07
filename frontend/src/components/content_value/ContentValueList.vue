@@ -31,7 +31,7 @@ const currentEditRow = ref({
 })
 const valueColumn = reactive({
     key: 'value',
-    title: i18n.t('value'),
+    title: i18n.t('common.value'),
     align: 'center',
     titleAlign: 'center',
     filterOptionValue: null,
@@ -57,7 +57,7 @@ const valueColumn = reactive({
 })
 const actionColumn = {
     key: 'action',
-    title: i18n.t('action'),
+    title: i18n.t('interface.action'),
     width: 100,
     align: 'center',
     titleAlign: 'center',
@@ -80,7 +80,7 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        $message.success(i18n.t('delete_key_succ', { key: '#' + row.no }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: '#' + row.no }))
                         // update display value
                         // if (!isEmpty(removed)) {
                         //     props.value.splice(removed[0], 1)
@@ -103,7 +103,7 @@ const actionColumn = {
                     )
                     if (success) {
                         connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
-                        $message.success(i18n.t('save_value_succ'))
+                        $message.success(i18n.t('dialogue.save_value_succ'))
                         // update display value
                         // if (!isEmpty(updated)) {
                         //     for (const key in updated) {
@@ -176,7 +176,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
             <div class="flex-box-h">
                 <n-input
                     v-model:value="filterValue"
-                    :placeholder="$t('search')"
+                    :placeholder="$t('interface.search')"
                     clearable
                     @clear="clearFilter"
                     @update:value="onFilterInput" />
@@ -186,7 +186,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
                 </template>
-                {{ $t('add_row') }}
+                {{ $t('interface.add_row') }}
             </n-button>
         </div>
         <div class="value-wrapper fill-height flex-box-h">

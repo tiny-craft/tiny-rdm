@@ -18,7 +18,7 @@ const i18n = useI18n()
 const editName = ref('')
 const generalForm = ref(null)
 const generalFormRules = () => {
-    const requiredMsg = i18n.t('field_required')
+    const requiredMsg = i18n.t('dialogue.field_required')
     const illegalChars = ['/', '\\']
     return {
         name: [
@@ -27,7 +27,7 @@ const generalFormRules = () => {
                 validator: (rule, value) => {
                     return every(illegalChars, (c) => !includes(value, c))
                 },
-                message: i18n.t('illegal_characters'),
+                message: i18n.t('dialogue.illegal_characters'),
                 trigger: 'input',
             },
         ],
@@ -50,7 +50,7 @@ const groupOptions = computed(() => {
         value: group,
     }))
     options.splice(0, 0, {
-        label: i18n.t('no_group'),
+        label: i18n.t('dialogue.connection.no_group'),
         value: '',
     })
     return options
@@ -86,7 +86,7 @@ const onSaveConnection = async () => {
         return
     }
 
-    $message.success(i18n.t('handle_succ'))
+    $message.success(i18n.t('dialogue.handle_succ'))
     onClose()
 }
 
@@ -149,26 +149,30 @@ const onClose = () => {
         :mask-closable="false"
         :on-after-leave="resetForm"
         :show-icon="false"
-        :title="isEditMode ? $t('edit_conn_title') : $t('new_conn_title')"
+        :title="isEditMode ? $t('dialogue.connection.edit_title') : $t('dialogue.connection.new_title')"
         preset="dialog"
         transform-origin="center">
         <n-spin :show="closingConnection">
             <n-tabs v-model:value="tab" animated type="line">
-                <n-tab-pane :tab="$t('general')" display-directive="show" name="general">
+                <n-tab-pane :tab="$t('dialogue.connection.general')" display-directive="show" name="general">
                     <n-form
                         ref="generalFormRef"
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
                         label-placement="top">
-                        <n-form-item :label="$t('conn_name')" path="name" required>
-                            <n-input v-model:value="generalForm.name" :placeholder="$t('conn_name_tip')" />
+                        <n-form-item :label="$t('dialogue.connection.conn_name')" path="name" required>
+                            <n-input
+                                v-model:value="generalForm.name"
+                                :placeholder="$t('dialogue.connection.name_tip')" />
                         </n-form-item>
-                        <n-form-item v-if="!isEditMode" :label="$t('conn_group')" required>
+                        <n-form-item v-if="!isEditMode" :label="$t('dialogue.connection.group')" required>
                             <n-select v-model:value="generalForm.group" :options="groupOptions" />
                         </n-form-item>
-                        <n-form-item :label="$t('conn_addr')" path="addr" required>
-                            <n-input v-model:value="generalForm.addr" :placeholder="$t('conn_addr_tip')" />
+                        <n-form-item :label="$t('dialogue.connection.addr')" path="addr" required>
+                            <n-input
+                                v-model:value="generalForm.addr"
+                                :placeholder="$t('dialogue.connection.addr_tip')" />
                             <n-text style="width: 40px; text-align: center">:</n-text>
                             <n-input-number
                                 v-model:value="generalForm.port"
@@ -176,51 +180,51 @@ const onClose = () => {
                                 :min="1"
                                 style="width: 200px" />
                         </n-form-item>
-                        <n-form-item :label="$t('conn_pwd')" path="password">
+                        <n-form-item :label="$t('dialogue.connection.pwd')" path="password">
                             <n-input
                                 v-model:value="generalForm.password"
-                                :placeholder="$t('conn_pwd_tip')"
+                                :placeholder="$t('dialogue.connection.pwd_tip')"
                                 show-password-on="click"
                                 type="password" />
                         </n-form-item>
-                        <n-form-item :label="$t('conn_usr')" path="username">
-                            <n-input v-model="generalForm.username" :placeholder="$t('conn_usr_tip')" />
+                        <n-form-item :label="$t('dialogue.connection.usr')" path="username">
+                            <n-input v-model="generalForm.username" :placeholder="$t('dialogue.connection.usr_tip')" />
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
 
-                <n-tab-pane :tab="$t('advanced')" display-directive="show" name="advanced">
+                <n-tab-pane :tab="$t('dialogue.connection.advanced')" display-directive="show" name="advanced">
                     <n-form
                         ref="advanceFormRef"
                         :model="generalForm"
                         :rules="generalFormRules()"
                         :show-require-mark="false"
                         label-placement="top">
-                        <n-form-item :label="$t('conn_advn_filter')" path="defaultFilter">
+                        <n-form-item :label="$t('dialogue.connection.advn_filter')" path="defaultFilter">
                             <n-input
                                 v-model:value="generalForm.defaultFilter"
-                                :placeholder="$t('conn_advn_filter_tip')" />
+                                :placeholder="$t('dialogue.connection.advn_filter_tip')" />
                         </n-form-item>
-                        <n-form-item :label="$t('conn_advn_separator')" path="keySeparator">
+                        <n-form-item :label="$t('dialogue.connection.advn_separator')" path="keySeparator">
                             <n-input
                                 v-model:value="generalForm.keySeparator"
-                                :placeholder="$t('conn_advn_separator_tip')" />
+                                :placeholder="$t('dialogue.connection.advn_separator_tip')" />
                         </n-form-item>
-                        <n-form-item :label="$t('conn_advn_conn_timeout')" path="connTimeout">
+                        <n-form-item :label="$t('dialogue.connection.advn_conn_timeout')" path="connTimeout">
                             <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
                                 <template #suffix>
-                                    {{ $t('second') }}
+                                    {{ $t('common.second') }}
                                 </template>
                             </n-input-number>
                         </n-form-item>
-                        <n-form-item :label="$t('conn_advn_exec_timeout')" path="execTimeout">
+                        <n-form-item :label="$t('dialogue.connection.advn_exec_timeout')" path="execTimeout">
                             <n-input-number v-model:value="generalForm.execTimeout" :max="999999" :min="1">
                                 <template #suffix>
-                                    {{ $t('second') }}
+                                    {{ $t('common.second') }}
                                 </template>
                             </n-input-number>
                         </n-form-item>
-                        <n-form-item :label="$t('conn_advn_mark_color')" path="markColor">
+                        <n-form-item :label="$t('dialogue.connection.advn_mark_color')" path="markColor">
                             <div
                                 v-for="color in predefineColors"
                                 :key="color"
@@ -240,9 +244,9 @@ const onClose = () => {
             <!-- test result alert-->
             <n-alert
                 v-if="showTestResult"
-                :title="isEmpty(testResult) ? '' : $t('conn_test_fail')"
+                :title="isEmpty(testResult) ? '' : $t('dialogue.connection.test_fail')"
                 :type="isEmpty(testResult) ? 'success' : 'error'">
-                <template v-if="isEmpty(testResult)">{{ $t('conn_test_succ') }}</template>
+                <template v-if="isEmpty(testResult)">{{ $t('dialogue.connection.test_succ') }}</template>
                 <template v-else>{{ testResult }}</template>
             </n-alert>
         </n-spin>
@@ -250,15 +254,15 @@ const onClose = () => {
         <template #action>
             <div class="flex-item-expand">
                 <n-button :focusable="false" :disabled="closingConnection" :loading="testing" @click="onTestConnection">
-                    {{ $t('conn_test') }}
+                    {{ $t('dialogue.connection.test') }}
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">
                 <n-button :focusable="false" :disabled="closingConnection" @click="onClose">
-                    {{ $t('cancel') }}
+                    {{ $t('common.cancel') }}
                 </n-button>
                 <n-button :focusable="false" :disabled="closingConnection" type="primary" @click="onSaveConnection">
-                    {{ isEditMode ? $t('update') : $t('confirm') }}
+                    {{ isEditMode ? $t('preferences.general.update') : $t('common.confirm') }}
                 </n-button>
             </div>
         </template>

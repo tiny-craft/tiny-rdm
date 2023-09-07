@@ -47,15 +47,15 @@ const defaultValue = {
 const title = computed(() => {
     switch (newForm.type) {
         case types.LIST:
-            return i18n.t('new_item')
+            return i18n.t('dialogue.field.new_item')
         case types.HASH:
-            return i18n.t('new_field')
+            return i18n.t('dialogue.field.new')
         case types.SET:
-            return i18n.t('new_field')
+            return i18n.t('dialogue.field.new')
         case types.ZSET:
-            return i18n.t('new_field')
+            return i18n.t('dialogue.field.new')
         case types.STREAM:
-            return i18n.t('new_field')
+            return i18n.t('dialogue.field.new')
     }
     return ''
 })
@@ -98,7 +98,7 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        $message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
                     }
@@ -112,7 +112,7 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        $message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
                     }
@@ -126,7 +126,7 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        $message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
                     }
@@ -140,7 +140,7 @@ const onAdd = async () => {
                         if (newForm.reload) {
                             connectionStore.loadKeyValue(server, db, key).then(() => {})
                         }
-                        $message.success(i18n.t('handle_succ'))
+                        $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
                     }
@@ -161,7 +161,7 @@ const onAdd = async () => {
                             if (newForm.reload) {
                                 connectionStore.loadKeyValue(server, db, key).then(() => {})
                             }
-                            $message.success(i18n.t('handle_succ'))
+                            $message.success(i18n.t('dialogue.handle_succ'))
                         } else {
                             $message.error(msg)
                         }
@@ -187,9 +187,9 @@ const onClose = () => {
         :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('cancel')"
+        :negative-text="$t('common.cancel')"
         :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('confirm')"
+        :positive-text="$t('common.confirm')"
         :show-icon="false"
         :title="title"
         preset="dialog"
@@ -199,7 +199,7 @@ const onClose = () => {
         @negative-click="onClose">
         <n-scrollbar style="max-height: 500px">
             <n-form :model="newForm" :show-require-mark="false" label-placement="top" style="padding-right: 15px">
-                <n-form-item :label="$t('key')" path="key" required>
+                <n-form-item :label="$t('common.key')" path="key" required>
                     <n-input v-model:value="newForm.key" placeholder="" readonly />
                 </n-form-item>
                 <component
@@ -208,7 +208,7 @@ const onClose = () => {
                     v-model:value="newForm.value" />
                 <n-form-item label=" " path="key" required>
                     <n-checkbox v-model:checked="newForm.reload">
-                        {{ $t('reload_when_succ') }}
+                        {{ $t('dialogue.field.reload_when_succ') }}
                     </n-checkbox>
                 </n-form-item>
             </n-form>

@@ -22,11 +22,14 @@ const emit = defineEmits(['edit', 'delete', 'save', 'cancel'])
     </div>
     <div v-else class="flex-box-h edit-column-func">
         <icon-button v-if="!props.readonly" :icon="Edit" @click="emit('edit')" />
-        <n-popconfirm :negative-text="$t('cancel')" :positive-text="$t('confirm')" @positive-click="emit('delete')">
+        <n-popconfirm
+            :negative-text="$t('common.cancel')"
+            :positive-text="$t('common.confirm')"
+            @positive-click="emit('delete')">
             <template #trigger>
                 <icon-button :icon="Delete" />
             </template>
-            {{ $t('remove_tip', { name: props.bindKey }) }}
+            {{ $t('dialogue.remove_tip', { name: props.bindKey }) }}
         </n-popconfirm>
     </div>
 </template>

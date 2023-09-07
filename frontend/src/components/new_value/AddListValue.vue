@@ -16,11 +16,11 @@ const i18n = useI18n()
 const insertOption = [
     {
         value: 0,
-        label: i18n.t('append_item'),
+        label: i18n.t('dialogue.field.append_item'),
     },
     {
         value: 1,
-        label: i18n.t('prepend_item'),
+        label: i18n.t('dialogue.field.prepend_item'),
     },
 ]
 
@@ -32,13 +32,13 @@ const onUpdate = (val) => {
 </script>
 
 <template>
-    <n-form-item :label="$t('type')">
+    <n-form-item :label="$t('interface.type')">
         <n-radio-group :value="props.type" @update:value="(val) => emit('update:type', val)">
             <n-radio-button v-for="(op, i) in insertOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>
     </n-form-item>
-    <n-form-item :label="$t('element')" required>
-        <n-dynamic-input v-model:value="list" :placeholder="$t('enter_elem')" @update:value="onUpdate">
+    <n-form-item :label="$t('dialogue.field.element')" required>
+        <n-dynamic-input v-model:value="list" :placeholder="$t('dialogue.field.enter_elem')" @update:value="onUpdate">
             <template #action="{ index, create, remove, move }">
                 <icon-button v-if="list.length > 1" :icon="Delete" size="18" @click="() => remove(index)" />
                 <icon-button :icon="Add" size="18" @click="() => create(index)" />

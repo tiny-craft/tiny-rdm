@@ -27,7 +27,7 @@ async function setupApp() {
         try {
             const content = err.toString()
             $notification.error({
-                title: i18n.global.t('error'),
+                title: i18n.global.t('common.error'),
                 content,
                 // meta: err.stack,
             })

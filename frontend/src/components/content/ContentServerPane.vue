@@ -8,13 +8,13 @@ const dialogStore = useDialogStore()
 <template>
     <div class="content-container flex-box-v">
         <!-- TODO: replace icon to app icon -->
-        <n-empty :description="$t('empty_server_content')">
+        <n-empty :description="$t('interface.empty_server_content')">
             <template #extra>
                 <n-button :focusable="false" @click="dialogStore.openNewDialog()">
                     <template #icon>
                         <n-icon :component="AddLink" size="18" />
                     </template>
-                    {{ $t('new_conn') }}
+                    {{ $t('interface.new_conn') }}
                 </n-button>
             </template>
         </n-empty>

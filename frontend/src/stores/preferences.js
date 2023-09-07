@@ -56,15 +56,15 @@ const usePreferencesStore = defineStore('preferences', {
             return [
                 {
                     value: 'light',
-                    label: i18nGlobal.t('theme_light'),
+                    label: i18nGlobal.t('preferences.general.theme_light'),
                 },
                 {
                     value: 'dark',
-                    label: i18nGlobal.t('theme_dark'),
+                    label: i18nGlobal.t('preferences.general.theme_dark'),
                 },
                 {
                     value: 'auto',
-                    label: i18nGlobal.t('theme_auto'),
+                    label: i18nGlobal.t('preferences.general.theme_auto'),
                 },
             ]
         },
@@ -80,7 +80,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             options.splice(0, 0, {
                 value: 'auto',
-                label: i18nGlobal.t('system_lang'),
+                label: i18nGlobal.t('preferences.general.system_lang'),
             })
             return options
         },
@@ -97,7 +97,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             option.splice(0, 0, {
                 value: '',
-                label: i18nGlobal.t('default'),
+                label: i18nGlobal.t('preferences.general.default'),
                 path: '',
             })
             return option
@@ -252,7 +252,7 @@ const usePreferencesStore = defineStore('preferences', {
                 if (success) {
                     const { version, latest, pageUrl } = data
                     if (latest > version) {
-                        $dialog.warning(i18nGlobal.t('new_version_tip'), () => {
+                        $dialog.warning(i18nGlobal.t('dialogue.upgrade.new_version_tip'), () => {
                             BrowserOpenURL(pageUrl)
                         })
                         return
@@ -260,7 +260,7 @@ const usePreferencesStore = defineStore('preferences', {
                 }
 
                 if (manual) {
-                    $message.info(i18nGlobal.t('no_update'))
+                    $message.info(i18nGlobal.t('dialogue.upgrade.no_update'))
                 }
             } finally {
                 if (msgRef != null) {
