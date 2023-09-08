@@ -11,8 +11,9 @@ import Edit from '@/components/icons/Edit.vue'
 import { IsJson } from '@/utils/check_string_format.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { toLower } from 'lodash'
+import { map, toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
+import { fromBase64, fromBase64Json, toBinary, toHex, toJsonText } from '@/utils/string_convert.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -28,52 +29,15 @@ const props = defineProps({
     value: String,
 })
 
-const viewOption = [
-    {
-        value: types.PLAIN_TEXT,
-        label: types.PLAIN_TEXT,
-    },
-    {
-        value: types.JSON,
-        label: types.JSON,
-    },
-    {
-        value: types.BASE64_TO_TEXT,
-        label: types.BASE64_TO_TEXT,
-    },
-    {
-        value: types.BASE64_TO_JSON,
-        label: types.BASE64_TO_JSON,
-    },
-]
+const viewOption = computed(() =>
+    map(types, (t) => {
+        return {
+            value: t,
+            label: t,
+        }
+    }),
+)
 const viewAs = ref(types.PLAIN_TEXT)
-
-const getJsonValue = () => {
-    try {
-        const jsonObj = JSON.parse(props.value)
-        return JSON.stringify(jsonObj, null, 2)
-    } catch (e) {
-        return props.value
-    }
-}
-
-const getBase64Value = () => {
-    try {
-        return atob(props.value)
-    } catch (e) {
-        return props.value
-    }
-}
-
-const getBase64JsonValue = () => {
-    try {
-        const text = atob(props.value)
-        const jsonObj = JSON.parse(text)
-        return JSON.stringify(jsonObj, null, 2)
-    } catch (e) {
-        return props.value
-    }
-}
 
 const autoDetectFormat = () => {
     // auto check format when loaded
@@ -104,11 +68,15 @@ const viewValue = computed(() => {
         case types.PLAIN_TEXT:
             return props.value
         case types.JSON:
-            return getJsonValue()
+            return toJsonText(props.value)
         case types.BASE64_TO_TEXT:
-            return getBase64Value()
+            return fromBase64(props.value)
         case types.BASE64_TO_JSON:
-            return getBase64JsonValue()
+            return fromBase64Json(props.value)
+        case types.HEX:
+            return toHex(props.value)
+        case types.BINARY:
+            return toBinary(props.value)
         default:
             return props.value
     }
@@ -116,9 +84,6 @@ const viewValue = computed(() => {
 
 const viewLanguage = computed(() => {
     switch (viewAs.value) {
-        case types.PLAIN_TEXT:
-        case types.BASE64_TO_TEXT:
-            return 'plaintext'
         case types.JSON:
         case types.BASE64_TO_JSON:
             return 'json'
