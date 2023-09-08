@@ -15,15 +15,15 @@
     "pinia": "^2.1.6",
     "sass": "^1.66.1",
     "vue": "^3.3.4",
-    "vue-i18n": "^9.2.2"
+    "vue-i18n": "^9.3.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.3.3",
+    "@vitejs/plugin-vue": "^4.3.4",
     "naive-ui": "^2.34.4",
-    "prettier": "^3.0.2",
+    "prettier": "^3.0.3",
     "unplugin-auto-import": "^0.16.6",
-    "unplugin-icons": "^0.16.6",
-    "unplugin-vue-components": "^0.25.1",
+    "unplugin-icons": "^0.17.0",
+    "unplugin-vue-components": "^0.25.2",
     "vite": "^4.4.9"
   }
 }
