@@ -4,7 +4,7 @@ import WindowMax from '@/components/icons/WindowMax.vue'
 import WindowClose from '@/components/icons/WindowClose.vue'
 import { computed } from 'vue'
 import { useThemeVars } from 'naive-ui'
-import { Quit, WindowMinimise, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
+import { Quit, WindowIsMaximised, WindowMinimise, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
 
 const themeVars = useThemeVars()
 const props = defineProps({
@@ -33,15 +33,30 @@ const handleClose = () => {
 
 <template>
     <n-space :wrap-item="false" align="center" justify="center" :size="0">
-        <div class="btn-wrapper" @click="handleMinimise">
-            <window-min />
-        </div>
-        <div class="btn-wrapper" @click="handleMaximise">
-            <window-max />
-        </div>
-        <div class="btn-wrapper" @click="handleClose">
-            <window-close />
-        </div>
+        <n-tooltip :show-arrow="false">
+            {{ $t('menu.minimise') }}
+            <template #trigger>
+                <div class="btn-wrapper" @click="handleMinimise">
+                    <window-min />
+                </div>
+            </template>
+        </n-tooltip>
+        <n-tooltip :show-arrow="false">
+            {{ WindowIsMaximised() ? $t('menu.restore') : $t('menu.maximise') }}
+            <template #trigger>
+                <div class="btn-wrapper" @click="handleMaximise">
+                    <window-max />
+                </div>
+            </template>
+        </n-tooltip>
+        <n-tooltip :show-arrow="false">
+            {{ $t('menu.close') }}
+            <template #trigger>
+                <div class="btn-wrapper" @click="handleClose">
+                    <window-close />
+                </div>
+            </template>
+        </n-tooltip>
     </n-space>
 </template>
 

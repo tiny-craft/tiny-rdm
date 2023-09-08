@@ -180,6 +180,10 @@
     }
   },
   "menu": {
+    "minimise": "Minimise",
+    "maximise": "Maximise",
+    "restore": "Restore Down",
+    "close": "Close",
     "preferences": "Preferences",
     "help": "Help",
     "check_update": "Check for Updates..."

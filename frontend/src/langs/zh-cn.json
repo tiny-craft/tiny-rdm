@@ -181,6 +181,10 @@
     }
   },
   "menu": {
+    "minimise": "最小化",
+    "maximise": "最大化",
+    "restore": "还原",
+    "close": "关闭",
     "preferences": "偏好设置",
     "help": "帮助",
     "check_update": "检查更新..."
