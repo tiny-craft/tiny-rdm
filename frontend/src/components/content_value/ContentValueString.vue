@@ -48,23 +48,42 @@ const viewOption = [
 ]
 const viewAs = ref(types.PLAIN_TEXT)
 
-const jsonValue = computed(() => {
+const getJsonValue = () => {
     try {
         const jsonObj = JSON.parse(props.value)
         return JSON.stringify(jsonObj, null, 2)
     } catch (e) {
         return props.value
     }
-})
+}
+
+const getBase64Value = () => {
+    try {
+        return atob(props.value)
+    } catch (e) {
+        return props.value
+    }
+}
+
+const getBase64JsonValue = () => {
+    try {
+        const text = atob(props.value)
+        const jsonObj = JSON.parse(text)
+        return JSON.stringify(jsonObj, null, 2)
+    } catch (e) {
+        return props.value
+    }
+}
 
 const autoDetectFormat = () => {
     // auto check format when loaded
-    if (IsJson(jsonValue.value)) {
+    if (IsJson(props.value)) {
         viewAs.value = types.JSON
     } else {
         viewAs.value = types.PLAIN_TEXT
     }
 }
+
 onMounted(() => {
     autoDetectFormat()
 })
@@ -85,11 +104,11 @@ const viewValue = computed(() => {
         case types.PLAIN_TEXT:
             return props.value
         case types.JSON:
-            return jsonValue.value
+            return getJsonValue()
         case types.BASE64_TO_TEXT:
-            return props.value
+            return getBase64Value()
         case types.BASE64_TO_JSON:
-            return props.value
+            return getBase64JsonValue()
         default:
             return props.value
     }
