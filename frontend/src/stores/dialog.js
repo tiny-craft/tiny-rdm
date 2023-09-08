@@ -1,9 +1,20 @@
 import { defineStore } from 'pinia'
 import useConnectionStore from './connections.js'
 
+/**
+ * connection dialog type
+ * @enum {number}
+ */
+export const ConnDialogType = {
+    NEW: 0,
+    EDIT: 1,
+}
+
 const useDialogStore = defineStore('dialog', {
     state: () => ({
         connDialogVisible: false,
+        /** @type {ConnDialogType} **/
+        connType: ConnDialogType.NEW,
         connParam: null,
 
         groupDialogVisible: false,
@@ -59,9 +70,10 @@ const useDialogStore = defineStore('dialog', {
     actions: {
         openNewDialog() {
             this.connParam = null
+            this.connType = ConnDialogType.NEW
             this.connDialogVisible = true
         },
-        closeNewDialog() {
+        closeConnDialog() {
             this.connDialogVisible = false
         },
 
@@ -69,10 +81,21 @@ const useDialogStore = defineStore('dialog', {
             const connStore = useConnectionStore()
             const profile = await connStore.getConnectionProfile(name)
             this.connParam = profile || connStore.newDefaultConnection(name)
+            this.connType = ConnDialogType.EDIT
             this.connDialogVisible = true
         },
-        closeEditDialog() {
-            this.connDialogVisible = false
+
+        async openDuplicateDialog(name) {
+            const connStore = useConnectionStore()
+            const profile = await connStore.getConnectionProfile(name)
+            if (profile != null) {
+                profile.name += '2'
+                this.connParam = profile
+            } else {
+                this.connParam = connStore.newDefaultConnection(name)
+            }
+            this.connType = ConnDialogType.NEW
+            this.connDialogVisible = true
         },
 
         openNewGroupDialog() {

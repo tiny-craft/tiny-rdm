@@ -74,14 +74,14 @@ const menuOptions = {
                     icon: renderIcon(Unlink),
                 },
                 {
-                    key: 'server_dup',
-                    label: i18n.t('interface.dup_conn'),
-                    icon: renderIcon(CopyLink),
-                },
-                {
                     key: 'server_edit',
                     label: i18n.t('interface.edit_conn'),
                     icon: renderIcon(Config),
+                },
+                {
+                    key: 'server_dup',
+                    label: i18n.t('interface.dup_conn'),
+                    icon: renderIcon(CopyLink),
                 },
                 {
                     type: 'divider',
@@ -104,6 +104,11 @@ const menuOptions = {
                     key: 'server_edit',
                     label: i18n.t('interface.edit_conn'),
                     icon: renderIcon(Config),
+                },
+                {
+                    key: 'server_dup',
+                    label: i18n.t('interface.dup_conn'),
+                    icon: renderIcon(CopyLink),
                 },
                 {
                     type: 'divider',
@@ -386,6 +391,9 @@ const handleSelectContextMenu = (key) => {
             } else {
                 dialogStore.openEditDialog(name)
             }
+            break
+        case 'server_dup':
+            dialogStore.openDuplicateDialog(name)
             break
         case 'server_remove':
             removeConnection(name)

@@ -1,3 +1,7 @@
+/**
+ * all redis type
+ * @enum {string}
+ */
 export const types = {
     STRING: 'STRING',
     HASH: 'HASH',
@@ -7,6 +11,10 @@ export const types = {
     STREAM: 'STREAM',
 }
 
+/**
+ * mark color for redis type
+ * @enum {string}
+ */
 export const typesColor = {
     [types.STRING]: '#8256DC',
     [types.HASH]: '#0171F5',
@@ -16,6 +24,10 @@ export const typesColor = {
     [types.STREAM]: '#F5C201',
 }
 
+/**
+ * background mark color for redis type
+ * @enum {string}
+ */
 export const typesBgColor = {
     [types.STRING]: '#F2EDFB',
     [types.HASH]: '#E4F0FC',

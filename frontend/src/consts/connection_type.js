@@ -1,3 +1,7 @@
+/**
+ * all types of connection item
+ * @enum {number}
+ */
 export const ConnectionType = {
     Group: 0,
     Server: 1,

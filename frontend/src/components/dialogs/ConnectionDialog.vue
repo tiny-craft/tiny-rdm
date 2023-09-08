@@ -3,7 +3,7 @@ import { every, get, includes, isEmpty, map } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TestConnection } from 'wailsjs/go/services/connectionService.js'
-import useDialog from 'stores/dialog'
+import useDialog, { ConnDialogType } from 'stores/dialog'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
 
@@ -36,7 +36,7 @@ const generalFormRules = () => {
         keySeparator: { required: true, message: requiredMsg, trigger: 'input' },
     }
 }
-const isEditMode = computed(() => !isEmpty(editName.value))
+const isEditMode = computed(() => dialogStore.connType === ConnDialogType.EDIT)
 const closingConnection = computed(() => {
     if (isEmpty(editName.value)) {
         return false
@@ -133,11 +133,7 @@ const onTestConnection = async () => {
 }
 
 const onClose = () => {
-    if (isEditMode.value) {
-        dialogStore.closeEditDialog()
-    } else {
-        dialogStore.closeNewDialog()
-    }
+    dialogStore.closeConnDialog()
 }
 </script>
 

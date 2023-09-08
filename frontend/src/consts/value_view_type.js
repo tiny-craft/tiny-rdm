@@ -1,3 +1,7 @@
+/**
+ * string view mode
+ * @enum {string}
+ */
 export const types = {
     PLAIN_TEXT: 'Plain Text',
     JSON: 'JSON',
