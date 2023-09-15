@@ -205,7 +205,7 @@
     "connected_clients": "Clients",
     "total_keys": "Keys",
     "memory_used": "Memory",
-    "all_info": "All Info",
+    "all_info": "Information",
     "refresh": "Refresh",
     "auto_refresh": "Auto Refresh"
   }
