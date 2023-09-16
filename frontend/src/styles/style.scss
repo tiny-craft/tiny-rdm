@@ -21,7 +21,8 @@ body {
   padding: 0;
   background-color: #0000;
   line-height: 1.5;
-  font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
+  font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --wails-draggable: drag;
 }
 
 #app {
@@ -117,4 +118,8 @@ body {
     min-height: 35px;
     //border-top: v-bind('themeVars.borderColor') 1px solid;
   }
+}
+
+.n-dialog {
+  --wails-draggable: drag;
 }

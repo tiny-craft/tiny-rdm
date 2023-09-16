@@ -81,7 +81,7 @@ watch(
     <n-spin
         :show="props.loading"
         :theme-overrides="{ opacitySpinning: 0 }"
-        style="--wails-draggable: drag; border-radius: 10px"
+        style="border-radius: 10px"
         :style="{ backgroundColor: themeVars.bodyColor }">
         <div
             id="app-content-wrapper"

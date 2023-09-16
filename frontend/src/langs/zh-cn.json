@@ -176,7 +176,7 @@
       "title": "设置键存活时间"
     },
     "upgrade":{
-      "new_version_tip": "有可用的新版本，是否立即下载",
+      "new_version_tip": "有可用的新版本（{ver}），是否立即下载",
       "no_update": "当前已是最新版"
     }
   },

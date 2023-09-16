@@ -250,9 +250,10 @@ const usePreferencesStore = defineStore('preferences', {
             try {
                 const { success, data = {} } = await CheckForUpdate()
                 if (success) {
-                    const { version, latest, pageUrl } = data
-                    if (latest > version) {
-                        $dialog.warning(i18nGlobal.t('dialogue.upgrade.new_version_tip'), () => {
+                    const { version = 'v1.0.0', latest, page_url: pageUrl } = data
+                    if (latest > version && !isEmpty(pageUrl)) {
+                        const tip = i18nGlobal.t('dialogue.upgrade.new_version_tip', { ver: version })
+                        $dialog.warning(tip, () => {
                             BrowserOpenURL(pageUrl)
                         })
                         return

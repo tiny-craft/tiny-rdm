@@ -2,5 +2,6 @@ build/bin
 node_modules
 frontend/dist
 frontend/wailsjs
+design/
 .vscode
 .idea

@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"github.com/adrg/sysfont"
-	"io"
 	"net/http"
 	"sort"
 	"strings"
@@ -87,7 +86,11 @@ func (p *preferencesService) GetFontList() (resp types.JSResp) {
 }
 
 func (p *preferencesService) SetClientVersion(ver string) {
-	p.clientVersion = ver
+	if !strings.HasPrefix(ver, "v") {
+		p.clientVersion = "v" + ver
+	} else {
+		p.clientVersion = ver
+	}
 }
 
 type latestRelease struct {
@@ -105,13 +108,8 @@ func (p *preferencesService) CheckForUpdate() (resp types.JSResp) {
 		return
 	}
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		resp.Msg = "invalid content"
-		return
-	}
 	var respObj latestRelease
-	err = json.Unmarshal(body, &respObj)
+	err = json.NewDecoder(res.Body).Decode(&respObj)
 	if err != nil {
 		resp.Msg = "invalid content"
 		return

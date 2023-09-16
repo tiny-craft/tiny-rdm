@@ -27,6 +27,7 @@ func main() {
 	app := NewApp()
 	connSvc := services.Connection()
 	prefSvc := services.Preferences()
+	prefSvc.SetClientVersion(version)
 
 	// menu
 	appMenu := menu.NewMenu()
