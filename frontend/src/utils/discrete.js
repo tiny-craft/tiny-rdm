@@ -1,5 +1,5 @@
 import usePreferencesStore from 'stores/preferences.js'
-import { createDiscreteApi, darkTheme } from 'naive-ui'
+import { createDiscreteApi, darkTheme, useDialog } from 'naive-ui'
 import { themeOverrides } from '@/utils/theme.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { computed } from 'vue'
@@ -28,6 +28,13 @@ function setupMessage(message) {
 
 function setupNotification(notification) {
     return {
+        /**
+         * @param {NotificationOption} option
+         * @return {NotificationReactive}
+         */
+        show(option) {
+            return notification.create(option)
+        },
         error: (content, option = {}) => {
             option.content = content
             option.title = option.title || i18nGlobal.t('common.error')
@@ -50,8 +57,23 @@ function setupNotification(notification) {
     }
 }
 
+/**
+ *
+ * @param {DialogApiInjection} dialog
+ * @return {*}
+ */
 function setupDialog(dialog) {
     return {
+        /**
+         * @param {DialogOptions} option
+         * @return {DialogReactive}
+         */
+        show(option) {
+            option.closable = option.closable === true
+            option.autoFocus = option.autoFocus === true
+            option.transformOrigin = 'center'
+            return dialog.create(option)
+        },
         warning: (content, onConfirm) => {
             return dialog.warning({
                 title: i18nGlobal.t('common.warning'),
@@ -86,7 +108,7 @@ export async function setupDiscreteApi() {
         },
         notificationProviderProps: {
             max: 5,
-            placement: 'top-right',
+            placement: 'bottom-right',
             keepAliveOnHover: true,
         },
     })

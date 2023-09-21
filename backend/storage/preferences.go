@@ -27,6 +27,8 @@ func (p *PreferencesStorage) DefaultPreferences() map[string]any {
 			"use_sys_proxy":      false,
 			"use_sys_proxy_http": false,
 			"check_update":       true,
+			"skip_version":       "",
+			"aside_width":        300,
 		},
 		"editor": map[string]any{
 			"font":      "",

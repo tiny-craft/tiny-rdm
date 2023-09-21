@@ -175,8 +175,12 @@
       "title": "Set Key TTL"
     },
     "upgrade": {
+      "title": "New Version Available",
       "new_version_tip": "A new version({ver}) is available. Download now?",
-      "no_update": "You're update to date"
+      "no_update": "You're update to date",
+      "download_now": "Download",
+      "later": "Later",
+      "skip": "Skip This Update"
     }
   },
   "menu": {

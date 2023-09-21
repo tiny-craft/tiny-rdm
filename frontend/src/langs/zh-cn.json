@@ -176,8 +176,12 @@
       "title": "设置键存活时间"
     },
     "upgrade":{
-      "new_version_tip": "有可用的新版本（{ver}），是否立即下载",
-      "no_update": "当前已是最新版"
+      "title": "有可用新版本",
+      "new_version_tip": "新版本（{ver}），是否立即下载",
+      "no_update": "当前已是最新版",
+      "download_now": "立即下载",
+      "later": "稍后提醒我",
+      "skip": "忽略本次更新"
     }
   },
   "menu": {

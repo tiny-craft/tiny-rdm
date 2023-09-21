@@ -10,7 +10,8 @@ import {
 } from 'wailsjs/go/services/preferencesService.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
-import { enUS, useOsTheme, zhCN } from 'naive-ui'
+import { enUS, NButton, NSpace, useOsTheme, zhCN } from 'naive-ui'
+import { h, nextTick } from 'vue'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -38,6 +39,7 @@ const usePreferencesStore = defineStore('preferences', {
             useSysProxy: false,
             useSysProxyHttp: false,
             checkUpdate: false,
+            skipVersion: '',
             asideWidth: 300,
         },
         editor: {
@@ -251,10 +253,49 @@ const usePreferencesStore = defineStore('preferences', {
                 const { success, data = {} } = await CheckForUpdate()
                 if (success) {
                     const { version = 'v1.0.0', latest, page_url: pageUrl } = data
-                    if (latest > version && !isEmpty(pageUrl)) {
-                        const tip = i18nGlobal.t('dialogue.upgrade.new_version_tip', { ver: version })
-                        $dialog.warning(tip, () => {
-                            BrowserOpenURL(pageUrl)
+                    if ((manual || latest > this.general.skipVersion) && latest > version && !isEmpty(pageUrl)) {
+                        const notiRef = $notification.show({
+                            title: i18nGlobal.t('dialogue.upgrade.title'),
+                            content: i18nGlobal.t('dialogue.upgrade.new_version_tip', { ver: latest }),
+                            action: () =>
+                                h('div', { class: 'flex-box-h flex-item-expand' }, [
+                                    h(NSpace, { wrapItem: false }, () => [
+                                        h(
+                                            NButton,
+                                            {
+                                                size: 'small',
+                                                secondary: true,
+                                                onClick: () => {
+                                                    // skip this update
+                                                    this.general.skipVersion = latest
+                                                    this.savePreferences()
+                                                    notiRef.destroy()
+                                                },
+                                            },
+                                            () => i18nGlobal.t('dialogue.upgrade.skip'),
+                                        ),
+                                        h(
+                                            NButton,
+                                            {
+                                                size: 'small',
+                                                secondary: true,
+                                                onClick: notiRef.destroy,
+                                            },
+                                            () => i18nGlobal.t('dialogue.upgrade.later'),
+                                        ),
+                                        h(
+                                            NButton,
+                                            {
+                                                type: 'primary',
+                                                size: 'small',
+                                                secondary: true,
+                                                onClick: () => BrowserOpenURL(pageUrl),
+                                            },
+                                            () => i18nGlobal.t('dialogue.upgrade.download_now'),
+                                        ),
+                                    ]),
+                                ]),
+                            onPositiveClick: () => BrowserOpenURL(pageUrl),
                         })
                         return
                     }
@@ -264,10 +305,12 @@ const usePreferencesStore = defineStore('preferences', {
                     $message.info(i18nGlobal.t('dialogue.upgrade.no_update'))
                 }
             } finally {
-                if (msgRef != null) {
-                    msgRef.destroy()
-                    msgRef = null
-                }
+                nextTick().then(() => {
+                    if (msgRef != null) {
+                        msgRef.destroy()
+                        msgRef = null
+                    }
+                })
             }
         },
     },
