@@ -182,6 +182,10 @@
       "download_now": "立即下载",
       "later": "稍后提醒我",
       "skip": "忽略本次更新"
+    },
+    "about": {
+      "source": "源码地址",
+      "website": "官方网站"
     }
   },
   "menu": {
@@ -191,7 +195,8 @@
     "close": "关闭",
     "preferences": "偏好设置",
     "help": "帮助",
-    "check_update": "检查更新..."
+    "check_update": "检查更新...",
+    "about": "关于"
   },
   "log": {
     "launch_log": "运行日志",

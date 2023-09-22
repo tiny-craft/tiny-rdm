@@ -181,6 +181,10 @@
       "download_now": "Download",
       "later": "Later",
       "skip": "Skip This Update"
+    },
+    "about": {
+      "source": "Source Code",
+      "website": "Official Website"
     }
   },
   "menu": {
@@ -190,7 +194,8 @@
     "close": "Close",
     "preferences": "Preferences",
     "help": "Help",
-    "check_update": "Check for Updates..."
+    "check_update": "Check for Updates...",
+    "about": "About"
   },
   "log": {
     "launch_log": "Launch Log",

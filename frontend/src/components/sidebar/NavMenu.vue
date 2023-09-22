@@ -73,6 +73,14 @@ const preferencesOptions = computed(() => {
             label: i18n.t('menu.check_update'),
             key: 'update',
         },
+        {
+            type: 'divider',
+            key: 'd1',
+        },
+        {
+            label: i18n.t('menu.about'),
+            key: 'about',
+        },
     ]
 })
 
@@ -89,6 +97,9 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'update':
             preferencesStore.checkForUpdate(true)
+            break
+        case 'about':
+            dialogStore.openAboutDialog()
             break
     }
 }

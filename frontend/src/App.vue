@@ -19,6 +19,7 @@ import { darkTheme } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 import { themeOverrides } from '@/utils/theme.js'
+import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
@@ -57,9 +58,9 @@ watch(
     <n-config-provider
         :hljs="hljs"
         :inline-theme-disabled="true"
+        :locale="prefStore.themeLocale"
         :theme="prefStore.isDark ? darkTheme : undefined"
         :theme-overrides="themeOverrides"
-        :locale="prefStore.themeLocale"
         class="fill-height">
         <n-dialog-provider>
             <app-content :loading="initializing" />
@@ -74,6 +75,7 @@ watch(
             <delete-key-dialog />
             <set-ttl-dialog />
             <preferences-dialog />
+            <about-dialog />
         </n-dialog-provider>
     </n-config-provider>
 </template>

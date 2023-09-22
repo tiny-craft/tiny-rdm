@@ -27,13 +27,14 @@ func main() {
 	app := NewApp()
 	connSvc := services.Connection()
 	prefSvc := services.Preferences()
-	prefSvc.SetClientVersion(version)
+	prefSvc.SetAppVersion(version)
 
 	// menu
 	appMenu := menu.NewMenu()
 	if runtime.GOOS == "darwin" {
 		appMenu.Append(menu.AppMenu())
 		appMenu.Append(menu.EditMenu())
+		appMenu.Append(menu.WindowMenu())
 	}
 
 	// Create application with options

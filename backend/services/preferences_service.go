@@ -85,12 +85,20 @@ func (p *preferencesService) GetFontList() (resp types.JSResp) {
 	return
 }
 
-func (p *preferencesService) SetClientVersion(ver string) {
+func (p *preferencesService) SetAppVersion(ver string) {
 	if !strings.HasPrefix(ver, "v") {
 		p.clientVersion = "v" + ver
 	} else {
 		p.clientVersion = ver
 	}
+}
+
+func (p *preferencesService) GetAppVersion() (resp types.JSResp) {
+	resp.Success = true
+	resp.Data = map[string]any{
+		"version": p.clientVersion,
+	}
+	return
 }
 
 type latestRelease struct {

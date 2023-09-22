@@ -13,7 +13,7 @@ import useConnectionStore from './stores/connections.js'
 import ContentLogPane from './components/content/ContentLogPane.vue'
 import ContentValueTab from '@/components/content/ContentValueTab.vue'
 import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
-import { WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
+import { WindowIsFullscreen, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
 import { isMacOS } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
 
@@ -81,8 +81,7 @@ watch(
     <n-spin
         :show="props.loading"
         :theme-overrides="{ opacitySpinning: 0 }"
-        style="border-radius: 10px"
-        :style="{ backgroundColor: themeVars.bodyColor }">
+        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: WindowIsFullscreen() ? '0' : '10px' }">
         <div
             id="app-content-wrapper"
             class="flex-box-v"
@@ -139,7 +138,7 @@ watch(
                 style="--wails-draggable: none"
                 class="flex-box-h flex-item-expand">
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
-                <!-- browser page-->
+                <!-- browser page -->
                 <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">
                     <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
                         <browser-pane

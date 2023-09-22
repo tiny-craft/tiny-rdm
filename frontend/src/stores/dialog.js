@@ -66,6 +66,7 @@ const useDialogStore = defineStore('dialog', {
         ttlDialogVisible: false,
 
         preferencesDialogVisible: false,
+        aboutDialogVisible: false,
     }),
     actions: {
         openNewDialog() {
@@ -210,6 +211,13 @@ const useDialogStore = defineStore('dialog', {
         },
         closePreferencesDialog() {
             this.preferencesDialogVisible = false
+        },
+
+        openAboutDialog() {
+            this.aboutDialogVisible = true
+        },
+        closeAboutDialog() {
+            this.aboutDialogVisible = false
         },
     },
 })
