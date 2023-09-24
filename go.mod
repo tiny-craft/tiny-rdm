@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/adrg/sysfont v0.1.2
-	github.com/redis/go-redis/v9 v9.1.0
+	github.com/redis/go-redis/v9 v9.2.0
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.6.0
 	gopkg.in/yaml.v3 v3.0.1

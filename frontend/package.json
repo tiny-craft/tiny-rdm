@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dayjs": "^1.11.9",
+    "dayjs": "^1.11.10",
     "highlight.js": "^11.8.0",
     "lodash": "^4.17.21",
     "pinia": "^2.1.6",
-    "sass": "^1.67.0",
+    "sass": "^1.68.0",
     "vue": "^3.3.4",
     "vue-i18n": "^9.4.1"
   },
