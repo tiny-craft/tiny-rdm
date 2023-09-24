@@ -74,6 +74,15 @@ watch(
         }
     },
 )
+
+const borderRadius = computed(() => {
+    if (isMacOS()) {
+        return WindowIsFullscreen().then((full) => {
+            return full ? '0' : '10px'
+        })
+    }
+    return '10px'
+})
 </script>
 
 <template>
@@ -81,7 +90,7 @@ watch(
     <n-spin
         :show="props.loading"
         :theme-overrides="{ opacitySpinning: 0 }"
-        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: WindowIsFullscreen() ? '0' : '10px' }">
+        :style="{ backgroundColor: themeVars.bodyColor, borderRadius }">
         <div
             id="app-content-wrapper"
             class="flex-box-v"
