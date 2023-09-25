@@ -22,7 +22,7 @@ body {
   background-color: #0000;
   line-height: 1.5;
   font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --wails-draggable: drag;
+  //--wails-draggable: drag;
 }
 
 #app {
@@ -120,6 +120,6 @@ body {
   }
 }
 
-.n-dialog {
+.n-modal-mask {
   --wails-draggable: drag;
 }

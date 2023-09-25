@@ -83,6 +83,13 @@ const borderRadius = computed(() => {
     }
     return '10px'
 })
+
+const border = computed(() => {
+    if (isMacOS()) {
+        return undefined
+    }
+    return `1px solid ${themeVars.value.borderColor}`
+})
 </script>
 
 <template>
@@ -90,7 +97,7 @@ const borderRadius = computed(() => {
     <n-spin
         :show="props.loading"
         :theme-overrides="{ opacitySpinning: 0 }"
-        :style="{ backgroundColor: themeVars.bodyColor, borderRadius }">
+        :style="{ backgroundColor: themeVars.bodyColor, borderRadius, border }">
         <div
             id="app-content-wrapper"
             class="flex-box-v"
@@ -196,8 +203,8 @@ const borderRadius = computed(() => {
 
 <style lang="scss" scoped>
 #app-content-wrapper {
-    width: 100vw;
-    height: 100vh;
+    width: calc(100vw - 2px);
+    height: calc(100vh - 2px);
     overflow: hidden;
     box-sizing: border-box;
     border-radius: 10px;
