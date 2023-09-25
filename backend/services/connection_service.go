@@ -183,14 +183,11 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	}
 
 	// get total databases
-	config, err := rdb.ConfigGet(ctx, "databases").Result()
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
-	totaldb, err := strconv.Atoi(config["database"])
-	if err != nil {
-		totaldb = 16
+	totaldb := 16
+	if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
+		if total, err := strconv.Atoi(config["databases"]); err == nil {
+			totaldb = total
+		}
 	}
 
 	// get database info
