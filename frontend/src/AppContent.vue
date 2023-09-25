@@ -85,10 +85,8 @@ const borderRadius = computed(() => {
 })
 
 const border = computed(() => {
-    if (isMacOS()) {
-        return undefined
-    }
-    return `1px solid ${themeVars.value.borderColor}`
+    const color = isMacOS() ? '#0000' : themeVars.value.borderColor
+    return `1px solid ${color}`
 })
 </script>
 
