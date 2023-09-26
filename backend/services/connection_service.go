@@ -527,6 +527,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 }
 
 // SetKeyValue set value by key
+// @param ttl <= 0 means keep current ttl
 func (c *connectionService) SetKeyValue(connName string, db int, key, keyType string, value any, ttl int64) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
@@ -536,7 +537,9 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 
 	var expiration time.Duration
 	if ttl < 0 {
-		expiration = redis.KeepTTL
+		if expiration, err = rdb.PTTL(ctx, key).Result(); err != nil {
+			expiration = redis.KeepTTL
+		}
 	} else {
 		expiration = time.Duration(ttl) * time.Second
 	}
@@ -546,7 +549,11 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid string value"
 			return
 		} else {
-			_, err = rdb.Set(ctx, key, str, expiration).Result()
+			_, err = rdb.Set(ctx, key, str, 0).Result()
+			// set expiration lonely, not "keepttl"
+			if err == nil && expiration > 0 {
+				rdb.Expire(ctx, key, expiration)
+			}
 		}
 	case "list":
 		if strs, ok := value.([]any); !ok {

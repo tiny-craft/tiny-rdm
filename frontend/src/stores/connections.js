@@ -533,8 +533,8 @@ const useConnectionStore = defineStore('connections', {
                         })
                         return
                     } else {
-                        // key not exists, remove this key
-                        await this.deleteKey(server, db, key)
+                        // its danger to delete "non-exists" key, just remove from tree view
+                        await this.deleteKey(server, db, key, true)
                     }
                 }
 
@@ -1327,21 +1327,23 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} connName
          * @param {number} db
          * @param {string} key
+         * @param {boolean} [soft] do not try to remove from redis if true, just remove from tree data
          * @returns {Promise<boolean>}
          */
-        async deleteKey(connName, db, key) {
+        async deleteKey(connName, db, key, soft) {
             try {
-                const { data, success, msg } = await DeleteKey(connName, db, key)
-                if (success) {
-                    // update tree view data
-                    this._deleteKeyNode(connName, db, key)
-                    this._tidyNode(connName, db, key, true)
-
-                    // set tab content empty
-                    const tab = useTabStore()
-                    tab.emptyTab(connName)
-                    return true
+                if (soft !== true) {
+                    await DeleteKey(connName, db, key)
                 }
+
+                // update tree view data
+                this._deleteKeyNode(connName, db, key)
+                this._tidyNode(connName, db, key, true)
+
+                // set tab content empty
+                const tab = useTabStore()
+                tab.emptyTab(connName)
+                return true
             } finally {
             }
             return false
