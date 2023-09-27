@@ -5,6 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.org/x/crypto/ssh"
+	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -68,12 +72,69 @@ func (c *connectionService) Stop(ctx context.Context) {
 	c.connMap = map[string]connectionItem{}
 }
 
-func (c *connectionService) TestConnection(host string, port int, username, password string) (resp types.JSResp) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Username: username,
-		Password: password,
-	})
+func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*redis.Client, error) {
+	var sshClient *ssh.Client
+	if config.SSH.Enable {
+		sshConfig := &ssh.ClientConfig{
+			User:            config.SSH.Username,
+			Auth:            []ssh.AuthMethod{ssh.Password(config.SSH.Password)},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         time.Duration(config.ConnTimeout) * time.Second,
+		}
+		switch config.SSH.LoginType {
+		case "pwd":
+			sshConfig.Auth = []ssh.AuthMethod{ssh.Password(config.SSH.Password)}
+		case "pkfile":
+			key, err := os.ReadFile(config.SSH.PKFile)
+			if err != nil {
+				return nil, err
+			}
+			var signer ssh.Signer
+			if len(config.SSH.Passphrase) > 0 {
+				signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(config.SSH.Passphrase))
+			} else {
+				signer, err = ssh.ParsePrivateKey(key)
+			}
+			if err != nil {
+				return nil, err
+			}
+			sshConfig.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		default:
+			return nil, errors.New("invalid login type")
+		}
+
+		var err error
+		sshClient, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", config.SSH.Addr, config.SSH.Port), sshConfig)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	option := &redis.Options{
+		Addr:         fmt.Sprintf("%s:%d", config.Addr, config.Port),
+		Username:     config.Username,
+		Password:     config.Password,
+		DialTimeout:  time.Duration(config.ConnTimeout) * time.Second,
+		ReadTimeout:  time.Duration(config.ExecTimeout) * time.Second,
+		WriteTimeout: time.Duration(config.ExecTimeout) * time.Second,
+	}
+	if sshClient != nil {
+		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return sshClient.Dial(network, addr)
+		}
+		option.ReadTimeout = -2
+		option.WriteTimeout = -2
+	}
+	rdb := redis.NewClient(option)
+	return rdb, nil
+}
+
+func (c *connectionService) TestConnection(config types.ConnectionConfig) (resp types.JSResp) {
+	rdb, err := c.createRedisClient(config)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
 	defer rdb.Close()
 	if _, err := rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 		resp.Msg = err.Error()
@@ -138,6 +199,23 @@ func (c *connectionService) SaveSortedConnection(sortedConns types.Connections) 
 		return
 	}
 	resp.Success = true
+	return
+}
+
+// SelectKeyFile open file dialog to select a private key file
+func (c *connectionService) SelectKeyFile(title string) (resp types.JSResp) {
+	filepath, err := runtime.OpenFileDialog(c.ctx, runtime.OpenDialogOptions{
+		Title:           title,
+		ShowHiddenFiles: true,
+	})
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	resp.Data = map[string]any{
+		"path": filepath,
+	}
 	return
 }
 
@@ -252,14 +330,11 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 			return nil, nil, fmt.Errorf("no match connection \"%s\"", connName)
 		}
 
-		rdb = redis.NewClient(&redis.Options{
-			Addr:         fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
-			Username:     selConn.Username,
-			Password:     selConn.Password,
-			DialTimeout:  time.Duration(selConn.ConnTimeout) * time.Second,
-			ReadTimeout:  time.Duration(selConn.ExecTimeout) * time.Second,
-			WriteTimeout: time.Duration(selConn.ExecTimeout) * time.Second,
-		})
+		var err error
+		rdb, err = c.createRedisClient(selConn.ConnectionConfig)
+		if err != nil {
+			return nil, nil, fmt.Errorf("create conenction error: %s", err.Error())
+		}
 		rdb.AddHook(redis2.NewHook(connName, func(cmd string, cost int64) {
 			now := time.Now()
 			//last := strings.LastIndex(cmd, ":")

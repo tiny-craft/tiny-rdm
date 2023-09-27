@@ -48,6 +48,7 @@
     "status": "Status",
     "filter": "Filter",
     "sort_conn": "Sort Connections",
+    "new_conn_title": "New Connection",
     "open_db": "Open Database",
     "close_db": "Close Database",
     "filter_key": "Filter Key",
@@ -131,7 +132,17 @@
       "advn_separator_tip": "Separator used for key path item",
       "advn_conn_timeout": "Connection Timeout",
       "advn_exec_timeout": "Execution Timeout",
-      "advn_mark_color": "Mark Color"
+      "advn_mark_color": "Mark Color",
+      "ssh_enable": "Enable SSH Tuntel",
+      "ssh_tunnel": "SSH Tunnel",
+      "login_type": "Login Type",
+      "pkfile": "Private Key File",
+      "passphrase": "Passphrase",
+      "ssh_usr_tip": "SSH Username",
+      "ssh_pwd_tip": "SSH Password",
+      "pkfile_tip": "SSH Private Key File Path",
+      "passphrase_tip": "(Optional) Passphrase for Private Key",
+      "pkfile_selection_title": "Please Select Private Key File"
     },
     "group": {
       "name": "Group Name",

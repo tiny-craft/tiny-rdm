@@ -76,16 +76,17 @@ watch(
 )
 
 const borderRadius = computed(() => {
-    if (isMacOS()) {
-        return WindowIsFullscreen().then((full) => {
-            return full ? '0' : '10px'
-        })
-    }
+    // FIXME: cannot get full screen status sync?
+    // if (isMacOS()) {
+    //     return WindowIsFullscreen().then((full) => {
+    //         return full ? '0' : '10px'
+    //     })
+    // }
     return '10px'
 })
 
 const border = computed(() => {
-    const color = isMacOS() ? '#0000' : themeVars.value.borderColor
+    const color = isMacOS() && false ? '#0000' : themeVars.value.borderColor
     return `1px solid ${color}`
 })
 </script>

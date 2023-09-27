@@ -2,7 +2,7 @@
 import { every, get, includes, isEmpty, map } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TestConnection } from 'wailsjs/go/services/connectionService.js'
+import { SelectKeyFile, TestConnection } from 'wailsjs/go/services/connectionService.js'
 import useDialog, { ConnDialogType } from 'stores/dialog'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
@@ -56,6 +56,19 @@ const groupOptions = computed(() => {
     return options
 })
 
+const sshLoginType = computed(() => {
+    return get(generalForm.value, 'ssh.loginType', 'pwd')
+})
+
+const onChoosePKFile = async () => {
+    const { success, data } = await SelectKeyFile(i18n.t('dialogue.connection.pkfile_selection_title'))
+    if (!success) {
+        generalForm.value.ssh.pkFile = ''
+    } else {
+        generalForm.value.ssh.pkFile = get(data, 'path', '')
+    }
+}
+
 const tab = ref('general')
 const testing = ref(false)
 const showTestResult = ref(false)
@@ -78,6 +91,23 @@ const onSaveConnection = async () => {
             nextTick(() => (tab.value = 'advanced'))
         }
     })
+
+    // trim ssh login data
+    if (generalForm.value.ssh.enable) {
+        switch (generalForm.value.ssh.loginType) {
+            case 'pkfile':
+                generalForm.value.ssh.password = ''
+                break
+            default:
+                generalForm.value.ssh.pkFile = ''
+                generalForm.value.ssh.passphrase = ''
+                break
+        }
+    } else {
+        // ssh disabled, reset to default value
+        const { ssh } = connectionStore.newDefaultConnection()
+        generalForm.value.ssh = ssh
+    }
 
     // store new connection
     const { success, msg } = await connectionStore.saveConnection(
@@ -107,6 +137,7 @@ watch(
         if (visible) {
             editName.value = get(dialogStore.connParam, 'name', '')
             generalForm.value = dialogStore.connParam || connectionStore.newDefaultConnection()
+            generalForm.value.ssh.loginType = generalForm.value.ssh.loginType || 'pwd'
         }
     },
 )
@@ -116,8 +147,7 @@ const onTestConnection = async () => {
     testing.value = true
     let result = ''
     try {
-        const { addr, port, username, password } = generalForm.value
-        const { success = false, msg } = await TestConnection(addr, port, username, password)
+        const { success = false, msg } = await TestConnection(generalForm.value)
         if (!success) {
             result = msg
         }
@@ -187,7 +217,9 @@ const onClose = () => {
                                 type="password" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.usr')" path="username">
-                            <n-input v-model="generalForm.username" :placeholder="$t('dialogue.connection.usr_tip')" />
+                            <n-input
+                                v-model:value="generalForm.username"
+                                :placeholder="$t('dialogue.connection.usr_tip')" />
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
@@ -238,13 +270,80 @@ const onClose = () => {
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
+
+                <n-tab-pane :tab="$t('dialogue.connection.ssh_tunnel')" display-directive="show" name="ssh">
+                    <n-form-item label-placement="left">
+                        <n-checkbox v-model:checked="generalForm.ssh.enable" size="medium">
+                            {{ $t('dialogue.connection.ssh_enable') }}
+                        </n-checkbox>
+                    </n-form-item>
+                    <n-form
+                        ref="sshFormRef"
+                        :model="generalForm.ssh"
+                        :show-require-mark="false"
+                        :disabled="!generalForm.ssh.enable"
+                        label-placement="top">
+                        <n-form-item :label="$t('dialogue.connection.addr')" required>
+                            <n-input
+                                v-model:value="generalForm.ssh.addr"
+                                :placeholder="$t('dialogue.connection.addr_tip')" />
+                            <n-text style="width: 40px; text-align: center">:</n-text>
+                            <n-input-number
+                                v-model:value="generalForm.ssh.port"
+                                :max="65535"
+                                :min="1"
+                                style="width: 200px" />
+                        </n-form-item>
+                        <n-form-item :label="$t('dialogue.connection.login_type')">
+                            <n-radio-group v-model:value="generalForm.ssh.loginType">
+                                <n-radio-button :label="$t('dialogue.connection.pwd')" value="pwd" />
+                                <n-radio-button :label="$t('dialogue.connection.pkfile')" value="pkfile" />
+                            </n-radio-group>
+                        </n-form-item>
+                        <n-form-item
+                            v-if="sshLoginType === 'pwd' || sshLoginType === 'pkfile'"
+                            :label="$t('dialogue.connection.usr')">
+                            <n-input
+                                v-model:value="generalForm.ssh.username"
+                                :placeholder="$t('dialogue.connection.ssh_usr_tip')" />
+                        </n-form-item>
+                        <n-form-item v-if="sshLoginType === 'pwd'" :label="$t('dialogue.connection.pwd')">
+                            <n-input
+                                v-model:value="generalForm.ssh.password"
+                                :placeholder="$t('dialogue.connection.ssh_pwd_tip')"
+                                show-password-on="click"
+                                type="password" />
+                        </n-form-item>
+                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.pkfile')">
+                            <n-input-group>
+                                <n-input
+                                    v-model:value="generalForm.ssh.pkFile"
+                                    :placeholder="$t('dialogue.connection.pkfile_tip')" />
+                                <n-button :focusable="false" @click="onChoosePKFile">...</n-button>
+                            </n-input-group>
+                        </n-form-item>
+                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.passphrase')">
+                            <n-input
+                                v-model:value="generalForm.ssh.passphrase"
+                                :placeholder="$t('dialogue.connection.passphrase_tip')"
+                                show-password-on="click"
+                                type="password" />
+                        </n-form-item>
+                    </n-form>
+                </n-tab-pane>
+
+                <!-- TODO: SSL tab pane -->
+                <!-- TODO: Sentinel tab pane -->
+                <!-- TODO: Cluster tab pane -->
             </n-tabs>
 
             <!-- test result alert-->
             <n-alert
                 v-if="showTestResult"
                 :title="isEmpty(testResult) ? '' : $t('dialogue.connection.test_fail')"
-                :type="isEmpty(testResult) ? 'success' : 'error'">
+                :type="isEmpty(testResult) ? 'success' : 'error'"
+                closable
+                :on-close="() => (showTestResult = false)">
                 <template v-if="isEmpty(testResult)">{{ $t('dialogue.connection.test_succ') }}</template>
                 <template v-else>{{ testResult }}</template>
             </n-alert>

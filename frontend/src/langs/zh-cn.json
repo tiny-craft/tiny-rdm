@@ -132,7 +132,17 @@
       "advn_separator_tip": "键名路径分隔符",
       "advn_conn_timeout": "连接超时",
       "advn_exec_timeout": "执行超时",
-      "advn_mark_color": "标记颜色"
+      "advn_mark_color": "标记颜色",
+      "ssh_enable": "启用SSH隧道",
+      "ssh_tunnel": "SSH隧道",
+      "login_type": "登录类型",
+      "pkfile": "私钥文件",
+      "passphrase": "私钥密码",
+      "ssh_usr_tip": "SSH登录用户名",
+      "ssh_pwd_tip": "SSH登录密码",
+      "pkfile_tip": "SSH私钥文件路径",
+      "passphrase_tip": "(可选)SSH私钥密码",
+      "pkfile_selection_title": "请选择私钥文件"
     },
     "group": {
       "name": "分组名",

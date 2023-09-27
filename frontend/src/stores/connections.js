@@ -209,6 +209,16 @@ const useConnectionStore = defineStore('connections', {
                 connTimeout: 60,
                 execTimeout: 60,
                 markColor: '',
+                ssh: {
+                    enable: false,
+                    addr: '',
+                    port: 22,
+                    loginType: 'pwd',
+                    username: '',
+                    password: '',
+                    pkFile: '',
+                    passphrase: '',
+                },
             }
         },
 
