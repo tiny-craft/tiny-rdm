@@ -4,5 +4,5 @@ Section: base
 Priority: optional
 Architecture: amd64
 Maintainer: {{.Author.Name}} <{{.Author.Email}}>
-Homepage: https://github.com/tiny-craft/tiny-rdm
+Homepage: https://redis.tinycraft.cc/
 Description: {{.Info.Comments}}

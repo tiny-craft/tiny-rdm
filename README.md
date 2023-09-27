@@ -29,7 +29,7 @@
 We publish binaries for Mac, Windows, and Linux.
 Available to download for free from [here](https://github.com/tiny-craft/tiny-rdm/releases).
 
-> If you can't open it after installation, exec the following command then reopen:
+> If you can't open it after installation on macOS, exec the following command then reopen:
 > ``` shell
 >  sudo xattr -d com.apple.quarantine /Applications/Tiny\ RDM.app
 > ```
