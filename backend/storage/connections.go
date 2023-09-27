@@ -35,6 +35,14 @@ func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 		ConnTimeout:   60,
 		ExecTimeout:   60,
 		MarkColor:     "",
+		SafeLink:      1,
+		SshAddr:       "",
+		SshPort:       22,
+		SshUser:       "",
+		SshAuth:       1,
+		SshKeyPath:    "",
+		SshKeyPwd:     "",
+		SshPassword:   "",
 	}
 }
 

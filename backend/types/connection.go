@@ -14,6 +14,14 @@ type ConnectionConfig struct {
 	ConnTimeout   int    `json:"connTimeout,omitempty" yaml:"conn_timeout,omitempty"`
 	ExecTimeout   int    `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
 	MarkColor     string `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
+	SafeLink      int    `json:"safeLink,omitempty" yaml:"safe_link,omitempty"`
+	SshAddr       string `json:"sshAddr,omitempty" yaml:"ssh_addr,omitempty"`
+	SshPort       int    `json:"sshPort,omitempty" yaml:"ssh_port,omitempty"`
+	SshUser       string `json:"sshUser,omitempty" yaml:"ssh_user,omitempty"`
+	SshAuth       int    `json:"sshAuth,omitempty" yaml:"ssh_auth,omitempty"`
+	SshKeyPath    string `json:"sshKeyPath,omitempty" yaml:"ssh_key_path,omitempty"`
+	SshKeyPwd     string `json:"sshKeyPwd,omitempty" yaml:"ssh_key_pwd,omitempty"`
+	SshPassword   string `json:"sshPassword,omitempty" yaml:"ssh_password,omitempty"`
 }
 
 type Connection struct {

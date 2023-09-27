@@ -2,9 +2,12 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/crypto/ssh"
+	"net"
 	"strconv"
 	"strings"
 	"sync"
@@ -68,12 +71,38 @@ func (c *connectionService) Stop(ctx context.Context) {
 	c.connMap = map[string]connectionItem{}
 }
 
-func (c *connectionService) TestConnection(host string, port int, username, password string) (resp types.JSResp) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Username: username,
-		Password: password,
-	})
+func (c *connectionService) TestConnection(optJson string) (resp types.JSResp) {
+	var opt types.ConnectionConfig
+	_ = json.Unmarshal([]byte(optJson), &opt)
+
+	var rdb *redis.Client
+	if opt.SafeLink == 2 {
+		sshClient, err := c.getSshClient(&types.Connection{
+			ConnectionConfig: opt,
+		})
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+
+		rdb = redis.NewClient(&redis.Options{
+			Addr: fmt.Sprintf("%s:%d", opt.Addr, opt.Port),
+			Dialer: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return sshClient.Dial(network, addr)
+			},
+			Username:     opt.Username,
+			Password:     opt.Password,
+			ReadTimeout:  -2,
+			WriteTimeout: -2,
+		})
+	} else {
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     fmt.Sprintf("%s:%d", opt.Addr, opt.Port),
+			Username: opt.Username,
+			Password: opt.Password,
+		})
+	}
+
 	defer rdb.Close()
 	if _, err := rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 		resp.Msg = err.Error()
@@ -238,6 +267,38 @@ func (c *connectionService) CloseConnection(name string) (resp types.JSResp) {
 	return
 }
 
+func (c *connectionService) getSshClient(selConn *types.Connection) (*ssh.Client, error) {
+	var authMethod ssh.AuthMethod
+
+	if selConn.SshAuth == 2 {
+		content := []byte(selConn.SshKeyPath)
+		if len(selConn.SshKeyPwd) <= 0 {
+			signer, err := ssh.ParsePrivateKey(content)
+			if err != nil {
+				return nil, err
+			}
+			authMethod = ssh.PublicKeys(signer)
+		} else {
+			signer, err := ssh.ParsePrivateKeyWithPassphrase(content, []byte(selConn.SshKeyPwd))
+			if err != nil {
+				return nil, err
+			}
+			authMethod = ssh.PublicKeys(signer)
+		}
+	} else {
+		authMethod = ssh.Password(selConn.SshPassword)
+	}
+
+	sshConfig := &ssh.ClientConfig{
+		User:            selConn.SshUser,
+		Auth:            []ssh.AuthMethod{authMethod},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         15 * time.Second,
+	}
+
+	return ssh.Dial("tcp", selConn.SshAddr+":"+strconv.Itoa(selConn.SshPort), sshConfig)
+}
+
 // get redis client from local cache or create a new open
 // if db >= 0, will also switch to db index
 func (c *connectionService) getRedisClient(connName string, db int) (*redis.Client, context.Context, error) {
@@ -252,14 +313,33 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 			return nil, nil, fmt.Errorf("no match connection \"%s\"", connName)
 		}
 
-		rdb = redis.NewClient(&redis.Options{
-			Addr:         fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
-			Username:     selConn.Username,
-			Password:     selConn.Password,
-			DialTimeout:  time.Duration(selConn.ConnTimeout) * time.Second,
-			ReadTimeout:  time.Duration(selConn.ExecTimeout) * time.Second,
-			WriteTimeout: time.Duration(selConn.ExecTimeout) * time.Second,
-		})
+		if selConn.SafeLink == 2 {
+			sshClient, err := c.getSshClient(selConn)
+			if err != nil {
+				return nil, nil, errors.New("can not connect to redis server:" + err.Error())
+			}
+
+			rdb = redis.NewClient(&redis.Options{
+				Addr: fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
+				Dialer: func(ctx context.Context, network, addr string) (net.Conn, error) {
+					return sshClient.Dial(network, addr)
+				},
+				Username:     selConn.Username,
+				Password:     selConn.Password,
+				ReadTimeout:  -2,
+				WriteTimeout: -2,
+			})
+		} else {
+			rdb = redis.NewClient(&redis.Options{
+				Addr:         fmt.Sprintf("%s:%d", selConn.Addr, selConn.Port),
+				Username:     selConn.Username,
+				Password:     selConn.Password,
+				DialTimeout:  time.Duration(selConn.ConnTimeout) * time.Second,
+				ReadTimeout:  time.Duration(selConn.ExecTimeout) * time.Second,
+				WriteTimeout: time.Duration(selConn.ExecTimeout) * time.Second,
+			})
+		}
+
 		rdb.AddHook(redis2.NewHook(connName, func(cmd string, cost int64) {
 			now := time.Now()
 			//last := strings.LastIndex(cmd, ":")

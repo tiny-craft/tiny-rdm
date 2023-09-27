@@ -112,6 +112,7 @@
       "new_title": "新建连接",
       "edit_title": "编辑连接",
       "general": "常规配置",
+      "safe": "安全链接",
       "advanced": "高级配置",
       "no_group": "无分组",
       "group": "分组",
@@ -132,7 +133,18 @@
       "advn_separator_tip": "键名路径分隔符",
       "advn_conn_timeout": "连接超时",
       "advn_exec_timeout": "执行超时",
-      "advn_mark_color": "标记颜色"
+      "advn_mark_color": "标记颜色",
+      "safe_link": "链接方式",
+      "ssh_auth": "授权方式",
+      "ssh_tunnel": "SSH隧道",
+      "ssh_user": "SSH用户",
+      "ssh_user_tip": "SSH用户名",
+      "ssh_addr_tip": "SSH远程服务器",
+      "ssh_key_path": "私钥",
+      "ssh_key_pwd": "密钥",
+      "ssh_key_pwd_tip": "提供的私钥密码",
+      "choose_file": "选择文件",
+      "choose_file_tip": "请选择秘钥文件"
     },
     "group": {
       "name": "分组名",

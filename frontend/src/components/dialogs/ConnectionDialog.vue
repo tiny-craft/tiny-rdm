@@ -62,7 +62,9 @@ const showTestResult = ref(false)
 const testResult = ref('')
 const predefineColors = ref(['', '#F75B52', '#F7A234', '#F7CE33', '#4ECF60', '#348CF7', '#B270D3'])
 const generalFormRef = ref(null)
+const safeFormRef = ref(null)
 const advanceFormRef = ref(null)
+const fileRef = ref(null)
 
 const onSaveConnection = async () => {
     // validate general form
@@ -98,6 +100,21 @@ const resetForm = () => {
     tab.value = 'general'
 }
 
+const choose_file = () => {
+  //弹出选择本地文件
+  fileRef.value.click()
+}
+const fileChange = (e) => {
+  const file = e.target.files ? e.target.files[0] : null
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      generalForm.value.sshKeyPath = event.target.result
+    };
+    reader.readAsText(e.target.files[0]);
+  }
+}
+
 watch(
     () => dialogStore.connDialogVisible,
     (visible) => {
@@ -113,8 +130,8 @@ const onTestConnection = async () => {
     testing.value = true
     let result = ''
     try {
-        const { addr, port, username, password } = generalForm.value
-        const { success = false, msg } = await TestConnection(addr, port, username, password)
+        const opt = JSON.stringify(generalForm.value)
+        const { success = false, msg } = await TestConnection(opt)
         if (!success) {
             result = msg
         }
@@ -139,6 +156,7 @@ const onClose = () => {
 
 <template>
     <n-modal
+        style="width:580px"
         v-model:show="dialogStore.connDialogVisible"
         :closable="false"
         :close-on-esc="false"
@@ -176,7 +194,7 @@ const onClose = () => {
                                 :min="1"
                                 style="width: 200px" />
                         </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.pwd')" path="password">
+                        <n-form-item :label="$t('dialogue.connection.pwd')" path="password" required>
                             <n-input
                                 v-model:value="generalForm.password"
                                 :placeholder="$t('dialogue.connection.pwd_tip')"
@@ -187,6 +205,90 @@ const onClose = () => {
                             <n-input v-model="generalForm.username" :placeholder="$t('dialogue.connection.usr_tip')" />
                         </n-form-item>
                     </n-form>
+                </n-tab-pane>
+
+                <n-tab-pane :tab="$t('dialogue.connection.safe')" display-directive="show" name="safe">
+                  <n-form
+                      ref="safeFormRef"
+                      :model="generalForm"
+                      :rules="generalFormRules()"
+                      :show-require-mark="false"
+                      label-placement="top">
+                    <n-form-item :label="$t('dialogue.connection.safe_link')" path="safeLink" required>
+                      <n-radio-group v-model:value="generalForm.safeLink" name="safeLink">
+                        <n-space>
+                          <n-radio :value="1" name="no">
+                            地址直连
+                          </n-radio>
+                          <n-radio :value="2" name="ssh">
+                            SSH隧道
+                          </n-radio>
+                        </n-space>
+                      </n-radio-group>
+                    </n-form-item>
+                    <n-collapse-transition :show="generalForm.safeLink === 2">
+                      <n-form-item :label="$t('dialogue.connection.ssh_user')" path="ssh_user">
+                        <n-input v-model:value="generalForm.sshUser" :placeholder="$t('dialogue.connection.ssh_user_tip')" />
+                      </n-form-item>
+                      <n-form-item :label="$t('dialogue.connection.addr')" path="ssh_addr" required>
+                        <n-input
+                            v-model:value="generalForm.sshAddr"
+                            :placeholder="$t('dialogue.connection.ssh_addr_tip')" />
+                        <n-text style="width: 40px; text-align: center">:</n-text>
+                        <n-input-number
+                            v-model:value="generalForm.sshPort"
+                            :max="65535"
+                            :min="1"
+                            style="width: 200px" />
+                      </n-form-item>
+                      <n-form-item :label="$t('dialogue.connection.ssh_auth')" path="ssh_auth" required>
+                        <n-radio-group v-model:value="generalForm.sshAuth" name="sshAuth">
+                          <n-space>
+                            <n-radio :value="1" name="pwd">
+                              密码
+                            </n-radio>
+                            <n-radio :value="2" name="key_file">
+                              秘钥
+                            </n-radio>
+                          </n-space>
+                        </n-radio-group>
+                      </n-form-item>
+                      <n-collapse-transition :show="generalForm.sshAuth === 1">
+                        <n-form-item :label="$t('dialogue.connection.pwd')" path="ssh_password">
+                          <n-input
+                              v-model:value="generalForm.sshPassword"
+                              show-password-on="click"
+                              type="password" />
+                        </n-form-item>
+                      </n-collapse-transition>
+                      <n-collapse-transition :show="generalForm.sshAuth === 2">
+                        <n-form-item :label="$t('dialogue.connection.ssh_key_path')" path="ssh_key_path">
+                          <input ref="fileRef" v-show="false" type="file" @change="fileChange($event)" />
+                          <n-button type="primary" ghost @click="choose_file">
+                            {{ $t('dialogue.connection.choose_file') }}
+                          </n-button>
+                        </n-form-item>
+                        <n-form-item style="margin-top: -30px">
+                          <n-input
+                              type="textarea"
+                              size="small"
+                              :placeholder="generalForm.sshKeyPath"
+                              disabled
+                              round
+                              :rows="6"
+                          />
+                        </n-form-item>
+                        <n-form-item :label="$t('dialogue.connection.ssh_key_pwd')" path="ssh_key_pwd">
+                          <n-input
+                              v-model:value="generalForm.sshKeyPwd"
+                              show-password-on="click"
+                              type="password"
+                              :placeholder="$t('dialogue.connection.ssh_key_pwd_tip')"
+                          />
+                        </n-form-item>
+                      </n-collapse-transition>
+                    </n-collapse-transition>
+                  </n-form>
                 </n-tab-pane>
 
                 <n-tab-pane :tab="$t('dialogue.connection.advanced')" display-directive="show" name="advanced">

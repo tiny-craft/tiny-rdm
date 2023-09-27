@@ -209,6 +209,14 @@ const useConnectionStore = defineStore('connections', {
                 connTimeout: 60,
                 execTimeout: 60,
                 markColor: '',
+                safeLink: 1,
+                sshAddr: '',
+                sshPort: 22,
+                sshUser: '',
+                sshAuth: 1,
+                sshKeyPath: '',
+                sshKeyPwd: '',
+                sshPassword: '',
             }
         },
 
