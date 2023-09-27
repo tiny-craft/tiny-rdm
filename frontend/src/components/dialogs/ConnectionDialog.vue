@@ -80,7 +80,10 @@ const onSaveConnection = async () => {
     })
 
     // store new connection
-    const { success, msg } = await connectionStore.saveConnection(editName.value, generalForm.value)
+    const { success, msg } = await connectionStore.saveConnection(
+        isEditMode.value ? editName.value : null,
+        generalForm.value,
+    )
     if (!success) {
         $message.error(msg)
         return
