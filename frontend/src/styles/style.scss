@@ -86,6 +86,10 @@ body {
     gap: 5px;
     justify-content: flex-end;
     align-items: center;
+
+    .tb2-extra-info {
+      padding: 0 5px;
+    }
   }
 
   .value-wrapper {

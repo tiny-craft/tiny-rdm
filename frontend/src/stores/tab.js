@@ -83,9 +83,10 @@ const useTabStore = defineStore('tab', {
          * @param {number} [type]
          * @param {number} [ttl]
          * @param {string} [key]
+         * @param {number} [size]
          * @param {*} [value]
          */
-        upsertTab({ server, db, type, ttl, key, value }) {
+        upsertTab({ server, db, type, ttl, key, size, value }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -95,6 +96,7 @@ const useTabStore = defineStore('tab', {
                     type,
                     ttl,
                     key,
+                    size,
                     value,
                 })
                 tabIndex = this.tabList.length - 1
@@ -108,6 +110,7 @@ const useTabStore = defineStore('tab', {
             tab.type = type
             tab.ttl = ttl
             tab.key = key
+            tab.size = size
             tab.value = value
             this._setActivatedIndex(tabIndex, true)
             // this.activatedTab = tab.name

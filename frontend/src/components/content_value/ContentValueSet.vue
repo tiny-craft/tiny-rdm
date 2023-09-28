@@ -20,6 +20,7 @@ const props = defineProps({
         default: -1,
     },
     value: Array,
+    size: Number,
 })
 
 const connectionStore = useConnectionStore()
@@ -177,7 +178,9 @@ const onUpdateFilter = (filters, sourceColumn) => {
                     @clear="clearFilter"
                     @update:value="onFilterInput" />
             </div>
-            <div class="flex-item-expand"></div>
+            <div class="tb2-extra-info flex-item-expand">
+                <n-tag size="large">{{ $t('interface.total', { size: props.size }) }}</n-tag>
+            </div>
             <n-button plain :focusable="false" @click="onAddValue">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />

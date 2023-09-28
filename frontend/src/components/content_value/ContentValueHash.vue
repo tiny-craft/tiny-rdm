@@ -19,6 +19,7 @@ const props = defineProps({
         default: -1,
     },
     value: Object,
+    size: Number,
 })
 
 const filterOption = [
@@ -257,7 +258,9 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         @update:value="onFilterInput" />
                 </n-input-group>
             </div>
-            <div class="flex-item-expand"></div>
+            <div class="tb2-extra-info flex-item-expand">
+                <n-tag size="large">{{ $t('interface.total', { size: props.size }) }}</n-tag>
+            </div>
             <n-button plain :focusable="false" @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />

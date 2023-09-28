@@ -27,6 +27,7 @@ const props = defineProps({
         default: -1,
     },
     value: String,
+    size: Number,
 })
 
 const viewOption = computed(() =>

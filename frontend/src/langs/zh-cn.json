@@ -87,7 +87,8 @@
     "empty_server_list": "还没添加Redis服务器",
     "action": "操作",
     "type": "类型",
-    "score": "分值"
+    "score": "分值",
+    "total": "总数：{size}"
   },
   "ribbon": {
     "server": "服务器",

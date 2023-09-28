@@ -97,6 +97,7 @@ const tabContent = computed(() => {
         keyPath: tab.key,
         ttl: tab.ttl,
         value: tab.value,
+        size: tab.size || 0,
     }
 })
 
@@ -151,7 +152,8 @@ const onReloadKey = async () => {
             :key-path="tabContent.keyPath"
             :name="tabContent.name"
             :ttl="tabContent.ttl"
-            :value="tabContent.value" />
+            :value="tabContent.value"
+            :size="tabContent.size" />
     </div>
 </template>
 

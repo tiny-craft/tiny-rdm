@@ -532,7 +532,7 @@ const useConnectionStore = defineStore('connections', {
                 if (!isEmpty(key)) {
                     const { data, success, msg } = await GetKeyValue(server, db, key)
                     if (success) {
-                        const { type, ttl, value } = data
+                        const { type, ttl, value, size } = data
                         tab.upsertTab({
                             server,
                             db,
@@ -540,6 +540,7 @@ const useConnectionStore = defineStore('connections', {
                             ttl,
                             key,
                             value,
+                            size,
                         })
                         return
                     } else {
@@ -555,6 +556,7 @@ const useConnectionStore = defineStore('connections', {
                     ttl: -1,
                     key: null,
                     value: null,
+                    size: 0,
                 })
             } finally {
             }

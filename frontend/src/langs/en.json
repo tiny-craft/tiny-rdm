@@ -87,7 +87,8 @@
     "empty_server_list": "No redis server",
     "action": "Action",
     "type": "Type",
-    "score": "Score"
+    "score": "Score",
+    "total": "Length: {size}"
   },
   "ribbon": {
     "server": "Server",

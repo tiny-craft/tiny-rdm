@@ -508,12 +508,15 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 	}
 
 	var value any
+	var size int64
 	var cursor uint64
 	switch strings.ToLower(keyType) {
 	case "string":
 		value, err = rdb.Get(ctx, key).Result()
+		size, _ = rdb.StrLen(ctx, key).Result()
 	case "list":
 		value, err = rdb.LRange(ctx, key, 0, -1).Result()
+		size, _ = rdb.LLen(ctx, key).Result()
 	case "hash":
 		//value, err = rdb.HGetAll(ctx, key).Result()
 		items := map[string]string{}
@@ -532,6 +535,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 			}
 		}
 		value = items
+		size, _ = rdb.HLen(ctx, key).Result()
 	case "set":
 		//value, err = rdb.SMembers(ctx, key).Result()
 		items := []string{}
@@ -548,6 +552,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 			}
 		}
 		value = items
+		size, _ = rdb.SCard(ctx, key).Result()
 	case "zset":
 		//value, err = rdb.ZRangeWithScores(ctx, key, 0, -1).Result()
 		var items []types.ZSetItem
@@ -572,6 +577,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 			}
 		}
 		value = items
+		size, _ = rdb.ZCard(ctx, key).Result()
 	case "stream":
 		var msgs []redis.XMessage
 		items := []types.StreamItem{}
@@ -587,6 +593,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 			})
 		}
 		value = items
+		size, _ = rdb.XLen(ctx, key).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -597,6 +604,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 		"type":  keyType,
 		"ttl":   ttl,
 		"value": value,
+		"size":  size,
 	}
 	return
 }
