@@ -749,10 +749,10 @@ const useConnectionStore = defineStore('connections', {
          */
         _tidyNode(connName, db, key, skipResort) {
             const nodeMap = this._getNodeMap(connName, db)
+            const dbNode = get(this.databases, [connName, db], {})
             const separator = this._getSeparator(connName)
             const keyParts = split(key, separator)
             const totalParts = size(keyParts)
-            const dbNode = get(this.databases, [connName, db], {})
             let node
             // find last exists ancestor key
             let i = totalParts - 1
@@ -1252,7 +1252,7 @@ const useConnectionStore = defineStore('connections', {
          *
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string} [key]
          * @param {boolean} [isLayer]
          * @private
          */
@@ -1265,46 +1265,52 @@ const useConnectionStore = defineStore('connections', {
             }
 
             const nodeMap = this._getNodeMap(connName, db)
-            const keyParts = split(key, separator)
-            const totalParts = size(keyParts)
             if (isLayer === true) {
                 this._deleteChildrenKeyNodes(nodeMap, key)
             }
-            // remove from parent in tree node
-            const parentKey = slice(keyParts, 0, totalParts - 1)
-            let parentNode
-            if (isEmpty(parentKey)) {
-                parentNode = dbRoot
+            if (isEmpty(key)) {
+                // clear all key nodes
+                dbRoot.children = []
+                dbRoot.keys = 0
             } else {
-                parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${join(parentKey, separator)}`)
-            }
-
-            // not found parent node
-            if (parentNode == null) {
-                return false
-            }
-            remove(parentNode.children, {
-                type: isLayer ? ConnectionType.RedisKey : ConnectionType.RedisValue,
-                redisKey: key,
-            })
-
-            // check and remove empty layer node
-            let i = totalParts - 1
-            for (; i >= 0; i--) {
-                const anceKey = join(slice(keyParts, 0, i), separator)
-                if (i > 0) {
-                    const anceNode = nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
-                    const redisKey = join(slice(keyParts, 0, i + 1), separator)
-                    remove(anceNode.children, { type: ConnectionType.RedisKey, redisKey })
-
-                    if (isEmpty(anceNode.children)) {
-                        nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
-                    } else {
-                        break
-                    }
+                const keyParts = split(key, separator)
+                const totalParts = size(keyParts)
+                // remove from parent in tree node
+                const parentKey = slice(keyParts, 0, totalParts - 1)
+                let parentNode
+                if (isEmpty(parentKey)) {
+                    parentNode = dbRoot
                 } else {
-                    // last one, remove from db node
-                    remove(dbRoot.children, { type: ConnectionType.RedisKey, redisKey: keyParts[0] })
+                    parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${join(parentKey, separator)}`)
+                }
+
+                // not found parent node
+                if (parentNode == null) {
+                    return false
+                }
+                remove(parentNode.children, {
+                    type: isLayer ? ConnectionType.RedisKey : ConnectionType.RedisValue,
+                    redisKey: key,
+                })
+
+                // check and remove empty layer node
+                let i = totalParts - 1
+                for (; i >= 0; i--) {
+                    const anceKey = join(slice(keyParts, 0, i), separator)
+                    if (i > 0) {
+                        const anceNode = nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
+                        const redisKey = join(slice(keyParts, 0, i + 1), separator)
+                        remove(anceNode.children, { type: ConnectionType.RedisKey, redisKey })
+
+                        if (isEmpty(anceNode.children)) {
+                            nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
+                        } else {
+                            break
+                        }
+                    } else {
+                        // last one, remove from db node
+                        remove(dbRoot.children, { type: ConnectionType.RedisKey, redisKey: keyParts[0] })
+                    }
                 }
             }
 
@@ -1313,24 +1319,28 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * delete node and all it's children from nodeMap
-         * @param nodeMap
-         * @param key
+         * @param {Map<string, DatabaseItem>} nodeMap
+         * @param {string} [key] clean nodeMap if key is empty
          * @private
          */
         _deleteChildrenKeyNodes(nodeMap, key) {
-            const mapKey = `${ConnectionType.RedisKey}/${key}`
-            const node = nodeMap.get(mapKey)
-            for (const child of node.children || []) {
-                if (child.type === ConnectionType.RedisValue) {
-                    if (!nodeMap.delete(`${ConnectionType.RedisValue}/${child.redisKey}`)) {
-                        console.warn('delete:', `${ConnectionType.RedisValue}/${child.redisKey}`)
+            if (isEmpty(key)) {
+                nodeMap.clear()
+            } else {
+                const mapKey = `${ConnectionType.RedisKey}/${key}`
+                const node = nodeMap.get(mapKey)
+                for (const child of node.children || []) {
+                    if (child.type === ConnectionType.RedisValue) {
+                        if (!nodeMap.delete(`${ConnectionType.RedisValue}/${child.redisKey}`)) {
+                            console.warn('delete:', `${ConnectionType.RedisValue}/${child.redisKey}`)
+                        }
+                    } else if (child.type === ConnectionType.RedisKey) {
+                        this._deleteChildrenKeyNodes(nodeMap, child.redisKey)
                     }
-                } else if (child.type === ConnectionType.RedisKey) {
-                    this._deleteChildrenKeyNodes(nodeMap, child.redisKey)
                 }
-            }
-            if (!nodeMap.delete(mapKey)) {
-                console.warn('delete map key', mapKey)
+                if (!nodeMap.delete(mapKey)) {
+                    console.warn('delete map key', mapKey)
+                }
             }
         },
 
