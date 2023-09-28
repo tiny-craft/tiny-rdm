@@ -4,7 +4,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
-import { find, get, includes, indexOf, isEmpty, remove } from 'lodash'
+import { find, get, includes, indexOf, isEmpty, pull, remove, size } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -300,14 +300,24 @@ const onUpdateExpanded = (value, option, meta) => {
     if (!meta.node) {
         return
     }
-    // console.log(JSON.stringify(meta))
-    switch (meta.action) {
-        case 'expand':
-            meta.node.expanded = true
-            break
-        case 'collapse':
-            meta.node.expanded = false
-            break
+
+    // keep expand or collapse children while they own more than 1 child
+    let node = meta.node
+    while (node != null && size(node.children) === 1) {
+        const key = node.children[0].key
+        switch (meta.action) {
+            case 'expand':
+                node.expanded = true
+                if (!includes(expandedKeys.value, key)) {
+                    expandedKeys.value.push(key)
+                }
+                break
+            case 'collapse':
+                node.expanded = false
+                remove(expandedKeys.value, (v) => v === key)
+                break
+        }
+        node = node.children[0]
     }
 }
 
