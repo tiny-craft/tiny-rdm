@@ -59,7 +59,7 @@ const startResize = () => {
 }
 
 const asideWidthVal = computed(() => {
-    return prefStore.general.asideWidth + 'px'
+    return prefStore.behavior.asideWidth + 'px'
 })
 
 const dragging = computed(() => {
@@ -115,7 +115,7 @@ const border = computed(() => {
                 <div
                     id="app-toolbar-title"
                     :style="{
-                        width: `${data.navMenuWidth + prefStore.general.asideWidth - 4}px`,
+                        width: `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`,
                         paddingLeft: isMacOS() ? '70px' : '10px',
                     }">
                     <n-space align="center" :wrap-item="false" :wrap="false" :size="3">

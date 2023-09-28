@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
+	"tinyrdm/backend/consts"
 )
 
 type PreferencesStorage struct {
@@ -20,15 +21,19 @@ func NewPreferences() *PreferencesStorage {
 
 func (p *PreferencesStorage) DefaultPreferences() map[string]any {
 	return map[string]any{
+		"behavior": map[string]any{
+			"aside_width":   consts.DEFAULT_ASIDE_WIDTH,
+			"window_width":  consts.DEFAULT_WINDOW_WIDTH,
+			"window_height": consts.DEFAULT_WINDOW_HEIGHT,
+		},
 		"general": map[string]any{
 			"language":           "auto",
 			"font":               "",
-			"font_size":          14,
+			"font_size":          consts.DEFAULT_FONT_SIZE,
 			"use_sys_proxy":      false,
 			"use_sys_proxy_http": false,
 			"check_update":       true,
 			"skip_version":       "",
-			"aside_width":        300,
 		},
 		"editor": map[string]any{
 			"font":      "",

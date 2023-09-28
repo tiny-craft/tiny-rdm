@@ -31,6 +31,11 @@ const usePreferencesStore = defineStore('preferences', {
      * @returns {Preferences}
      */
     state: () => ({
+        behavior: {
+            asideWidth: 300,
+            windowWidth: 0,
+            windowHeight: 0,
+        },
         general: {
             theme: 'auto',
             language: 'en',
@@ -40,7 +45,6 @@ const usePreferencesStore = defineStore('preferences', {
             useSysProxyHttp: false,
             checkUpdate: false,
             skipVersion: '',
-            asideWidth: 300,
         },
         editor: {
             font: '',
@@ -211,7 +215,12 @@ const usePreferencesStore = defineStore('preferences', {
                 }
                 return result
             }
-            const pf = Object.assign({}, obj2Map('general', this.general), obj2Map('editor', this.editor))
+            const pf = Object.assign(
+                {},
+                obj2Map('behavior', this.behavior),
+                obj2Map('general', this.general),
+                obj2Map('editor', this.editor),
+            )
             const { success, msg } = await SetPreferences(pf)
             return success === true
         },
@@ -241,7 +250,7 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         setAsideWidth(width) {
-            this.general.asideWidth = width
+            this.behavior.asideWidth = width
         },
 
         async checkForUpdate(manual = false) {

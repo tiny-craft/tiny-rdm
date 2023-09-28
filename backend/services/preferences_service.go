@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"tinyrdm/backend/consts"
 	storage2 "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
@@ -97,6 +98,28 @@ func (p *preferencesService) GetAppVersion() (resp types.JSResp) {
 	resp.Success = true
 	resp.Data = map[string]any{
 		"version": p.clientVersion,
+	}
+	return
+}
+
+func (p *preferencesService) SaveWindowSize(width, height int) {
+	p.SetPreferences(map[string]any{
+		"behavior": map[string]any{
+			"window_width":  width,
+			"window_height": height,
+		},
+	})
+}
+
+func (p *preferencesService) GetWindowSize() (width, height int) {
+	data := p.pref.GetPreferences()
+	w, h := data["behavior.window_width"], data["behavior.window_height"]
+	var ok bool
+	if width, ok = w.(int); !ok {
+		return consts.DEFAULT_WINDOW_WIDTH, consts.DEFAULT_WINDOW_HEIGHT
+	}
+	if height, ok = h.(int); !ok {
+		return consts.DEFAULT_WINDOW_WIDTH, consts.DEFAULT_WINDOW_HEIGHT
 	}
 	return
 }

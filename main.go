@@ -10,7 +10,9 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"runtime"
+	"tinyrdm/backend/consts"
 	"tinyrdm/backend/services"
 )
 
@@ -28,6 +30,7 @@ func main() {
 	connSvc := services.Connection()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
+	windowWidth, windowHeight := prefSvc.GetWindowSize()
 
 	// menu
 	appMenu := menu.NewMenu()
@@ -40,10 +43,10 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:     "Tiny RDM",
-		Width:     1024,
-		Height:    768,
-		MinWidth:  1024,
-		MinHeight: 768,
+		Width:     windowWidth,
+		Height:    windowHeight,
+		MinWidth:  consts.DEFAULT_WINDOW_WIDTH,
+		MinHeight: consts.DEFAULT_WINDOW_HEIGHT,
 		Frameless: runtime.GOOS != "darwin",
 		Menu:      appMenu,
 		AssetServer: &assetserver.Options{
@@ -55,6 +58,12 @@ func main() {
 			connSvc.Start(ctx)
 		},
 		OnShutdown: func(ctx context.Context) {
+			// save current window size
+			width, height := runtime2.WindowGetSize(ctx)
+			if width > 0 && height > 0 {
+				prefSvc.SaveWindowSize(width, height)
+			}
+
 			connSvc.Stop(ctx)
 		},
 		Bind: []interface{}{
