@@ -98,6 +98,7 @@ const tabContent = computed(() => {
         ttl: tab.ttl,
         value: tab.value,
         size: tab.size || 0,
+        viewAs: tab.viewAs,
     }
 })
 
@@ -122,7 +123,7 @@ const onReloadKey = async () => {
     if (tab == null || isEmpty(tab.key)) {
         return null
     }
-    await connectionStore.loadKeyValue(tab.name, tab.db, tab.key)
+    await connectionStore.loadKeyValue(tab.name, tab.db, tab.key, tab.viewAs)
 }
 </script>
 
@@ -153,7 +154,8 @@ const onReloadKey = async () => {
             :name="tabContent.name"
             :ttl="tabContent.ttl"
             :value="tabContent.value"
-            :size="tabContent.size" />
+            :size="tabContent.size"
+            :view-as="tabContent.viewAs" />
     </div>
 </template>
 

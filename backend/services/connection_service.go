@@ -17,6 +17,7 @@ import (
 	"tinyrdm/backend/types"
 	maputil "tinyrdm/backend/utils/map"
 	redis2 "tinyrdm/backend/utils/redis"
+	strutil "tinyrdm/backend/utils/string"
 )
 
 type cmdHistoryItem struct {
@@ -476,7 +477,7 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 }
 
 // GetKeyValue get value by key
-func (c *connectionService) GetKeyValue(connName string, db int, key string) (resp types.JSResp) {
+func (c *connectionService) GetKeyValue(connName string, db int, key, viewAs string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -512,7 +513,9 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 	var cursor uint64
 	switch strings.ToLower(keyType) {
 	case "string":
-		value, err = rdb.Get(ctx, key).Result()
+		var str string
+		str, err = rdb.Get(ctx, key).Result()
+		value, viewAs = strutil.ConvertTo(str, viewAs)
 		size, _ = rdb.StrLen(ctx, key).Result()
 	case "list":
 		value, err = rdb.LRange(ctx, key, 0, -1).Result()
@@ -601,17 +604,18 @@ func (c *connectionService) GetKeyValue(connName string, db int, key string) (re
 	}
 	resp.Success = true
 	resp.Data = map[string]any{
-		"type":  keyType,
-		"ttl":   ttl,
-		"value": value,
-		"size":  size,
+		"type":   keyType,
+		"ttl":    ttl,
+		"value":  value,
+		"size":   size,
+		"viewAs": viewAs,
 	}
 	return
 }
 
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
-func (c *connectionService) SetKeyValue(connName string, db int, key, keyType string, value any, ttl int64) (resp types.JSResp) {
+func (c *connectionService) SetKeyValue(connName string, db int, key, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -632,7 +636,12 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid string value"
 			return
 		} else {
-			_, err = rdb.Set(ctx, key, str, 0).Result()
+			var saveStr string
+			if saveStr, err = strutil.SaveAs(str, viewAs); err != nil {
+				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, viewAs, err.Error())
+				return
+			}
+			_, err = rdb.Set(ctx, key, saveStr, 0).Result()
 			// set expiration lonely, not "keepttl"
 			if err == nil && expiration > 0 {
 				rdb.Expire(ctx, key, expiration)

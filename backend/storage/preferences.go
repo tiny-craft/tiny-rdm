@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"log"
 	"strings"
 	"sync"
 	"tinyrdm/backend/consts"
@@ -158,10 +159,12 @@ func (p *PreferencesStorage) SetPreferencesN(values map[string]any) error {
 
 	pf := p.getPreferences()
 	for path, v := range values {
+		log.Println("path", path, v)
 		if err := p.setPreferences(pf, path, v); err != nil {
 			return err
 		}
 	}
+	log.Println("after save", pf)
 
 	return p.savePreferences(pf)
 }

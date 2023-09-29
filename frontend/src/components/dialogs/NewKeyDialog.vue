@@ -1,6 +1,7 @@
 <script setup>
 import { computed, h, reactive, ref, watch } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
+import { types as viewTypes } from '@/consts/value_view_type.js'
 import useDialog from 'stores/dialog'
 import { isEmpty, keys, map } from 'lodash'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
@@ -116,7 +117,15 @@ const onAdd = async () => {
         if (value == null) {
             value = defaultValue[type]
         }
-        const { success, msg, nodeKey } = await connectionStore.setKey(server, db, key, type, value, ttl)
+        const { success, msg, nodeKey } = await connectionStore.setKey(
+            server,
+            db,
+            key,
+            type,
+            value,
+            ttl,
+            viewTypes.PLAIN_TEXT,
+        )
         if (success) {
             // select current key
             tabStore.setSelectedKeys(server, nodeKey)

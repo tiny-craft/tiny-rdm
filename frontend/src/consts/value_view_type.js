@@ -5,8 +5,11 @@
 export const types = {
     PLAIN_TEXT: 'Plain Text',
     JSON: 'JSON',
-    BASE64_TO_TEXT: 'Base64 To Text',
-    BASE64_TO_JSON: 'Base64 To JSON',
+    BASE64_TEXT: 'Base64 Text',
+    BASE64_JSON: 'Base64 JSON',
     HEX: 'Hex',
     BINARY: 'Binary',
+    GZIP: 'GZip',
+    GZIP_JSON: 'GZip JSON',
+    DEFLATE: 'Deflate',
 }

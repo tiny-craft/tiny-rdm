@@ -8,12 +8,10 @@ import { useThemeVars } from 'naive-ui'
 import { types } from '@/consts/value_view_type.js'
 import Close from '@/components/icons/Close.vue'
 import Edit from '@/components/icons/Edit.vue'
-import { IsJson } from '@/utils/check_string_format.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { map, toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
-import { fromBase64, fromBase64Json, toBinary, toHex, toJsonText } from '@/utils/string_convert.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -28,6 +26,10 @@ const props = defineProps({
     },
     value: String,
     size: Number,
+    viewAs: {
+        type: String,
+        default: types.PLAIN_TEXT,
+    },
 })
 
 const viewOption = computed(() =>
@@ -38,15 +40,15 @@ const viewOption = computed(() =>
         }
     }),
 )
-const viewAs = ref(types.PLAIN_TEXT)
+// const viewAs = ref(types.PLAIN_TEXT)
 
 const autoDetectFormat = () => {
     // auto check format when loaded
-    if (IsJson(props.value)) {
-        viewAs.value = types.JSON
-    } else {
-        viewAs.value = types.PLAIN_TEXT
-    }
+    // if (IsJson(props.value)) {
+    //     viewAs.value = types.JSON
+    // } else {
+    //     viewAs.value = types.PLAIN_TEXT
+    // }
 }
 
 onMounted(() => {
@@ -60,44 +62,25 @@ watch(
 )
 
 const keyType = redisTypes.STRING
-/**
- * view value
- * @type {ComputedRef<string>}
- */
-const viewValue = computed(() => {
-    switch (viewAs.value) {
-        case types.PLAIN_TEXT:
-            return props.value
-        case types.JSON:
-            return toJsonText(props.value)
-        case types.BASE64_TO_TEXT:
-            return fromBase64(props.value)
-        case types.BASE64_TO_JSON:
-            return fromBase64Json(props.value)
-        case types.HEX:
-            return toHex(props.value)
-        case types.BINARY:
-            return toBinary(props.value)
-        default:
-            return props.value
-    }
-})
-
 const viewLanguage = computed(() => {
-    switch (viewAs.value) {
+    switch (props.viewAs) {
         case types.JSON:
-        case types.BASE64_TO_JSON:
+        case types.BASE64_JSON:
             return 'json'
         default:
             return 'plaintext'
     }
 })
 
+const onViewTypeUpdate = (viewType) => {
+    connectionStore.loadKeyValue(props.name, props.db, props.keyPath, viewType)
+}
+
 /**
  * Copy value
  */
 const onCopyValue = () => {
-    ClipboardSetText(viewValue.value)
+    ClipboardSetText(props.value)
         .then((succ) => {
             if (succ) {
                 $message.success(i18n.t('dialogue.copy_succ'))
@@ -111,7 +94,7 @@ const onCopyValue = () => {
 const editValue = ref('')
 const inEdit = ref(false)
 const onEditValue = () => {
-    editValue.value = viewValue.value
+    editValue.value = props.value
     inEdit.value = true
 }
 
@@ -134,6 +117,7 @@ const onSaveValue = async () => {
             toLower(keyType),
             editValue.value,
             -1,
+            props.viewAs,
         )
         if (success) {
             await connectionStore.loadKeyValue(props.name, props.db, props.keyPath)
@@ -155,7 +139,11 @@ const onSaveValue = async () => {
         <content-toolbar :db="props.db" :key-path="keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <n-text>{{ $t('interface.view_as') }}</n-text>
-            <n-select v-model:value="viewAs" :options="viewOption" style="width: 200px" />
+            <n-select
+                :value="props.viewAs"
+                :options="viewOption"
+                style="width: 200px"
+                @update:value="onViewTypeUpdate" />
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
                 <n-button :focusable="false" @click="onCopyValue">
@@ -188,7 +176,7 @@ const onSaveValue = async () => {
         </div>
         <div class="value-wrapper flex-item-expand flex-box-v">
             <n-scrollbar v-if="!inEdit" class="flex-item-expand">
-                <n-code :code="viewValue" :language="viewLanguage" show-line-numbers style="cursor: text" word-wrap />
+                <n-code :code="props.value" :language="viewLanguage" show-line-numbers style="cursor: text" word-wrap />
             </n-scrollbar>
             <n-input
                 v-else

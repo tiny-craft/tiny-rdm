@@ -525,14 +525,15 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} server
          * @param {number} db
          * @param {string} [key] when key is null or blank, update tab to display normal content (blank content or server status)
+         * @param {string} [viewType]
          */
-        async loadKeyValue(server, db, key) {
+        async loadKeyValue(server, db, key, viewType) {
             try {
                 const tab = useTabStore()
                 if (!isEmpty(key)) {
-                    const { data, success, msg } = await GetKeyValue(server, db, key)
+                    const { data, success, msg } = await GetKeyValue(server, db, key, viewType)
                     if (success) {
-                        const { type, ttl, value, size } = data
+                        const { type, ttl, value, size, viewAs } = data
                         tab.upsertTab({
                             server,
                             db,
@@ -541,11 +542,16 @@ const useConnectionStore = defineStore('connections', {
                             key,
                             value,
                             size,
+                            viewAs,
                         })
                         return
                     } else {
+                        if (!isEmpty(msg)) {
+                            $message.error('load key fail: ' + msg)
+                        }
                         // its danger to delete "non-exists" key, just remove from tree view
                         await this.deleteKey(server, db, key, true)
+                        // TODO: show key not found page?
                     }
                 }
 
@@ -852,11 +858,12 @@ const useConnectionStore = defineStore('connections', {
          * @param {string} keyType
          * @param {any} value
          * @param {number} ttl
+         * @param {string} [viewAs]
          * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: {string}}>}
          */
-        async setKey(connName, db, key, keyType, value, ttl) {
+        async setKey(connName, db, key, keyType, value, ttl, viewAs) {
             try {
-                const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl)
+                const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl, viewAs)
                 if (success) {
                     // update tree view data
                     const { newKey = 0 } = this._addKeyNodes(connName, db, [key], true)

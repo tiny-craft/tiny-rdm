@@ -57,6 +57,16 @@ func main() {
 			app.startup(ctx)
 			connSvc.Start(ctx)
 		},
+		//OnBeforeClose: func(ctx context.Context) (prevent bool) {
+		//	// save current window size
+		//	width, height := runtime2.WindowGetSize(ctx)
+		//	if width > 0 && height > 0 {
+		//		if w, h := prefSvc.GetWindowSize(); w != width || h != height {
+		//			prefSvc.SaveWindowSize(width, height)
+		//		}
+		//	}
+		//	return false
+		//},
 		OnShutdown: func(ctx context.Context) {
 			// save current window size
 			width, height := runtime2.WindowGetSize(ctx)
