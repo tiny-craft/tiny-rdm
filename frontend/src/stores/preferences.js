@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
-import { camelCase, clone, find, get, isEmpty, isObject, map, set, snakeCase, split } from 'lodash'
+import { clone, find, get, isEmpty, map, pick, set, split } from 'lodash'
 import {
     CheckForUpdate,
     GetFontList,
@@ -165,8 +165,7 @@ const usePreferencesStore = defineStore('preferences', {
     actions: {
         _applyPreferences(data) {
             for (const key in data) {
-                const keys = map(split(key, '.'), camelCase)
-                set(this, keys, data[key])
+                set(this, key, data[key])
             }
         },
 
@@ -203,30 +202,13 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {Promise<boolean>}
          */
         async savePreferences() {
-            const obj2Map = (prefix, obj) => {
-                const result = {}
-                for (const key in obj) {
-                    if (isObject(obj[key])) {
-                        const subResult = obj2Map(`${prefix}.${snakeCase(key)}`, obj[key])
-                        Object.assign(result, subResult)
-                    } else {
-                        result[`${prefix}.${snakeCase(key)}`] = obj[key]
-                    }
-                }
-                return result
-            }
-            const pf = Object.assign(
-                {},
-                obj2Map('behavior', this.behavior),
-                obj2Map('general', this.general),
-                obj2Map('editor', this.editor),
-            )
+            const pf = pick(this, ['behavior', 'general', 'editor'])
             const { success, msg } = await SetPreferences(pf)
             return success === true
         },
 
         /**
-         * reset to last loaded preferences
+         * reset to last-loaded preferences
          * @returns {Promise<void>}
          */
         async resetToLastPreferences() {

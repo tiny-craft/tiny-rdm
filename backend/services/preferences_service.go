@@ -39,13 +39,23 @@ func (p *preferencesService) GetPreferences() (resp types.JSResp) {
 	return
 }
 
-func (p *preferencesService) SetPreferences(values map[string]any) (resp types.JSResp) {
-	err := p.pref.SetPreferencesN(values)
+func (p *preferencesService) SetPreferences(pf types.Preferences) (resp types.JSResp) {
+	err := p.pref.SetPreferences(&pf)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	resp.Success = true
+	return
+}
+
+func (p *preferencesService) UpdatePreferences(value map[string]any) (resp types.JSResp) {
+	err := p.pref.UpdatePreferences(value)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
 	resp.Success = true
 	return
 }
@@ -103,21 +113,20 @@ func (p *preferencesService) GetAppVersion() (resp types.JSResp) {
 }
 
 func (p *preferencesService) SaveWindowSize(width, height int) {
-	p.SetPreferences(map[string]any{
-		"behavior.window_width":  width,
-		"behavior.window_height": height,
+	p.UpdatePreferences(map[string]any{
+		"behavior.windowWidth":  width,
+		"behavior.windowHeight": height,
 	})
 }
 
 func (p *preferencesService) GetWindowSize() (width, height int) {
 	data := p.pref.GetPreferences()
-	w, h := data["behavior.window_width"], data["behavior.window_height"]
-	var ok bool
-	if width, ok = w.(int); !ok {
-		return consts.DEFAULT_WINDOW_WIDTH, consts.DEFAULT_WINDOW_HEIGHT
+	width, height = data.Behavior.WindowWidth, data.Behavior.WindowHeight
+	if width <= 0 {
+		width = consts.DEFAULT_WINDOW_WIDTH
 	}
-	if height, ok = h.(int); !ok {
-		return consts.DEFAULT_WINDOW_WIDTH, consts.DEFAULT_WINDOW_HEIGHT
+	if height <= 0 {
+		height = consts.DEFAULT_WINDOW_HEIGHT
 	}
 	return
 }

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"log"
+	"reflect"
 	"strings"
 	"sync"
-	"tinyrdm/backend/consts"
+	"tinyrdm/backend/types"
 )
 
 type PreferencesStorage struct {
@@ -20,30 +21,11 @@ func NewPreferences() *PreferencesStorage {
 	}
 }
 
-func (p *PreferencesStorage) DefaultPreferences() map[string]any {
-	return map[string]any{
-		"behavior": map[string]any{
-			"aside_width":   consts.DEFAULT_ASIDE_WIDTH,
-			"window_width":  consts.DEFAULT_WINDOW_WIDTH,
-			"window_height": consts.DEFAULT_WINDOW_HEIGHT,
-		},
-		"general": map[string]any{
-			"language":           "auto",
-			"font":               "",
-			"font_size":          consts.DEFAULT_FONT_SIZE,
-			"use_sys_proxy":      false,
-			"use_sys_proxy_http": false,
-			"check_update":       true,
-			"skip_version":       "",
-		},
-		"editor": map[string]any{
-			"font":      "",
-			"font_size": 14,
-		},
-	}
+func (p *PreferencesStorage) DefaultPreferences() types.Preferences {
+	return types.NewPreferences()
 }
 
-func (p *PreferencesStorage) getPreferences() (ret map[string]any) {
+func (p *PreferencesStorage) getPreferences() (ret types.Preferences) {
 	b, err := p.storage.Load()
 	if err != nil {
 		ret = p.DefaultPreferences()
@@ -57,79 +39,43 @@ func (p *PreferencesStorage) getPreferences() (ret map[string]any) {
 	return
 }
 
-func (p *PreferencesStorage) flatPreferences(data map[string]any, prefix string) map[string]any {
-	flattened := make(map[string]any)
-	for key, value := range data {
-		newKey := key
-		if prefix != "" {
-			newKey = prefix + "." + key
-		}
-
-		if nested, ok := value.(map[string]any); ok {
-			nestedFlattened := p.flatPreferences(nested, newKey)
-			for k, v := range nestedFlattened {
-				flattened[k] = v
-			}
-		} else {
-			flattened[newKey] = value
-		}
-	}
-	return flattened
-}
-
 // GetPreferences Get preferences from local
-func (p *PreferencesStorage) GetPreferences() (ret map[string]any) {
+func (p *PreferencesStorage) GetPreferences() (ret types.Preferences) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	pref := p.getPreferences()
-	ret = p.flatPreferences(pref, "")
+	ret = p.getPreferences()
 	return
 }
 
-func (p *PreferencesStorage) Value(keys ...string) any {
-	kv := p.getPreferences()
-	var ok bool
-	var a any
-	total := len(keys)
-	for i, key := range keys {
-		if a, ok = kv[key]; !ok {
-			return nil
-		}
-		if i == total-1 {
-			// last key, return value
-			return a
-		}
-		if kv, ok = a.(map[string]any); !ok {
-			return nil
-		}
-	}
-	return nil
-}
-
-func (p *PreferencesStorage) setPreferences(pf map[string]any, key string, value any) error {
-	keyPath := strings.Split(key, ".")
-	if len(keyPath) <= 0 {
-		return fmt.Errorf("invalid key path(%s)", key)
-	}
-	var node any = pf
-	for _, k := range keyPath[:len(keyPath)-1] {
-		if subNode, ok := node.(map[string]any); ok {
-			node = subNode[k]
+func (p *PreferencesStorage) setPreferences(pf *types.Preferences, key string, value any) error {
+	parts := strings.Split(key, ".")
+	if len(parts) > 0 {
+		var reflectValue reflect.Value
+		if reflect.TypeOf(pf).Kind() == reflect.Ptr {
+			reflectValue = reflect.ValueOf(pf).Elem()
 		} else {
-			return fmt.Errorf("invalid key path(%s)", key)
+			reflectValue = reflect.ValueOf(pf)
+		}
+		for i, part := range parts {
+			part = strings.ToUpper(part[:1]) + part[1:]
+			reflectValue = reflectValue.FieldByName(part)
+			if reflectValue.IsValid() {
+				if i == len(parts)-1 {
+					reflectValue.Set(reflect.ValueOf(value))
+					return nil
+				}
+			} else {
+				break
+			}
 		}
 	}
 
-	if subNode, ok := node.(map[string]any); ok {
-		subNode[keyPath[len(keyPath)-1]] = value
-	}
-
-	return nil
+	return fmt.Errorf("invalid key path(%s)", key)
 }
 
-func (p *PreferencesStorage) savePreferences(pf map[string]any) error {
-	b, err := yaml.Marshal(&pf)
+func (p *PreferencesStorage) savePreferences(pf *types.Preferences) error {
+	b, err := yaml.Marshal(pf)
 	if err != nil {
 		return err
 	}
@@ -140,37 +86,35 @@ func (p *PreferencesStorage) savePreferences(pf map[string]any) error {
 	return nil
 }
 
-// SetPreferences assign value to key path, the key path use "." to indicate multiple level
-func (p *PreferencesStorage) SetPreferences(key string, value any) error {
+// SetPreferences replace preferences
+func (p *PreferencesStorage) SetPreferences(pf *types.Preferences) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	pf := p.getPreferences()
-	if err := p.setPreferences(pf, key, value); err != nil {
-		return err
-	}
 	return p.savePreferences(pf)
 }
 
-// SetPreferencesN set multiple key path and value
-func (p *PreferencesStorage) SetPreferencesN(values map[string]any) error {
+// UpdatePreferences update values by key paths, the key path use "." to indicate multiple level
+func (p *PreferencesStorage) UpdatePreferences(values map[string]any) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
 	pf := p.getPreferences()
 	for path, v := range values {
-		log.Println("path", path, v)
-		if err := p.setPreferences(pf, path, v); err != nil {
+		if err := p.setPreferences(&pf, path, v); err != nil {
 			return err
 		}
 	}
 	log.Println("after save", pf)
 
-	return p.savePreferences(pf)
+	return p.savePreferences(&pf)
 }
 
-func (p *PreferencesStorage) RestoreDefault() map[string]any {
+func (p *PreferencesStorage) RestoreDefault() types.Preferences {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	pf := p.DefaultPreferences()
-	p.savePreferences(pf)
-	return p.flatPreferences(pf, "")
+	p.savePreferences(&pf)
+	return pf
 }
