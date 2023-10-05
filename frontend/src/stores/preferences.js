@@ -232,7 +232,7 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         setAsideWidth(width) {
-            this.behavior.asideWidth = width
+            this.behavior.asideWidth = Math.max(width, 300)
         },
 
         async checkForUpdate(manual = false) {

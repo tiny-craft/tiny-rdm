@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"strconv"
 	"strings"
 	"tinyrdm/backend/types"
 )
@@ -54,7 +54,6 @@ func ConvertTo(str, targetType string) (value, resultType string) {
 
 	case types.HEX:
 		if hexStr, ok := decodeHex(str); ok {
-			log.Print(hexStr)
 			value = hexStr
 		} else {
 			value = str
@@ -63,11 +62,11 @@ func ConvertTo(str, targetType string) (value, resultType string) {
 		return
 
 	case types.BINARY:
-		var binary strings.Builder
-		for _, char := range str {
-			binary.WriteString(fmt.Sprintf("%08b", int(char)))
+		if binStr, ok := decodeBinary(str); ok {
+			value = binStr
+		} else {
+			value = str
 		}
-		value = binary.String()
 		resultType = targetType
 		return
 
@@ -114,6 +113,10 @@ func autoToType(str string) (value, resultType string) {
 		}
 
 		if value, ok = decodeGZip(str); ok {
+			if value, ok = decodeJson(value); ok {
+				resultType = types.GZIP_JSON
+				return
+			}
 			resultType = types.GZIP
 			return
 		}
@@ -122,11 +125,27 @@ func autoToType(str string) (value, resultType string) {
 			resultType = types.DEFLATE
 			return
 		}
+
+		if isBinary(str) {
+			if value, ok = decodeHex(str); ok {
+				resultType = types.HEX
+				return
+			}
+		}
 	}
 
 	value = str
 	resultType = types.PLAIN_TEXT
 	return
+}
+
+func isBinary(str string) bool {
+	for _, s := range str {
+		if s < 0x20 || s > 0x7E {
+			return true
+		}
+	}
+	return false
 }
 
 func decodeJson(str string) (string, bool) {
@@ -148,6 +167,14 @@ func decodeBase64(str string) (string, bool) {
 		return string(decodedStr), true
 	}
 	return str, false
+}
+
+func decodeBinary(str string) (string, bool) {
+	var binary strings.Builder
+	for _, char := range str {
+		binary.WriteString(fmt.Sprintf("%08b", int(char)))
+	}
+	return binary.String(), true
 }
 
 func decodeHex(str string) (string, bool) {
@@ -189,12 +216,24 @@ func SaveAs(str, targetType string) (value string, err error) {
 		base64Str, _ := encodeBase64(str)
 		return base64Str, nil
 
+	case types.HEX:
+		hexStr, _ := encodeHex(str)
+		return hexStr, nil
+
+	case types.BINARY:
+		binStr, _ := encodeBinary(str)
+		return binStr, nil
+
 	case types.JSON, types.BASE64_JSON, types.GZIP_JSON:
 		if jsonStr, ok := encodeJson(str); ok {
-			if targetType == types.BASE64_JSON {
+			switch targetType {
+			case types.BASE64_JSON:
 				base64Str, _ := encodeBase64(jsonStr)
 				return base64Str, nil
-			} else {
+			case types.GZIP_JSON:
+				gzipStr, _ := encodeGZip(jsonStr)
+				return gzipStr, nil
+			default:
 				return jsonStr, nil
 			}
 		} else {
@@ -234,6 +273,26 @@ func encodeJson(str string) (string, bool) {
 
 func encodeBase64(str string) (string, bool) {
 	return base64.StdEncoding.EncodeToString([]byte(str)), true
+}
+
+func encodeBinary(str string) (string, bool) {
+	var result strings.Builder
+	total := len(str)
+	for i := 0; i < total; i += 8 {
+		b, _ := strconv.ParseInt(str[i:i+8], 2, 8)
+		result.WriteByte(byte(b))
+	}
+	return result.String(), true
+}
+
+func encodeHex(str string) (string, bool) {
+	hexStrArr := strings.Split(str, "\\x")
+	hexStr := strings.Join(hexStrArr, "")
+	if decodeStr, err := hex.DecodeString(hexStr); err == nil {
+		return string(decodeStr), true
+	}
+
+	return str, false
 }
 
 func encodeGZip(str string) (string, bool) {

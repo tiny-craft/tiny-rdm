@@ -66,6 +66,7 @@ const viewLanguage = computed(() => {
     switch (props.viewAs) {
         case types.JSON:
         case types.BASE64_JSON:
+        case types.GZIP_JSON:
             return 'json'
         default:
             return 'plaintext'
