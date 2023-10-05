@@ -126,6 +126,7 @@ const onSaveConnection = async () => {
 const resetForm = () => {
     generalForm.value = connectionStore.newDefaultConnection()
     generalFormRef.value?.restoreValidation()
+    testing.value = false
     showTestResult.value = false
     testResult.value = ''
     tab.value = 'general'
@@ -135,6 +136,7 @@ watch(
     () => dialogStore.connDialogVisible,
     (visible) => {
         if (visible) {
+            resetForm()
             editName.value = get(dialogStore.connParam, 'name', '')
             generalForm.value = dialogStore.connParam || connectionStore.newDefaultConnection()
             generalForm.value.ssh.loginType = generalForm.value.ssh.loginType || 'pwd'
@@ -286,7 +288,7 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.addr')" required>
                             <n-input
                                 v-model:value="generalForm.ssh.addr"
-                                :placeholder="$t('dialogue.connection.addr_tip')" />
+                                :placeholder="$t('dialogue.connection.ssh_addr_tip')" />
                             <n-text style="width: 40px; text-align: center">:</n-text>
                             <n-input-number
                                 v-model:value="generalForm.ssh.port"

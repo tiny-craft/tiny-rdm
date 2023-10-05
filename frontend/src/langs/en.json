@@ -139,6 +139,7 @@
       "login_type": "Login Type",
       "pkfile": "Private Key File",
       "passphrase": "Passphrase",
+      "ssh_addr_tip": "SSH Server Host",
       "ssh_usr_tip": "SSH Username",
       "ssh_pwd_tip": "SSH Password",
       "pkfile_tip": "SSH Private Key File Path",

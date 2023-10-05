@@ -139,6 +139,7 @@
       "login_type": "登录类型",
       "pkfile": "私钥文件",
       "passphrase": "私钥密码",
+      "ssh_addr_tip": "SSH地址",
       "ssh_usr_tip": "SSH登录用户名",
       "ssh_pwd_tip": "SSH登录密码",
       "pkfile_tip": "SSH私钥文件路径",
