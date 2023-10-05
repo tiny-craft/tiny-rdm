@@ -663,7 +663,13 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			return
 		} else {
 			if len(strs) > 1 {
-				err = rdb.HMSet(ctx, key, strs).Err()
+				version := getRedisVersion(rdb, ctx)
+				if strings.HasPrefix(version, "2.") || strings.HasPrefix(version, "3.") {
+					// 4.0以前老版本redis
+					err = rdb.HMSet(ctx, key, strs).Err()
+				} else {
+					err = rdb.HSet(ctx, key, strs).Err()
+				}
 				if err == nil && expiration > 0 {
 					rdb.Expire(ctx, key, expiration)
 				}
@@ -795,7 +801,13 @@ func (c *connectionService) AddHashField(connName string, db int, key string, ac
 		}
 	default:
 		// overwrite duplicated fields
-		_, err = rdb.HMSet(ctx, key, fieldItems...).Result()
+		version := getRedisVersion(rdb, ctx)
+		if strings.HasPrefix(version, "2.") || strings.HasPrefix(version, "3.") {
+			// 4.0以前老版本redis
+			_, err = rdb.HMSet(ctx, key, fieldItems...).Result()
+		} else {
+			_, err = rdb.HSet(ctx, key, fieldItems...).Result()
+		}
 		for i := 0; i < len(fieldItems); i += 2 {
 			updated[fieldItems[i].(string)] = fieldItems[i+1]
 		}
@@ -1164,6 +1176,23 @@ func (c *connectionService) CleanCmdHistory() (resp types.JSResp) {
 	c.cmdHistory = []cmdHistoryItem{}
 	resp.Success = true
 	return
+}
+
+func getRedisVersion(rdb *redis.Client, ctx context.Context) string {
+	var version = ""
+	info, err := rdb.Info(ctx, "server").Result()
+	if err != nil {
+		return version
+	}
+	// 解析 Redis 版本信息
+	infoStr := strings.Split(info, "\r\n")
+	for _, line := range infoStr {
+		if strings.HasPrefix(line, "redis_version:") {
+			version = line[len("redis_version:"):]
+			break
+		}
+	}
+	return version
 }
 
 // update or insert key info to database
