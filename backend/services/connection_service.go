@@ -662,11 +662,17 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 			resp.Msg = "invalid hash value"
 			return
 		} else {
-			if len(strs) > 1 {
-				err = rdb.HSet(ctx, key, strs).Err()
-				if err == nil && expiration > 0 {
-					rdb.Expire(ctx, key, expiration)
-				}
+			total := len(strs)
+			if total > 1 {
+				_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+					for i := 0; i < total; i += 2 {
+						pipe.HSet(ctx, key, strs[i], strs[i+1])
+					}
+					if expiration > 0 {
+						pipe.Expire(ctx, key, expiration)
+					}
+					return nil
+				})
 			}
 		}
 	case "set":
@@ -795,9 +801,17 @@ func (c *connectionService) AddHashField(connName string, db int, key string, ac
 		}
 	default:
 		// overwrite duplicated fields
-		_, err = rdb.HSet(ctx, key, fieldItems...).Result()
-		for i := 0; i < len(fieldItems); i += 2 {
-			updated[fieldItems[i].(string)] = fieldItems[i+1]
+		total := len(fieldItems)
+		if total > 1 {
+			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+				for i := 0; i < total; i += 2 {
+					rdb.HSet(ctx, key, fieldItems[i], fieldItems[i+1])
+				}
+				return nil
+			})
+			for i := 0; i < total; i += 2 {
+				updated[fieldItems[i].(string)] = fieldItems[i+1]
+			}
 		}
 	}
 	if err != nil {
