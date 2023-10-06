@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"net"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -261,11 +262,16 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 		return
 	}
 
-	// get total databases
+	// get connection config
+	selConn := c.conns.GetConnection(name)
+
 	totaldb := 16
-	if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
-		if total, err := strconv.Atoi(config["databases"]); err == nil {
-			totaldb = total
+	if selConn.DBFilterType == "none" {
+		// get total databases
+		if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
+			if total, err := strconv.Atoi(config["databases"]); err == nil {
+				totaldb = total
+			}
 		}
 	}
 
@@ -278,21 +284,37 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	// Parse all db, response content like below
 	var dbs []types.ConnectionDB
 	info := c.parseInfo(res)
-	for i := 0; i < totaldb; i++ {
-		dbName := "db" + strconv.Itoa(i)
+	queryDB := func(idx int) types.ConnectionDB {
+		dbName := "db" + strconv.Itoa(idx)
 		dbInfoStr := info["Keyspace"][dbName]
 		if len(dbInfoStr) > 0 {
 			dbInfo := c.parseDBItemInfo(dbInfoStr)
-			dbs = append(dbs, types.ConnectionDB{
+			return types.ConnectionDB{
 				Name:    dbName,
 				Keys:    dbInfo["keys"],
 				Expires: dbInfo["expires"],
 				AvgTTL:  dbInfo["avg_ttl"],
-			})
+			}
 		} else {
-			dbs = append(dbs, types.ConnectionDB{
+			return types.ConnectionDB{
 				Name: dbName,
-			})
+			}
+		}
+	}
+	switch selConn.DBFilterType {
+	case "none":
+		for idx := 0; idx < totaldb; idx++ {
+			dbs = append(dbs, queryDB(idx))
+		}
+	case "show":
+		for _, idx := range selConn.DBFilterList {
+			dbs = append(dbs, queryDB(idx))
+		}
+	case "hide":
+		for idx := 0; idx < totaldb; idx++ {
+			if !slices.Contains(selConn.DBFilterList, idx) {
+				dbs = append(dbs, queryDB(idx))
+			}
 		}
 	}
 
@@ -350,7 +372,7 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 			})
 		}))
 
-		if _, err := rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
+		if _, err = rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 			return nil, nil, errors.New("can not connect to redis server:" + err.Error())
 		}
 		var cancelFunc context.CancelFunc

@@ -34,6 +34,8 @@ func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 		KeySeparator:  ":",
 		ConnTimeout:   60,
 		ExecTimeout:   60,
+		DBFilterType:  "none",
+		DBFilterList:  []int{},
 		MarkColor:     "",
 	}
 }

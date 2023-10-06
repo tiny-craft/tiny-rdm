@@ -13,6 +13,8 @@ type ConnectionConfig struct {
 	KeySeparator  string        `json:"keySeparator,omitempty" yaml:"key_separator,omitempty"`
 	ConnTimeout   int           `json:"connTimeout,omitempty" yaml:"conn_timeout,omitempty"`
 	ExecTimeout   int           `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
+	DBFilterType  string        `json:"dbFilterType" yaml:"db_filter_type,omitempty"`
+	DBFilterList  []int         `json:"dbFilterList" yaml:"db_filter_list,omitempty"`
 	MarkColor     string        `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 	SSH           ConnectionSSH `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 }

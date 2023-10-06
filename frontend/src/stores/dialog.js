@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import useConnectionStore from './connections.js'
+import { assignWith, isEmpty } from 'lodash'
 
 /**
  * connection dialog type
@@ -81,7 +82,16 @@ const useDialogStore = defineStore('dialog', {
         async openEditDialog(name) {
             const connStore = useConnectionStore()
             const profile = await connStore.getConnectionProfile(name)
-            this.connParam = profile || connStore.newDefaultConnection(name)
+            const assignCustomizer = (objVal, srcVal, key) => {
+                if (isEmpty(objVal)) {
+                    return srcVal
+                }
+                if (isEmpty(srcVal)) {
+                    return objVal
+                }
+                return undefined
+            }
+            this.connParam = assignWith({}, connStore.newDefaultConnection(name), profile, assignCustomizer)
             this.connType = ConnDialogType.EDIT
             this.connDialogVisible = true
         },

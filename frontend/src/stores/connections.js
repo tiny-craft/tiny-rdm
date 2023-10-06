@@ -208,6 +208,8 @@ const useConnectionStore = defineStore('connections', {
                 keySeparator: ':',
                 connTimeout: 60,
                 execTimeout: 60,
+                dbFilterType: 'none',
+                dbFilterList: [],
                 markColor: '',
                 ssh: {
                     enable: false,

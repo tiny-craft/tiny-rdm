@@ -1,5 +1,5 @@
 <script setup>
-import { every, get, includes, isEmpty, map } from 'lodash'
+import { every, get, includes, isEmpty, map, sortBy, toNumber } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { SelectKeyFile, TestConnection } from 'wailsjs/go/services/connectionService.js'
@@ -56,12 +56,24 @@ const groupOptions = computed(() => {
     return options
 })
 
+const dbFilterList = ref([])
+const onUpdateDBFilterList = (list) => {
+    const dbList = []
+    for (const item of list) {
+        const idx = toNumber(item)
+        if (!isNaN(idx)) {
+            dbList.push(idx)
+        }
+    }
+    generalForm.value.dbFilterList = sortBy(dbList)
+}
+
 const sshLoginType = computed(() => {
     return get(generalForm.value, 'ssh.loginType', 'pwd')
 })
 
 const onChoosePKFile = async () => {
-    const { success, data } = await SelectKeyFile(i18n.t('dialogue.connection.pkfile_selection_title'))
+    const { success, data } = await SelectKeyFile(i18n.t('dialogue.connection.ssh.pkfile_selection_title'))
     if (!success) {
         generalForm.value.ssh.pkFile = ''
     } else {
@@ -139,6 +151,7 @@ watch(
             resetForm()
             editName.value = get(dialogStore.connParam, 'name', '')
             generalForm.value = dialogStore.connParam || connectionStore.newDefaultConnection()
+            dbFilterList.value = map(generalForm.value.dbFilterList, (item) => item + '')
             generalForm.value.ssh.loginType = generalForm.value.ssh.loginType || 'pwd'
         }
     },
@@ -233,50 +246,91 @@ const onClose = () => {
                         :rules="generalFormRules()"
                         :show-require-mark="false"
                         label-placement="top">
-                        <n-form-item :label="$t('dialogue.connection.advn_filter')" path="defaultFilter">
-                            <n-input
-                                v-model:value="generalForm.defaultFilter"
-                                :placeholder="$t('dialogue.connection.advn_filter_tip')" />
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.advn_separator')" path="keySeparator">
-                            <n-input
-                                v-model:value="generalForm.keySeparator"
-                                :placeholder="$t('dialogue.connection.advn_separator_tip')" />
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.advn_conn_timeout')" path="connTimeout">
-                            <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
-                                <template #suffix>
-                                    {{ $t('common.second') }}
-                                </template>
-                            </n-input-number>
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.advn_exec_timeout')" path="execTimeout">
-                            <n-input-number v-model:value="generalForm.execTimeout" :max="999999" :min="1">
-                                <template #suffix>
-                                    {{ $t('common.second') }}
-                                </template>
-                            </n-input-number>
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.advn_mark_color')" path="markColor">
-                            <div
-                                v-for="color in predefineColors"
-                                :key="color"
-                                :class="{
-                                    'color-preset-item_selected': generalForm.markColor === color,
-                                }"
-                                :style="{ backgroundColor: color }"
-                                class="color-preset-item"
-                                @click="generalForm.markColor = color">
-                                <n-icon v-if="isEmpty(color)" :component="Close" size="24" />
-                            </div>
-                        </n-form-item>
+                        <n-grid :x-gap="10">
+                            <n-form-item-gi
+                                :span="12"
+                                :label="$t('dialogue.connection.advn.filter')"
+                                path="defaultFilter">
+                                <n-input
+                                    v-model:value="generalForm.defaultFilter"
+                                    :placeholder="$t('dialogue.connection.advn.filter_tip')" />
+                            </n-form-item-gi>
+                            <n-form-item-gi
+                                :span="12"
+                                :label="$t('dialogue.connection.advn.separator')"
+                                path="keySeparator">
+                                <n-input
+                                    v-model:value="generalForm.keySeparator"
+                                    :placeholder="$t('dialogue.connection.advn_separator_tip')" />
+                            </n-form-item-gi>
+                            <n-form-item-gi
+                                :span="12"
+                                :label="$t('dialogue.connection.advn.conn_timeout')"
+                                path="connTimeout">
+                                <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
+                                    <template #suffix>
+                                        {{ $t('common.second') }}
+                                    </template>
+                                </n-input-number>
+                            </n-form-item-gi>
+                            <n-form-item-gi
+                                :span="12"
+                                :label="$t('dialogue.connection.advn.exec_timeout')"
+                                path="execTimeout">
+                                <n-input-number v-model:value="generalForm.execTimeout" :max="999999" :min="1">
+                                    <template #suffix>
+                                        {{ $t('common.second') }}
+                                    </template>
+                                </n-input-number>
+                            </n-form-item-gi>
+                            <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_type')">
+                                <n-radio-group v-model:value="generalForm.dbFilterType">
+                                    <n-radio-button :label="$t('dialogue.connection.advn.dbfilter_all')" value="none" />
+                                    <n-radio-button
+                                        :label="$t('dialogue.connection.advn.dbfilter_show')"
+                                        value="show" />
+                                    <n-radio-button
+                                        :label="$t('dialogue.connection.advn.dbfilter_hide')"
+                                        value="hide" />
+                                </n-radio-group>
+                            </n-form-item-gi>
+                            <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_input')">
+                                <n-select
+                                    v-model:value="dbFilterList"
+                                    :disabled="generalForm.dbFilterType === 'none'"
+                                    filterable
+                                    multiple
+                                    tag
+                                    :placeholder="$t('dialogue.connection.advn.dbfilter_input_tip')"
+                                    :show-arrow="false"
+                                    :show="false"
+                                    :clearable="true"
+                                    @update:value="onUpdateDBFilterList" />
+                            </n-form-item-gi>
+                            <n-form-item-gi
+                                :span="24"
+                                :label="$t('dialogue.connection.advn.mark_color')"
+                                path="markColor">
+                                <div
+                                    v-for="color in predefineColors"
+                                    :key="color"
+                                    :class="{
+                                        'color-preset-item_selected': generalForm.markColor === color,
+                                    }"
+                                    :style="{ backgroundColor: color }"
+                                    class="color-preset-item"
+                                    @click="generalForm.markColor = color">
+                                    <n-icon v-if="isEmpty(color)" :component="Close" size="24" />
+                                </div>
+                            </n-form-item-gi>
+                        </n-grid>
                     </n-form>
                 </n-tab-pane>
 
-                <n-tab-pane :tab="$t('dialogue.connection.ssh_tunnel')" display-directive="show" name="ssh">
+                <n-tab-pane :tab="$t('dialogue.connection.ssh.tunnel')" display-directive="show" name="ssh">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.ssh.enable" size="medium">
-                            {{ $t('dialogue.connection.ssh_enable') }}
+                            {{ $t('dialogue.connection.ssh.enable') }}
                         </n-checkbox>
                     </n-form-item>
                     <n-form
@@ -288,7 +342,7 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.addr')" required>
                             <n-input
                                 v-model:value="generalForm.ssh.addr"
-                                :placeholder="$t('dialogue.connection.ssh_addr_tip')" />
+                                :placeholder="$t('dialogue.connection.ssh.addr_tip')" />
                             <n-text style="width: 40px; text-align: center">:</n-text>
                             <n-input-number
                                 v-model:value="generalForm.ssh.port"
@@ -296,10 +350,10 @@ const onClose = () => {
                                 :min="1"
                                 style="width: 200px" />
                         </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.login_type')">
+                        <n-form-item :label="$t('dialogue.connection.ssh.login_type')">
                             <n-radio-group v-model:value="generalForm.ssh.loginType">
                                 <n-radio-button :label="$t('dialogue.connection.pwd')" value="pwd" />
-                                <n-radio-button :label="$t('dialogue.connection.pkfile')" value="pkfile" />
+                                <n-radio-button :label="$t('dialogue.connection.ssh.pkfile')" value="pkfile" />
                             </n-radio-group>
                         </n-form-item>
                         <n-form-item
@@ -307,27 +361,27 @@ const onClose = () => {
                             :label="$t('dialogue.connection.usr')">
                             <n-input
                                 v-model:value="generalForm.ssh.username"
-                                :placeholder="$t('dialogue.connection.ssh_usr_tip')" />
+                                :placeholder="$t('dialogue.connection.ssh.usr_tip')" />
                         </n-form-item>
                         <n-form-item v-if="sshLoginType === 'pwd'" :label="$t('dialogue.connection.pwd')">
                             <n-input
                                 v-model:value="generalForm.ssh.password"
-                                :placeholder="$t('dialogue.connection.ssh_pwd_tip')"
+                                :placeholder="$t('dialogue.connection.ssh.pwd_tip')"
                                 show-password-on="click"
                                 type="password" />
                         </n-form-item>
-                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.pkfile')">
+                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.pkfile')">
                             <n-input-group>
                                 <n-input
                                     v-model:value="generalForm.ssh.pkFile"
-                                    :placeholder="$t('dialogue.connection.pkfile_tip')" />
+                                    :placeholder="$t('dialogue.connection.ssh.pkfile_tip')" />
                                 <n-button :focusable="false" @click="onChoosePKFile">...</n-button>
                             </n-input-group>
                         </n-form-item>
-                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.passphrase')">
+                        <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.passphrase')">
                             <n-input
                                 v-model:value="generalForm.ssh.passphrase"
-                                :placeholder="$t('dialogue.connection.passphrase_tip')"
+                                :placeholder="$t('dialogue.connection.ssh.passphrase_tip')"
                                 show-password-on="click"
                                 type="password" />
                         </n-form-item>
