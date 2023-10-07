@@ -114,7 +114,6 @@
       "new_title": "New Connection",
       "edit_title": "Edit Connection",
       "general": "General",
-      "advanced": "Advanced",
       "no_group": "No Group",
       "group": "Group",
       "conn_name": "Name",
@@ -129,6 +128,7 @@
       "test_succ": "Successful connection to redis-server",
       "test_fail": "Fail Connection",
       "advn": {
+        "title": "Advanced",
         "filter": "Default Key Filter Pattern",
         "filter_tip": "Pattern which defines loaded keys from redis server",
         "separator": "Key Separator",
@@ -146,8 +146,8 @@
         "mark_color": "Mark Color"
       },
       "ssh": {
+        "title": "SSH Tunnel",
         "enable": "Enable SSH Tuntel",
-        "tunnel": "SSH Tunnel",
         "login_type": "Login Type",
         "pkfile": "Private Key File",
         "passphrase": "Passphrase",
@@ -157,6 +157,15 @@
         "pkfile_tip": "SSH Private Key File Path",
         "passphrase_tip": "(Optional) Passphrase for Private Key",
         "pkfile_selection_title": "Please Select Private Key File"
+      },
+      "sentinel": {
+        "title": "Sentinel",
+        "enable": "Serve as Sentinel Node",
+        "master": "Name of Master Node",
+        "password": "Password for Master Node",
+        "username": "Username for Master Node",
+        "pwd_tip": "(Optional) username for master node",
+        "usr_tip": "(Optional) authentication password for master node (Redis > 6.0)"
       }
     },
     "group": {

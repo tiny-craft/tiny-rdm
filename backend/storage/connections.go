@@ -37,6 +37,9 @@ func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 		DBFilterType:  "none",
 		DBFilterList:  []int{},
 		MarkColor:     "",
+		Sentinel: types.ConnectionSentinel{
+			Master: "mymaster",
+		},
 	}
 }
 

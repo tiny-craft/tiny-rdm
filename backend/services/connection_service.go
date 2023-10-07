@@ -127,6 +127,21 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*r
 		option.ReadTimeout = -2
 		option.WriteTimeout = -2
 	}
+
+	if config.Sentinel.Enable {
+		sentinel := redis.NewSentinelClient(option)
+		addr, err := sentinel.GetMasterAddrByName(c.ctx, config.Sentinel.Master).Result()
+		if err != nil {
+			return nil, err
+		}
+		if len(addr) < 2 {
+			return nil, errors.New("cannot get master address")
+		}
+		option.Addr = fmt.Sprintf("%s:%s", addr[0], addr[1])
+		option.Username = config.Sentinel.Username
+		option.Password = config.Sentinel.Password
+	}
+
 	rdb := redis.NewClient(option)
 	return rdb, nil
 }

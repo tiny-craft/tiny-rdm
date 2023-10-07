@@ -221,6 +221,12 @@ const useConnectionStore = defineStore('connections', {
                     pkFile: '',
                     passphrase: '',
                 },
+                sentinel: {
+                    enable: false,
+                    master: 'mymaster',
+                    username: '',
+                    password: '',
+                },
             }
         },
 

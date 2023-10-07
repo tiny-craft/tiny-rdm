@@ -114,7 +114,6 @@
       "new_title": "新建连接",
       "edit_title": "编辑连接",
       "general": "常规配置",
-      "advanced": "高级配置",
       "no_group": "无分组",
       "group": "分组",
       "conn_name": "连接名",
@@ -129,6 +128,7 @@
       "test_succ": "成功连接到Redis服务器",
       "test_fail": "连接失败",
       "advn": {
+        "title": "高级配置",
         "filter": "默认键过滤表达式",
         "filter_tip": "需要加载的键名表达式",
         "separator": "键分隔符",
@@ -147,7 +147,7 @@
       },
       "ssh": {
         "enable": "启用SSH隧道",
-        "tunnel": "SSH隧道",
+        "title": "SSH隧道",
         "login_type": "登录类型",
         "pkfile": "私钥文件",
         "passphrase": "私钥密码",
@@ -157,6 +157,15 @@
         "pkfile_tip": "SSH私钥文件路径",
         "passphrase_tip": "(可选)SSH私钥密码",
         "pkfile_selection_title": "请选择私钥文件"
+      },
+      "sentinel": {
+        "title": "哨兵模式",
+        "enable": "当前为哨兵节点",
+        "master": "主实例名",
+        "password": "主节点密码",
+        "username": "主节点用户名",
+        "pwd_tip": "(可选)主节点服务授权用户名",
+        "usr_tip": "(可选)主节点服务授权密码 (Redis > 6.0)"
       }
     },
     "group": {

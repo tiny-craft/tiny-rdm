@@ -198,6 +198,7 @@ const onClose = () => {
         transform-origin="center">
         <n-spin :show="closingConnection">
             <n-tabs v-model:value="tab" animated type="line">
+                <!-- General pane -->
                 <n-tab-pane :tab="$t('dialogue.connection.general')" display-directive="show" name="general">
                     <n-form
                         ref="generalFormRef"
@@ -239,7 +240,8 @@ const onClose = () => {
                     </n-form>
                 </n-tab-pane>
 
-                <n-tab-pane :tab="$t('dialogue.connection.advanced')" display-directive="show" name="advanced">
+                <!-- Advance pane -->
+                <n-tab-pane :tab="$t('dialogue.connection.advn.title')" display-directive="show" name="advanced">
                     <n-form
                         ref="advanceFormRef"
                         :model="generalForm"
@@ -327,14 +329,14 @@ const onClose = () => {
                     </n-form>
                 </n-tab-pane>
 
-                <n-tab-pane :tab="$t('dialogue.connection.ssh.tunnel')" display-directive="show" name="ssh">
+                <!-- SSH pane -->
+                <n-tab-pane :tab="$t('dialogue.connection.ssh.title')" display-directive="show" name="ssh">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.ssh.enable" size="medium">
                             {{ $t('dialogue.connection.ssh.enable') }}
                         </n-checkbox>
                     </n-form-item>
                     <n-form
-                        ref="sshFormRef"
                         :model="generalForm.ssh"
                         :show-require-mark="false"
                         :disabled="!generalForm.ssh.enable"
@@ -384,6 +386,38 @@ const onClose = () => {
                                 :placeholder="$t('dialogue.connection.ssh.passphrase_tip')"
                                 show-password-on="click"
                                 type="password" />
+                        </n-form-item>
+                    </n-form>
+                </n-tab-pane>
+
+                <!-- Sentinel pane -->
+                <n-tab-pane :tab="$t('dialogue.connection.sentinel.title')" display-directive="show" name="sentinel">
+                    <n-form-item label-placement="left">
+                        <n-checkbox v-model:checked="generalForm.sentinel.enable" size="medium">
+                            {{ $t('dialogue.connection.sentinel.enable') }}
+                        </n-checkbox>
+                    </n-form-item>
+                    <n-form
+                        :model="generalForm.sentinel"
+                        :show-require-mark="false"
+                        :disabled="!generalForm.sentinel.enable"
+                        label-placement="top">
+                        <n-form-item :label="$t('dialogue.connection.sentinel.master')">
+                            <n-input
+                                v-model:value="generalForm.sentinel.master"
+                                :placeholder="$t('dialogue.connection.sentinel.master')" />
+                        </n-form-item>
+                        <n-form-item :label="$t('dialogue.connection.sentinel.password')">
+                            <n-input
+                                v-model:value="generalForm.sentinel.password"
+                                :placeholder="$t('dialogue.connection.sentinel.pwd_tip')"
+                                show-password-on="click"
+                                type="password" />
+                        </n-form-item>
+                        <n-form-item :label="$t('dialogue.connection.sentinel.username')">
+                            <n-input
+                                v-model:value="generalForm.sentinel.username"
+                                :placeholder="$t('dialogue.connection.sentinel.usr_tip')" />
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
