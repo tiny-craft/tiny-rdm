@@ -261,7 +261,7 @@ const onClose = () => {
                                 path="keySeparator">
                                 <n-input
                                     v-model:value="generalForm.keySeparator"
-                                    :placeholder="$t('dialogue.connection.advn_separator_tip')" />
+                                    :placeholder="$t('dialogue.connection.advn.separator_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
                                 :span="12"

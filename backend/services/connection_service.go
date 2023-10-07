@@ -302,10 +302,6 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 		}
 	}
 	switch selConn.DBFilterType {
-	case "none":
-		for idx := 0; idx < totaldb; idx++ {
-			dbs = append(dbs, queryDB(idx))
-		}
 	case "show":
 		for _, idx := range selConn.DBFilterList {
 			dbs = append(dbs, queryDB(idx))
@@ -315,6 +311,10 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 			if !slices.Contains(selConn.DBFilterList, idx) {
 				dbs = append(dbs, queryDB(idx))
 			}
+		}
+	default:
+		for idx := 0; idx < totaldb; idx++ {
+			dbs = append(dbs, queryDB(idx))
 		}
 	}
 

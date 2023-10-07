@@ -1,55 +1,109 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { types } from '@/consts/support_redis_type.js'
 import ContentValueHash from '@/components/content_value/ContentValueHash.vue'
 import ContentValueList from '@/components/content_value/ContentValueList.vue'
 import ContentValueString from '@/components/content_value/ContentValueString.vue'
 import ContentValueSet from '@/components/content_value/ContentValueSet.vue'
 import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
-import { isEmpty, map, toUpper } from 'lodash'
+import { get, isEmpty, keyBy, map, size, toUpper } from 'lodash'
 import useTabStore from 'stores/tab.js'
 import useConnectionStore from 'stores/connections.js'
 import ContentServerStatus from '@/components/content_value/ContentServerStatus.vue'
 import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 
-const serverInfo = ref({})
-const autoRefresh = ref(false)
+/**
+ * @typedef {Object} ServerStatusItem
+ * @property {string} name
+ * @property {Object} info
+ * @property {boolean} autoRefresh
+ * @property {boolean} loading loading status for refresh
+ * @property {boolean} autoLoading loading status for auto refresh
+ */
+
+/**
+ *
+ * @type {UnwrapNestedRefs<Object.<string, ServerStatusItem>>}
+ */
+const serverStatusTab = reactive({})
+
+/**
+ *
+ * @param {string} serverName
+ * @return {UnwrapRef<ServerStatusItem>}
+ */
+const getServerInfo = (serverName) => {
+    if (isEmpty(serverName)) {
+        return {
+            name: serverName,
+            info: {},
+            autoRefresh: false,
+            autoLoading: false,
+            loading: false,
+        }
+    }
+    if (!serverStatusTab.hasOwnProperty(serverName)) {
+        serverStatusTab[serverName] = {
+            name: serverName,
+            info: {},
+            autoRefresh: false,
+            autoLoading: false,
+            loading: false,
+        }
+    }
+    return serverStatusTab[serverName]
+}
 const serverName = computed(() => {
     if (tabContent.value != null) {
         return tabContent.value.name
     }
     return ''
 })
-const loadingServerInfo = ref(false)
-const autoLoadingServerInfo = ref(false)
+/**
+ *
+ * @type {ComputedRef<ServerStatusItem>}
+ */
+const currentServer = computed(() => {
+    return getServerInfo(serverName.value)
+})
 
 /**
  * refresh server status info
+ * @param {string} serverName
  * @param {boolean} [force] force refresh will show loading indicator
  * @returns {Promise<void>}
  */
-const refreshInfo = async (force) => {
+const refreshInfo = async (serverName, force) => {
+    const info = getServerInfo(serverName)
     if (force) {
-        loadingServerInfo.value = true
+        info.loading = true
     } else {
-        autoLoadingServerInfo.value = true
+        info.autoLoading = true
     }
-    if (!isEmpty(serverName.value) && connectionStore.isConnected(serverName.value)) {
+    if (!isEmpty(serverName) && connectionStore.isConnected(serverName)) {
         try {
-            serverInfo.value = await connectionStore.getServerInfo(serverName.value)
+            info.info = await connectionStore.getServerInfo(serverName)
         } finally {
-            loadingServerInfo.value = false
-            autoLoadingServerInfo.value = false
+            info.loading = false
+            info.autoLoading = false
         }
+    }
+}
+
+const refreshAllInfo = async (force) => {
+    for (const serverName in serverStatusTab) {
+        await refreshInfo(serverName, force)
     }
 }
 
 let intervalId
 onMounted(() => {
-    refreshInfo(true)
+    refreshAllInfo(true)
     intervalId = setInterval(() => {
-        if (autoRefresh.value) {
-            refreshInfo()
+        for (const serverName in serverStatusTab) {
+            if (get(serverStatusTab, [serverName, 'autoRefresh'])) {
+                refreshInfo(serverName)
+            }
         }
     }, 5000)
 })
@@ -80,9 +134,25 @@ watch(
     () => tabStore.nav,
     (nav) => {
         if (nav === 'browser') {
-            refreshInfo()
+            refreshInfo(serverName.value)
         }
     },
+)
+
+watch(
+    () => tabStore.tabList,
+    (tabs) => {
+        if (size(tabs) < size(serverStatusTab)) {
+            const tabMap = keyBy(tabs, 'name')
+            // remove unused server status tab
+            for (const t in serverStatusTab) {
+                if (!tabMap.hasOwnProperty(t)) {
+                    delete serverStatusTab[t]
+                }
+            }
+        }
+    },
+    { deep: true },
 )
 
 const tabContent = computed(() => {
@@ -110,10 +180,6 @@ const showNonexists = computed(() => {
     return tabContent.value.value == null
 })
 
-const onUpdateValue = (tabIndex) => {
-    tabStore.switchTab(tabIndex)
-}
-
 /**
  * reload current selection key
  * @returns {Promise<null>}
@@ -132,12 +198,12 @@ const onReloadKey = async () => {
         <div v-if="showServerStatus" class="content-container flex-item-expand flex-box-v">
             <!-- select nothing or select server node, display server status -->
             <content-server-status
-                v-model:auto-refresh="autoRefresh"
-                :info="serverInfo"
-                :loading="loadingServerInfo"
-                :auto-loading="autoLoadingServerInfo"
-                :server="serverName"
-                @refresh="refreshInfo(true)" />
+                v-model:auto-refresh="currentServer.autoRefresh"
+                :info="currentServer.info"
+                :loading="currentServer.loading"
+                :auto-loading="currentServer.autoLoading"
+                :server="currentServer.name"
+                @refresh="refreshInfo(currentServer.name, true)" />
         </div>
         <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
             <n-empty :description="$t('interface.nonexist_tab_content')" class="empty-content">
