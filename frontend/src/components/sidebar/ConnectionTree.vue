@@ -21,7 +21,7 @@ import usePreferencesStore from 'stores/preferences.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
-const openingConnection = ref(false)
+const connectingServer = ref('')
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
@@ -287,18 +287,21 @@ const onUpdateSelectedKeys = (keys, option) => {
  */
 const openConnection = async (name) => {
     try {
+        connectingServer.value = name
         if (!connectionStore.isConnected(name)) {
-            openingConnection.value = true
             await connectionStore.openConnection(name)
         }
-        tabStore.upsertTab({
-            server: name,
-        })
+        // check if connection already canceled before finish open
+        if (!isEmpty(connectingServer.value)) {
+            tabStore.upsertTab({
+                server: name,
+            })
+        }
     } catch (e) {
         $message.error(e.message)
         // node.isLeaf = undefined
     } finally {
-        openingConnection.value = false
+        connectingServer.value = ''
     }
 }
 
@@ -467,6 +470,13 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
     connectionStore.connections = Array.from(connectionStore.connections)
     saveSort()
 }
+
+const onCancelOpen = () => {
+    if (!isEmpty(connectingServer.value)) {
+        connectionStore.closeConnection(connectingServer.value)
+        connectingServer.value = ''
+    }
+}
 </script>
 
 <template>
@@ -496,7 +506,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         @update:expanded-keys="onUpdateExpandedKeys" />
 
     <!-- status display modal -->
-    <n-modal :show="openingConnection" transform-origin="center">
+    <n-modal :show="connectingServer !== ''" transform-origin="center">
         <n-card
             :bordered="false"
             :content-style="{ textAlign: 'center' }"
@@ -505,7 +515,12 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
             style="width: 400px">
             <n-spin>
                 <template #description>
-                    {{ $t('dialogue.opening_connection') }}
+                    <n-space vertical>
+                        <n-text strong>{{ $t('dialogue.opening_connection') }}</n-text>
+                        <n-button secondary size="small" :focusable="false" @click="onCancelOpen">
+                            {{ $t('dialogue.interrupt_connection') }}
+                        </n-button>
+                    </n-space>
                 </template>
             </n-spin>
         </n-card>
