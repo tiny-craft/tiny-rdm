@@ -4,10 +4,10 @@ go 1.21
 
 require (
 	github.com/adrg/sysfont v0.1.2
-	github.com/redis/go-redis/v9 v9.2.0
+	github.com/redis/go-redis/v9 v9.2.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.6.0
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -40,8 +40,8 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
 
