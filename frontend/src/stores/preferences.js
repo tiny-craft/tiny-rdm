@@ -12,6 +12,7 @@ import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { enUS, NButton, NSpace, useOsTheme, zhCN } from 'naive-ui'
 import { h, nextTick } from 'vue'
+import { compareVersion } from '@/utils/version.js'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -244,7 +245,11 @@ const usePreferencesStore = defineStore('preferences', {
                 const { success, data = {} } = await CheckForUpdate()
                 if (success) {
                     const { version = 'v1.0.0', latest, page_url: pageUrl } = data
-                    if ((manual || latest > this.general.skipVersion) && latest > version && !isEmpty(pageUrl)) {
+                    if (
+                        (manual || latest > this.general.skipVersion) &&
+                        compareVersion(latest, version) > 0 &&
+                        !isEmpty(pageUrl)
+                    ) {
                         const notiRef = $notification.show({
                             title: i18nGlobal.t('dialogue.upgrade.title'),
                             content: i18nGlobal.t('dialogue.upgrade.new_version_tip', { ver: latest }),
