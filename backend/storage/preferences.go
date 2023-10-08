@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
 )
 
@@ -45,6 +46,9 @@ func (p *PreferencesStorage) GetPreferences() (ret types.Preferences) {
 	defer p.mutex.Unlock()
 
 	ret = p.getPreferences()
+	ret.Behavior.AsideWidth = max(ret.Behavior.AsideWidth, consts.DEFAULT_ASIDE_WIDTH)
+	ret.Behavior.WindowWidth = max(ret.Behavior.WindowWidth, consts.DEFAULT_WINDOW_WIDTH)
+	ret.Behavior.WindowHeight = max(ret.Behavior.WindowHeight, consts.DEFAULT_WINDOW_HEIGHT)
 	return
 }
 
