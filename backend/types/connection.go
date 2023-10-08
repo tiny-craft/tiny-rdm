@@ -35,6 +35,7 @@ type ConnectionGroup struct {
 
 type ConnectionDB struct {
 	Name    string `json:"name"`
+	Index   int    `json:"index"`
 	Keys    int    `json:"keys"`
 	Expires int    `json:"expires,omitempty"`
 	AvgTTL  int    `json:"avgTtl,omitempty"`

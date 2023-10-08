@@ -178,11 +178,11 @@ func decodeBinary(str string) (string, bool) {
 }
 
 func decodeHex(str string) (string, bool) {
-	encodeStr := hex.EncodeToString([]byte(str))
+	decodeStr := hex.EncodeToString([]byte(str))
 	var resultStr strings.Builder
-	for i := 0; i < len(encodeStr); i += 2 {
+	for i := 0; i < len(decodeStr); i += 2 {
 		resultStr.WriteString("\\x")
-		resultStr.WriteString(encodeStr[i : i+2])
+		resultStr.WriteString(decodeStr[i : i+2])
 	}
 	return resultStr.String(), true
 }

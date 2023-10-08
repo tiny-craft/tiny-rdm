@@ -9,15 +9,16 @@ import (
 	"golang.org/x/crypto/ssh"
 	"net"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
+	"tinyrdm/backend/utils/coll"
 	maputil "tinyrdm/backend/utils/map"
 	redis2 "tinyrdm/backend/utils/redis"
+	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
 )
 
@@ -352,24 +353,28 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 			dbInfo := c.parseDBItemInfo(dbInfoStr)
 			return types.ConnectionDB{
 				Name:    dbName,
+				Index:   idx,
 				Keys:    dbInfo["keys"],
 				Expires: dbInfo["expires"],
 				AvgTTL:  dbInfo["avg_ttl"],
 			}
 		} else {
 			return types.ConnectionDB{
-				Name: dbName,
+				Name:  dbName,
+				Index: idx,
 			}
 		}
 	}
 	switch selConn.DBFilterType {
 	case "show":
-		for _, idx := range selConn.DBFilterList {
+		filterList := sliceutil.Unique(selConn.DBFilterList)
+		for _, idx := range filterList {
 			dbs = append(dbs, queryDB(idx))
 		}
 	case "hide":
+		hiddenList := coll.NewSet(selConn.DBFilterList...)
 		for idx := 0; idx < totaldb; idx++ {
-			if !slices.Contains(selConn.DBFilterList, idx) {
+			if !hiddenList.Contains(idx) {
 				dbs = append(dbs, queryDB(idx))
 			}
 		}

@@ -460,7 +460,7 @@ const onClose = () => {
                         :disabled="!generalForm.sentinel.enable"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.sentinel.master')">
-                            <n-space>
+                            <n-input-group>
                                 <n-select
                                     v-model:value="generalForm.sentinel.master"
                                     filterable
@@ -469,7 +469,7 @@ const onClose = () => {
                                 <n-button :loading="loadingSentinelMaster" @click="onLoadSentinelMasters">
                                     {{ $t('dialogue.connection.sentinel.auto_discover') }}
                                 </n-button>
-                            </n-space>
+                            </n-input-group>
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.sentinel.password')">
                             <n-input

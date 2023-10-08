@@ -1,5 +1,19 @@
 import { defineStore } from 'pinia'
-import { endsWith, get, isEmpty, join, remove, size, slice, sortedIndexBy, split, sumBy, toUpper, uniq } from 'lodash'
+import {
+    endsWith,
+    find,
+    get,
+    isEmpty,
+    join,
+    remove,
+    size,
+    slice,
+    sortedIndexBy,
+    split,
+    sumBy,
+    toUpper,
+    uniq,
+} from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -272,6 +286,23 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * get database by server name and index
+         * @param {string} connName
+         * @param {number} db
+         * @return {{}|null}
+         */
+        getDatabase(connName, db) {
+            const dbs = this.databases[connName]
+            if (dbs != null) {
+                const selDB = find(dbs, (item) => item.db === db)
+                if (selDB != null) {
+                    return selDB
+                }
+            }
+            return null
+        },
+
+        /**
          * create a new connection or update current connection profile
          * @param {string} name set null if create a new connection
          * @param {{}} param
@@ -362,7 +393,7 @@ const useConnectionStore = defineStore('connections', {
                     label: db[i].name,
                     name: name,
                     keys: db[i].keys,
-                    db: i,
+                    db: db[i].index,
                     type: ConnectionType.RedisDB,
                     isLeaf: false,
                     children: undefined,
@@ -490,10 +521,14 @@ const useConnectionStore = defineStore('connections', {
                 throw new Error(msg)
             }
             const { keys = [] } = data
-            const dbs = this.databases[connName]
-            dbs[db].opened = true
+            const selDB = this.getDatabase(connName, db)
+            if (selDB == null) {
+                return
+            }
+
+            selDB.opened = true
             if (isEmpty(keys)) {
-                dbs[db].children = []
+                selDB.children = []
                 return
             }
 
@@ -509,9 +544,12 @@ const useConnectionStore = defineStore('connections', {
          * @returns {Promise<void>}
          */
         async reopenDatabase(connName, db) {
-            const dbs = this.databases[connName]
-            dbs[db].children = undefined
-            dbs[db].isLeaf = false
+            const selDB = this.getDatabase(connName, db)
+            if (selDB == null) {
+                return
+            }
+            selDB.children = undefined
+            selDB.isLeaf = false
 
             this._getNodeMap(connName, db).clear()
         },
@@ -522,10 +560,13 @@ const useConnectionStore = defineStore('connections', {
          * @param db
          */
         closeDatabase(connName, db) {
-            const dbs = this.databases[connName]
-            delete dbs[db].children
-            dbs[db].isLeaf = false
-            dbs[db].opened = false
+            const selDB = this.getDatabase(connName, db)
+            if (selDB == null) {
+                return
+            }
+            delete selDB.children
+            selDB.isLeaf = false
+            selDB.opened = false
 
             this._getNodeMap(connName, db).clear()
         },
@@ -683,12 +724,16 @@ const useConnectionStore = defineStore('connections', {
                 return result
             }
             const separator = this._getSeparator(connName)
-            const dbs = this.databases[connName]
-            if (dbs[db].children == null) {
-                dbs[db].children = []
+            const selDB = this.getDatabase(connName, db)
+            if (selDB == null) {
+                return result
+            }
+
+            if (selDB.children == null) {
+                selDB.children = []
             }
             const nodeMap = this._getNodeMap(connName, db)
-            const rootChildren = dbs[db].children
+            const rootChildren = selDB.children
             for (const key of keys) {
                 const keyParts = split(key, separator)
                 const len = size(keyParts)
@@ -782,7 +827,7 @@ const useConnectionStore = defineStore('connections', {
          */
         _tidyNode(connName, db, key, skipResort) {
             const nodeMap = this._getNodeMap(connName, db)
-            const dbNode = get(this.databases, [connName, db], {})
+            const dbNode = this.getDatabase(connName, db) || {}
             const separator = this._getSeparator(connName)
             const keyParts = split(key, separator)
             const totalParts = size(keyParts)
@@ -873,7 +918,7 @@ const useConnectionStore = defineStore('connections', {
                 const nodeMap = this._getNodeMap(server, db)
                 return nodeMap.get(keyPart)
             } else {
-                return this.databases[server][db]
+                return this.getDatabase(server, db)
             }
         },
 
@@ -1291,7 +1336,7 @@ const useConnectionStore = defineStore('connections', {
          * @private
          */
         _deleteKeyNode(connName, db, key, isLayer) {
-            const dbRoot = get(this.databases, [connName, db], {})
+            const dbRoot = this.getDatabase(connName, db) || {}
             const separator = this._getSeparator(connName)
 
             if (dbRoot == null) {
