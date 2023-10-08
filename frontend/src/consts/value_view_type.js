@@ -12,4 +12,7 @@ export const types = {
     GZIP: 'GZip',
     GZIP_JSON: 'GZip JSON',
     DEFLATE: 'Deflate',
+    DEFLATE_JSON: 'Deflate JSON',
+    BROTLI: 'Brotli',
+    BROTLI_JSON: 'Brotli JSON',
 }

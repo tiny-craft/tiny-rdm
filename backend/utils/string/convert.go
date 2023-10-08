@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/andybalholm/brotli"
 	"io"
 	"strconv"
 	"strings"
@@ -72,7 +73,7 @@ func ConvertTo(str, targetType string) (value, resultType string) {
 
 	case types.GZIP, types.GZIP_JSON:
 		if gzipStr, ok := decodeGZip(str); ok {
-			if targetType == types.BASE64_JSON {
+			if targetType == types.GZIP_JSON {
 				value, _ = decodeJson(gzipStr)
 			} else {
 				value = gzipStr
@@ -83,8 +84,29 @@ func ConvertTo(str, targetType string) (value, resultType string) {
 		resultType = targetType
 		return
 
-	case types.DEFLATE:
-		value, _ = decodeDeflate(str)
+	case types.DEFLATE, types.DEFLATE_JSON:
+		if deflateStr, ok := decodeDeflate(str); ok {
+			if targetType == types.DEFLATE_JSON {
+				value, _ = decodeJson(deflateStr)
+			} else {
+				value = deflateStr
+			}
+		} else {
+			value = str
+		}
+		resultType = targetType
+		return
+
+	case types.BROTLI, types.BROTLI_JSON:
+		if brotliStr, ok := decodeBrotli(str); ok {
+			if targetType == types.BROTLI_JSON {
+				value, _ = decodeJson(brotliStr)
+			} else {
+				value = brotliStr
+			}
+		} else {
+			value = str
+		}
 		resultType = targetType
 		return
 	}
@@ -122,7 +144,20 @@ func autoToType(str string) (value, resultType string) {
 		}
 
 		if value, ok = decodeDeflate(str); ok {
+			if value, ok = decodeJson(value); ok {
+				resultType = types.DEFLATE_JSON
+				return
+			}
 			resultType = types.DEFLATE
+			return
+		}
+
+		if value, ok = decodeBrotli(str); ok {
+			if value, ok = decodeJson(value); ok {
+				resultType = types.BROTLI_JSON
+				return
+			}
+			resultType = types.BROTLI
 			return
 		}
 
@@ -207,6 +242,14 @@ func decodeDeflate(str string) (string, bool) {
 	return str, false
 }
 
+func decodeBrotli(str string) (string, bool) {
+	reader := brotli.NewReader(strings.NewReader(str))
+	if decompressed, err := io.ReadAll(reader); err == nil {
+		return string(decompressed), true
+	}
+	return str, false
+}
+
 func SaveAs(str, targetType string) (value string, err error) {
 	switch targetType {
 	case types.PLAIN_TEXT:
@@ -224,7 +267,7 @@ func SaveAs(str, targetType string) (value string, err error) {
 		binStr, _ := encodeBinary(str)
 		return binStr, nil
 
-	case types.JSON, types.BASE64_JSON, types.GZIP_JSON:
+	case types.JSON, types.BASE64_JSON, types.GZIP_JSON, types.DEFLATE_JSON, types.BROTLI_JSON:
 		if jsonStr, ok := encodeJson(str); ok {
 			switch targetType {
 			case types.BASE64_JSON:
@@ -233,6 +276,12 @@ func SaveAs(str, targetType string) (value string, err error) {
 			case types.GZIP_JSON:
 				gzipStr, _ := encodeGZip(jsonStr)
 				return gzipStr, nil
+			case types.DEFLATE_JSON:
+				deflateStr, _ := encodeDeflate(jsonStr)
+				return deflateStr, nil
+			case types.BROTLI_JSON:
+				brotliStr, _ := encodeBrotli(jsonStr)
+				return brotliStr, nil
 			default:
 				return jsonStr, nil
 			}
@@ -252,6 +301,13 @@ func SaveAs(str, targetType string) (value string, err error) {
 			return deflateStr, nil
 		} else {
 			return str, errors.New("fail to build deflate data")
+		}
+
+	case types.BROTLI:
+		if brotliStr, ok := encodeBrotli(str); ok {
+			return brotliStr, nil
+		} else {
+			return str, errors.New("fail to build brotli data")
 		}
 	}
 	return str, errors.New("fail to save with unknown error")
@@ -329,6 +385,23 @@ func encodeDeflate(str string) (string, bool) {
 	}
 	if deflateStr, err := compress([]byte(str)); err == nil {
 		return deflateStr, true
+	}
+	return str, false
+}
+
+func encodeBrotli(str string) (string, bool) {
+	var compress = func(b []byte) (string, error) {
+		var buf bytes.Buffer
+		writer := brotli.NewWriter(&buf)
+		if _, err := writer.Write([]byte(str)); err != nil {
+			writer.Close()
+			return "", err
+		}
+		writer.Close()
+		return string(buf.Bytes()), nil
+	}
+	if brotliStr, err := compress([]byte(str)); err == nil {
+		return brotliStr, true
 	}
 	return str, false
 }

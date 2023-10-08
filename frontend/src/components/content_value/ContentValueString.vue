@@ -67,6 +67,8 @@ const viewLanguage = computed(() => {
         case types.JSON:
         case types.BASE64_JSON:
         case types.GZIP_JSON:
+        case types.DEFLATE_JSON:
+        case types.BROTLI_JSON:
             return 'json'
         default:
             return 'plaintext'
@@ -144,6 +146,7 @@ const onSaveValue = async () => {
                 :value="props.viewAs"
                 :options="viewOption"
                 style="width: 200px"
+                filterable
                 @update:value="onViewTypeUpdate" />
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
