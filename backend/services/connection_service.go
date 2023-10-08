@@ -328,7 +328,7 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	selConn := c.conns.GetConnection(name)
 
 	totaldb := 16
-	if selConn.DBFilterType == "none" {
+	if selConn.DBFilterType == "" || selConn.DBFilterType == "none" {
 		// get total databases
 		if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
 			if total, err := strconv.Atoi(config["databases"]); err == nil {
