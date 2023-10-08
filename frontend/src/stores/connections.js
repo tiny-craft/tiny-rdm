@@ -230,6 +230,25 @@ const useConnectionStore = defineStore('connections', {
             }
         },
 
+        mergeConnectionProfile(dest, src) {
+            const mergeObj = (destObj, srcObj) => {
+                for (const k in srcObj) {
+                    const t = typeof srcObj[k]
+                    if (t === 'string') {
+                        destObj[k] = srcObj[k] || destObj[k] || ''
+                    } else if (t === 'number') {
+                        destObj[k] = srcObj[k] || destObj[k] || 0
+                    } else if (t === 'object') {
+                        mergeObj(destObj[k], srcObj[k] || {})
+                    } else {
+                        destObj[k] = srcObj[k]
+                    }
+                }
+                return destObj
+            }
+            return mergeObj(dest, src)
+        },
+
         /**
          * get database server by name
          * @param name

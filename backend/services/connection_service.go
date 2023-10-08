@@ -74,7 +74,7 @@ func (c *connectionService) Stop(ctx context.Context) {
 	c.connMap = map[string]connectionItem{}
 }
 
-func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*redis.Client, error) {
+func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.Options, error) {
 	var sshClient *ssh.Client
 	if config.SSH.Enable {
 		sshConfig := &ssh.ClientConfig{
@@ -127,10 +127,21 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*r
 		option.ReadTimeout = -2
 		option.WriteTimeout = -2
 	}
+	return option, nil
+}
+
+func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*redis.Client, error) {
+	option, err := c.buildOption(config)
+	if err != nil {
+		return nil, err
+	}
 
 	if config.Sentinel.Enable {
 		sentinel := redis.NewSentinelClient(option)
-		addr, err := sentinel.GetMasterAddrByName(c.ctx, config.Sentinel.Master).Result()
+		defer sentinel.Close()
+
+		var addr []string
+		addr, err = sentinel.GetMasterAddrByName(c.ctx, config.Sentinel.Master).Result()
 		if err != nil {
 			return nil, err
 		}
@@ -146,6 +157,40 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*r
 	return rdb, nil
 }
 
+// ListSentinelMasters list all master info by sentinel
+func (c *connectionService) ListSentinelMasters(config types.ConnectionConfig) (resp types.JSResp) {
+	option, err := c.buildOption(config)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	if option.DialTimeout > 0 {
+		option.DialTimeout = 10 * time.Second
+	}
+	sentinel := redis.NewSentinelClient(option)
+	defer sentinel.Close()
+
+	var retInfo []map[string]string
+	masterInfos, err := sentinel.Masters(c.ctx).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	for _, info := range masterInfos {
+		if infoMap, ok := info.(map[any]any); ok {
+			retInfo = append(retInfo, map[string]string{
+				"name": infoMap["name"].(string),
+				"addr": fmt.Sprintf("%s:%s", infoMap["ip"].(string), infoMap["port"].(string)),
+			})
+		}
+	}
+
+	resp.Data = retInfo
+	resp.Success = true
+	return
+}
+
 func (c *connectionService) TestConnection(config types.ConnectionConfig) (resp types.JSResp) {
 	rdb, err := c.createRedisClient(config)
 	if err != nil {
@@ -153,7 +198,8 @@ func (c *connectionService) TestConnection(config types.ConnectionConfig) (resp 
 		return
 	}
 	defer rdb.Close()
-	if _, err := rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
+
+	if _, err = rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 		resp.Msg = err.Error()
 	} else {
 		resp.Success = true

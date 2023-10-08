@@ -45,7 +45,7 @@ type ConnectionSSH struct {
 	Addr       string `json:"addr,omitempty" yaml:"addr,omitempty"`
 	Port       int    `json:"port,omitempty" yaml:"port,omitempty"`
 	LoginType  string `json:"loginType" yaml:"login_type"`
-	Username   string `json:"username" yaml:"username"`
+	Username   string `json:"username" yaml:"username,omitempty"`
 	Password   string `json:"password,omitempty" yaml:"password,omitempty"`
 	PKFile     string `json:"pkFile,omitempty" yaml:"pk_file,omitempty"`
 	Passphrase string `json:"passphrase,omitempty" yaml:"passphrase,omitempty"`

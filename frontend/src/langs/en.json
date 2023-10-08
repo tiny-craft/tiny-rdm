@@ -122,8 +122,8 @@
       "pwd": "Password",
       "name_tip": "Connection name",
       "addr_tip": "Redis server host",
-      "usr_tip": "(Optional) Redis server username",
-      "pwd_tip": "(Optional) Redis server authentication password (Redis > 6.0)",
+      "usr_tip": "(Optional) Authentication username",
+      "pwd_tip": "(Optional) Authentication password (Redis > 6.0)",
       "test": "Test Connection",
       "test_succ": "Successful connection to redis-server",
       "test_fail": "Fail Connection",
@@ -161,11 +161,12 @@
       "sentinel": {
         "title": "Sentinel",
         "enable": "Serve as Sentinel Node",
-        "master": "Name of Master Node",
+        "master": "Master Group Name",
+        "auto_discover": "Auto Discover",
         "password": "Password for Master Node",
         "username": "Username for Master Node",
-        "pwd_tip": "(Optional) username for master node",
-        "usr_tip": "(Optional) authentication password for master node (Redis > 6.0)"
+        "pwd_tip": "(Optional) Authentication username for master node",
+        "usr_tip": "(Optional) Authentication password for master node (Redis > 6.0)"
       }
     },
     "group": {

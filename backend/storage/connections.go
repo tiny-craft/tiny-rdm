@@ -195,8 +195,7 @@ func (c *ConnectionsStorage) UpdateConnection(name string, param types.Connectio
 					updated = true
 				}
 			} else {
-				err := retrieve(conn.Connections, name, param)
-				if err != nil {
+				if err := retrieve(conn.Connections, name, param); err != nil {
 					return err
 				}
 			}
@@ -287,7 +286,7 @@ func (c *ConnectionsStorage) SaveSortedConnection(sortedConns types.Connections)
 	return c.saveConnections(conns)
 }
 
-// CreateGroup create new group
+// CreateGroup create a new group
 func (c *ConnectionsStorage) CreateGroup(name string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -333,7 +332,7 @@ func (c *ConnectionsStorage) RenameGroup(name, newName string) error {
 	return c.saveConnections(conns)
 }
 
-// DeleteGroup remove special group, include all connections under it
+// DeleteGroup remove specified group, include all connections under it
 func (c *ConnectionsStorage) DeleteGroup(group string, includeConnection bool) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

@@ -2,7 +2,7 @@
 import { every, get, includes, isEmpty, map, sortBy, toNumber } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { SelectKeyFile, TestConnection } from 'wailsjs/go/services/connectionService.js'
+import { ListSentinelMasters, SelectKeyFile, TestConnection } from 'wailsjs/go/services/connectionService.js'
 import useDialog, { ConnDialogType } from 'stores/dialog'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
@@ -57,16 +57,26 @@ const groupOptions = computed(() => {
 })
 
 const dbFilterList = ref([])
-const onUpdateDBFilterList = (list) => {
-    const dbList = []
-    for (const item of list) {
-        const idx = toNumber(item)
-        if (!isNaN(idx)) {
-            dbList.push(idx)
+const onUpdateDBFilterType = (t) => {
+    if (t !== 'none') {
+        // set default filter index if empty
+        if (isEmpty(dbFilterList.value)) {
+            dbFilterList.value = ['0']
         }
     }
-    generalForm.value.dbFilterList = sortBy(dbList)
 }
+
+watch(
+    () => dbFilterList.value,
+    (list) => {
+        const dbList = map(list, (item) => {
+            const idx = toNumber(item)
+            return isNaN(idx) ? 0 : idx
+        })
+        generalForm.value.dbFilterList = sortBy(dbList)
+    },
+    { deep: true },
+)
 
 const sshLoginType = computed(() => {
     return get(generalForm.value, 'ssh.loginType', 'pwd')
@@ -78,6 +88,36 @@ const onChoosePKFile = async () => {
         generalForm.value.ssh.pkFile = ''
     } else {
         generalForm.value.ssh.pkFile = get(data, 'path', '')
+    }
+}
+
+const loadingSentinelMaster = ref(false)
+const masterNameOptions = ref([])
+const onLoadSentinelMasters = async () => {
+    try {
+        loadingSentinelMaster.value = true
+        const { success, data, msg } = await ListSentinelMasters(generalForm.value)
+        if (!success || isEmpty(data)) {
+            $message.error(msg || 'list sentinel master fail')
+        } else {
+            const options = []
+            for (const m of data) {
+                options.push({
+                    label: m['name'],
+                    value: m['name'],
+                })
+            }
+
+            // select default names
+            if (!isEmpty(options)) {
+                generalForm.value.sentinel.master = options[0].value
+            }
+            masterNameOptions.value = options
+        }
+    } catch (e) {
+        $message.error(e.message)
+    } finally {
+        loadingSentinelMaster.value = false
     }
 }
 
@@ -104,6 +144,11 @@ const onSaveConnection = async () => {
         }
     })
 
+    // trim advance data
+    if (get(generalForm.value, 'dbFilterType', 'none') === 'none') {
+        generalForm.value.dbFilterList = []
+    }
+
     // trim ssh login data
     if (generalForm.value.ssh.enable) {
         switch (generalForm.value.ssh.loginType) {
@@ -119,6 +164,13 @@ const onSaveConnection = async () => {
         // ssh disabled, reset to default value
         const { ssh } = connectionStore.newDefaultConnection()
         generalForm.value.ssh = ssh
+    }
+
+    // trim sentinel data
+    if (!generalForm.value.sentinel.enable) {
+        generalForm.value.sentinel.master = ''
+        generalForm.value.sentinel.username = ''
+        generalForm.value.sentinel.password = ''
     }
 
     // store new connection
@@ -142,6 +194,7 @@ const resetForm = () => {
     showTestResult.value = false
     testResult.value = ''
     tab.value = 'general'
+    loadingSentinelMaster.value = false
 }
 
 watch(
@@ -286,7 +339,9 @@ const onClose = () => {
                                 </n-input-number>
                             </n-form-item-gi>
                             <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_type')">
-                                <n-radio-group v-model:value="generalForm.dbFilterType">
+                                <n-radio-group
+                                    v-model:value="generalForm.dbFilterType"
+                                    @update:value="onUpdateDBFilterType">
                                     <n-radio-button :label="$t('dialogue.connection.advn.dbfilter_all')" value="none" />
                                     <n-radio-button
                                         :label="$t('dialogue.connection.advn.dbfilter_show')"
@@ -296,7 +351,10 @@ const onClose = () => {
                                         value="hide" />
                                 </n-radio-group>
                             </n-form-item-gi>
-                            <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_input')">
+                            <n-form-item-gi
+                                v-show="generalForm.dbFilterType !== 'none'"
+                                :span="24"
+                                :label="$t('dialogue.connection.advn.dbfilter_input')">
                                 <n-select
                                     v-model:value="dbFilterList"
                                     :disabled="generalForm.dbFilterType === 'none'"
@@ -306,8 +364,7 @@ const onClose = () => {
                                     :placeholder="$t('dialogue.connection.advn.dbfilter_input_tip')"
                                     :show-arrow="false"
                                     :show="false"
-                                    :clearable="true"
-                                    @update:value="onUpdateDBFilterList" />
+                                    :clearable="true" />
                             </n-form-item-gi>
                             <n-form-item-gi
                                 :span="24"
@@ -403,9 +460,16 @@ const onClose = () => {
                         :disabled="!generalForm.sentinel.enable"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.sentinel.master')">
-                            <n-input
-                                v-model:value="generalForm.sentinel.master"
-                                :placeholder="$t('dialogue.connection.sentinel.master')" />
+                            <n-space>
+                                <n-select
+                                    v-model:value="generalForm.sentinel.master"
+                                    filterable
+                                    tag
+                                    :options="masterNameOptions" />
+                                <n-button :loading="loadingSentinelMaster" @click="onLoadSentinelMasters">
+                                    {{ $t('dialogue.connection.sentinel.auto_discover') }}
+                                </n-button>
+                            </n-space>
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.sentinel.password')">
                             <n-input
@@ -423,7 +487,6 @@ const onClose = () => {
                 </n-tab-pane>
 
                 <!-- TODO: SSL tab pane -->
-                <!-- TODO: Sentinel tab pane -->
                 <!-- TODO: Cluster tab pane -->
             </n-tabs>
 

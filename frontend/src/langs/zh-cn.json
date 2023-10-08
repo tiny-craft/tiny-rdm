@@ -132,7 +132,7 @@
         "filter": "默认键过滤表达式",
         "filter_tip": "需要加载的键名表达式",
         "separator": "键分隔符",
-        "separator_tip":"键名路径分隔符",
+        "separator_tip": "键名路径分隔符",
         "conn_timeout": "连接超时",
         "exec_timeout": "执行超时",
         "dbfilter_type": "数据库过滤方式",
@@ -161,7 +161,8 @@
       "sentinel": {
         "title": "哨兵模式",
         "enable": "当前为哨兵节点",
-        "master": "主实例名",
+        "master": "主节点组名",
+        "auto_discover": "自动查询组名",
         "password": "主节点密码",
         "username": "主节点用户名",
         "pwd_tip": "(可选)主节点服务授权用户名",
@@ -209,7 +210,7 @@
     "ttl": {
       "title": "设置键存活时间"
     },
-    "upgrade":{
+    "upgrade": {
       "title": "有可用新版本",
       "new_version_tip": "新版本（{ver}），是否立即下载",
       "no_update": "当前已是最新版",
