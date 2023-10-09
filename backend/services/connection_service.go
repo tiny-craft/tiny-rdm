@@ -327,7 +327,7 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	// get connection config
 	selConn := c.conns.GetConnection(name)
 
-	totaldb := 16
+	var totaldb int
 	if selConn.DBFilterType == "" || selConn.DBFilterType == "none" {
 		// get total databases
 		if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
@@ -343,9 +343,23 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 		resp.Msg = "get server info fail:" + err.Error()
 		return
 	}
-	// Parse all db, response content like below
+	// parse all db, response content like below
 	var dbs []types.ConnectionDB
 	info := c.parseInfo(res)
+	if totaldb <= 0 {
+		// cannot retrieve the database count by "CONFIG GET databases", try to get max index from keyspace
+		keyspace := info["Keyspace"]
+		var db, maxDB int
+		for dbName := range keyspace {
+			if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
+				if maxDB < db {
+					maxDB = db
+				}
+			}
+		}
+		totaldb = maxDB + 1
+	}
+
 	queryDB := func(idx int) types.ConnectionDB {
 		dbName := "db" + strconv.Itoa(idx)
 		dbInfoStr := info["Keyspace"][dbName]
