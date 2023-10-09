@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"tinyrdm/backend/types"
+	"unicode/utf8"
 )
 
 // ConvertTo convert string to specified type
@@ -175,10 +176,17 @@ func autoToType(str string) (value, resultType string) {
 }
 
 func isBinary(str string) bool {
-	for _, s := range str {
-		if s < 0x20 || s > 0x7E {
-			return true
-		}
+	//buf := []byte(str)
+	//size := 0
+	//for start := 0; start < len(buf); start += size {
+	//	var r rune
+	//	if r, size = utf8.DecodeRune(buf[start:]); r == utf8.RuneError {
+	//		return true
+	//	}
+	//}
+
+	if !utf8.ValidString(str) {
+		return true
 	}
 	return false
 }
