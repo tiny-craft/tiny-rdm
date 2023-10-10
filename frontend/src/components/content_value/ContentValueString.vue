@@ -10,7 +10,7 @@ import Close from '@/components/icons/Close.vue'
 import Edit from '@/components/icons/Edit.vue'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { map, toLower } from 'lodash'
+import { isEmpty, map, toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
 
 const i18n = useI18n()
@@ -20,6 +20,10 @@ const props = defineProps({
     name: String,
     db: Number,
     keyPath: String,
+    keyCode: {
+        type: Array,
+        default: null,
+    },
     ttl: {
         type: Number,
         default: -1,
@@ -30,6 +34,14 @@ const props = defineProps({
         type: String,
         default: types.PLAIN_TEXT,
     },
+})
+
+/**
+ *
+ * @type {ComputedRef<string|number[]>}
+ */
+const keyName = computed(() => {
+    return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
 const viewOption = computed(() =>
@@ -76,7 +88,7 @@ const viewLanguage = computed(() => {
 })
 
 const onViewTypeUpdate = (viewType) => {
-    connectionStore.loadKeyValue(props.name, props.db, props.keyPath, viewType)
+    connectionStore.loadKeyValue(props.name, props.db, keyName.value, viewType)
 }
 
 /**
@@ -116,14 +128,14 @@ const onSaveValue = async () => {
         const { success, msg } = await connectionStore.setKey(
             props.name,
             props.db,
-            props.keyPath,
+            keyName.value,
             toLower(keyType),
             editValue.value,
             -1,
             props.viewAs,
         )
         if (success) {
-            await connectionStore.loadKeyValue(props.name, props.db, props.keyPath)
+            await connectionStore.loadKeyValue(props.name, props.db, keyName.value)
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -139,13 +151,19 @@ const onSaveValue = async () => {
 
 <template>
     <div class="content-wrapper flex-box-v">
-        <content-toolbar :db="props.db" :key-path="keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
+        <content-toolbar
+            :db="props.db"
+            :key-path="keyPath"
+            :key-code="keyCode"
+            :key-type="keyType"
+            :server="props.name"
+            :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <n-text>{{ $t('interface.view_as') }}</n-text>
             <n-select
                 :value="props.viewAs"
                 :options="viewOption"
-                style="width: 200px"
+                style="width: 160px"
                 filterable
                 @update:value="onViewTypeUpdate" />
             <div class="flex-item-expand"></div>

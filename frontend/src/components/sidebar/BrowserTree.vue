@@ -3,6 +3,7 @@ import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
+import Binary from '@/components/icons/Binary.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
 import { find, get, includes, indexOf, isEmpty, pull, remove, size } from 'lodash'
 import { useI18n } from 'vue-i18n'
@@ -223,7 +224,9 @@ const handleSelectContextMenu = (key) => {
         return
     }
     const node = connectionStore.getNode(selectedKey)
-    const { db, key: nodeKey, redisKey } = node || {}
+    const { db, key: nodeKey } = node || {}
+    const redisKey = node.redisKeyCode || node.redisKey
+    const redisKeyName = !!node.redisKeyCode ? node.label : redisKey
     switch (key) {
         case 'server_info':
             tabStore.setSelectedKeys(props.server)
@@ -267,10 +270,10 @@ const handleSelectContextMenu = (key) => {
             dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
             break
         case 'value_remove':
-            $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKey }), () => {
+            $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKeyName }), () => {
                 connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: redisKey }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: redisKeyName }))
                     }
                 })
             })
@@ -327,7 +330,8 @@ const onUpdateSelectedKeys = (keys, options) => {
             // prevent load duplicate key
             for (const node of options) {
                 if (node.type === ConnectionType.RedisValue) {
-                    const { key, db, redisKey } = node
+                    const { key, db } = node
+                    const redisKey = node.redisKeyCode || node.redisKey
                     if (!includes(selectedKeys.value, key)) {
                         connectionStore.loadKeyValue(props.server, db, redisKey)
                     }
@@ -373,7 +377,7 @@ const renderPrefix = ({ option }) => {
                 NIcon,
                 { size: 20 },
                 {
-                    default: () => h(Key),
+                    default: () => h(!!option.redisKeyCode ? Binary : Key),
                 },
             )
     }

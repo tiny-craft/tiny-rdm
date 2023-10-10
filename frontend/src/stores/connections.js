@@ -5,6 +5,7 @@ import {
     get,
     isEmpty,
     join,
+    map,
     remove,
     size,
     slice,
@@ -49,6 +50,7 @@ import {
 import { ConnectionType } from '@/consts/connection_type.js'
 import useTabStore from './tab.js'
 import { types } from '@/consts/support_redis_type.js'
+import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -68,6 +70,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {number} type
      * @property {number} [db] - database index, type == ConnectionType.RedisDB only
      * @property {string} [redisKey] - redis key, type == ConnectionType.RedisKey || type == ConnectionType.RedisValue only
+     * @property {string} [redisKeyCode] - redis key char code array, optional for redis key which contains binary data
      * @property {number} [keys] - children key count
      * @property {boolean} [isLeaf]
      * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
@@ -592,7 +595,7 @@ const useConnectionStore = defineStore('connections', {
          * load redis key
          * @param {string} server
          * @param {number} db
-         * @param {string} [key] when key is null or blank, update tab to display normal content (blank content or server status)
+         * @param {string|number[]} [key] when key is null or blank, update tab to display normal content (blank content or server status)
          * @param {string} [viewType]
          */
         async loadKeyValue(server, db, key, viewType) {
@@ -602,12 +605,15 @@ const useConnectionStore = defineStore('connections', {
                     const { data, success, msg } = await GetKeyValue(server, db, key, viewType)
                     if (success) {
                         const { type, ttl, value, size, viewAs } = data
+                        const k = decodeRedisKey(key)
+                        const binaryKey = k !== key
                         tab.upsertTab({
                             server,
                             db,
                             type,
                             ttl,
-                            key,
+                            keyCode: binaryKey ? key : undefined,
+                            key: k,
                             value,
                             size,
                             viewAs,
@@ -629,6 +635,7 @@ const useConnectionStore = defineStore('connections', {
                     type: 'none',
                     ttl: -1,
                     key: null,
+                    keyCode: null,
                     value: null,
                     size: 0,
                 })
@@ -713,7 +720,7 @@ const useConnectionStore = defineStore('connections', {
          * remove keys in db
          * @param {string} connName
          * @param {number} db
-         * @param {string[]} keys
+         * @param {Array<string|number[]>} keys
          * @param {boolean} [sortInsert]
          * @return {{success: boolean, newKey: number, newLayer: number, replaceKey: number}}
          * @private
@@ -735,7 +742,9 @@ const useConnectionStore = defineStore('connections', {
             const nodeMap = this._getNodeMap(connName, db)
             const rootChildren = selDB.children
             for (const key of keys) {
-                const keyParts = split(key, separator)
+                const k = decodeRedisKey(key)
+                const binaryKey = k !== key
+                const keyParts = binaryKey ? [nativeRedisKey(key)] : split(k, separator)
                 const len = size(keyParts)
                 const lastIdx = len - 1
                 let handlePath = ''
@@ -776,10 +785,11 @@ const useConnectionStore = defineStore('connections', {
                         const replaceKey = nodeMap.has(nodeKey)
                         const selectedNode = {
                             key: `${connName}/db${db}#${nodeKey}`,
-                            label: keyParts[i],
+                            label: binaryKey ? k : keyParts[i],
                             db,
                             keys: 0,
                             redisKey: handlePath,
+                            redisKeyCode: binaryKey ? key : undefined,
                             type: ConnectionType.RedisValue,
                             isLeaf: true,
                         }
@@ -926,7 +936,7 @@ const useConnectionStore = defineStore('connections', {
          * set redis key
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} keyType
          * @param {any} value
          * @param {number} ttl
@@ -959,7 +969,7 @@ const useConnectionStore = defineStore('connections', {
          * when both field and newField are set, and field !== newField, delete field and add newField
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} field
          * @param {string} newField
          * @param {string} value
@@ -983,7 +993,7 @@ const useConnectionStore = defineStore('connections', {
          * insert or update hash field item
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number }action 0:ignore duplicated fields 1:overwrite duplicated fields
          * @param {string[]} fieldItems field1, value1, filed2, value2...
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
@@ -1028,7 +1038,7 @@ const useConnectionStore = defineStore('connections', {
          * insert list item
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {int} action 0: push to head, 1: push to tail
          * @param {string[]}values
          * @returns {Promise<*|{msg, success: boolean}>}
@@ -1089,7 +1099,7 @@ const useConnectionStore = defineStore('connections', {
          * update value of list item by index
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number} index
          * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
@@ -1112,7 +1122,7 @@ const useConnectionStore = defineStore('connections', {
          * remove list item
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number} index
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: string[]}>}
          */
@@ -1134,7 +1144,7 @@ const useConnectionStore = defineStore('connections', {
          * add item to set
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number} key
          * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
@@ -1155,7 +1165,7 @@ const useConnectionStore = defineStore('connections', {
          * update value of set item
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} value
          * @param {string} newValue
          * @returns {Promise<{[msg]: string, success: boolean}>}
@@ -1175,10 +1185,10 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * remove item from set
-         * @param connName
-         * @param db
-         * @param key
-         * @param value
+         * @param {string} connName
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async removeSetItem(connName, db, key, value) {
@@ -1198,7 +1208,7 @@ const useConnectionStore = defineStore('connections', {
          * add item to sorted set
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number} action
          * @param {Object.<string, number>} vs value: score
          * @returns {Promise<{[msg]: string, success: boolean}>}
@@ -1220,7 +1230,7 @@ const useConnectionStore = defineStore('connections', {
          * update item of sorted set
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} value
          * @param {string} newValue
          * @param {number} score
@@ -1244,7 +1254,7 @@ const useConnectionStore = defineStore('connections', {
          * remove item from sorted set
          * @param {string} connName
          * @param {number} db
-         * @param key
+         * @param {string|number[]} key
          * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: []}>}
          */
@@ -1266,7 +1276,7 @@ const useConnectionStore = defineStore('connections', {
          * insert new stream field item
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} id
          * @param {string[]} values field1, value1, filed2, value2...
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
@@ -1289,7 +1299,7 @@ const useConnectionStore = defineStore('connections', {
          * remove stream field
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string[]|string} ids
          * @returns {Promise<{[msg]: {}, success: boolean, [removed]: string[]}>}
          */
@@ -1427,7 +1437,7 @@ const useConnectionStore = defineStore('connections', {
          * delete redis key
          * @param {string} connName
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {boolean} [soft] do not try to remove from redis if true, just remove from tree data
          * @returns {Promise<boolean>}
          */
@@ -1437,9 +1447,10 @@ const useConnectionStore = defineStore('connections', {
                     await DeleteKey(connName, db, key)
                 }
 
+                const k = nativeRedisKey(key)
                 // update tree view data
-                this._deleteKeyNode(connName, db, key)
-                this._tidyNode(connName, db, key, true)
+                this._deleteKeyNode(connName, db, k)
+                this._tidyNode(connName, db, k, true)
 
                 // set tab content empty
                 const tab = useTabStore()

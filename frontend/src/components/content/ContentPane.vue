@@ -165,6 +165,7 @@ const tabContent = computed(() => {
         type: toUpper(tab.type),
         db: tab.db,
         keyPath: tab.key,
+        keyCode: tab.keyCode,
         ttl: tab.ttl,
         value: tab.value,
         size: tab.size || 0,
@@ -217,6 +218,7 @@ const onReloadKey = async () => {
             v-else
             :db="tabContent.db"
             :key-path="tabContent.keyPath"
+            :key-code="tabContent.keyCode"
             :name="tabContent.name"
             :ttl="tabContent.ttl"
             :value="tabContent.value"

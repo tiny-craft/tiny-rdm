@@ -3,8 +3,14 @@ import { reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import useTabStore from 'stores/tab.js'
 import useConnectionStore from 'stores/connections.js'
+import Binary from '@/components/icons/Binary.vue'
+import { isEmpty } from 'lodash'
 
 const ttlForm = reactive({
+    server: '',
+    db: 0,
+    key: '',
+    keyCode: null,
     ttl: -1,
 })
 
@@ -12,9 +18,6 @@ const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 
-const currentServer = ref('')
-const currentKey = ref('')
-const currentDB = ref(0)
 watch(
     () => dialogStore.ttlDialogVisible,
     (visible) => {
@@ -22,15 +25,15 @@ watch(
             // get ttl from current tab
             const tab = tabStore.currentTab
             if (tab != null) {
+                ttlForm.server = tab.name
+                ttlForm.db = tab.db
                 ttlForm.key = tab.key
+                ttlForm.keyCode = tab.keyCode
                 if (tab.ttl < 0) {
                     // forever
                 } else {
                     ttlForm.ttl = tab.ttl
                 }
-                currentServer.value = tab.name
-                currentDB.value = tab.db
-                currentKey.value = tab.key
             }
         }
     },
@@ -46,16 +49,18 @@ const onConfirm = async () => {
         if (tab == null) {
             return
         }
-        const success = await connectionStore.setTTL(tab.name, tab.db, tab.key, ttlForm.ttl)
+        const key = isEmpty(ttlForm.keyCode) ? ttlForm.key : ttlForm.keyCode
+        const success = await connectionStore.setTTL(tab.name, tab.db, key, ttlForm.ttl)
         if (success) {
             tabStore.updateTTL({
-                server: currentServer.value,
-                db: currentDB.value,
-                key: currentKey.value,
+                server: ttlForm.server,
+                db: ttlForm.db,
+                key: ttlForm.key,
                 ttl: ttlForm.ttl,
             })
         }
     } catch (e) {
+        $message.error(e.message || 'set ttl fail')
     } finally {
         dialogStore.closeTTLDialog()
     }
@@ -74,7 +79,11 @@ const onConfirm = async () => {
         transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('common.key')">
-                <n-input :value="currentKey" readonly />
+                <n-input :value="ttlForm.key" readonly>
+                    <template #prefix>
+                        <n-icon v-if="!!ttlForm.keyCode" :component="Binary" size="20" />
+                    </template>
+                </n-input>
             </n-form-item>
             <n-form-item :label="$t('interface.ttl')" required>
                 <n-input-number

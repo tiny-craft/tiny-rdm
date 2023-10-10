@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput } from 'naive-ui'
-import { size } from 'lodash'
+import { isEmpty, size } from 'lodash'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -15,12 +15,24 @@ const props = defineProps({
     name: String,
     db: Number,
     keyPath: String,
+    keyCode: {
+        type: Array,
+        default: null,
+    },
     ttl: {
         type: Number,
         default: -1,
     },
     value: Object,
     size: Number,
+})
+
+/**
+ *
+ * @type {ComputedRef<string|number[]>}
+ */
+const keyName = computed(() => {
+    return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
 const connectionStore = useConnectionStore()
@@ -56,6 +68,7 @@ const valueColumn = reactive({
         }
     },
 })
+
 const actionColumn = {
     key: 'action',
     title: i18n.t('interface.action'),
@@ -76,11 +89,11 @@ const actionColumn = {
                     const { success, msg } = await connectionStore.removeListItem(
                         props.name,
                         props.db,
-                        props.keyPath,
+                        keyName.value,
                         row.no - 1,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
+                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: '#' + row.no }))
                         // update display value
                         // if (!isEmpty(removed)) {
@@ -98,12 +111,12 @@ const actionColumn = {
                     const { success, msg } = await connectionStore.updateListItem(
                         props.name,
                         props.db,
-                        props.keyPath,
+                        keyName.value,
                         currentEditRow.value.no - 1,
                         currentEditRow.value.value,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
+                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.save_value_succ'))
                         // update display value
                         // if (!isEmpty(updated)) {
@@ -153,7 +166,7 @@ const tableData = computed(() => {
 })
 
 const onAddValue = (value) => {
-    dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, types.LIST)
+    dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.LIST)
 }
 
 const filterValue = ref('')
@@ -172,7 +185,13 @@ const onUpdateFilter = (filters, sourceColumn) => {
 
 <template>
     <div class="content-wrapper flex-box-v">
-        <content-toolbar :db="props.db" :key-path="props.keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
+        <content-toolbar
+            :db="props.db"
+            :key-path="props.keyPath"
+            :key-code="props.keyCode"
+            :key-type="keyType"
+            :server="props.name"
+            :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <div class="flex-box-h">
                 <n-input

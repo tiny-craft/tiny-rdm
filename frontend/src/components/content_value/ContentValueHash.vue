@@ -8,18 +8,31 @@ import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
 import useConnectionStore from 'stores/connections.js'
+import { isEmpty } from 'lodash'
 
 const i18n = useI18n()
 const props = defineProps({
     name: String,
     db: Number,
     keyPath: String,
+    keyCode: {
+        type: Array,
+        default: null,
+    },
     ttl: {
         type: Number,
         default: -1,
     },
     value: Object,
     size: Number,
+})
+
+/**
+ *
+ * @type {ComputedRef<string|number[]>}
+ */
+const keyName = computed(() => {
+    return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
 const filterOption = [
@@ -119,11 +132,11 @@ const actionColumn = {
                     const { success, msg } = await connectionStore.removeHashField(
                         props.name,
                         props.db,
-                        props.keyPath,
+                        keyName.value,
                         row.key,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
+                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.key }))
                         // update display value
                         // if (!isEmpty(removed)) {
@@ -143,13 +156,13 @@ const actionColumn = {
                     const { success, msg } = await connectionStore.setHash(
                         props.name,
                         props.db,
-                        props.keyPath,
+                        keyName.value,
                         row.key,
                         currentEditRow.value.key,
                         currentEditRow.value.value,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, props.keyPath).then((r) => {})
+                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.save_value_succ'))
                         // update display value
                         // if (!isEmpty(updated)) {
@@ -198,7 +211,7 @@ const tableData = computed(() => {
     return data
 })
 const onAddRow = () => {
-    dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, types.HASH)
+    dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.HASH)
 }
 
 const filterValue = ref('')
@@ -240,7 +253,13 @@ const onUpdateFilter = (filters, sourceColumn) => {
 
 <template>
     <div class="content-wrapper flex-box-v">
-        <content-toolbar :db="props.db" :key-path="props.keyPath" :key-type="keyType" :server="props.name" :ttl="ttl" />
+        <content-toolbar
+            :db="props.db"
+            :key-path="props.keyPath"
+            :key-code="props.keyCode"
+            :key-type="keyType"
+            :server="props.name"
+            :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>

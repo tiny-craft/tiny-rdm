@@ -14,6 +14,7 @@ const useTabStore = defineStore('tab', {
      * @property {string} [server] server name
      * @property {int} [db] database index
      * @property {string} [key] current key name
+     * @property {number[]|null|undefined} [keyCode] current key name as char array
      * @property {int} [ttl] ttl of current key
      */
 
@@ -83,11 +84,12 @@ const useTabStore = defineStore('tab', {
          * @param {number} [type]
          * @param {number} [ttl]
          * @param {string} [key]
+         * @param {string} [keyCode]
          * @param {number} [size]
          * @param {*} [value]
          * @param {string} [viewAs]
          */
-        upsertTab({ server, db, type, ttl, key, size, value, viewAs }) {
+        upsertTab({ server, db, type, ttl, key, keyCode, size, value, viewAs }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -97,6 +99,7 @@ const useTabStore = defineStore('tab', {
                     type,
                     ttl,
                     key,
+                    keyCode,
                     size,
                     value,
                     viewAs,
@@ -112,6 +115,7 @@ const useTabStore = defineStore('tab', {
             tab.type = type
             tab.ttl = ttl
             tab.key = key
+            tab.keyCode = keyCode
             tab.size = size
             tab.value = value
             tab.viewAs = viewAs
@@ -123,7 +127,7 @@ const useTabStore = defineStore('tab', {
          * update ttl by tag
          * @param {string} server
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number} ttl
          */
         updateTTL({ server, db, key, ttl }) {

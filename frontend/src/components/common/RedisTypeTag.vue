@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { typesBgColor, typesColor, validType } from '@/consts/support_redis_type.js'
+import Binary from '@/components/icons/Binary.vue'
 
 const props = defineProps({
     type: {
@@ -10,6 +11,7 @@ const props = defineProps({
         },
         default: 'STRING',
     },
+    binaryKey: Boolean,
     bordered: Boolean,
     size: String,
 })
@@ -31,6 +33,9 @@ const backgroundColor = computed(() => {
         :size="props.size"
         strong>
         {{ props.type }}
+        <template #icon>
+            <n-icon v-if="binaryKey" :component="Binary" size="18" />
+        </template>
     </n-tag>
     <!--  <div class="redis-type-tag flex-box-h" :style="{backgroundColor: backgroundColor}">{{ props.type }}</div>-->
 </template>

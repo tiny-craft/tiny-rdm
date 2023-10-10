@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"tinyrdm/backend/types"
-	"unicode/utf8"
 )
 
 // ConvertTo convert string to specified type
@@ -55,7 +54,7 @@ func ConvertTo(str, targetType string) (value, resultType string) {
 		return
 
 	case types.HEX:
-		if hexStr, ok := decodeHex(str); ok {
+		if hexStr, ok := decodeToHex(str); ok {
 			value = hexStr
 		} else {
 			value = str
@@ -162,8 +161,8 @@ func autoToType(str string) (value, resultType string) {
 			return
 		}
 
-		if isBinary(str) {
-			if value, ok = decodeHex(str); ok {
+		if containsBinary(str) {
+			if value, ok = decodeToHex(str); ok {
 				resultType = types.HEX
 				return
 			}
@@ -173,22 +172,6 @@ func autoToType(str string) (value, resultType string) {
 	value = str
 	resultType = types.PLAIN_TEXT
 	return
-}
-
-func isBinary(str string) bool {
-	//buf := []byte(str)
-	//size := 0
-	//for start := 0; start < len(buf); start += size {
-	//	var r rune
-	//	if r, size = utf8.DecodeRune(buf[start:]); r == utf8.RuneError {
-	//		return true
-	//	}
-	//}
-
-	if !utf8.ValidString(str) {
-		return true
-	}
-	return false
 }
 
 func decodeJson(str string) (string, bool) {
@@ -220,7 +203,7 @@ func decodeBinary(str string) (string, bool) {
 	return binary.String(), true
 }
 
-func decodeHex(str string) (string, bool) {
+func decodeToHex(str string) (string, bool) {
 	decodeStr := hex.EncodeToString([]byte(str))
 	var resultStr strings.Builder
 	for i := 0; i < len(decodeStr); i += 2 {

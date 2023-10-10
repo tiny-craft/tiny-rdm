@@ -45,6 +45,7 @@ const useDialogStore = defineStore('dialog', {
             server: '',
             db: 0,
             key: '',
+            keyCode: null,
             type: null,
         },
         addFieldsDialogVisible: false,
@@ -185,12 +186,14 @@ const useDialogStore = defineStore('dialog', {
          * @param {string} server
          * @param {number} db
          * @param {string} key
+         * @param {number[]|null} keyCode
          * @param {string} type
          */
-        openAddFieldsDialog(server, db, key, type) {
+        openAddFieldsDialog(server, db, key, keyCode, type) {
             this.addFieldParam.server = server
             this.addFieldParam.db = db
             this.addFieldParam.key = key
+            this.addFieldParam.keyCode = keyCode
             this.addFieldParam.type = type
             this.addFieldsDialogVisible = true
         },

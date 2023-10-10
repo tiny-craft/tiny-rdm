@@ -545,7 +545,7 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 
 	filterType := len(keyType) > 0
 
-	var keys []string
+	var keys []any
 	//keys := map[string]keyItem{}
 	var cursor uint64
 	for {
@@ -559,7 +559,9 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 			resp.Msg = err.Error()
 			return
 		}
-		keys = append(keys, loadedKey...)
+		for _, k := range loadedKey {
+			keys = append(keys, strutil.EncodeRedisKey(k))
+		}
 		//for _, k := range loadedKey {
 		//	//t, _ := rdb.Type(ctx, k).Result()
 		//	keys[k] = keyItem{Type: "t"}
@@ -579,13 +581,14 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 }
 
 // GetKeyValue get value by key
-func (c *connectionService) GetKeyValue(connName string, db int, key, viewAs string) (resp types.JSResp) {
+func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var keyType string
 	var dur time.Duration
 	keyType, err = rdb.Type(ctx, key).Result()
@@ -717,13 +720,14 @@ func (c *connectionService) GetKeyValue(connName string, db int, key, viewAs str
 
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
-func (c *connectionService) SetKeyValue(connName string, db int, key, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
+func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
 		if expiration, err = rdb.PTTL(ctx, key).Result(); err != nil {
@@ -839,13 +843,14 @@ func (c *connectionService) SetKeyValue(connName string, db int, key, keyType st
 }
 
 // SetHashValue set hash field
-func (c *connectionService) SetHashValue(connName string, db int, key, field, newField, value string) (resp types.JSResp) {
+func (c *connectionService) SetHashValue(connName string, db int, k any, field, newField, value string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var removedField []string
 	updatedField := map[string]string{}
 	if len(field) <= 0 {
@@ -884,13 +889,14 @@ func (c *connectionService) SetHashValue(connName string, db int, key, field, ne
 }
 
 // AddHashField add or update hash field
-func (c *connectionService) AddHashField(connName string, db int, key string, action int, fieldItems []any) (resp types.JSResp) {
+func (c *connectionService) AddHashField(connName string, db int, k any, action int, fieldItems []any) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	updated := map[string]any{}
 	switch action {
 	case 1:
@@ -929,13 +935,14 @@ func (c *connectionService) AddHashField(connName string, db int, key string, ac
 }
 
 // AddListItem add item to list or remove from it
-func (c *connectionService) AddListItem(connName string, db int, key string, action int, items []any) (resp types.JSResp) {
+func (c *connectionService) AddListItem(connName string, db int, k any, action int, items []any) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var leftPush, rightPush []any
 	switch action {
 	case 0:
@@ -961,13 +968,14 @@ func (c *connectionService) AddListItem(connName string, db int, key string, act
 }
 
 // SetListItem update or remove list item by index
-func (c *connectionService) SetListItem(connName string, db int, key string, index int64, value string) (resp types.JSResp) {
+func (c *connectionService) SetListItem(connName string, db int, k any, index int64, value string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var removed []int64
 	updated := map[int64]string{}
 	if len(value) <= 0 {
@@ -1003,13 +1011,14 @@ func (c *connectionService) SetListItem(connName string, db int, key string, ind
 }
 
 // SetSetItem add members to set or remove from set
-func (c *connectionService) SetSetItem(connName string, db int, key string, remove bool, members []any) (resp types.JSResp) {
+func (c *connectionService) SetSetItem(connName string, db int, k any, remove bool, members []any) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	if remove {
 		_, err = rdb.SRem(ctx, key, members...).Result()
 	} else {
@@ -1025,13 +1034,14 @@ func (c *connectionService) SetSetItem(connName string, db int, key string, remo
 }
 
 // UpdateSetItem replace member of set
-func (c *connectionService) UpdateSetItem(connName string, db int, key, value, newValue string) (resp types.JSResp) {
+func (c *connectionService) UpdateSetItem(connName string, db int, k any, value, newValue string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	_, _ = rdb.SRem(ctx, key, value).Result()
 	_, err = rdb.SAdd(ctx, key, newValue).Result()
 	if err != nil {
@@ -1044,13 +1054,14 @@ func (c *connectionService) UpdateSetItem(connName string, db int, key, value, n
 }
 
 // UpdateZSetValue update value of sorted set member
-func (c *connectionService) UpdateZSetValue(connName string, db int, key, value, newValue string, score float64) (resp types.JSResp) {
+func (c *connectionService) UpdateZSetValue(connName string, db int, k any, value, newValue string, score float64) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	updated := map[string]any{}
 	var removed []string
 	if len(newValue) <= 0 {
@@ -1094,13 +1105,14 @@ func (c *connectionService) UpdateZSetValue(connName string, db int, key, value,
 }
 
 // AddZSetValue add item to sorted set
-func (c *connectionService) AddZSetValue(connName string, db int, key string, action int, valueScore map[string]float64) (resp types.JSResp) {
+func (c *connectionService) AddZSetValue(connName string, db int, k any, action int, valueScore map[string]float64) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	members := maputil.ToSlice(valueScore, func(k string) redis.Z {
 		return redis.Z{
 			Score:  valueScore[k],
@@ -1126,13 +1138,14 @@ func (c *connectionService) AddZSetValue(connName string, db int, key string, ac
 }
 
 // AddStreamValue add stream field
-func (c *connectionService) AddStreamValue(connName string, db int, key, ID string, fieldItems []any) (resp types.JSResp) {
+func (c *connectionService) AddStreamValue(connName string, db int, k any, ID string, fieldItems []any) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	_, err = rdb.XAdd(ctx, &redis.XAddArgs{
 		Stream: key,
 		ID:     ID,
@@ -1148,26 +1161,28 @@ func (c *connectionService) AddStreamValue(connName string, db int, key, ID stri
 }
 
 // RemoveStreamValues remove stream values by id
-func (c *connectionService) RemoveStreamValues(connName string, db int, key string, IDs []string) (resp types.JSResp) {
+func (c *connectionService) RemoveStreamValues(connName string, db int, k any, IDs []string) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	_, err = rdb.XDel(ctx, key, IDs...).Result()
 	resp.Success = true
 	return
 }
 
 // SetKeyTTL set ttl of key
-func (c *connectionService) SetKeyTTL(connName string, db int, key string, ttl int64) (resp types.JSResp) {
+func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
 		if err = rdb.Persist(ctx, key).Err(); err != nil {
@@ -1187,14 +1202,15 @@ func (c *connectionService) SetKeyTTL(connName string, db int, key string, ttl i
 }
 
 // DeleteKey remove redis key
-func (c *connectionService) DeleteKey(connName string, db int, key string) (resp types.JSResp) {
+func (c *connectionService) DeleteKey(connName string, db int, k any) (resp types.JSResp) {
 	rdb, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
-	var deletedKeys []string
 
+	key := strutil.DecodeRedisKey(k)
+	var deletedKeys []string
 	if strings.HasSuffix(key, "*") {
 		// delete by prefix
 		var cursor uint64

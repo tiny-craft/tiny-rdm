@@ -11,6 +11,8 @@ import IconButton from '@/components/common/IconButton.vue'
 import useConnectionStore from 'stores/connections.js'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
+import { computed } from 'vue'
+import { isEmpty } from 'lodash'
 
 const props = defineProps({
     server: String,
@@ -23,6 +25,10 @@ const props = defineProps({
         default: 'STRING',
     },
     keyPath: String,
+    keyCode: {
+        type: Array,
+        default: null,
+    },
     ttl: {
         type: Number,
         default: -1,
@@ -33,8 +39,20 @@ const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
 
+const binaryKey = computed(() => {
+    return !!props.keyCode
+})
+
+/**
+ *
+ * @type {ComputedRef<string|number[]>}
+ */
+const keyName = computed(() => {
+    return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
+})
+
 const onReloadKey = () => {
-    connectionStore.loadKeyValue(props.server, props.db, props.keyPath)
+    connectionStore.loadKeyValue(props.server, props.db, keyName.value)
 }
 
 const onCopyKey = () => {
@@ -49,9 +67,17 @@ const onCopyKey = () => {
         })
 }
 
+const onRenameKey = () => {
+    if (binaryKey.value) {
+        $message.error(i18n.t('dialogue.rename_binary_key_fail'))
+    } else {
+        dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)
+    }
+}
+
 const onDeleteKey = () => {
     $dialog.warning(i18n.t('dialogue.remove_tip', { name: props.keyPath }), () => {
-        connectionStore.deleteKey(props.server, props.db, props.keyPath).then((success) => {
+        connectionStore.deleteKey(props.server, props.db, keyName.value).then((success) => {
             if (success) {
                 $message.success(i18n.t('dialogue.delete_key_succ', { key: props.keyPath }))
             }
@@ -63,7 +89,7 @@ const onDeleteKey = () => {
 <template>
     <div class="content-toolbar flex-box-h">
         <n-input-group>
-            <redis-type-tag :type="props.keyType" size="large" />
+            <redis-type-tag :type="props.keyType" :binary-key="binaryKey" size="large" />
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
                     <icon-button :icon="Refresh" size="18" t-tooltip="interface.reload" @click="onReloadKey" />
@@ -86,18 +112,13 @@ const onDeleteKey = () => {
                 </template>
                 TTL
             </n-tooltip>
-            <icon-button
-                :icon="Edit"
-                border
-                size="18"
-                t-tooltip="interface.rename_key"
-                @click="dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)" />
+            <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="onRenameKey" />
         </n-button-group>
         <n-tooltip>
             <template #trigger>
-                <n-button>
+                <n-button :focusable="false" @click="onDeleteKey">
                     <template #icon>
-                        <n-icon :component="Delete" size="18" @click="onDeleteKey" />
+                        <n-icon :component="Delete" size="18" />
                     </template>
                 </n-button>
             </template>
