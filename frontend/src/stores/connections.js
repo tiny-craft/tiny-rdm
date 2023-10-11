@@ -532,11 +532,10 @@ const useConnectionStore = defineStore('connections', {
             selDB.opened = true
             if (isEmpty(keys)) {
                 selDB.children = []
-                return
+            } else {
+                // append db node to current connection's children
+                this._addKeyNodes(connName, db, keys)
             }
-
-            // append db node to current connection's children
-            this._addKeyNodes(connName, db, keys)
             this._tidyNode(connName, db)
         },
 
@@ -874,7 +873,7 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * sort all node item's children and calculate keys count
-         * @param node
+         * @param {DatabaseItem} node
          * @param {boolean} skipSort skip sorting children
          * @returns {boolean} return whether key count changed
          * @private
@@ -891,7 +890,12 @@ const useConnectionStore = defineStore('connections', {
                     count += elem.keys
                 }
             } else {
-                count += 1
+                if (node.type === ConnectionType.RedisValue) {
+                    count += 1
+                } else {
+                    // no children in db node or layer node, set count to 0
+                    count = 0
+                }
             }
             if (node.keys !== count) {
                 node.keys = count
