@@ -175,14 +175,11 @@ func autoToType(str string) (value, resultType string) {
 }
 
 func decodeJson(str string) (string, bool) {
-	var data any
 	if (strings.HasPrefix(str, "{") && strings.HasSuffix(str, "}")) ||
 		(strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]")) {
-		if err := json.Unmarshal([]byte(str), &data); err == nil {
-			var jsonByte []byte
-			if jsonByte, err = json.MarshalIndent(data, "", "  "); err == nil {
-				return string(jsonByte), true
-			}
+		var out bytes.Buffer
+		if err := json.Indent(&out, []byte(str), "", "  "); err == nil {
+			return out.String(), true
 		}
 	}
 	return str, false
