@@ -1,7 +1,7 @@
 <script setup>
 import ContentPane from './components/content/ContentPane.vue'
 import BrowserPane from './components/sidebar/BrowserPane.vue'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { debounce, get } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import NavMenu from './components/sidebar/NavMenu.vue'
@@ -13,7 +13,7 @@ import useConnectionStore from './stores/connections.js'
 import ContentLogPane from './components/content/ContentLogPane.vue'
 import ContentValueTab from '@/components/content/ContentValueTab.vue'
 import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
-import { WindowIsFullscreen, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
+import { EventsOn, WindowIsFullscreen, WindowIsMaximised, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
 import { isMacOS } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
 
@@ -37,11 +37,11 @@ const logPaneRef = ref(null)
 // const preferences = ref({})
 // provide('preferences', preferences)
 
-const saveWidth = debounce(prefStore.savePreferences, 1000, { trailing: true })
+const saveSidebarWidth = debounce(prefStore.savePreferences, 1000, { trailing: true })
 const handleResize = (evt) => {
     if (data.resizing) {
         prefStore.setAsideWidth(Math.max(evt.clientX - data.navMenuWidth, 300))
-        saveWidth()
+        saveSidebarWidth()
     }
 }
 
@@ -49,7 +49,6 @@ const stopResize = () => {
     data.resizing = false
     document.removeEventListener('mousemove', handleResize)
     document.removeEventListener('mouseup', stopResize)
-    // TODO: Save sidebar x-position
 }
 
 const startResize = () => {
@@ -75,19 +74,53 @@ watch(
     },
 )
 
-const borderRadius = computed(() => {
-    // FIXME: cannot get full screen status sync?
-    // if (isMacOS()) {
-    //     return WindowIsFullscreen().then((full) => {
-    //         return full ? '0' : '10px'
-    //     })
-    // }
-    return '10px'
-})
-
 const border = computed(() => {
     const color = isMacOS() && false ? '#0000' : themeVars.value.borderColor
     return `1px solid ${color}`
+})
+
+const borderRadius = ref(10)
+const logoPaddingLeft = ref(10)
+const maximised = ref(false)
+const toggleWindowRadius = (on) => {
+    borderRadius.value = on ? 10 : 0
+}
+
+const onToggleFullscreen = (fullscreen) => {
+    if (fullscreen) {
+        logoPaddingLeft.value = 10
+        toggleWindowRadius(false)
+    } else {
+        logoPaddingLeft.value = isMacOS() ? 70 : 10
+        toggleWindowRadius(true)
+    }
+}
+
+const onToggleMaximize = (isMaximised) => {
+    if (isMaximised) {
+        maximised.value = true
+        if (!isMacOS()) {
+            toggleWindowRadius(false)
+        }
+    } else {
+        maximised.value = false
+        if (!isMacOS()) {
+            toggleWindowRadius(true)
+        }
+    }
+}
+
+EventsOn('window_changed', (info) => {
+    const { fullscreen, maximised } = info
+    onToggleFullscreen(fullscreen === true)
+    onToggleMaximize(maximised)
+})
+
+onMounted(async () => {
+    const fullscreen = await WindowIsFullscreen()
+    onToggleFullscreen(fullscreen === true)
+    const maximised = await WindowIsMaximised()
+    onToggleMaximize(maximised)
 })
 </script>
 
@@ -96,7 +129,7 @@ const border = computed(() => {
     <n-spin
         :show="props.loading"
         :theme-overrides="{ opacitySpinning: 0 }"
-        :style="{ backgroundColor: themeVars.bodyColor, borderRadius, border }">
+        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: `${borderRadius}px`, border }">
         <div
             id="app-content-wrapper"
             class="flex-box-v"
@@ -116,7 +149,7 @@ const border = computed(() => {
                     id="app-toolbar-title"
                     :style="{
                         width: `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`,
-                        paddingLeft: isMacOS() ? '70px' : '10px',
+                        paddingLeft: `${logoPaddingLeft}px`,
                     }">
                     <n-space align="center" :wrap-item="false" :wrap="false" :size="3">
                         <n-avatar :src="iconUrl" color="#0000" :size="35" style="min-width: 35px" />
@@ -143,7 +176,11 @@ const border = computed(() => {
                 </div>
                 <div class="flex-item-expand"></div>
                 <!-- simulate window control buttons -->
-                <toolbar-control-widget v-if="!isMacOS()" :size="data.toolbarHeight" style="align-self: flex-start" />
+                <toolbar-control-widget
+                    v-if="!isMacOS()"
+                    :size="data.toolbarHeight"
+                    :maximised="maximised"
+                    style="align-self: flex-start" />
             </div>
 
             <!-- content -->

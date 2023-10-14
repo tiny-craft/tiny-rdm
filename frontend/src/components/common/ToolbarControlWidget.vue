@@ -4,13 +4,17 @@ import WindowMax from '@/components/icons/WindowMax.vue'
 import WindowClose from '@/components/icons/WindowClose.vue'
 import { computed } from 'vue'
 import { useThemeVars } from 'naive-ui'
-import { Quit, WindowIsMaximised, WindowMinimise, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
+import { Quit, WindowMinimise, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
+import WindowRestore from '@/components/icons/WindowRestore.vue'
 
 const themeVars = useThemeVars()
 const props = defineProps({
     size: {
         type: Number,
         default: 35,
+    },
+    maximised: {
+        type: Boolean,
     },
 })
 
@@ -33,7 +37,7 @@ const handleClose = () => {
 
 <template>
     <n-space :wrap-item="false" align="center" justify="center" :size="0">
-        <n-tooltip :show-arrow="false">
+        <n-tooltip :show-arrow="false" :delay="1000">
             {{ $t('menu.minimise') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleMinimise">
@@ -41,15 +45,23 @@ const handleClose = () => {
                 </div>
             </template>
         </n-tooltip>
-        <n-tooltip :show-arrow="false">
-            {{ WindowIsMaximised() ? $t('menu.restore') : $t('menu.maximise') }}
+        <n-tooltip :show-arrow="false" :delay="1000" v-if="maximised">
+            {{ $t('menu.restore') }}
+            <template #trigger>
+                <div class="btn-wrapper" @click="handleMaximise">
+                    <window-restore />
+                </div>
+            </template>
+        </n-tooltip>
+        <n-tooltip :show-arrow="false" :delay="1000" v-else>
+            {{ $t('menu.maximise') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleMaximise">
                     <window-max />
                 </div>
             </template>
         </n-tooltip>
-        <n-tooltip :show-arrow="false">
+        <n-tooltip :show-arrow="false" :delay="1000">
             {{ $t('menu.close') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleClose">

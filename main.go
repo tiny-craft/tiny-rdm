@@ -10,7 +10,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"runtime"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/services"
@@ -56,14 +55,6 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
-		},
-		OnBeforeClose: func(ctx context.Context) (prevent bool) {
-			// save current window size
-			width, height := runtime2.WindowGetSize(ctx)
-			if width > 0 && height > 0 {
-				prefSvc.SaveWindowSize(width, height)
-			}
-			return false
 		},
 		OnShutdown: func(ctx context.Context) {
 			connSvc.Stop(ctx)

@@ -113,10 +113,12 @@ func (p *preferencesService) GetAppVersion() (resp types.JSResp) {
 }
 
 func (p *preferencesService) SaveWindowSize(width, height int) {
-	p.UpdatePreferences(map[string]any{
-		"behavior.windowWidth":  width,
-		"behavior.windowHeight": height,
-	})
+	if width >= consts.DEFAULT_WINDOW_WIDTH && height >= consts.DEFAULT_WINDOW_HEIGHT {
+		p.UpdatePreferences(map[string]any{
+			"behavior.windowWidth":  width,
+			"behavior.windowHeight": height,
+		})
+	}
 }
 
 func (p *preferencesService) GetWindowSize() (width, height int) {
