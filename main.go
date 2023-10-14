@@ -26,7 +26,7 @@ var version = "0.0.0"
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	sysSvc := services.System()
 	connSvc := services.Connection()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
@@ -54,7 +54,7 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 0},
 		OnStartup: func(ctx context.Context) {
-			app.startup(ctx)
+			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
 		},
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
@@ -69,7 +69,7 @@ func main() {
 			connSvc.Stop(ctx)
 		},
 		Bind: []interface{}{
-			app,
+			sysSvc,
 			connSvc,
 			prefSvc,
 		},

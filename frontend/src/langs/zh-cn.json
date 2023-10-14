@@ -150,12 +150,12 @@
       "ssl": {
         "title": "SSL/TLS",
         "enable": "启用SSL",
-        "key_file": "公钥文件",
-        "cert_file": "私钥文件",
+        "cert_file": "公钥文件",
+        "key_file": "私钥文件",
         "ca_file": "授权文件",
-        "key_file_tip": "PEM格式公钥文件",
-        "cert_file_tip":"PEM格式私钥文件",
-        "ca_file_tip": "PEM格式授权文件"
+        "cert_file_tip":"PEM格式公钥文件(Cert)",
+        "key_file_tip": "PEM格式私钥文件(Key)",
+        "ca_file_tip": "PEM格式授权文件(CA)"
       },
       "ssh": {
         "enable": "启用SSH隧道",
@@ -167,8 +167,7 @@
         "usr_tip": "SSH登录用户名",
         "pwd_tip": "SSH登录密码",
         "pkfile_tip": "SSH私钥文件路径",
-        "passphrase_tip": "(可选)SSH私钥密码",
-        "pkfile_selection_title": "请选择私钥文件"
+        "passphrase_tip": "(可选)SSH私钥密码"
       },
       "sentinel": {
         "title": "哨兵模式",

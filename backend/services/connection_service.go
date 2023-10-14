@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
 	"log"
 	"net"
@@ -115,6 +116,39 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		}
 	}
 
+	var tlsConfig *tls.Config
+	if config.SSL.Enable {
+		// setup tls config
+		var certs []tls.Certificate
+		if len(config.SSL.CertFile) > 0 && len(config.SSL.KeyFile) > 0 {
+			if cert, err := tls.LoadX509KeyPair(config.SSL.CertFile, config.SSL.KeyFile); err != nil {
+				return nil, err
+			} else {
+				certs = []tls.Certificate{cert}
+			}
+		}
+
+		var caCertPool *x509.CertPool
+		if len(config.SSL.CAFile) > 0 {
+			ca, err := os.ReadFile(config.SSL.CAFile)
+			if err != nil {
+				return nil, err
+			}
+			caCertPool = x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(ca)
+		}
+
+		if len(certs) <= 0 {
+			return nil, errors.New("tls config error")
+		}
+
+		tlsConfig = &tls.Config{
+			RootCAs:            caCertPool,
+			InsecureSkipVerify: false,
+			Certificates:       certs,
+		}
+	}
+
 	option := &redis.Options{
 		ClientName:   config.Name,
 		Addr:         fmt.Sprintf("%s:%d", config.Addr, config.Port),
@@ -123,6 +157,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		DialTimeout:  time.Duration(config.ConnTimeout) * time.Second,
 		ReadTimeout:  time.Duration(config.ExecTimeout) * time.Second,
 		WriteTimeout: time.Duration(config.ExecTimeout) * time.Second,
+		TLSConfig:    tlsConfig,
 	}
 	if sshClient != nil {
 		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -318,23 +353,6 @@ func (c *connectionService) SaveSortedConnection(sortedConns types.Connections) 
 		return
 	}
 	resp.Success = true
-	return
-}
-
-// SelectKeyFile open file dialog to select a private key file
-func (c *connectionService) SelectKeyFile(title string) (resp types.JSResp) {
-	filepath, err := runtime.OpenFileDialog(c.ctx, runtime.OpenDialogOptions{
-		Title:           title,
-		ShowHiddenFiles: true,
-	})
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
-	resp.Success = true
-	resp.Data = map[string]any{
-		"path": filepath,
-	}
 	return
 }
 

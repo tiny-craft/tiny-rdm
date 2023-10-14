@@ -16,6 +16,7 @@ type ConnectionConfig struct {
 	DBFilterType  string             `json:"dbFilterType" yaml:"db_filter_type,omitempty"`
 	DBFilterList  []int              `json:"dbFilterList" yaml:"db_filter_list,omitempty"`
 	MarkColor     string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
+	SSL           ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
 	SSH           ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 	Sentinel      ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
 	Cluster       ConnectionCluster  `json:"cluster,omitempty" yaml:"cluster,omitempty"`
@@ -40,6 +41,13 @@ type ConnectionDB struct {
 	Keys    int    `json:"keys"`
 	Expires int    `json:"expires,omitempty"`
 	AvgTTL  int    `json:"avgTtl,omitempty"`
+}
+
+type ConnectionSSL struct {
+	Enable   bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
+	KeyFile  string `json:"keyFile,omitempty" yaml:"keyFile,omitempty"`
+	CertFile string `json:"certFile,omitempty" yaml:"certFile,omitempty"`
+	CAFile   string `json:"caFile,omitempty" yaml:"caFile,omitempty"`
 }
 
 type ConnectionSSH struct {

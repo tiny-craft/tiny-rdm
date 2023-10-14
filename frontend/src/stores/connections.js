@@ -231,6 +231,12 @@ const useConnectionStore = defineStore('connections', {
                 dbFilterType: 'none',
                 dbFilterList: [],
                 markColor: '',
+                ssl: {
+                    enable: false,
+                    certFile: '',
+                    keyFile: '',
+                    caFile: '',
+                },
                 ssh: {
                     enable: false,
                     addr: '',
