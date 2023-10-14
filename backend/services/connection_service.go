@@ -7,11 +7,13 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
+	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
@@ -37,7 +39,7 @@ type connectionService struct {
 }
 
 type connectionItem struct {
-	rdb        *redis.Client
+	client     redis.UniversalClient
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 }
@@ -67,9 +69,9 @@ func (c *connectionService) Start(ctx context.Context) {
 
 func (c *connectionService) Stop(ctx context.Context) {
 	for _, item := range c.connMap {
-		if item.rdb != nil {
+		if item.client != nil {
 			item.cancelFunc()
-			item.rdb.Close()
+			item.client.Close()
 		}
 	}
 	c.connMap = map[string]connectionItem{}
@@ -114,6 +116,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	}
 
 	option := &redis.Options{
+		ClientName:   config.Name,
 		Addr:         fmt.Sprintf("%s:%d", config.Addr, config.Port),
 		Username:     config.Username,
 		Password:     config.Password,
@@ -131,13 +134,14 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	return option, nil
 }
 
-func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*redis.Client, error) {
+func (c *connectionService) createRedisClient(config types.ConnectionConfig) (redis.UniversalClient, error) {
 	option, err := c.buildOption(config)
 	if err != nil {
 		return nil, err
 	}
 
 	if config.Sentinel.Enable {
+		// get master address via sentinel node
 		sentinel := redis.NewSentinelClient(option)
 		defer sentinel.Close()
 
@@ -155,6 +159,57 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (*r
 	}
 
 	rdb := redis.NewClient(option)
+	if config.Cluster.Enable {
+		// connect to cluster
+		var slots []redis.ClusterSlot
+		if slots, err = rdb.ClusterSlots(c.ctx).Result(); err == nil {
+			log.Println(slots)
+			clusterOptions := &redis.ClusterOptions{
+				//NewClient:             nil,
+				//MaxRedirects:          0,
+				//RouteByLatency:        false,
+				//RouteRandomly:         false,
+				//ClusterSlots:          nil,
+				ClientName:            option.ClientName,
+				Dialer:                option.Dialer,
+				OnConnect:             option.OnConnect,
+				Protocol:              option.Protocol,
+				Username:              option.Username,
+				Password:              option.Password,
+				MaxRetries:            option.MaxRetries,
+				MinRetryBackoff:       option.MinRetryBackoff,
+				MaxRetryBackoff:       option.MaxRetryBackoff,
+				DialTimeout:           option.DialTimeout,
+				ContextTimeoutEnabled: option.ContextTimeoutEnabled,
+				PoolFIFO:              option.PoolFIFO,
+				PoolSize:              option.PoolSize,
+				PoolTimeout:           option.PoolTimeout,
+				MinIdleConns:          option.MinIdleConns,
+				MaxIdleConns:          option.MaxIdleConns,
+				ConnMaxIdleTime:       option.ConnMaxIdleTime,
+				ConnMaxLifetime:       option.ConnMaxLifetime,
+				TLSConfig:             option.TLSConfig,
+				DisableIndentity:      option.DisableIndentity,
+			}
+			if option.Dialer != nil {
+				clusterOptions.Dialer = option.Dialer
+				clusterOptions.ReadTimeout = -2
+				clusterOptions.WriteTimeout = -2
+			}
+			var addrs []string
+			for _, slot := range slots {
+				for _, node := range slot.Nodes {
+					addrs = append(addrs, node.Addr)
+				}
+			}
+			clusterOptions.Addrs = addrs
+			clusterClient := redis.NewClusterClient(clusterOptions)
+			return clusterClient, nil
+		} else {
+			return nil, err
+		}
+	}
+
 	return rdb, nil
 }
 
@@ -193,14 +248,14 @@ func (c *connectionService) ListSentinelMasters(config types.ConnectionConfig) (
 }
 
 func (c *connectionService) TestConnection(config types.ConnectionConfig) (resp types.JSResp) {
-	rdb, err := c.createRedisClient(config)
+	client, err := c.createRedisClient(config)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
-	defer rdb.Close()
+	defer client.Close()
 
-	if _, err = rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
+	if _, err = client.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 		resp.Msg = err.Error()
 	} else {
 		resp.Success = true
@@ -318,7 +373,7 @@ func (c *connectionService) DeleteGroup(name string, includeConn bool) (resp typ
 
 // OpenConnection open redis server connection
 func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(name, 0)
+	client, ctx, err := c.getRedisClient(name, 0)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -330,71 +385,102 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 	var totaldb int
 	if selConn.DBFilterType == "" || selConn.DBFilterType == "none" {
 		// get total databases
-		if config, err := rdb.ConfigGet(ctx, "databases").Result(); err == nil {
+		if config, err := client.ConfigGet(ctx, "databases").Result(); err == nil {
 			if total, err := strconv.Atoi(config["databases"]); err == nil {
 				totaldb = total
 			}
 		}
 	}
 
-	// get database info
-	res, err := rdb.Info(ctx, "keyspace").Result()
-	if err != nil {
-		resp.Msg = "get server info fail:" + err.Error()
-		return
-	}
 	// parse all db, response content like below
 	var dbs []types.ConnectionDB
-	info := c.parseInfo(res)
-	if totaldb <= 0 {
-		// cannot retrieve the database count by "CONFIG GET databases", try to get max index from keyspace
-		keyspace := info["Keyspace"]
-		var db, maxDB int
-		for dbName := range keyspace {
-			if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
-				if maxDB < db {
-					maxDB = db
+	var clusterKeyCount int64
+	cluster, isCluster := client.(*redis.ClusterClient)
+	if isCluster {
+		var keyCount atomic.Int64
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			if size, serr := cli.DBSize(ctx).Result(); serr != nil {
+				return serr
+			} else {
+				keyCount.Add(size)
+			}
+			return nil
+		})
+		if err != nil {
+			resp.Msg = "get db size error:" + err.Error()
+			return
+		}
+		clusterKeyCount = keyCount.Load()
+
+		// only one database in cluster mode
+		dbs = []types.ConnectionDB{
+			{
+				Name:  "db0",
+				Index: 0,
+				Keys:  int(clusterKeyCount),
+			},
+		}
+	} else {
+		// get database info
+		var res string
+		res, err = client.Info(ctx, "keyspace").Result()
+		if err != nil {
+			resp.Msg = "get server info fail:" + err.Error()
+			return
+		}
+		info := c.parseInfo(res)
+
+		if totaldb <= 0 {
+			// cannot retrieve the database count by "CONFIG GET databases", try to get max index from keyspace
+			keyspace := info["Keyspace"]
+			var db, maxDB int
+			for dbName := range keyspace {
+				if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
+					if maxDB < db {
+						maxDB = db
+					}
+				}
+			}
+			totaldb = maxDB + 1
+		}
+
+		queryDB := func(idx int) types.ConnectionDB {
+			dbName := "db" + strconv.Itoa(idx)
+			dbInfoStr := info["Keyspace"][dbName]
+			if len(dbInfoStr) > 0 {
+				dbInfo := c.parseDBItemInfo(dbInfoStr)
+				return types.ConnectionDB{
+					Name:    dbName,
+					Index:   idx,
+					Keys:    dbInfo["keys"],
+					Expires: dbInfo["expires"],
+					AvgTTL:  dbInfo["avg_ttl"],
+				}
+			} else {
+				return types.ConnectionDB{
+					Name:  dbName,
+					Index: idx,
 				}
 			}
 		}
-		totaldb = maxDB + 1
-	}
 
-	queryDB := func(idx int) types.ConnectionDB {
-		dbName := "db" + strconv.Itoa(idx)
-		dbInfoStr := info["Keyspace"][dbName]
-		if len(dbInfoStr) > 0 {
-			dbInfo := c.parseDBItemInfo(dbInfoStr)
-			return types.ConnectionDB{
-				Name:    dbName,
-				Index:   idx,
-				Keys:    dbInfo["keys"],
-				Expires: dbInfo["expires"],
-				AvgTTL:  dbInfo["avg_ttl"],
-			}
-		} else {
-			return types.ConnectionDB{
-				Name:  dbName,
-				Index: idx,
-			}
-		}
-	}
-	switch selConn.DBFilterType {
-	case "show":
-		filterList := sliceutil.Unique(selConn.DBFilterList)
-		for _, idx := range filterList {
-			dbs = append(dbs, queryDB(idx))
-		}
-	case "hide":
-		hiddenList := coll.NewSet(selConn.DBFilterList...)
-		for idx := 0; idx < totaldb; idx++ {
-			if !hiddenList.Contains(idx) {
+		switch selConn.DBFilterType {
+		case "show":
+			filterList := sliceutil.Unique(selConn.DBFilterList)
+			for _, idx := range filterList {
 				dbs = append(dbs, queryDB(idx))
 			}
-		}
-	default:
-		for idx := 0; idx < totaldb; idx++ {
-			dbs = append(dbs, queryDB(idx))
+		case "hide":
+			hiddenList := coll.NewSet(selConn.DBFilterList...)
+			for idx := 0; idx < totaldb; idx++ {
+				if !hiddenList.Contains(idx) {
+					dbs = append(dbs, queryDB(idx))
+				}
+			}
+		default:
+			for idx := 0; idx < totaldb; idx++ {
+				dbs = append(dbs, queryDB(idx))
+			}
 		}
 	}
 
@@ -410,9 +496,9 @@ func (c *connectionService) CloseConnection(name string) (resp types.JSResp) {
 	item, ok := c.connMap[name]
 	if ok {
 		delete(c.connMap, name)
-		if item.rdb != nil {
+		if item.client != nil {
 			item.cancelFunc()
-			item.rdb.Close()
+			item.client.Close()
 		}
 	}
 	resp.Success = true
@@ -421,24 +507,19 @@ func (c *connectionService) CloseConnection(name string) (resp types.JSResp) {
 
 // get redis client from local cache or create a new open
 // if db >= 0, will also switch to db index
-func (c *connectionService) getRedisClient(connName string, db int) (*redis.Client, context.Context, error) {
+func (c *connectionService) getRedisClient(connName string, db int) (redis.UniversalClient, context.Context, error) {
 	item, ok := c.connMap[connName]
-	var rdb *redis.Client
+	var client redis.UniversalClient
 	var ctx context.Context
 	if ok {
-		rdb, ctx = item.rdb, item.ctx
+		client, ctx = item.client, item.ctx
 	} else {
 		selConn := c.conns.GetConnection(connName)
 		if selConn == nil {
 			return nil, nil, fmt.Errorf("no match connection \"%s\"", connName)
 		}
 
-		var err error
-		rdb, err = c.createRedisClient(selConn.ConnectionConfig)
-		if err != nil {
-			return nil, nil, fmt.Errorf("create conenction error: %s", err.Error())
-		}
-		rdb.AddHook(redis2.NewHook(connName, func(cmd string, cost int64) {
+		hook := redis2.NewHook(connName, func(cmd string, cost int64) {
 			now := time.Now()
 			//last := strings.LastIndex(cmd, ":")
 			//if last != -1 {
@@ -450,26 +531,48 @@ func (c *connectionService) getRedisClient(connName string, db int) (*redis.Clie
 				Cmd:       cmd,
 				Cost:      cost,
 			})
-		}))
+		})
 
-		if _, err = rdb.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
+		var err error
+		client, err = c.createRedisClient(selConn.ConnectionConfig)
+		if err != nil {
+			return nil, nil, fmt.Errorf("create conenction error: %s", err.Error())
+		}
+		// add hook to each node in cluster mode
+		var cluster *redis.ClusterClient
+		if cluster, ok = client.(*redis.ClusterClient); ok {
+			err = cluster.ForEachShard(c.ctx, func(ctx context.Context, cli *redis.Client) error {
+				cli.AddHook(hook)
+				return nil
+			})
+			if err != nil {
+				return nil, nil, fmt.Errorf("get cluster nodes error: %s", err.Error())
+			}
+		} else {
+			client.AddHook(hook)
+		}
+
+		if _, err = client.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
 			return nil, nil, errors.New("can not connect to redis server:" + err.Error())
 		}
 		var cancelFunc context.CancelFunc
 		ctx, cancelFunc = context.WithCancel(c.ctx)
 		c.connMap[connName] = connectionItem{
-			rdb:        rdb,
+			client:     client,
 			ctx:        ctx,
 			cancelFunc: cancelFunc,
 		}
 	}
 
 	if db >= 0 {
-		if err := rdb.Do(ctx, "select", strconv.Itoa(db)).Err(); err != nil {
-			return nil, nil, err
+		var rdb *redis.Client
+		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
+			if err := rdb.Do(ctx, "select", strconv.Itoa(db)).Err(); err != nil {
+				return nil, nil, err
+			}
 		}
 	}
-	return rdb, ctx, nil
+	return client, ctx, nil
 }
 
 // parse command response content which use "redis info"
@@ -511,14 +614,14 @@ func (c *connectionService) parseDBItemInfo(info string) map[string]int {
 
 // ServerInfo get server info
 func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(name, 0)
+	client, ctx, err := c.getRedisClient(name, 0)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	// get database info
-	res, err := rdb.Info(ctx).Result()
+	res, err := client.Info(ctx).Result()
 	if err != nil {
 		resp.Msg = "get server info fail:" + err.Error()
 		return
@@ -537,40 +640,47 @@ func (c *connectionService) OpenDatabase(connName string, db int, match string, 
 
 // ScanKeys scan all keys
 func (c *connectionService) ScanKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	filterType := len(keyType) > 0
+	var countPerScan int64 = 10000
+	// define sub scan function
+	scan := func(ctx context.Context, cli redis.UniversalClient, appendFunc func(k any)) error {
+		var iter *redis.ScanIterator
+		if filterType {
+			iter = cli.ScanType(ctx, 0, match, countPerScan, keyType).Iterator()
+		} else {
+			iter = cli.Scan(ctx, 0, match, countPerScan).Iterator()
+		}
+		for iter.Next(ctx) {
+			appendFunc(strutil.EncodeRedisKey(iter.Val()))
+		}
+		return iter.Err()
+	}
 
 	var keys []any
-	//keys := map[string]keyItem{}
-	var cursor uint64
-	for {
-		var loadedKey []string
-		if filterType {
-			loadedKey, cursor, err = rdb.ScanType(ctx, cursor, match, 10000, keyType).Result()
-		} else {
-			loadedKey, cursor, err = rdb.Scan(ctx, cursor, match, 10000).Result()
-		}
-		if err != nil {
-			resp.Msg = err.Error()
-			return
-		}
-		for _, k := range loadedKey {
-			keys = append(keys, strutil.EncodeRedisKey(k))
-		}
-		//for _, k := range loadedKey {
-		//	//t, _ := rdb.Type(ctx, k).Result()
-		//	keys[k] = keyItem{Type: "t"}
-		//}
-		//keys = append(keys, loadedKey...)
-		// no more loadedKey
-		if cursor == 0 {
-			break
-		}
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		var mutex sync.Mutex
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			return scan(ctx, cli, func(k any) {
+				mutex.Lock()
+				keys = append(keys, k)
+				mutex.Unlock()
+			})
+		})
+	} else {
+		err = scan(ctx, client, func(k any) {
+			keys = append(keys, k)
+		})
+	}
+	if err != nil {
+		resp.Msg = err.Error()
+		return
 	}
 
 	resp.Success = true
@@ -582,7 +692,7 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 
 // GetKeyValue get value by key
 func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -591,7 +701,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	key := strutil.DecodeRedisKey(k)
 	var keyType string
 	var dur time.Duration
-	keyType, err = rdb.Type(ctx, key).Result()
+	keyType, err = client.Type(ctx, key).Result()
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -603,7 +713,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	}
 
 	var ttl int64
-	if dur, err = rdb.TTL(ctx, key).Result(); err != nil {
+	if dur, err = client.TTL(ctx, key).Result(); err != nil {
 		ttl = -1
 	} else {
 		if dur < 0 {
@@ -619,18 +729,18 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	switch strings.ToLower(keyType) {
 	case "string":
 		var str string
-		str, err = rdb.Get(ctx, key).Result()
+		str, err = client.Get(ctx, key).Result()
 		value, viewAs = strutil.ConvertTo(str, viewAs)
-		size, _ = rdb.StrLen(ctx, key).Result()
+		size, _ = client.StrLen(ctx, key).Result()
 	case "list":
-		value, err = rdb.LRange(ctx, key, 0, -1).Result()
-		size, _ = rdb.LLen(ctx, key).Result()
+		value, err = client.LRange(ctx, key, 0, -1).Result()
+		size, _ = client.LLen(ctx, key).Result()
 	case "hash":
-		//value, err = rdb.HGetAll(ctx, key).Result()
+		//value, err = client.HGetAll(ctx, key).Result()
 		items := map[string]string{}
 		for {
 			var loadedVal []string
-			loadedVal, cursor, err = rdb.HScan(ctx, key, cursor, "*", 10000).Result()
+			loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", 10000).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -643,13 +753,13 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 			}
 		}
 		value = items
-		size, _ = rdb.HLen(ctx, key).Result()
+		size, _ = client.HLen(ctx, key).Result()
 	case "set":
-		//value, err = rdb.SMembers(ctx, key).Result()
+		//value, err = client.SMembers(ctx, key).Result()
 		items := []string{}
 		for {
 			var loadedKey []string
-			loadedKey, cursor, err = rdb.SScan(ctx, key, cursor, "*", 10000).Result()
+			loadedKey, cursor, err = client.SScan(ctx, key, cursor, "*", 10000).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -660,13 +770,13 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 			}
 		}
 		value = items
-		size, _ = rdb.SCard(ctx, key).Result()
+		size, _ = client.SCard(ctx, key).Result()
 	case "zset":
-		//value, err = rdb.ZRangeWithScores(ctx, key, 0, -1).Result()
+		//value, err = client.ZRangeWithScores(ctx, key, 0, -1).Result()
 		var items []types.ZSetItem
 		for {
 			var loadedVal []string
-			loadedVal, cursor, err = rdb.ZScan(ctx, key, cursor, "*", 10000).Result()
+			loadedVal, cursor, err = client.ZScan(ctx, key, cursor, "*", 10000).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -685,11 +795,11 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 			}
 		}
 		value = items
-		size, _ = rdb.ZCard(ctx, key).Result()
+		size, _ = client.ZCard(ctx, key).Result()
 	case "stream":
 		var msgs []redis.XMessage
 		items := []types.StreamItem{}
-		msgs, err = rdb.XRevRange(ctx, key, "+", "-").Result()
+		msgs, err = client.XRevRange(ctx, key, "+", "-").Result()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -701,7 +811,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 			})
 		}
 		value = items
-		size, _ = rdb.XLen(ctx, key).Result()
+		size, _ = client.XLen(ctx, key).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -721,7 +831,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
 func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -730,7 +840,7 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
-		if expiration, err = rdb.PTTL(ctx, key).Result(); err != nil {
+		if expiration, err = client.PTTL(ctx, key).Result(); err != nil {
 			expiration = redis.KeepTTL
 		}
 	} else {
@@ -747,10 +857,10 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, viewAs, err.Error())
 				return
 			}
-			_, err = rdb.Set(ctx, key, saveStr, 0).Result()
+			_, err = client.Set(ctx, key, saveStr, 0).Result()
 			// set expiration lonely, not "keepttl"
 			if err == nil && expiration > 0 {
-				rdb.Expire(ctx, key, expiration)
+				client.Expire(ctx, key, expiration)
 			}
 		}
 	case "list":
@@ -758,9 +868,9 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 			resp.Msg = "invalid list value"
 			return
 		} else {
-			err = rdb.LPush(ctx, key, strs...).Err()
+			err = client.LPush(ctx, key, strs...).Err()
 			if err == nil && expiration > 0 {
-				rdb.Expire(ctx, key, expiration)
+				client.Expire(ctx, key, expiration)
 			}
 		}
 	case "hash":
@@ -770,7 +880,7 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 		} else {
 			total := len(strs)
 			if total > 1 {
-				_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+				_, err = client.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 					for i := 0; i < total; i += 2 {
 						pipe.HSet(ctx, key, strs[i], strs[i+1])
 					}
@@ -787,9 +897,9 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 			return
 		} else {
 			if len(strs) > 0 {
-				err = rdb.SAdd(ctx, key, strs...).Err()
+				err = client.SAdd(ctx, key, strs...).Err()
 				if err == nil && expiration > 0 {
-					rdb.Expire(ctx, key, expiration)
+					client.Expire(ctx, key, expiration)
 				}
 			}
 		}
@@ -807,9 +917,9 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 						Member: strs[i],
 					})
 				}
-				err = rdb.ZAdd(ctx, key, members...).Err()
+				err = client.ZAdd(ctx, key, members...).Err()
 				if err == nil && expiration > 0 {
-					rdb.Expire(ctx, key, expiration)
+					client.Expire(ctx, key, expiration)
 				}
 			}
 		}
@@ -819,13 +929,13 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 			return
 		} else {
 			if len(strs) > 2 {
-				err = rdb.XAdd(ctx, &redis.XAddArgs{
+				err = client.XAdd(ctx, &redis.XAddArgs{
 					Stream: key,
 					ID:     strs[0].(string),
 					Values: strs[1:],
 				}).Err()
 				if err == nil && expiration > 0 {
-					rdb.Expire(ctx, key, expiration)
+					client.Expire(ctx, key, expiration)
 				}
 			}
 		}
@@ -844,7 +954,7 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 
 // SetHashValue set hash field
 func (c *connectionService) SetHashValue(connName string, db int, k any, field, newField, value string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -855,23 +965,23 @@ func (c *connectionService) SetHashValue(connName string, db int, k any, field, 
 	updatedField := map[string]string{}
 	if len(field) <= 0 {
 		// old filed is empty, add new field
-		_, err = rdb.HSet(ctx, key, newField, value).Result()
+		_, err = client.HSet(ctx, key, newField, value).Result()
 		updatedField[newField] = value
 	} else if len(newField) <= 0 {
 		// new field is empty, delete old field
-		_, err = rdb.HDel(ctx, key, field, value).Result()
+		_, err = client.HDel(ctx, key, field, value).Result()
 		removedField = append(removedField, field)
 	} else if field == newField {
 		// replace field
-		_, err = rdb.HSet(ctx, key, newField, value).Result()
+		_, err = client.HSet(ctx, key, newField, value).Result()
 		updatedField[newField] = value
 	} else {
 		// remove old field and add new field
-		if _, err = rdb.HDel(ctx, key, field).Result(); err != nil {
+		if _, err = client.HDel(ctx, key, field).Result(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
-		_, err = rdb.HSet(ctx, key, newField, value).Result()
+		_, err = client.HSet(ctx, key, newField, value).Result()
 		removedField = append(removedField, field)
 		updatedField[newField] = value
 	}
@@ -890,7 +1000,7 @@ func (c *connectionService) SetHashValue(connName string, db int, k any, field, 
 
 // AddHashField add or update hash field
 func (c *connectionService) AddHashField(connName string, db int, k any, action int, fieldItems []any) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -902,7 +1012,7 @@ func (c *connectionService) AddHashField(connName string, db int, k any, action 
 	case 1:
 		// ignore duplicated fields
 		for i := 0; i < len(fieldItems); i += 2 {
-			_, err = rdb.HSetNX(ctx, key, fieldItems[i].(string), fieldItems[i+1]).Result()
+			_, err = client.HSetNX(ctx, key, fieldItems[i].(string), fieldItems[i+1]).Result()
 			if err == nil {
 				updated[fieldItems[i].(string)] = fieldItems[i+1]
 			}
@@ -911,9 +1021,9 @@ func (c *connectionService) AddHashField(connName string, db int, k any, action 
 		// overwrite duplicated fields
 		total := len(fieldItems)
 		if total > 1 {
-			_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+			_, err = client.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 				for i := 0; i < total; i += 2 {
-					rdb.HSet(ctx, key, fieldItems[i], fieldItems[i+1])
+					client.HSet(ctx, key, fieldItems[i], fieldItems[i+1])
 				}
 				return nil
 			})
@@ -936,7 +1046,7 @@ func (c *connectionService) AddHashField(connName string, db int, k any, action 
 
 // AddListItem add item to list or remove from it
 func (c *connectionService) AddListItem(connName string, db int, k any, action int, items []any) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -947,11 +1057,11 @@ func (c *connectionService) AddListItem(connName string, db int, k any, action i
 	switch action {
 	case 0:
 		// push to head
-		_, err = rdb.LPush(ctx, key, items...).Result()
+		_, err = client.LPush(ctx, key, items...).Result()
 		leftPush = append(leftPush, items...)
 	default:
 		// append to tail
-		_, err = rdb.RPush(ctx, key, items...).Result()
+		_, err = client.RPush(ctx, key, items...).Result()
 		rightPush = append(rightPush, items...)
 	}
 	if err != nil {
@@ -969,7 +1079,7 @@ func (c *connectionService) AddListItem(connName string, db int, k any, action i
 
 // SetListItem update or remove list item by index
 func (c *connectionService) SetListItem(connName string, db int, k any, index int64, value string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -980,13 +1090,13 @@ func (c *connectionService) SetListItem(connName string, db int, k any, index in
 	updated := map[int64]string{}
 	if len(value) <= 0 {
 		// remove from list
-		err = rdb.LSet(ctx, key, index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
+		err = client.LSet(ctx, key, index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
 		}
 
-		err = rdb.LRem(ctx, key, 1, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
+		err = client.LRem(ctx, key, 1, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -994,7 +1104,7 @@ func (c *connectionService) SetListItem(connName string, db int, k any, index in
 		removed = append(removed, index)
 	} else {
 		// replace index value
-		err = rdb.LSet(ctx, key, index, value).Err()
+		err = client.LSet(ctx, key, index, value).Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -1012,7 +1122,7 @@ func (c *connectionService) SetListItem(connName string, db int, k any, index in
 
 // SetSetItem add members to set or remove from set
 func (c *connectionService) SetSetItem(connName string, db int, k any, remove bool, members []any) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1020,9 +1130,9 @@ func (c *connectionService) SetSetItem(connName string, db int, k any, remove bo
 
 	key := strutil.DecodeRedisKey(k)
 	if remove {
-		_, err = rdb.SRem(ctx, key, members...).Result()
+		_, err = client.SRem(ctx, key, members...).Result()
 	} else {
-		_, err = rdb.SAdd(ctx, key, members...).Result()
+		_, err = client.SAdd(ctx, key, members...).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1035,15 +1145,15 @@ func (c *connectionService) SetSetItem(connName string, db int, k any, remove bo
 
 // UpdateSetItem replace member of set
 func (c *connectionService) UpdateSetItem(connName string, db int, k any, value, newValue string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	key := strutil.DecodeRedisKey(k)
-	_, _ = rdb.SRem(ctx, key, value).Result()
-	_, err = rdb.SAdd(ctx, key, newValue).Result()
+	_, _ = client.SRem(ctx, key, value).Result()
+	_, err = client.SAdd(ctx, key, newValue).Result()
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1055,7 +1165,7 @@ func (c *connectionService) UpdateSetItem(connName string, db int, k any, value,
 
 // UpdateZSetValue update value of sorted set member
 func (c *connectionService) UpdateZSetValue(connName string, db int, k any, value, newValue string, score float64) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1066,24 +1176,24 @@ func (c *connectionService) UpdateZSetValue(connName string, db int, k any, valu
 	var removed []string
 	if len(newValue) <= 0 {
 		// blank new value, delete value
-		_, err = rdb.ZRem(ctx, key, value).Result()
+		_, err = client.ZRem(ctx, key, value).Result()
 		if err == nil {
 			removed = append(removed, value)
 		}
 	} else if newValue == value {
 		// update score only
-		_, err = rdb.ZAdd(ctx, key, redis.Z{
+		_, err = client.ZAdd(ctx, key, redis.Z{
 			Score:  score,
 			Member: value,
 		}).Result()
 	} else {
 		// remove old value and add new one
-		_, err = rdb.ZRem(ctx, key, value).Result()
+		_, err = client.ZRem(ctx, key, value).Result()
 		if err == nil {
 			removed = append(removed, value)
 		}
 
-		_, err = rdb.ZAdd(ctx, key, redis.Z{
+		_, err = client.ZAdd(ctx, key, redis.Z{
 			Score:  score,
 			Member: newValue,
 		}).Result()
@@ -1106,7 +1216,7 @@ func (c *connectionService) UpdateZSetValue(connName string, db int, k any, valu
 
 // AddZSetValue add item to sorted set
 func (c *connectionService) AddZSetValue(connName string, db int, k any, action int, valueScore map[string]float64) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1123,10 +1233,10 @@ func (c *connectionService) AddZSetValue(connName string, db int, k any, action 
 	switch action {
 	case 1:
 		// ignore duplicated fields
-		_, err = rdb.ZAddNX(ctx, key, members...).Result()
+		_, err = client.ZAddNX(ctx, key, members...).Result()
 	default:
 		// overwrite duplicated fields
-		_, err = rdb.ZAdd(ctx, key, members...).Result()
+		_, err = client.ZAdd(ctx, key, members...).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1139,14 +1249,14 @@ func (c *connectionService) AddZSetValue(connName string, db int, k any, action 
 
 // AddStreamValue add stream field
 func (c *connectionService) AddStreamValue(connName string, db int, k any, ID string, fieldItems []any) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	key := strutil.DecodeRedisKey(k)
-	_, err = rdb.XAdd(ctx, &redis.XAddArgs{
+	_, err = client.XAdd(ctx, &redis.XAddArgs{
 		Stream: key,
 		ID:     ID,
 		Values: fieldItems,
@@ -1162,21 +1272,21 @@ func (c *connectionService) AddStreamValue(connName string, db int, k any, ID st
 
 // RemoveStreamValues remove stream values by id
 func (c *connectionService) RemoveStreamValues(connName string, db int, k any, IDs []string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	key := strutil.DecodeRedisKey(k)
-	_, err = rdb.XDel(ctx, key, IDs...).Result()
+	_, err = client.XDel(ctx, key, IDs...).Result()
 	resp.Success = true
 	return
 }
 
 // SetKeyTTL set ttl of key
 func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1185,13 +1295,13 @@ func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64)
 	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
-		if err = rdb.Persist(ctx, key).Err(); err != nil {
+		if err = client.Persist(ctx, key).Err(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
 	} else {
 		expiration = time.Duration(ttl) * time.Second
-		if err = rdb.Expire(ctx, key, expiration).Err(); err != nil {
+		if err = client.Expire(ctx, key, expiration).Err(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
@@ -1203,7 +1313,7 @@ func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64)
 
 // DeleteKey remove redis key
 func (c *connectionService) DeleteKey(connName string, db int, k any) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1213,29 +1323,39 @@ func (c *connectionService) DeleteKey(connName string, db int, k any) (resp type
 	var deletedKeys []string
 	if strings.HasSuffix(key, "*") {
 		// delete by prefix
-		var cursor uint64
-		for {
-			var loadedKey []string
-			if loadedKey, cursor, err = rdb.Scan(ctx, cursor, key, 10000).Result(); err != nil {
-				resp.Msg = err.Error()
-				return
-			} else {
-				if err = rdb.Del(ctx, loadedKey...).Err(); err != nil {
-					resp.Msg = err.Error()
-					return
+		var mutex sync.Mutex
+		del := func(ctx context.Context, cli redis.UniversalClient) error {
+			iter := cli.Scan(ctx, 0, key, 10000).Iterator()
+			for iter.Next(ctx) {
+				subKey := iter.Val()
+				if err = cli.Unlink(ctx, subKey).Err(); err != nil {
+					log.Println("unlink error", err.Error())
+					return err
 				} else {
-					deletedKeys = append(deletedKeys, loadedKey...)
+					mutex.Lock()
+					deletedKeys = append(deletedKeys, subKey)
+					mutex.Unlock()
 				}
 			}
+			return nil
+		}
 
-			// no more loadedKey
-			if cursor == 0 {
-				break
-			}
+		if cluster, ok := client.(*redis.ClusterClient); ok {
+			// cluster mode
+			err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+				return del(ctx, cli)
+			})
+		} else {
+			err = del(ctx, client)
+		}
+
+		if err != nil {
+			resp.Msg = err.Error()
+			return
 		}
 	} else {
 		// delete key only
-		_, err = rdb.Del(ctx, key).Result()
+		_, err = client.Del(ctx, key).Result()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -1252,13 +1372,13 @@ func (c *connectionService) DeleteKey(connName string, db int, k any) (resp type
 
 // RenameKey rename key
 func (c *connectionService) RenameKey(connName string, db int, key, newKey string) (resp types.JSResp) {
-	rdb, ctx, err := c.getRedisClient(connName, db)
+	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
-	_, err = rdb.RenameNX(ctx, key, newKey).Result()
+	_, err = client.RenameNX(ctx, key, newKey).Result()
 	if err != nil {
 		resp.Msg = err.Error()
 		return

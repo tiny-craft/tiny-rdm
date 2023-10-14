@@ -18,6 +18,7 @@ type ConnectionConfig struct {
 	MarkColor     string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 	SSH           ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 	Sentinel      ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
+	Cluster       ConnectionCluster  `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 }
 
 type Connection struct {
@@ -42,19 +43,23 @@ type ConnectionDB struct {
 }
 
 type ConnectionSSH struct {
-	Enable     bool   `json:"enable" yaml:"enable"`
+	Enable     bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
 	Addr       string `json:"addr,omitempty" yaml:"addr,omitempty"`
 	Port       int    `json:"port,omitempty" yaml:"port,omitempty"`
-	LoginType  string `json:"loginType" yaml:"login_type"`
-	Username   string `json:"username" yaml:"username,omitempty"`
+	LoginType  string `json:"loginType,omitempty" yaml:"login_type"`
+	Username   string `json:"username,omitempty" yaml:"username,omitempty"`
 	Password   string `json:"password,omitempty" yaml:"password,omitempty"`
 	PKFile     string `json:"pkFile,omitempty" yaml:"pk_file,omitempty"`
 	Passphrase string `json:"passphrase,omitempty" yaml:"passphrase,omitempty"`
 }
 
 type ConnectionSentinel struct {
-	Enable   bool   `json:"enable" yaml:"enable"`
-	Master   string `json:"master" yaml:"master"`
+	Enable   bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
+	Master   string `json:"master,omitempty" yaml:"master,omitempty"`
 	Username string `json:"username,omitempty" yaml:"username,omitempty"`
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+}
+
+type ConnectionCluster struct {
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 }

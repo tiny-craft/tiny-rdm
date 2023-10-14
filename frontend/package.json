@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "dayjs": "^1.11.10",
-    "highlight.js": "^11.8.0",
+    "highlight.js": "^11.9.0",
     "lodash": "^4.17.21",
-    "pinia": "^2.1.6",
-    "sass": "^1.69.0",
+    "pinia": "^2.1.7",
+    "sass": "^1.69.3",
     "vue": "^3.3.4",
     "vue-i18n": "^9.5.0"
   },

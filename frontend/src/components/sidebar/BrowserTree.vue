@@ -5,7 +5,7 @@ import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
-import { find, get, includes, indexOf, isEmpty, pull, remove, size } from 'lodash'
+import { find, get, includes, indexOf, isEmpty, remove, size } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -16,7 +16,6 @@ import Connect from '@/components/icons/Connect.vue'
 import useDialogStore from 'stores/dialog.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
-import ToggleServer from '@/components/icons/ToggleServer.vue'
 import Unlink from '@/components/icons/Unlink.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Close from '@/components/icons/Close.vue'
@@ -348,14 +347,15 @@ const onUpdateSelectedKeys = (keys, options) => {
 
 const renderPrefix = ({ option }) => {
     switch (option.type) {
-        case ConnectionType.Server:
-            return h(
-                NIcon,
-                { size: 20 },
-                {
-                    default: () => h(ToggleServer, { modelValue: false }),
-                },
-            )
+        // case ConnectionType.Server:
+        //     const icon = option.cluster === true ? ToggleCluster : ToggleServer
+        //     return h(
+        //         NIcon,
+        //         { size: 20 },
+        //         {
+        //             default: () => h(icon, { modelValue: false }),
+        //         },
+        //     )
         case ConnectionType.RedisDB:
             return h(
                 NIcon,

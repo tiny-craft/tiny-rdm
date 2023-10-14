@@ -6,6 +6,7 @@ import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '@/consts/connection_type.js'
 import ToggleFolder from '@/components/icons/ToggleFolder.vue'
 import ToggleServer from '@/components/icons/ToggleServer.vue'
+import ToggleCluster from '@/components/icons/ToggleCluster.vue'
 import { debounce, get, includes, indexOf, isEmpty, split } from 'lodash'
 import Config from '@/components/icons/Config.vue'
 import Delete from '@/components/icons/Delete.vue'
@@ -193,12 +194,13 @@ const renderPrefix = ({ option }) => {
         case ConnectionType.Server:
             const connected = connectionStore.isConnected(option.name)
             const color = getServerMarkColor(option.name)
+            const icon = option.cluster === true ? ToggleCluster : ToggleServer
             return h(
                 NIcon,
                 { size: 20, color: !!!connected ? color : undefined },
                 {
                     default: () =>
-                        h(ToggleServer, {
+                        h(icon, {
                             modelValue: !!connected,
                             fillColor: `rgba(220,66,60,${iconTransparency})`,
                         }),

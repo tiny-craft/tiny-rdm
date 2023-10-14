@@ -93,7 +93,7 @@
   },
   "ribbon": {
     "server": "服务器",
-    "browser": "浏览器",
+    "browser": "数据浏览",
     "log": "日志"
   },
   "dialogue": {
@@ -147,6 +147,16 @@
         "dbfilter_input_tip": "按回车确认",
         "mark_color": "标记颜色"
       },
+      "ssl": {
+        "title": "SSL/TLS",
+        "enable": "启用SSL",
+        "key_file": "公钥文件",
+        "cert_file": "私钥文件",
+        "ca_file": "授权文件",
+        "key_file_tip": "PEM格式公钥文件",
+        "cert_file_tip":"PEM格式私钥文件",
+        "ca_file_tip": "PEM格式授权文件"
+      },
       "ssh": {
         "enable": "启用SSH隧道",
         "title": "SSH隧道",
@@ -169,6 +179,10 @@
         "username": "主节点用户名",
         "pwd_tip": "(可选)主节点服务授权用户名",
         "usr_tip": "(可选)主节点服务授权密码 (Redis > 6.0)"
+      },
+      "cluster": {
+        "title": "集群模式",
+        "enable": "当前为集群节点"
       }
     },
     "group": {

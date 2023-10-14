@@ -76,17 +76,17 @@ func (l *LogHook) DialHook(next redis.DialHook) redis.DialHook {
 
 func (l *LogHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
-		log.Println(cmd)
 		t := time.Now()
 		err := next(ctx, cmd)
-		if l.cmdExec != nil {
-			b := make([]byte, 0, 64)
-			for i, arg := range cmd.Args() {
-				if i > 0 {
-					b = append(b, ' ')
-				}
-				b = appendArg(b, arg)
+		b := make([]byte, 0, 64)
+		for i, arg := range cmd.Args() {
+			if i > 0 {
+				b = append(b, ' ')
 			}
+			b = appendArg(b, arg)
+		}
+		log.Println(string(b))
+		if l.cmdExec != nil {
 			l.cmdExec(string(b), time.Since(t).Milliseconds())
 		}
 		return err
@@ -98,18 +98,21 @@ func (l *LogHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.Proc
 		t := time.Now()
 		err := next(ctx, cmds)
 		cost := time.Since(t).Milliseconds()
+		b := make([]byte, 0, 64)
 		for _, cmd := range cmds {
 			log.Println("pipeline: ", cmd)
 			if l.cmdExec != nil {
-				b := make([]byte, 0, 64)
 				for i, arg := range cmd.Args() {
 					if i > 0 {
 						b = append(b, ' ')
 					}
 					b = appendArg(b, arg)
 				}
-				l.cmdExec(string(b), cost)
+				b = append(b, '\n')
 			}
+		}
+		if l.cmdExec != nil {
+			l.cmdExec(string(b), cost)
 		}
 		return err
 	}

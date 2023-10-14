@@ -93,7 +93,7 @@
   },
   "ribbon": {
     "server": "Server",
-    "browser": "Browser",
+    "browser": "Data Browser",
     "log": "Log"
   },
   "dialogue": {
@@ -147,6 +147,16 @@
         "dbfilter_input_tip": "Press Enter to confirm",
         "mark_color": "Mark Color"
       },
+      "ssl": {
+        "title": "SSL/TLS",
+        "enable": "Enable SSL/TLS",
+        "key_file": "Public Key",
+        "cert_file": "Private Key",
+        "ca_file": "Authority",
+        "key_file_tip": "Public Key File in PEM format",
+        "cert_file_tip":"Private Key File in PEM format",
+        "ca_file_tip": "Certificate Authority File in PEM format"
+      },
       "ssh": {
         "title": "SSH Tunnel",
         "enable": "Enable SSH Tuntel",
@@ -169,6 +179,11 @@
         "username": "Username for Master Node",
         "pwd_tip": "(Optional) Authentication username for master node",
         "usr_tip": "(Optional) Authentication password for master node (Redis > 6.0)"
+      },
+      "cluster": {
+        "title": "Cluster",
+        "enable": "Serve as Cluster Node",
+        "readonly": "Enables read-only commands on slave nodes"
       }
     },
     "group": {

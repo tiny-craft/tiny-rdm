@@ -31,6 +31,7 @@ watch(
                 ttlForm.keyCode = tab.keyCode
                 if (tab.ttl < 0) {
                     // forever
+                    ttlForm.ttl = -1
                 } else {
                     ttlForm.ttl = tab.ttl
                 }

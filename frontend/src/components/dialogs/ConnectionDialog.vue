@@ -248,6 +248,7 @@ const onClose = () => {
         :show-icon="false"
         :title="isEditMode ? $t('dialogue.connection.edit_title') : $t('dialogue.connection.new_title')"
         preset="dialog"
+        style="width: 600px"
         transform-origin="center">
         <n-spin :show="closingConnection">
             <n-tabs v-model:value="tab" animated type="line">
@@ -486,8 +487,20 @@ const onClose = () => {
                     </n-form>
                 </n-tab-pane>
 
-                <!-- TODO: SSL tab pane -->
-                <!-- TODO: Cluster tab pane -->
+                <!-- Cluster pane -->
+                <n-tab-pane :tab="$t('dialogue.connection.cluster.title')" display-directive="show" name="cluster">
+                    <n-form-item label-placement="left">
+                        <n-checkbox v-model:checked="generalForm.cluster.enable" size="medium">
+                            {{ $t('dialogue.connection.cluster.enable') }}
+                        </n-checkbox>
+                    </n-form-item>
+                    <!--                    <n-form-->
+                    <!--                        :model="generalForm.cluster"-->
+                    <!--                        :show-require-mark="false"-->
+                    <!--                        :disabled="!generalForm.cluster.enable"-->
+                    <!--                        label-placement="top">-->
+                    <!--                    </n-form>-->
+                </n-tab-pane>
             </n-tabs>
 
             <!-- test result alert-->

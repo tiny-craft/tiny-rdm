@@ -59,6 +59,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {string} label display label
      * @property {string} name database name
      * @property {number} type
+     * @property {boolean} cluster is cluster node
      * @property {ConnectionItem[]} children
      */
 
@@ -146,6 +147,7 @@ const useConnectionStore = defineStore('connections', {
                         label: conn.name,
                         name: conn.name,
                         type: ConnectionType.Server,
+                        cluster: get(conn, 'cluster.enable', false),
                         // isLeaf: false,
                     })
                     profiles[conn.name] = {
@@ -165,6 +167,7 @@ const useConnectionStore = defineStore('connections', {
                             label: item.name,
                             name: item.name,
                             type: ConnectionType.Server,
+                            cluster: get(item, 'cluster.enable', false),
                             // isLeaf: false,
                         })
                         profiles[item.name] = {
@@ -243,6 +246,9 @@ const useConnectionStore = defineStore('connections', {
                     master: 'mymaster',
                     username: '',
                     password: '',
+                },
+                cluster: {
+                    enable: false,
                 },
             }
         },
@@ -624,7 +630,7 @@ const useConnectionStore = defineStore('connections', {
                         }
                         // its danger to delete "non-exists" key, just remove from tree view
                         await this.deleteKey(server, db, key, true)
-                        // TODO: show key not found page?
+                        // TODO: show key not found page or check exists on server first?
                     }
                 }
 
