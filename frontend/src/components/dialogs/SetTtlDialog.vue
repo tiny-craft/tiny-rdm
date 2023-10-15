@@ -29,11 +29,7 @@ watch(
                 ttlForm.db = tab.db
                 ttlForm.key = tab.key
                 ttlForm.keyCode = tab.keyCode
-                if (tab.ttl < 0) {
-                    // forever
-                } else {
-                    ttlForm.ttl = tab.ttl
-                }
+                ttlForm.ttl = tab.ttl
             }
         }
     },
