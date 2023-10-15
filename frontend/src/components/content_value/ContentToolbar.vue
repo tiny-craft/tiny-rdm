@@ -12,7 +12,7 @@ import useConnectionStore from 'stores/connections.js'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed } from 'vue'
-import { isEmpty } from 'lodash'
+import { isEmpty, padStart } from 'lodash'
 
 const props = defineProps({
     server: String,
@@ -49,6 +49,23 @@ const binaryKey = computed(() => {
  */
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
+})
+
+const ttlString = computed(() => {
+    let s = ''
+    if (props.ttl > 0) {
+        const hours = Math.floor(props.ttl / 3600)
+        s += padStart(hours + ':', 3, '0')
+        const minutes = Math.floor((props.ttl % 3600) / 60)
+        s += padStart(minutes + ':', 3, '0')
+        const seconds = Math.floor(props.ttl % 60)
+        s += padStart(seconds + '', 2, '0')
+    } else if (props.ttl < 0) {
+        s = i18n.t('interface.forever')
+    } else {
+        s = '00:00:00'
+    }
+    return s
 })
 
 const onReloadKey = () => {
@@ -104,15 +121,10 @@ const onDeleteKey = () => {
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
-                        <template v-if="ttl < 0">
-                            {{ $t('interface.forever') }}
-                        </template>
-                        <template v-else>
-                            {{ Math.floor(ttl/3600) }}:{{ Math.floor((ttl%3600)/60) }}:{{ Math.floor(ttl%60) }}
-                        </template>
+                        {{ ttlString }}
                     </n-button>
                 </template>
-                TTL
+                TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}
             </n-tooltip>
             <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="onRenameKey" />
         </n-button-group>
