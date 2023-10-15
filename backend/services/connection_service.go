@@ -1396,8 +1396,12 @@ func (c *connectionService) RenameKey(connName string, db int, key, newKey strin
 		return
 	}
 
-	_, err = client.RenameNX(ctx, key, newKey).Result()
-	if err != nil {
+	if _, ok := client.(*redis.ClusterClient); ok {
+		resp.Msg = "RENAME not support in cluster mode yet"
+		return
+	}
+
+	if _, err = client.RenameNX(ctx, key, newKey).Result(); err != nil {
 		resp.Msg = err.Error()
 		return
 	}

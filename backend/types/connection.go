@@ -30,11 +30,6 @@ type Connection struct {
 
 type Connections []Connection
 
-type ConnectionGroup struct {
-	GroupName   string       `json:"groupName" yaml:"group_name"`
-	Connections []Connection `json:"connections" yaml:"connections"`
-}
-
 type ConnectionDB struct {
 	Name    string `json:"name"`
 	Index   int    `json:"index"`

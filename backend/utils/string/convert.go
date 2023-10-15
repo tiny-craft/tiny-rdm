@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"tinyrdm/backend/types"
+	"unicode/utf8"
 )
 
 // ConvertTo convert string to specified type
@@ -187,7 +188,9 @@ func decodeJson(str string) (string, bool) {
 
 func decodeBase64(str string) (string, bool) {
 	if decodedStr, err := base64.StdEncoding.DecodeString(str); err == nil {
-		return string(decodedStr), true
+		if s := string(decodedStr); utf8.ValidString(s) {
+			return s, true
+		}
 	}
 	return str, false
 }
