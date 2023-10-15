@@ -12,6 +12,7 @@ const deleteForm = reactive({
     showAffected: false,
     loadingAffected: false,
     affectedKeys: [],
+    async: true,
 })
 
 const dialogStore = useDialog()
@@ -27,6 +28,7 @@ watch(
             deleteForm.showAffected = false
             deleteForm.loadingAffected = false
             deleteForm.affectedKeys = []
+            deleteForm.async = true
         }
     },
 )
@@ -50,8 +52,8 @@ const resetAffected = () => {
 const i18n = useI18n()
 const onConfirmDelete = async () => {
     try {
-        const { server, db, key } = deleteForm
-        const success = await connectionStore.deleteKeyPrefix(server, db, key)
+        const { server, db, key, async } = deleteForm
+        const success = await connectionStore.deleteKeyPrefix(server, db, key, async)
         if (success) {
             $message.success(i18n.t('dialogue.handle_succ'))
         }
@@ -85,6 +87,9 @@ const onClose = () => {
             </n-form-item>
             <n-form-item :label="$t('dialogue.key.key_expression')" required>
                 <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
+            </n-form-item>
+            <n-form-item :label="$t('dialogue.key.async_delete')" required>
+                <n-checkbox v-model:checked="deleteForm.async">{{ $t('dialogue.key.async_delete_title') }}</n-checkbox>
             </n-form-item>
             <n-card v-if="deleteForm.showAffected" :title="$t('dialogue.key.affected_key')" size="small">
                 <n-skeleton v-if="deleteForm.loadingAffected" :repeat="10" text />

@@ -1330,7 +1330,7 @@ func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64)
 }
 
 // DeleteKey remove redis key
-func (c *connectionService) DeleteKey(connName string, db int, k any) (resp types.JSResp) {
+func (c *connectionService) DeleteKey(connName string, db int, k any, async bool) (resp types.JSResp) {
 	client, ctx, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1344,10 +1344,15 @@ func (c *connectionService) DeleteKey(connName string, db int, k any) (resp type
 		var mutex sync.Mutex
 		del := func(ctx context.Context, cli redis.UniversalClient) error {
 			iter := cli.Scan(ctx, 0, key, 10000).Iterator()
+			var fn func(c context.Context, ks ...string) *redis.IntCmd
+			if async {
+				fn = cli.Unlink
+			} else {
+				fn = cli.Del
+			}
 			for iter.Next(ctx) {
 				subKey := iter.Val()
-				if err = cli.Unlink(ctx, subKey).Err(); err != nil {
-					log.Println("unlink error", err.Error())
+				if err = fn(ctx, subKey).Err(); err != nil {
 					return err
 				} else {
 					mutex.Lock()
@@ -1373,10 +1378,16 @@ func (c *connectionService) DeleteKey(connName string, db int, k any) (resp type
 		}
 	} else {
 		// delete key only
-		_, err = client.Del(ctx, key).Result()
-		if err != nil {
-			resp.Msg = err.Error()
-			return
+		if async {
+			if _, err = client.Unlink(ctx, key).Result(); err != nil {
+				resp.Msg = err.Error()
+				return
+			}
+		} else {
+			if _, err = client.Del(ctx, key).Result(); err != nil {
+				resp.Msg = err.Error()
+				return
+			}
 		}
 		deletedKeys = append(deletedKeys, key)
 	}

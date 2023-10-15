@@ -1479,12 +1479,13 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * delete keys with prefix
-         * @param connName
-         * @param db
-         * @param prefix
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} prefix
+         * @param {boolean} async
          * @returns {Promise<boolean>}
          */
-        async deleteKeyPrefix(connName, db, prefix) {
+        async deleteKeyPrefix(connName, db, prefix, async) {
             if (isEmpty(prefix)) {
                 return false
             }
@@ -1492,7 +1493,7 @@ const useConnectionStore = defineStore('connections', {
                 if (!endsWith(prefix, '*')) {
                     prefix += '*'
                 }
-                const { data, success, msg } = await DeleteKey(connName, db, prefix)
+                const { data, success, msg } = await DeleteKey(connName, db, prefix, async)
                 if (success) {
                     // const { deleted: keys = [] } = data
                     // for (const key of keys) {

@@ -199,7 +199,9 @@
       "key_expression": "Key Expression",
       "affected_key": "Affected Keys",
       "show_affected_key": "Show Affected Keys",
-      "confirm_delete_key": "Confirm Delete {num} Keys"
+      "confirm_delete_key": "Confirm Delete {num} Key(s)",
+      "async_delete": "Asynchronously Execute",
+      "async_delete_title": "Do not waiting for the operation's result"
     },
     "field": {
       "new": "Add New Field",

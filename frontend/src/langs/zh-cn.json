@@ -198,7 +198,9 @@
       "key_expression": "键名表达式",
       "affected_key": "受影响的键名",
       "show_affected_key": "查看受影响的键名",
-      "confirm_delete_key": "确认删除{num}个键"
+      "confirm_delete_key": "确认删除{num}个键",
+      "async_delete": "异步执行",
+      "async_delete_title": "不等待操作结果"
     },
     "field": {
       "new": "添加新字段",
