@@ -1343,22 +1343,36 @@ func (c *connectionService) DeleteKey(connName string, db int, k any, async bool
 		// delete by prefix
 		var mutex sync.Mutex
 		del := func(ctx context.Context, cli redis.UniversalClient) error {
-			iter := cli.Scan(ctx, 0, key, 10000).Iterator()
-			var fn func(c context.Context, ks ...string) *redis.IntCmd
-			if async {
-				fn = cli.Unlink
-			} else {
-				fn = cli.Del
-			}
-			for iter.Next(ctx) {
-				subKey := iter.Val()
-				if err = fn(ctx, subKey).Err(); err != nil {
-					return err
-				} else {
-					mutex.Lock()
-					deletedKeys = append(deletedKeys, subKey)
-					mutex.Unlock()
+			handleDel := func(ks []string) error {
+				pipe := cli.Pipeline()
+				for _, k2 := range ks {
+					if async {
+						cli.Unlink(ctx, k2)
+					} else {
+						cli.Del(ctx, k2)
+					}
 				}
+				pipe.Exec(ctx)
+
+				mutex.Lock()
+				deletedKeys = append(deletedKeys, ks...)
+				mutex.Unlock()
+
+				return nil
+			}
+
+			iter := cli.Scan(ctx, 0, key, 10000).Iterator()
+			resultKeys := make([]string, 0, 100)
+			for iter.Next(ctx) {
+				resultKeys = append(resultKeys, iter.Val())
+				if len(resultKeys) >= 3 {
+					handleDel(resultKeys)
+					resultKeys = resultKeys[:0:cap(resultKeys)]
+				}
+			}
+
+			if len(resultKeys) > 0 {
+				handleDel(resultKeys)
 			}
 			return nil
 		}
