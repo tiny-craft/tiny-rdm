@@ -529,7 +529,7 @@ const getValueMenu = () => {
 
 // render menu function icon
 const renderSuffix = ({ option }) => {
-    if (includes(selectedKeys.value, option.key)) {
+    if ((option.type === ConnectionType.RedisDB && option.opened) || includes(selectedKeys.value, option.key)) {
         switch (option.type) {
             case ConnectionType.RedisDB:
                 return renderIconMenu(getDatabaseMenu(option.opened))
