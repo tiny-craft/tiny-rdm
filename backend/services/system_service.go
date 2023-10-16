@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 	"time"
+	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
 )
 
@@ -28,6 +29,18 @@ func System() *systemService {
 
 func (s *systemService) Start(ctx context.Context) {
 	s.ctx = ctx
+
+	// maximize the window if screen size is lower than the minimum window size
+	if screen, err := runtime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
+		for _, sc := range screen {
+			if sc.IsCurrent {
+				if sc.Size.Width < consts.MIN_WINDOW_WIDTH || sc.Size.Height < consts.MIN_WINDOW_HEIGHT {
+					runtime.WindowMaximise(ctx)
+					break
+				}
+			}
+		}
+	}
 }
 
 // SelectFile open file dialog to select a file

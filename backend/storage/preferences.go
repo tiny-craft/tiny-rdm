@@ -47,8 +47,8 @@ func (p *PreferencesStorage) GetPreferences() (ret types.Preferences) {
 
 	ret = p.getPreferences()
 	ret.Behavior.AsideWidth = max(ret.Behavior.AsideWidth, consts.DEFAULT_ASIDE_WIDTH)
-	ret.Behavior.WindowWidth = max(ret.Behavior.WindowWidth, consts.DEFAULT_WINDOW_WIDTH)
-	ret.Behavior.WindowHeight = max(ret.Behavior.WindowHeight, consts.DEFAULT_WINDOW_HEIGHT)
+	ret.Behavior.WindowWidth = max(ret.Behavior.WindowWidth, consts.MIN_WINDOW_WIDTH)
+	ret.Behavior.WindowHeight = max(ret.Behavior.WindowHeight, consts.MIN_WINDOW_HEIGHT)
 	return
 }
 

@@ -44,8 +44,8 @@ func main() {
 		Title:     "Tiny RDM",
 		Width:     windowWidth,
 		Height:    windowHeight,
-		MinWidth:  consts.DEFAULT_WINDOW_WIDTH,
-		MinHeight: consts.DEFAULT_WINDOW_HEIGHT,
+		MinWidth:  consts.MIN_WINDOW_WIDTH,
+		MinHeight: consts.MIN_WINDOW_HEIGHT,
 		Frameless: runtime.GOOS != "darwin",
 		Menu:      appMenu,
 		AssetServer: &assetserver.Options{
