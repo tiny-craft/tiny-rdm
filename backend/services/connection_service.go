@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/ssh"
-	"log"
 	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -150,7 +150,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	}
 
 	option := &redis.Options{
-		ClientName:   config.Name,
+		ClientName:   url.QueryEscape(config.Name),
 		Addr:         fmt.Sprintf("%s:%d", config.Addr, config.Port),
 		Username:     config.Username,
 		Password:     config.Password,
@@ -198,14 +198,13 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 		// connect to cluster
 		var slots []redis.ClusterSlot
 		if slots, err = rdb.ClusterSlots(c.ctx).Result(); err == nil {
-			log.Println(slots)
 			clusterOptions := &redis.ClusterOptions{
 				//NewClient:             nil,
 				//MaxRedirects:          0,
 				//RouteByLatency:        false,
 				//RouteRandomly:         false,
 				//ClusterSlots:          nil,
-				ClientName:            option.ClientName,
+				ClientName:            url.QueryEscape(option.ClientName),
 				Dialer:                option.Dialer,
 				OnConnect:             option.OnConnect,
 				Protocol:              option.Protocol,
