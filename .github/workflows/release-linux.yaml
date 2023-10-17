@@ -63,7 +63,10 @@ jobs:
 
       - name: Build wails app for Linux
         shell: bash
-        run: CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}" -o tiny-rdm
+        run: |
+          CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} \
+          -ldflags "-X main.version=${{ github.event.release.tag_name }} -X main.gaMeasurementID=${{ secrets.GA_MEASUREMENT_ID }} -X main.gaSecretKey=${{ secrets.LINUX_GA_SECRET }}" \
+          -o tiny-rdm
 
       - name: Setup control template
         shell: bash

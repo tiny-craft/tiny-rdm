@@ -69,7 +69,9 @@ jobs:
 
       - name: Build wails app for macOS
         shell: bash
-        run: CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: |
+          CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} \
+          -ldflags "-X main.version=${{ github.event.release.tag_name }} -X main.gaMeasurementID=${{ secrets.GA_MEASUREMENT_ID }} -X main.gaSecretKey=${{ secrets.MAC_GA_SECRET }}"
 
       #      - name: Notarise macOS app + create dmg
       #        shell: bash

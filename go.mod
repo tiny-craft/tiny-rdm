@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/adrg/sysfont v0.1.2
 	github.com/andybalholm/brotli v1.0.5
+	github.com/google/uuid v1.3.1
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.6.0
@@ -19,7 +20,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/google/uuid v1.3.1 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/labstack/echo/v4 v4.11.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect

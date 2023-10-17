@@ -22,6 +22,7 @@ var assets embed.FS
 var icon []byte
 
 var version = "0.0.0"
+var gaMeasurementID, gaSecretKey string
 
 func main() {
 	// Create an instance of the app structure
@@ -55,6 +56,9 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
+
+			services.GA().SetSecretKey(gaMeasurementID, gaSecretKey)
+			services.GA().Startup(version)
 		},
 		OnShutdown: func(ctx context.Context) {
 			connSvc.Stop(ctx)
