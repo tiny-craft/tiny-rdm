@@ -12,20 +12,20 @@ export const types = {
 }
 
 /**
- * mark color for redis type
+ * mark color for redis types
  * @enum {string}
  */
 export const typesColor = {
-    [types.STRING]: '#8256DC',
-    [types.HASH]: '#0171F5',
-    [types.LIST]: '#23C338',
-    [types.SET]: '#F29E33',
-    [types.ZSET]: '#F53227',
-    [types.STREAM]: '#F5C201',
+    [types.STRING]: '#8B5CF6',
+    [types.HASH]: '#3B82F6',
+    [types.LIST]: '#10B981',
+    [types.SET]: '#F59E0B',
+    [types.ZSET]: '#EF4444',
+    [types.STREAM]: '#EC4899',
 }
 
 /**
- * background mark color for redis type
+ * background mark color for redis types
  * @enum {string}
  */
 export const typesBgColor = {
@@ -34,7 +34,7 @@ export const typesBgColor = {
     [types.LIST]: '#E3F3EB',
     [types.SET]: '#FDF1DF',
     [types.ZSET]: '#FAEAED',
-    [types.STREAM]: '#FFF8DF',
+    [types.STREAM]: '#FDE6F1',
 }
 
 // export const typesName = Object.fromEntries(Object.entries(types).map(([key, value]) => [key, value.name]))
