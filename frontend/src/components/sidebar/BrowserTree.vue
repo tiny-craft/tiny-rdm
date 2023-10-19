@@ -223,9 +223,9 @@ const handleSelectContextMenu = (key) => {
         return
     }
     const node = connectionStore.getNode(selectedKey)
-    const { db, key: nodeKey } = node || {}
-    const redisKey = node.redisKeyCode || node.redisKey
-    const redisKeyName = !!node.redisKeyCode ? node.label : redisKey
+    const { db = 0, key: nodeKey, redisKey: rk = '', redisKeyCode: rkc, label } = node || {}
+    const redisKey = rkc || rk
+    const redisKeyName = !!rkc ? label : redisKey
     switch (key) {
         case 'server_info':
             tabStore.setSelectedKeys(props.server)
