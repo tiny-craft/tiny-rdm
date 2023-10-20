@@ -6,7 +6,7 @@ import { ListSentinelMasters, TestConnection } from 'wailsjs/go/services/connect
 import useDialog, { ConnDialogType } from 'stores/dialog'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
-import { SelectFile } from 'wailsjs/go/services/systemService.js'
+import FileOpenInput from '@/components/common/FileOpenInput.vue'
 
 /**
  * Dialog for new or edit connection
@@ -82,39 +82,6 @@ watch(
 const sshLoginType = computed(() => {
     return get(generalForm.value, 'ssh.loginType', 'pwd')
 })
-
-const onSSHChooseKey = async () => {
-    const { success, data } = await SelectFile()
-    const path = get(data, 'path', '')
-    if (!isEmpty(path)) {
-        generalForm.value.ssh.pkFile = path
-    }
-}
-
-const onSSLChooseCert = async () => {
-    const { success, data } = await SelectFile()
-    const path = get(data, 'path', '')
-    if (!isEmpty(path)) {
-        generalForm.value.ssl.certFile = path
-    }
-}
-
-const onSSLChooseKey = async () => {
-    const { success, data } = await SelectFile()
-    const path = get(data, 'path', '')
-    if (!isEmpty(path)) {
-        generalForm.value.ssl.keyFile = path
-    }
-}
-
-const onSSLChooseCA = async () => {
-    const { success, data } = await SelectFile()
-    if (!success) {
-        generalForm.value.ssl.caFile = ''
-    } else {
-        generalForm.value.ssl.caFile = get(data, 'path', '')
-    }
-}
 
 const loadingSentinelMaster = ref(false)
 const masterNameOptions = ref([])
@@ -434,43 +401,22 @@ const onClose = () => {
                         :show-require-mark="false"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.ssl.cert_file')">
-                            <n-input-group>
-                                <n-input
-                                    v-model:value="generalForm.ssl.certFile"
-                                    :placeholder="$t('dialogue.connection.ssl.cert_file_tip')"
-                                    clearable />
-                                <n-button
-                                    :disabled="!generalForm.ssl.enable"
-                                    :focusable="false"
-                                    @click="onSSLChooseCert">
-                                    ...
-                                </n-button>
-                            </n-input-group>
+                            <file-open-input
+                                v-model:value="generalForm.ssl.certFile"
+                                :placeholder="$t('dialogue.connection.ssl.cert_file_tip')"
+                                :disabled="!generalForm.ssl.enable" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.ssl.key_file')">
-                            <n-input-group>
-                                <n-input
-                                    v-model:value="generalForm.ssl.keyFile"
-                                    :placeholder="$t('dialogue.connection.ssl.key_file_tip')"
-                                    clearable />
-                                <n-button
-                                    :disabled="!generalForm.ssl.enable"
-                                    :focusable="false"
-                                    @click="onSSLChooseKey">
-                                    ...
-                                </n-button>
-                            </n-input-group>
+                            <file-open-input
+                                v-model:value="generalForm.ssl.keyFile"
+                                :placeholder="$t('dialogue.connection.ssl.key_file_tip')"
+                                :disabled="!generalForm.ssl.enable" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.ssl.ca_file')">
-                            <n-input-group>
-                                <n-input
-                                    v-model:value="generalForm.ssl.caFile"
-                                    :placeholder="$t('dialogue.connection.ssl.ca_file_tip')"
-                                    clearable />
-                                <n-button :disabled="!generalForm.ssl.enable" :focusable="false" @click="onSSLChooseCA">
-                                    ...
-                                </n-button>
-                            </n-input-group>
+                            <file-open-input
+                                v-model:value="generalForm.ssl.caFile"
+                                :placeholder="$t('dialogue.connection.ssl.ca_file_tip')"
+                                :disabled="!generalForm.ssl.enable" />
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
@@ -519,18 +465,10 @@ const onClose = () => {
                                 type="password" />
                         </n-form-item>
                         <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.pkfile')">
-                            <n-input-group>
-                                <n-input
-                                    v-model:value="generalForm.ssh.pkFile"
-                                    :placeholder="$t('dialogue.connection.ssh.pkfile_tip')" />
-                                <n-button
-                                    :disabled="!generalForm.ssh.enable"
-                                    :focusable="false"
-                                    clearable
-                                    @click="onSSHChooseKey">
-                                    ...
-                                </n-button>
-                            </n-input-group>
+                            <file-open-input
+                                v-model:value="generalForm.ssh.pkFile"
+                                :placeholder="$t('dialogue.connection.ssh.pkfile_tip')"
+                                :disabled="!generalForm.ssh.enable" />
                         </n-form-item>
                         <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.passphrase')">
                             <n-input
