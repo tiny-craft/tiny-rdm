@@ -8,9 +8,9 @@ const props = defineProps({
 </script>
 
 <template>
-    <svg :width="props.size" :height="props.size" viewBox="0 0 48 48" fill="none">
-        <path d="M8 8L40 40" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M8 40L40 8" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+    <svg :height="props.size" :width="props.size" fill="none" viewBox="0 0 48 48">
+        <path d="M8 8L40 40" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" />
+        <path d="M8 40L40 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" />
     </svg>
 </template>
 

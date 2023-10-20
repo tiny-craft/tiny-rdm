@@ -8,34 +8,34 @@ const props = defineProps({
 </script>
 
 <template>
-    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <rect
-            x="4"
-            y="6"
-            width="40"
+            :stroke-width="props.strokeWidth"
+            fill="none"
             height="36"
             rx="2"
-            fill="none"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
-            stroke-linejoin="round" />
+            stroke-linejoin="round"
+            width="40"
+            x="4"
+            y="6" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M32 25V32"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M24 16V32"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M16 20V32"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
     </svg>

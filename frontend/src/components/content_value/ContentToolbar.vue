@@ -106,7 +106,7 @@ const onDeleteKey = () => {
 <template>
     <div class="content-toolbar flex-box-h">
         <n-input-group>
-            <redis-type-tag :type="props.keyType" :binary-key="binaryKey" size="large" />
+            <redis-type-tag :binary-key="binaryKey" :type="props.keyType" size="large" />
             <n-input v-model:value="props.keyPath">
                 <template #suffix>
                     <icon-button :icon="Refresh" size="18" t-tooltip="interface.reload" @click="onReloadKey" />

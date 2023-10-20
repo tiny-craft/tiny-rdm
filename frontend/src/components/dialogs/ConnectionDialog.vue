@@ -335,24 +335,24 @@ const onClose = () => {
                         label-placement="top">
                         <n-grid :x-gap="10">
                             <n-form-item-gi
-                                :span="12"
                                 :label="$t('dialogue.connection.advn.filter')"
+                                :span="12"
                                 path="defaultFilter">
                                 <n-input
                                     v-model:value="generalForm.defaultFilter"
                                     :placeholder="$t('dialogue.connection.advn.filter_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
-                                :span="12"
                                 :label="$t('dialogue.connection.advn.separator')"
+                                :span="12"
                                 path="keySeparator">
                                 <n-input
                                     v-model:value="generalForm.keySeparator"
                                     :placeholder="$t('dialogue.connection.advn.separator_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
-                                :span="12"
                                 :label="$t('dialogue.connection.advn.conn_timeout')"
+                                :span="12"
                                 path="connTimeout">
                                 <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
                                     <template #suffix>
@@ -361,8 +361,8 @@ const onClose = () => {
                                 </n-input-number>
                             </n-form-item-gi>
                             <n-form-item-gi
-                                :span="12"
                                 :label="$t('dialogue.connection.advn.exec_timeout')"
+                                :span="12"
                                 path="execTimeout">
                                 <n-input-number v-model:value="generalForm.execTimeout" :max="999999" :min="1">
                                     <template #suffix>
@@ -370,10 +370,10 @@ const onClose = () => {
                                     </template>
                                 </n-input-number>
                             </n-form-item-gi>
-                            <n-form-item-gi :span="12" :label="$t('dialogue.connection.advn.load_size')">
+                            <n-form-item-gi :label="$t('dialogue.connection.advn.load_size')" :span="12">
                                 <n-input-number v-model:value="generalForm.loadSize" :min="0" />
                             </n-form-item-gi>
-                            <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_type')">
+                            <n-form-item-gi :label="$t('dialogue.connection.advn.dbfilter_type')" :span="24">
                                 <n-radio-group
                                     v-model:value="generalForm.dbFilterType"
                                     @update:value="onUpdateDBFilterType">
@@ -388,22 +388,22 @@ const onClose = () => {
                             </n-form-item-gi>
                             <n-form-item-gi
                                 v-show="generalForm.dbFilterType !== 'none'"
-                                :span="24"
-                                :label="$t('dialogue.connection.advn.dbfilter_input')">
+                                :label="$t('dialogue.connection.advn.dbfilter_input')"
+                                :span="24">
                                 <n-select
                                     v-model:value="dbFilterList"
+                                    :clearable="true"
                                     :disabled="generalForm.dbFilterType === 'none'"
+                                    :placeholder="$t('dialogue.connection.advn.dbfilter_input_tip')"
+                                    :show="false"
+                                    :show-arrow="false"
                                     filterable
                                     multiple
-                                    tag
-                                    :placeholder="$t('dialogue.connection.advn.dbfilter_input_tip')"
-                                    :show-arrow="false"
-                                    :show="false"
-                                    :clearable="true" />
+                                    tag />
                             </n-form-item-gi>
                             <n-form-item-gi
-                                :span="24"
                                 :label="$t('dialogue.connection.advn.mark_color')"
+                                :span="24"
                                 path="markColor">
                                 <div
                                     v-for="color in predefineColors"
@@ -429,9 +429,9 @@ const onClose = () => {
                         </n-checkbox>
                     </n-form-item>
                     <n-form
+                        :disabled="!generalForm.ssl.enable"
                         :model="generalForm.ssl"
                         :show-require-mark="false"
-                        :disabled="!generalForm.ssl.enable"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.ssl.cert_file')">
                             <n-input-group>
@@ -440,8 +440,8 @@ const onClose = () => {
                                     :placeholder="$t('dialogue.connection.ssl.cert_file_tip')"
                                     clearable />
                                 <n-button
-                                    :focusable="false"
                                     :disabled="!generalForm.ssl.enable"
+                                    :focusable="false"
                                     @click="onSSLChooseCert">
                                     ...
                                 </n-button>
@@ -454,8 +454,8 @@ const onClose = () => {
                                     :placeholder="$t('dialogue.connection.ssl.key_file_tip')"
                                     clearable />
                                 <n-button
-                                    :focusable="false"
                                     :disabled="!generalForm.ssl.enable"
+                                    :focusable="false"
                                     @click="onSSLChooseKey">
                                     ...
                                 </n-button>
@@ -467,7 +467,7 @@ const onClose = () => {
                                     v-model:value="generalForm.ssl.caFile"
                                     :placeholder="$t('dialogue.connection.ssl.ca_file_tip')"
                                     clearable />
-                                <n-button :focusable="false" :disabled="!generalForm.ssl.enable" @click="onSSLChooseCA">
+                                <n-button :disabled="!generalForm.ssl.enable" :focusable="false" @click="onSSLChooseCA">
                                     ...
                                 </n-button>
                             </n-input-group>
@@ -483,9 +483,9 @@ const onClose = () => {
                         </n-checkbox>
                     </n-form-item>
                     <n-form
+                        :disabled="!generalForm.ssh.enable"
                         :model="generalForm.ssh"
                         :show-require-mark="false"
-                        :disabled="!generalForm.ssh.enable"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.addr')" required>
                             <n-input
@@ -524,10 +524,10 @@ const onClose = () => {
                                     v-model:value="generalForm.ssh.pkFile"
                                     :placeholder="$t('dialogue.connection.ssh.pkfile_tip')" />
                                 <n-button
-                                    :focusable="false"
                                     :disabled="!generalForm.ssh.enable"
-                                    @click="onSSHChooseKey"
-                                    clearable>
+                                    :focusable="false"
+                                    clearable
+                                    @click="onSSHChooseKey">
                                     ...
                                 </n-button>
                             </n-input-group>
@@ -550,17 +550,17 @@ const onClose = () => {
                         </n-checkbox>
                     </n-form-item>
                     <n-form
+                        :disabled="!generalForm.sentinel.enable"
                         :model="generalForm.sentinel"
                         :show-require-mark="false"
-                        :disabled="!generalForm.sentinel.enable"
                         label-placement="top">
                         <n-form-item :label="$t('dialogue.connection.sentinel.master')">
                             <n-input-group>
                                 <n-select
                                     v-model:value="generalForm.sentinel.master"
+                                    :options="masterNameOptions"
                                     filterable
-                                    tag
-                                    :options="masterNameOptions" />
+                                    tag />
                                 <n-button :loading="loadingSentinelMaster" @click="onLoadSentinelMasters">
                                     {{ $t('dialogue.connection.sentinel.auto_discover') }}
                                 </n-button>
@@ -600,10 +600,10 @@ const onClose = () => {
             <!-- test result alert-->
             <n-alert
                 v-if="showTestResult"
+                :on-close="() => (showTestResult = false)"
                 :title="isEmpty(testResult) ? '' : $t('dialogue.connection.test_fail')"
                 :type="isEmpty(testResult) ? 'success' : 'error'"
-                closable
-                :on-close="() => (showTestResult = false)">
+                closable>
                 <template v-if="isEmpty(testResult)">{{ $t('dialogue.connection.test_succ') }}</template>
                 <template v-else>{{ testResult }}</template>
             </n-alert>
@@ -611,15 +611,15 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item-expand">
-                <n-button :focusable="false" :disabled="closingConnection" :loading="testing" @click="onTestConnection">
+                <n-button :disabled="closingConnection" :focusable="false" :loading="testing" @click="onTestConnection">
                     {{ $t('dialogue.connection.test') }}
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">
-                <n-button :focusable="false" :disabled="closingConnection" @click="onClose">
+                <n-button :disabled="closingConnection" :focusable="false" @click="onClose">
                     {{ $t('common.cancel') }}
                 </n-button>
-                <n-button :focusable="false" :disabled="closingConnection" type="primary" @click="onSaveConnection">
+                <n-button :disabled="closingConnection" :focusable="false" type="primary" @click="onSaveConnection">
                     {{ isEditMode ? $t('preferences.general.update') : $t('common.confirm') }}
                 </n-button>
             </div>

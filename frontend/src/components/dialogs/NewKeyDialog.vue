@@ -187,7 +187,7 @@ const onClose = () => {
                                 {{ $t('common.second') }}
                             </template>
                         </n-input-number>
-                        <n-button secondary type="primary" :focusable="false" @click="() => (newForm.ttl = -1)">
+                        <n-button :focusable="false" secondary type="primary" @click="() => (newForm.ttl = -1)">
                             {{ $t('dialogue.key.persist_key') }}
                         </n-button>
                     </n-input-group>

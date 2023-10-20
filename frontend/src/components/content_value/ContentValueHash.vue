@@ -255,8 +255,8 @@ const onUpdateFilter = (filters, sourceColumn) => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
-            :key-path="props.keyPath"
             :key-code="props.keyCode"
+            :key-path="props.keyPath"
             :key-type="keyType"
             :server="props.name"
             :ttl="ttl" />
@@ -280,7 +280,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
             <div class="tb2-extra-info flex-item-expand">
                 <n-tag size="large">{{ $t('interface.total', { size: props.size }) }}</n-tag>
             </div>
-            <n-button plain :focusable="false" @click="onAddRow">
+            <n-button :focusable="false" plain @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
                 </template>
@@ -290,12 +290,12 @@ const onUpdateFilter = (filters, sourceColumn) => {
         <div class="value-wrapper fill-height flex-box-h">
             <n-data-table
                 :key="(row) => row.no"
+                :bordered="false"
+                :bottom-bordered="false"
                 :columns="columns"
                 :data="tableData"
                 :single-column="true"
                 :single-line="false"
-                :bordered="false"
-                :bottom-bordered="false"
                 flex-height
                 max-height="100%"
                 size="small"

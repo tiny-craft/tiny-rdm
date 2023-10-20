@@ -153,18 +153,18 @@ const onSaveValue = async () => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
-            :key-path="keyPath"
             :key-code="keyCode"
+            :key-path="keyPath"
             :key-type="keyType"
             :server="props.name"
             :ttl="ttl" />
         <div class="tb2 flex-box-h">
             <n-text>{{ $t('interface.view_as') }}</n-text>
             <n-select
-                :value="props.viewAs"
                 :options="viewOption"
-                style="width: 160px"
+                :value="props.viewAs"
                 filterable
+                style="width: 160px"
                 @update:value="onViewTypeUpdate" />
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
@@ -174,7 +174,7 @@ const onSaveValue = async () => {
                     </template>
                     {{ $t('interface.copy_value') }}
                 </n-button>
-                <n-button plain :focusable="false" @click="onEditValue">
+                <n-button :focusable="false" plain @click="onEditValue">
                     <template #icon>
                         <n-icon :component="Edit" size="18" />
                     </template>
@@ -182,13 +182,13 @@ const onSaveValue = async () => {
                 </n-button>
             </n-button-group>
             <n-button-group v-else>
-                <n-button :loading="saving" :focusable="false" plain @click="onSaveValue">
+                <n-button :focusable="false" :loading="saving" plain @click="onSaveValue">
                     <template #icon>
                         <n-icon :component="Save" size="18" />
                     </template>
                     {{ $t('interface.save_update') }}
                 </n-button>
-                <n-button :loading="saving" :focusable="false" plain @click="onCancelEdit">
+                <n-button :focusable="false" :loading="saving" plain @click="onCancelEdit">
                     <template #icon>
                         <n-icon :component="Close" size="18" />
                     </template>

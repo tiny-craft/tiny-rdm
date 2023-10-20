@@ -58,10 +58,6 @@ const tab = computed(() =>
             borderLeftColor: themeVars.borderColor,
             borderRightColor: themeVars.borderColor,
         }"
-        size="small"
-        type="card"
-        @close="onCloseTab"
-        @update:value="(tabIndex) => tabStore.switchTab(tabIndex)"
         :theme-overrides="{
             tabFontWeightActive: 800,
             tabBorderRadius: 0,
@@ -72,16 +68,20 @@ const tab = computed(() =>
             // tabBorderColor: themeVars.borderColor,
             tabBorderColor: '#0000',
             tabTextColorCard: themeVars.closeIconColor,
-        }">
+        }"
+        size="small"
+        type="card"
+        @close="onCloseTab"
+        @update:value="(tabIndex) => tabStore.switchTab(tabIndex)">
         <n-tab
             v-for="(t, i) in tab"
             :key="i"
-            :name="i"
             :closable="tabStore.activatedIndex === i"
+            :name="i"
             :style="tabStore.activatedIndex === i ? activeTabStyle : inactiveTabStyle"
             style="--wails-draggable: none"
             @dblclick.stop="() => {}">
-            <n-space align="center" justify="center" :wrap-item="false" :size="5" inline>
+            <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                 <n-icon :component="ToggleServer" size="18" />
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-space>
@@ -89,4 +89,4 @@ const tab = computed(() =>
     </n-tabs>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

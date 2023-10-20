@@ -104,18 +104,18 @@ const infoFilter = ref('')
                     <n-space align="center" inline>
                         {{ $t('status.auto_refresh') }}
                         <n-switch
-                            :value="props.autoRefresh"
                             :loading="props.autoLoading"
+                            :value="props.autoRefresh"
                             @update:value="(v) => emit('update:autoRefresh', v)" />
                         <n-tooltip>
                             {{ $t('status.refresh') }}
                             <template #trigger>
                                 <n-button
+                                    :loading="props.autoLoading"
                                     circle
                                     size="small"
                                     tertiary
-                                    @click="emit('refresh')"
-                                    :loading="props.autoLoading">
+                                    @click="emit('refresh')">
                                     <template #icon>
                                         <n-icon :component="Refresh" />
                                     </template>

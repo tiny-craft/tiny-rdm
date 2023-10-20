@@ -66,8 +66,8 @@ const onClose = () => {
         @negative-click="onClose">
         <n-form
             :model="renameForm"
-            :show-require-mark="false"
             :show-label="false"
+            :show-require-mark="false"
             label-align="left"
             label-placement="top">
             <n-form-item :label="$t('dialogue.key.new_name')" required>

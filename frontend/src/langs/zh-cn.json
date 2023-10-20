@@ -158,7 +158,7 @@
         "cert_file": "公钥文件",
         "key_file": "私钥文件",
         "ca_file": "授权文件",
-        "cert_file_tip":"PEM格式公钥文件(Cert)",
+        "cert_file_tip": "PEM格式公钥文件(Cert)",
         "key_file_tip": "PEM格式私钥文件(Key)",
         "ca_file_tip": "PEM格式授权文件(CA)"
       },

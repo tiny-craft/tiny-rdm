@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import useConnectionStore from './connections.js'
-import { assignWith, isEmpty } from 'lodash'
 
 /**
  * connection dialog type

@@ -69,8 +69,8 @@ defineExpose({
 
 <template>
     <n-card
-        :title="$t('log.launch_log')"
         :bordered="false"
+        :title="$t('log.launch_log')"
         class="content-container flex-box-v"
         content-style="display: flex;flex-direction: column; overflow: hidden;">
         <n-form :disabled="data.loading" class="flex-item" inline>

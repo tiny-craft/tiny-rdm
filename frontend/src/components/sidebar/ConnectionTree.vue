@@ -519,7 +519,7 @@ const onCancelOpen = () => {
                 <template #description>
                     <n-space vertical>
                         <n-text strong>{{ $t('dialogue.opening_connection') }}</n-text>
-                        <n-button secondary size="small" :focusable="false" @click="onCancelOpen">
+                        <n-button :focusable="false" secondary size="small" @click="onCancelOpen">
                             {{ $t('dialogue.interrupt_connection') }}
                         </n-button>
                     </n-space>

@@ -1,5 +1,5 @@
 import usePreferencesStore from 'stores/preferences.js'
-import { createDiscreteApi, darkTheme, useDialog } from 'naive-ui'
+import { createDiscreteApi, darkTheme } from 'naive-ui'
 import { themeOverrides } from '@/utils/theme.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { computed } from 'vue'

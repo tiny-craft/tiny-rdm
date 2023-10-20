@@ -105,13 +105,13 @@ const onClose = () => {
         <template #action>
             <div class="flex-item n-dialog__action">
                 <n-button :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
-                <n-button v-if="!deleteForm.showAffected" type="primary" :focusable="false" @click="scanAffectedKey">
+                <n-button v-if="!deleteForm.showAffected" :focusable="false" type="primary" @click="scanAffectedKey">
                     {{ $t('dialogue.key.show_affected_key') }}
                 </n-button>
                 <n-button
                     v-else
-                    :focusable="false"
                     :disabled="isEmpty(deleteForm.affectedKeys)"
+                    :focusable="false"
                     type="error"
                     @click="onConfirmDelete">
                     {{ $t('dialogue.key.confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}

@@ -128,21 +128,21 @@ onMounted(async () => {
     <!-- app content-->
     <n-spin
         :show="props.loading"
-        :theme-overrides="{ opacitySpinning: 0 }"
-        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: `${borderRadius}px`, border }">
+        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: `${borderRadius}px`, border }"
+        :theme-overrides="{ opacitySpinning: 0 }">
         <div
             id="app-content-wrapper"
-            class="flex-box-v"
             :style="{
                 backgroundColor: themeVars.bodyColor,
                 color: themeVars.textColorBase,
-            }">
+            }"
+            class="flex-box-v">
             <!-- title bar -->
             <div
                 id="app-toolbar"
+                :style="{ height: data.toolbarHeight + 'px' }"
                 class="flex-box-h"
                 style="--wails-draggable: drag"
-                :style="{ height: data.toolbarHeight + 'px' }"
                 @dblclick="WindowToggleMaximise">
                 <!-- title -->
                 <div
@@ -151,11 +151,11 @@ onMounted(async () => {
                         width: `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`,
                         paddingLeft: `${logoPaddingLeft}px`,
                     }">
-                    <n-space align="center" :wrap-item="false" :wrap="false" :size="3">
-                        <n-avatar :src="iconUrl" color="#0000" :size="35" style="min-width: 35px" />
+                    <n-space :size="3" :wrap="false" :wrap-item="false" align="center">
+                        <n-avatar :size="35" :src="iconUrl" color="#0000" style="min-width: 35px" />
                         <div style="min-width: 68px; font-weight: 800">Tiny RDM</div>
                         <transition name="fade">
-                            <n-text v-if="tabStore.nav === 'browser'" strong class="ellipsis" style="font-size: 13px">
+                            <n-text v-if="tabStore.nav === 'browser'" class="ellipsis" strong style="font-size: 13px">
                                 - {{ get(tabStore.currentTab, 'name') }}
                             </n-text>
                         </transition>
@@ -178,8 +178,8 @@ onMounted(async () => {
                 <!-- simulate window control buttons -->
                 <toolbar-control-widget
                     v-if="!isMacOS()"
-                    :size="data.toolbarHeight"
                     :maximised="maximised"
+                    :size="data.toolbarHeight"
                     style="align-self: flex-start" />
             </div>
 
@@ -187,8 +187,8 @@ onMounted(async () => {
             <div
                 id="app-content"
                 :style="prefStore.generalFont"
-                style="--wails-draggable: none"
-                class="flex-box-h flex-item-expand">
+                class="flex-box-h flex-item-expand"
+                style="--wails-draggable: none">
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page -->
                 <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">

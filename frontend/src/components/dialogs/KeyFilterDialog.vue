@@ -89,12 +89,12 @@ const onClose = () => {
                         <template #trigger>
                             <n-input
                                 v-model:value="filterForm.pattern"
-                                clearable
-                                :placeholder="$t('dialogue.filter.filter_pattern')" />
+                                :placeholder="$t('dialogue.filter.filter_pattern')"
+                                clearable />
                         </template>
                         <div class="text-block">{{ $t('dialogue.filter.filter_pattern_tip') }}</div>
                     </n-tooltip>
-                    <n-button secondary type="primary" :focusable="false" @click="filterForm.pattern = '*'">
+                    <n-button :focusable="false" secondary type="primary" @click="filterForm.pattern = '*'">
                         {{ $t('preferences.restore_defaults') }}
                     </n-button>
                 </n-input-group>

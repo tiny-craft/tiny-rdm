@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import useTabStore from 'stores/tab.js'
 import useConnectionStore from 'stores/connections.js'
@@ -105,7 +105,7 @@ const onConfirm = async () => {
             </div>
             <div class="flex-item n-dialog__action">
                 <n-button :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
-                <n-button type="primary" :focusable="false" @click="onConfirm">{{ $t('common.save') }}</n-button>
+                <n-button :focusable="false" type="primary" @click="onConfirm">{{ $t('common.save') }}</n-button>
             </div>
         </template>
     </n-modal>

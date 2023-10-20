@@ -200,9 +200,9 @@ const onReloadKey = async () => {
             <!-- select nothing or select server node, display server status -->
             <content-server-status
                 v-model:auto-refresh="currentServer.autoRefresh"
+                :auto-loading="currentServer.autoLoading"
                 :info="currentServer.info"
                 :loading="currentServer.loading"
-                :auto-loading="currentServer.autoLoading"
                 :server="currentServer.name"
                 @refresh="refreshInfo(currentServer.name, true)" />
         </div>
@@ -217,12 +217,12 @@ const onReloadKey = async () => {
             :is="valueComponents[tabContent.type]"
             v-else
             :db="tabContent.db"
-            :key-path="tabContent.keyPath"
             :key-code="tabContent.keyCode"
+            :key-path="tabContent.keyPath"
             :name="tabContent.name"
+            :size="tabContent.size"
             :ttl="tabContent.ttl"
             :value="tabContent.value"
-            :size="tabContent.size"
             :view-as="tabContent.viewAs" />
     </div>
 </template>

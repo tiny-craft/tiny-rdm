@@ -4,7 +4,7 @@ import useDialog from 'stores/dialog.js'
 import { useThemeVars } from 'naive-ui'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { GetAppVersion } from 'wailsjs/go/services/preferencesService.js'
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialog()
@@ -27,23 +27,23 @@ const onOpenWebsite = () => {
 
 <template>
     <n-modal v-model:show="dialogStore.aboutDialogVisible" :show-icon="false" preset="dialog" transform-origin="center">
-        <n-space vertical align="center" :wrap-item="false" :wrap="false" :size="10">
-            <n-avatar :size="120" color="#0000" :src="iconUrl"></n-avatar>
+        <n-space :size="10" :wrap="false" :wrap-item="false" align="center" vertical>
+            <n-avatar :size="120" :src="iconUrl" color="#0000"></n-avatar>
             <div class="about-app-title">Tiny RDM</div>
             <n-text>{{ version }}</n-text>
-            <n-space align="center" :wrap-item="false" :wrap="false" :size="5">
+            <n-space :size="5" :wrap="false" :wrap-item="false" align="center">
                 <n-text class="about-link" @click="onOpenSource">{{ $t('dialogue.about.source') }}</n-text>
                 <n-divider vertical />
                 <n-text class="about-link" @click="onOpenWebsite">{{ $t('dialogue.about.website') }}</n-text>
             </n-space>
-            <div class="about-copyright" :style="{ color: themeVars.textColor3 }">
+            <div :style="{ color: themeVars.textColor3 }" class="about-copyright">
                 Copyright © 2023 Tinycraft.cc All rights reserved
             </div>
         </n-space>
     </n-modal>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .about-app-title {
     font-weight: bold;
     font-size: 18px;

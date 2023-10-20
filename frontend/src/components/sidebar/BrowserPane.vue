@@ -1,6 +1,5 @@
 <script setup>
 import { useThemeVars } from 'naive-ui'
-import AddLink from '@/components/icons/AddLink.vue'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
@@ -74,7 +73,7 @@ const filterTypeOptions = computed(() => {
                     :options="filterTypeOptions"
                     style="width: 120px" />
                 <n-input clearable placeholder="" />
-                <n-button ghost :focusable="false">
+                <n-button :focusable="false" ghost>
                     <template #icon>
                         <n-icon :component="Search" />
                     </template>

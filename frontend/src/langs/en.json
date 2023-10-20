@@ -138,7 +138,7 @@
         "filter": "Default Key Filter Pattern",
         "filter_tip": "Pattern which defines loaded keys from redis server",
         "separator": "Key Separator",
-        "separator_tip":"Separator for key path item",
+        "separator_tip": "Separator for key path item",
         "conn_timeout": "Connection Timeout",
         "exec_timeout": "Execution Timeout",
         "dbfilter_type": "Database Filter",
@@ -158,7 +158,7 @@
         "cert_file": "Public Key",
         "key_file": "Private Key",
         "ca_file": "Authority",
-        "cert_file_tip":"Public Key File in PEM format(Cert)",
+        "cert_file_tip": "Public Key File in PEM format(Cert)",
         "key_file_tip": "Private Key File in PEM format(Key)",
         "ca_file_tip": "Certificate Authority File in PEM format(CA)"
       },

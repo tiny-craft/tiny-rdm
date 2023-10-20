@@ -36,8 +36,8 @@ const handleClose = () => {
 </script>
 
 <template>
-    <n-space :wrap-item="false" align="center" justify="center" :size="0">
-        <n-tooltip :show-arrow="false" :delay="1000">
+    <n-space :size="0" :wrap-item="false" align="center" justify="center">
+        <n-tooltip :delay="1000" :show-arrow="false">
             {{ $t('menu.minimise') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleMinimise">
@@ -45,7 +45,7 @@ const handleClose = () => {
                 </div>
             </template>
         </n-tooltip>
-        <n-tooltip :show-arrow="false" :delay="1000" v-if="maximised">
+        <n-tooltip v-if="maximised" :delay="1000" :show-arrow="false">
             {{ $t('menu.restore') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleMaximise">
@@ -53,7 +53,7 @@ const handleClose = () => {
                 </div>
             </template>
         </n-tooltip>
-        <n-tooltip :show-arrow="false" :delay="1000" v-else>
+        <n-tooltip v-else :delay="1000" :show-arrow="false">
             {{ $t('menu.maximise') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleMaximise">
@@ -61,7 +61,7 @@ const handleClose = () => {
                 </div>
             </template>
         </n-tooltip>
-        <n-tooltip :show-arrow="false" :delay="1000">
+        <n-tooltip :delay="1000" :show-arrow="false">
             {{ $t('menu.close') }}
             <template #trigger>
                 <div class="btn-wrapper" @click="handleClose">
@@ -72,7 +72,7 @@ const handleClose = () => {
     </n-space>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .btn-wrapper {
     width: v-bind('buttonSize');
     height: v-bind('buttonSize');
