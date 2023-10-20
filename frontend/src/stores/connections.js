@@ -5,7 +5,6 @@ import {
     get,
     isEmpty,
     join,
-    map,
     remove,
     size,
     slice,
@@ -30,6 +29,8 @@ import {
     GetConnection,
     GetKeyValue,
     ListConnection,
+    LoadAllKeys,
+    LoadNextKeys,
     OpenConnection,
     OpenDatabase,
     RemoveStreamValues,
@@ -37,7 +38,6 @@ import {
     RenameKey,
     SaveConnection,
     SaveSortedConnection,
-    ScanKeys,
     ServerInfo,
     SetHashValue,
     SetKeyTTL,
@@ -77,6 +77,8 @@ const useConnectionStore = defineStore('connections', {
      * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
      * @property {boolean} [expanded] - current node is expanded
      * @property {DatabaseItem[]} [children]
+     * @property {boolean} [loading] - indicated that is loading children now
+     * @property {boolean} [fullLoaded] - indicated that all children already loaded
      */
 
     /**
@@ -230,6 +232,7 @@ const useConnectionStore = defineStore('connections', {
                 execTimeout: 60,
                 dbFilterType: 'none',
                 dbFilterList: [],
+                loadSize: 10000,
                 markColor: '',
                 ssl: {
                     enable: false,
@@ -407,7 +410,8 @@ const useConnectionStore = defineStore('connections', {
                     key: `${name}/${db[i].name}`,
                     label: db[i].name,
                     name: name,
-                    keys: db[i].keys,
+                    keys: 0,
+                    maxKeys: db[i].keys,
                     db: db[i].index,
                     type: ConnectionType.RedisDB,
                     isLeaf: false,
@@ -535,13 +539,14 @@ const useConnectionStore = defineStore('connections', {
             if (!success) {
                 throw new Error(msg)
             }
-            const { keys = [] } = data
+            const { keys = [], end = false } = data
             const selDB = this.getDatabase(connName, db)
             if (selDB == null) {
                 return
             }
 
             selDB.opened = true
+            selDB.fullLoaded = end
             if (isEmpty(keys)) {
                 selDB.children = []
             } else {
@@ -658,44 +663,77 @@ const useConnectionStore = defineStore('connections', {
          * scan keys with prefix
          * @param {string} connName
          * @param {number} db
-         * @param {string} [prefix] full reload database if prefix is null
-         * @returns {Promise<{keys: string[]}>}
+         * @param {string} match
+         * @param {string} matchType
+         * @param {boolean} [full]
+         * @returns {Promise<{keys: string[], end: boolean}>}
          */
-        async scanKeys(connName, db, prefix) {
-            const { data, success, msg } = await ScanKeys(connName, db, prefix || '*')
+        async scanKeys(connName, db, match, matchType, full) {
+            let resp
+            if (full) {
+                resp = await LoadAllKeys(connName, db, match || '*', matchType)
+            } else {
+                resp = await LoadNextKeys(connName, db, match || '*', matchType)
+            }
+            const { data, success, msg } = resp || {}
             if (!success) {
                 throw new Error(msg)
             }
-            const { keys = [] } = data
-            return { keys, success }
+            const { keys = [], end } = data
+            return { keys, end, success }
         },
 
         /**
-         * load keys with prefix
+         *
          * @param {string} connName
          * @param {number} db
-         * @param {string} [prefix]
-         * @returns {Promise<void>}
+         * @param {string|null} prefix
+         * @param {string|null} matchType
+         * @param {boolean} [all]
+         * @return {Promise<{keys: Array<string|number[]>, end: boolean}>}
+         * @private
          */
-        async loadKeys(connName, db, prefix) {
-            let scanPrefix = prefix
-            if (isEmpty(scanPrefix)) {
-                scanPrefix = '*'
+        async _loadKeys(connName, db, prefix, matchType, all) {
+            let match = prefix
+            if (isEmpty(match)) {
+                match = '*'
             } else {
                 const separator = this._getSeparator(connName)
                 if (!endsWith(prefix, separator + '*')) {
-                    scanPrefix = prefix + separator + '*'
+                    match = prefix + separator + '*'
                 }
             }
-            const { keys, success } = await this.scanKeys(connName, db, scanPrefix)
-            if (!success) {
-                return
-            }
+            return this.scanKeys(connName, db, match, matchType, all)
+        },
 
+        /**
+         * load more keys within the database
+         * @param {string} connName
+         * @param {number} db
+         * @return {Promise<boolean>}
+         */
+        async loadMoreKeys(connName, db) {
+            const { match, type: keyType } = this.getKeyFilter(connName, db)
+            const { keys, end } = await this._loadKeys(connName, db, match, keyType, false)
             // remove current keys below prefix
-            this._deleteKeyNode(connName, db, prefix, true)
             this._addKeyNodes(connName, db, keys)
-            this._tidyNode(connName, db, prefix)
+            this._tidyNode(connName, db, '')
+            return end
+        },
+
+        /**
+         * load all left keys within the database
+         * @param {string} connName
+         * @param {number} db
+         * @return {Promise<void>}
+         */
+        async loadAllKeys(connName, db) {
+            const { match, type: keyType } = this.getKeyFilter(connName, db)
+            const { keys } = await this._loadKeys(connName, db, match, keyType, true)
+            // remove current keys below prefix
+            this._deleteKeyNode(connName, db, '', true)
+            this._addKeyNodes(connName, db, keys)
+            this._tidyNode(connName, db, '')
         },
 
         /**

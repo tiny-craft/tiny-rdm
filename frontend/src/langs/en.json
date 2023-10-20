@@ -31,6 +31,7 @@
       "default": "Default",
       "font": "Font",
       "font_size": "Font Size",
+      "scan_size": "Default Size for SCAN Command",
       "proxy": "Proxy",
       "use_system_proxy": "Use system proxy",
       "use_system_proxy_http": "Use system proxy only for HTTP(S) request",
@@ -82,7 +83,10 @@
     "copy_key": "Copy Key",
     "binary_key": "Binary Key Name",
     "remove_key": "Remove Key",
-    "new_key": "Add New Key",
+    "new_key": "Add Key",
+    "load_more": "Load More Keys",
+    "load_all": "Load All Keys",
+    "more_action": "More Action",
     "nonexist_tab_content": "Selected key does not exist. Please retry",
     "empty_server_content": "Select and open a connection from the left",
     "empty_server_list": "No redis server",
@@ -145,6 +149,7 @@
         "dbfilter_hide_title": "Select the Databases to Hide",
         "dbfilter_input": "Input Database Index",
         "dbfilter_input_tip": "Press Enter to confirm",
+        "load_size": "Size of Keys Per Load",
         "mark_color": "Mark Color"
       },
       "ssl": {

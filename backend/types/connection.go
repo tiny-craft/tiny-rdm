@@ -15,6 +15,7 @@ type ConnectionConfig struct {
 	ExecTimeout   int                `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
 	DBFilterType  string             `json:"dbFilterType" yaml:"db_filter_type,omitempty"`
 	DBFilterList  []int              `json:"dbFilterList" yaml:"db_filter_list,omitempty"`
+	LoadSize      int                `json:"loadSize,omitempty" yaml:"load_size,omitempty"`
 	MarkColor     string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 	SSL           ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
 	SSH           ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`

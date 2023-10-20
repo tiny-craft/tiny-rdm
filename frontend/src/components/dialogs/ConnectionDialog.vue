@@ -370,6 +370,9 @@ const onClose = () => {
                                     </template>
                                 </n-input-number>
                             </n-form-item-gi>
+                            <n-form-item-gi :span="12" :label="$t('dialogue.connection.advn.load_size')">
+                                <n-input-number v-model:value="generalForm.loadSize" :min="0" />
+                            </n-form-item-gi>
                             <n-form-item-gi :span="24" :label="$t('dialogue.connection.advn.dbfilter_type')">
                                 <n-radio-group
                                     v-model:value="generalForm.dbFilterType"

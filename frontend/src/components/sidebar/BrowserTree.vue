@@ -23,6 +23,8 @@ import { typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
 import { parseHexColor } from '@/utils/rgb.js'
+import LoadList from '@/components/icons/LoadList.vue'
+import LoadAll from '@/components/icons/LoadAll.vue'
 
 const props = defineProps({
     server: String,
@@ -146,11 +148,11 @@ const menuOptions = {
         }
     },
     [ConnectionType.RedisKey]: () => [
-        {
-            key: 'key_reload',
-            label: i18n.t('interface.reload'),
-            icon: renderIcon(Refresh),
-        },
+        // {
+        //     key: 'key_reload',
+        //     label: i18n.t('interface.reload'),
+        //     icon: renderIcon(Refresh),
+        // },
         {
             key: 'key_newkey',
             label: i18n.t('interface.new_key'),
@@ -259,9 +261,9 @@ const handleSelectContextMenu = (key) => {
             const { match: pattern, type } = connectionStore.getKeyFilter(props.server, db)
             dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
-        case 'key_reload':
-            connectionStore.loadKeys(props.server, db, redisKey)
-            break
+        // case 'key_reload':
+        //     connectionStore.loadKeys(props.server, db, redisKey)
+        //     break
         case 'value_reload':
             connectionStore.loadKeyValue(props.server, db, redisKey)
             break
@@ -289,6 +291,38 @@ const handleSelectContextMenu = (key) => {
                     $message.error(e.message)
                 })
             break
+        case 'db_loadmore':
+            if (node != null && !!!node.loading && !!!node.fullLoaded) {
+                node.loading = true
+                connectionStore
+                    .loadMoreKeys(props.server, db)
+                    .then((end) => {
+                        // fully loaded
+                        node.fullLoaded = end === true
+                    })
+                    .catch((e) => {
+                        $message.error(e.message)
+                    })
+                    .finally(() => {
+                        delete node.loading
+                    })
+            }
+            break
+        case 'db_loadall':
+            if (node != null && !!!node.loading) {
+                node.loading = true
+                connectionStore
+                    .loadAllKeys(props.server, db)
+                    .catch((e) => {
+                        $message.error(e.message)
+                    })
+                    .finally(() => {
+                        delete node.loading
+                        node.fullLoaded = true
+                    })
+            }
+            break
+        case 'more_action':
         default:
             console.warn('TODO: handle context menu:' + key)
     }
@@ -389,9 +423,14 @@ const renderLabel = ({ option }) => {
         case ConnectionType.Server:
             return h('b', {}, { default: () => option.label })
         case ConnectionType.RedisDB:
-            const { name: server, db } = option
+            const { name: server, db, opened = false } = option
             let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)
-            const items = [`${option.label} (${option.keys || 0})`]
+            const items = []
+            if (opened) {
+                items.push(`${option.label} (${option.keys || 0}/${Math.max(option.maxKeys || 0, option.keys || 0)})`)
+            } else {
+                items.push(`${option.label} (${Math.max(option.maxKeys || 0, option.keys || 0)})`)
+            }
             // show filter tag after label
             // type filter tag
             if (!isEmpty(typeFilter)) {
@@ -460,30 +499,53 @@ const renderIconMenu = (items) => {
     )
 }
 
-const getDatabaseMenu = (opened) => {
+const getDatabaseMenu = (opened, loading, end) => {
     const btns = []
     if (opened) {
         btns.push(
             h(IconButton, {
                 tTooltip: 'interface.filter_key',
                 icon: Filter,
+                disabled: loading === true,
                 onClick: () => handleSelectContextMenu('db_filter'),
             }),
             h(IconButton, {
                 tTooltip: 'interface.reload',
                 icon: Refresh,
+                disabled: loading === true,
                 onClick: () => handleSelectContextMenu('db_reload'),
             }),
             h(IconButton, {
                 tTooltip: 'interface.new_key',
                 icon: Add,
+                disabled: loading === true,
                 onClick: () => handleSelectContextMenu('db_newkey'),
+            }),
+            h(IconButton, {
+                tTooltip: 'interface.load_more',
+                icon: LoadList,
+                disabled: end === true,
+                loading: loading === true,
+                onClick: () => handleSelectContextMenu('db_loadmore'),
+            }),
+            h(IconButton, {
+                tTooltip: 'interface.load_all',
+                icon: LoadAll,
+                disabled: end === true,
+                loading: loading === true,
+                onClick: () => handleSelectContextMenu('db_loadall'),
             }),
             h(IconButton, {
                 tTooltip: 'interface.batch_delete',
                 icon: Delete,
+                disabled: loading === true,
                 onClick: () => handleSelectContextMenu('key_remove'),
             }),
+            // h(IconButton, {
+            //     tTooltip: 'interface.more_action',
+            //     icon: More,
+            //     onClick: () => handleSelectContextMenu('more_action'),
+            // }),
         )
     } else {
         btns.push(
@@ -499,11 +561,12 @@ const getDatabaseMenu = (opened) => {
 
 const getLayerMenu = () => {
     return [
-        h(IconButton, {
-            tTooltip: 'interface.reload',
-            icon: Refresh,
-            onClick: () => handleSelectContextMenu('key_reload'),
-        }),
+        // disable reload by layer, due to conflict with partial loading keys
+        // h(IconButton, {
+        //     tTooltip: 'interface.reload',
+        //     icon: Refresh,
+        //     onClick: () => handleSelectContextMenu('key_reload'),
+        // }),
         h(IconButton, {
             tTooltip: 'interface.new_key',
             icon: Add,
@@ -532,7 +595,7 @@ const renderSuffix = ({ option }) => {
     if ((option.type === ConnectionType.RedisDB && option.opened) || includes(selectedKeys.value, option.key)) {
         switch (option.type) {
             case ConnectionType.RedisDB:
-                return renderIconMenu(getDatabaseMenu(option.opened))
+                return renderIconMenu(getDatabaseMenu(option.opened, option.loading, option.fullLoaded))
             case ConnectionType.RedisKey:
                 return renderIconMenu(getLayerMenu())
             case ConnectionType.RedisValue:

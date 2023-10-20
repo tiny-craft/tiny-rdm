@@ -16,6 +16,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"tinyrdm/backend/consts"
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
@@ -43,6 +44,8 @@ type connectionItem struct {
 	client     redis.UniversalClient
 	ctx        context.Context
 	cancelFunc context.CancelFunc
+	cursor     map[int]uint64 // current cursor of databases
+	stepSize   int64
 }
 
 type keyItem struct {
@@ -390,12 +393,13 @@ func (c *connectionService) DeleteGroup(name string, includeConn bool) (resp typ
 
 // OpenConnection open redis server connection
 func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(name, 0)
+	item, err := c.getRedisClient(name, 0)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	// get connection config
 	selConn := c.conns.GetConnection(name)
 
@@ -522,18 +526,18 @@ func (c *connectionService) CloseConnection(name string) (resp types.JSResp) {
 	return
 }
 
-// get redis client from local cache or create a new open
+// get a redis client from local cache or create a new open
 // if db >= 0, will also switch to db index
-func (c *connectionService) getRedisClient(connName string, db int) (redis.UniversalClient, context.Context, error) {
-	item, ok := c.connMap[connName]
+func (c *connectionService) getRedisClient(connName string, db int) (item connectionItem, err error) {
+	var ok bool
 	var client redis.UniversalClient
-	var ctx context.Context
-	if ok {
-		client, ctx = item.client, item.ctx
+	if item, ok = c.connMap[connName]; ok {
+		client = item.client
 	} else {
 		selConn := c.conns.GetConnection(connName)
 		if selConn == nil {
-			return nil, nil, fmt.Errorf("no match connection \"%s\"", connName)
+			err = fmt.Errorf("no match connection \"%s\"", connName)
+			return
 		}
 
 		hook := redis2.NewHook(connName, func(cmd string, cost int64) {
@@ -550,10 +554,10 @@ func (c *connectionService) getRedisClient(connName string, db int) (redis.Unive
 			})
 		})
 
-		var err error
 		client, err = c.createRedisClient(selConn.ConnectionConfig)
 		if err != nil {
-			return nil, nil, fmt.Errorf("create conenction error: %s", err.Error())
+			err = fmt.Errorf("create conenction error: %s", err.Error())
+			return
 		}
 		// add hook to each node in cluster mode
 		var cluster *redis.ClusterClient
@@ -563,33 +567,51 @@ func (c *connectionService) getRedisClient(connName string, db int) (redis.Unive
 				return nil
 			})
 			if err != nil {
-				return nil, nil, fmt.Errorf("get cluster nodes error: %s", err.Error())
+				err = fmt.Errorf("get cluster nodes error: %s", err.Error())
+				return
 			}
 		} else {
 			client.AddHook(hook)
 		}
 
 		if _, err = client.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
-			return nil, nil, errors.New("can not connect to redis server:" + err.Error())
+			err = errors.New("can not connect to redis server:" + err.Error())
+			return
 		}
-		var cancelFunc context.CancelFunc
-		ctx, cancelFunc = context.WithCancel(c.ctx)
-		c.connMap[connName] = connectionItem{
+		ctx, cancelFunc := context.WithCancel(c.ctx)
+		item = connectionItem{
 			client:     client,
 			ctx:        ctx,
 			cancelFunc: cancelFunc,
+			cursor:     map[int]uint64{},
+			stepSize:   int64(selConn.LoadSize),
 		}
+		if item.stepSize <= 0 {
+			item.stepSize = consts.DEFAULT_LOAD_SIZE
+		}
+		c.connMap[connName] = item
 	}
 
 	if db >= 0 {
 		var rdb *redis.Client
 		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
-			if err := rdb.Do(ctx, "select", strconv.Itoa(db)).Err(); err != nil {
-				return nil, nil, err
+			if err = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err(); err != nil {
+				return
 			}
 		}
 	}
-	return client, ctx, nil
+	return
+}
+
+// save current scan cursor
+func (c *connectionService) setClientCursor(connName string, db int, cursor uint64) {
+	if _, ok := c.connMap[connName]; ok {
+		if cursor == 0 {
+			delete(c.connMap[connName].cursor, db)
+		} else {
+			c.connMap[connName].cursor[db] = cursor
+		}
+	}
 }
 
 // parse command response content which use "redis info"
@@ -631,12 +653,13 @@ func (c *connectionService) parseDBItemInfo(info string) map[string]int {
 
 // ServerInfo get server info
 func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(name, 0)
+	item, err := c.getRedisClient(name, 0)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	// get database info
 	res, err := client.Info(ctx).Result()
 	if err != nil {
@@ -652,31 +675,43 @@ func (c *connectionService) ServerInfo(name string) (resp types.JSResp) {
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
 func (c *connectionService) OpenDatabase(connName string, db int, match string, keyType string) (resp types.JSResp) {
-	return c.ScanKeys(connName, db, match, keyType)
+	c.setClientCursor(connName, db, 0)
+	return c.LoadNextKeys(connName, db, match, keyType)
 }
 
-// ScanKeys scan all keys
-func (c *connectionService) ScanKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
-
+// scan keys
+// @return loaded keys
+// @return next cursor
+// @return scan error
+func (c *connectionService) scanKeys(ctx context.Context, client redis.UniversalClient, match, keyType string, cursor uint64, count int64) ([]any, uint64, error) {
+	var err error
 	filterType := len(keyType) > 0
-	var countPerScan int64 = 10000
+	scanSize := int64(Preferences().GetScanSize())
 	// define sub scan function
-	scan := func(ctx context.Context, cli redis.UniversalClient, appendFunc func(k any)) error {
-		var iter *redis.ScanIterator
-		if filterType {
-			iter = cli.ScanType(ctx, 0, match, countPerScan, keyType).Iterator()
-		} else {
-			iter = cli.Scan(ctx, 0, match, countPerScan).Iterator()
+	scan := func(ctx context.Context, cli redis.UniversalClient, appendFunc func(k []any)) error {
+		var loadedKey []string
+		var scanCount int64
+		for {
+			if filterType {
+				loadedKey, cursor, err = cli.ScanType(ctx, cursor, match, scanSize, keyType).Result()
+			} else {
+				loadedKey, cursor, err = cli.Scan(ctx, cursor, match, scanSize).Result()
+			}
+			if err != nil {
+				return err
+			} else {
+				ks := sliceutil.Map(loadedKey, func(i int) any {
+					return strutil.EncodeRedisKey(loadedKey[i])
+				})
+				scanCount += int64(len(ks))
+				appendFunc(ks)
+			}
+
+			if (count > 0 && scanCount > count) || cursor == 0 {
+				break
+			}
 		}
-		for iter.Next(ctx) {
-			appendFunc(strutil.EncodeRedisKey(iter.Val()))
-		}
-		return iter.Err()
+		return nil
 	}
 
 	var keys []any
@@ -684,21 +719,63 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 		// cluster mode
 		var mutex sync.Mutex
 		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
-			return scan(ctx, cli, func(k any) {
+			return scan(ctx, cli, func(k []any) {
 				mutex.Lock()
-				keys = append(keys, k)
+				keys = append(keys, k...)
 				mutex.Unlock()
 			})
 		})
 	} else {
-		err = scan(ctx, client, func(k any) {
-			keys = append(keys, k)
+		err = scan(ctx, client, func(k []any) {
+			keys = append(keys, k...)
 		})
 	}
+	if err != nil {
+		return nil, cursor, err
+	}
+	return keys, cursor, nil
+}
+
+// LoadNextKeys load next key from saved cursor
+func (c *connectionService) LoadNextKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+
+	client, ctx, count := item.client, item.ctx, item.stepSize
+	cursor := item.cursor[db]
+	keys, cursor, err := c.scanKeys(ctx, client, match, keyType, cursor, count)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	c.setClientCursor(connName, db, cursor)
+
+	resp.Success = true
+	resp.Data = map[string]any{
+		"keys": keys,
+		"end":  cursor == 0,
+	}
+	return
+}
+
+// LoadAllKeys load all keys
+func (c *connectionService) LoadAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := c.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	keys, _, err := c.scanKeys(ctx, client, match, keyType, 0, 0)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	c.setClientCursor(connName, db, 0)
 
 	resp.Success = true
 	resp.Data = map[string]any{
@@ -709,12 +786,13 @@ func (c *connectionService) ScanKeys(connName string, db int, match, keyType str
 
 // GetKeyValue get value by key
 func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var keyType string
 	var dur time.Duration
@@ -755,9 +833,10 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	case "hash":
 		//value, err = client.HGetAll(ctx, key).Result()
 		items := map[string]string{}
+		scanSize := int64(Preferences().GetScanSize())
 		for {
 			var loadedVal []string
-			loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", 10000).Result()
+			loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", scanSize).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -774,9 +853,10 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	case "set":
 		//value, err = client.SMembers(ctx, key).Result()
 		items := []string{}
+		scanSize := int64(Preferences().GetScanSize())
 		for {
 			var loadedKey []string
-			loadedKey, cursor, err = client.SScan(ctx, key, cursor, "*", 10000).Result()
+			loadedKey, cursor, err = client.SScan(ctx, key, cursor, "*", scanSize).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -791,9 +871,10 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	case "zset":
 		//value, err = client.ZRangeWithScores(ctx, key, 0, -1).Result()
 		var items []types.ZSetItem
+		scanSize := int64(Preferences().GetScanSize())
 		for {
 			var loadedVal []string
-			loadedVal, cursor, err = client.ZScan(ctx, key, cursor, "*", 10000).Result()
+			loadedVal, cursor, err = client.ZScan(ctx, key, cursor, "*", scanSize).Result()
 			if err != nil {
 				resp.Msg = err.Error()
 				return
@@ -848,12 +929,13 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
 func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
@@ -971,12 +1053,13 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 
 // SetHashValue set hash field
 func (c *connectionService) SetHashValue(connName string, db int, k any, field, newField, value string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var removedField []string
 	updatedField := map[string]string{}
@@ -1017,12 +1100,13 @@ func (c *connectionService) SetHashValue(connName string, db int, k any, field, 
 
 // AddHashField add or update hash field
 func (c *connectionService) AddHashField(connName string, db int, k any, action int, fieldItems []any) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	updated := map[string]any{}
 	switch action {
@@ -1063,12 +1147,13 @@ func (c *connectionService) AddHashField(connName string, db int, k any, action 
 
 // AddListItem add item to list or remove from it
 func (c *connectionService) AddListItem(connName string, db int, k any, action int, items []any) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var leftPush, rightPush []any
 	switch action {
@@ -1096,12 +1181,13 @@ func (c *connectionService) AddListItem(connName string, db int, k any, action i
 
 // SetListItem update or remove list item by index
 func (c *connectionService) SetListItem(connName string, db int, k any, index int64, value string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var removed []int64
 	updated := map[int64]string{}
@@ -1139,12 +1225,13 @@ func (c *connectionService) SetListItem(connName string, db int, k any, index in
 
 // SetSetItem add members to set or remove from set
 func (c *connectionService) SetSetItem(connName string, db int, k any, remove bool, members []any) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	if remove {
 		_, err = client.SRem(ctx, key, members...).Result()
@@ -1162,12 +1249,13 @@ func (c *connectionService) SetSetItem(connName string, db int, k any, remove bo
 
 // UpdateSetItem replace member of set
 func (c *connectionService) UpdateSetItem(connName string, db int, k any, value, newValue string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	_, _ = client.SRem(ctx, key, value).Result()
 	_, err = client.SAdd(ctx, key, newValue).Result()
@@ -1182,12 +1270,13 @@ func (c *connectionService) UpdateSetItem(connName string, db int, k any, value,
 
 // UpdateZSetValue update value of sorted set member
 func (c *connectionService) UpdateZSetValue(connName string, db int, k any, value, newValue string, score float64) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	updated := map[string]any{}
 	var removed []string
@@ -1233,12 +1322,13 @@ func (c *connectionService) UpdateZSetValue(connName string, db int, k any, valu
 
 // AddZSetValue add item to sorted set
 func (c *connectionService) AddZSetValue(connName string, db int, k any, action int, valueScore map[string]float64) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	members := maputil.ToSlice(valueScore, func(k string) redis.Z {
 		return redis.Z{
@@ -1266,12 +1356,13 @@ func (c *connectionService) AddZSetValue(connName string, db int, k any, action 
 
 // AddStreamValue add stream field
 func (c *connectionService) AddStreamValue(connName string, db int, k any, ID string, fieldItems []any) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	_, err = client.XAdd(ctx, &redis.XAddArgs{
 		Stream: key,
@@ -1289,12 +1380,13 @@ func (c *connectionService) AddStreamValue(connName string, db int, k any, ID st
 
 // RemoveStreamValues remove stream values by id
 func (c *connectionService) RemoveStreamValues(connName string, db int, k any, IDs []string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	_, err = client.XDel(ctx, key, IDs...).Result()
 	resp.Success = true
@@ -1303,12 +1395,13 @@ func (c *connectionService) RemoveStreamValues(connName string, db int, k any, I
 
 // SetKeyTTL set ttl of key
 func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var expiration time.Duration
 	if ttl < 0 {
@@ -1330,12 +1423,13 @@ func (c *connectionService) SetKeyTTL(connName string, db int, k any, ttl int64)
 
 // DeleteKey remove redis key
 func (c *connectionService) DeleteKey(connName string, db int, k any, async bool) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
 	var deletedKeys []string
 	if strings.HasSuffix(key, "*") {
@@ -1360,7 +1454,8 @@ func (c *connectionService) DeleteKey(connName string, db int, k any, async bool
 				return nil
 			}
 
-			iter := cli.Scan(ctx, 0, key, 10000).Iterator()
+			scanSize := int64(Preferences().GetScanSize())
+			iter := cli.Scan(ctx, 0, key, scanSize).Iterator()
 			resultKeys := make([]string, 0, 100)
 			for iter.Next(ctx) {
 				resultKeys = append(resultKeys, iter.Val())
@@ -1414,12 +1509,13 @@ func (c *connectionService) DeleteKey(connName string, db int, k any, async bool
 
 // RenameKey rename key
 func (c *connectionService) RenameKey(connName string, db int, key, newKey string) (resp types.JSResp) {
-	client, ctx, err := c.getRedisClient(connName, db)
+	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
+	client, ctx := item.client, item.ctx
 	if _, ok := client.(*redis.ClusterClient); ok {
 		resp.Msg = "RENAME not support in cluster mode yet"
 		return

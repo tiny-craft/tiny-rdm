@@ -42,6 +42,7 @@ const usePreferencesStore = defineStore('preferences', {
             language: 'auto',
             font: '',
             fontSize: 14,
+            scanSize: 3000,
             useSysProxy: false,
             useSysProxyHttp: false,
             checkUpdate: false,

@@ -74,11 +74,11 @@ const onClose = () => {
             :show-require-mark="false"
             label-placement="top"
             style="padding-right: 15px">
-            <n-form-item :label="$t('server')" path="key">
-                <n-text>{{ filterForm.server }}</n-text>
+            <n-form-item :label="$t('dialogue.key.server')" path="key">
+                <n-input :value="filterForm.server" readonly></n-input>
             </n-form-item>
             <n-form-item :label="$t('dialogue.key.db_index')" path="db">
-                <n-text>{{ filterForm.db }}</n-text>
+                <n-input :value="filterForm.db + ''" readonly></n-input>
             </n-form-item>
             <n-form-item :label="$t('interface.type')" path="type" required>
                 <n-select v-model:value="filterForm.type" :options="typeOptions" />
@@ -87,7 +87,10 @@ const onClose = () => {
                 <n-input-group>
                     <n-tooltip trigger="focus">
                         <template #trigger>
-                            <n-input v-model:value="filterForm.pattern" clearable placeholder="Filter Pattern" />
+                            <n-input
+                                v-model:value="filterForm.pattern"
+                                clearable
+                                :placeholder="$t('dialogue.filter.filter_pattern')" />
                         </template>
                         <div class="text-block">{{ $t('dialogue.filter.filter_pattern_tip') }}</div>
                     </n-tooltip>

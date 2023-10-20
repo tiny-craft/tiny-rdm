@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gopkg.in/yaml.v3"
 	"sync"
+	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
 	sliceutil "tinyrdm/backend/utils/slice"
 )
@@ -36,6 +37,7 @@ func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 		ExecTimeout:   60,
 		DBFilterType:  "none",
 		DBFilterList:  []int{},
+		LoadSize:      consts.DEFAULT_LOAD_SIZE,
 		MarkColor:     "",
 		Sentinel: types.ConnectionSentinel{
 			Master: "mymaster",

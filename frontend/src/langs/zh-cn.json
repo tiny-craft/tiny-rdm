@@ -31,6 +31,7 @@
       "default": "默认",
       "font": "字体",
       "font_size": "字体尺寸",
+      "scan_size": "SCAN命令默认数量",
       "proxy": "代理",
       "use_system_proxy": "使用系统代理",
       "use_system_proxy_http": "仅在HTTP请求时使用系统代理",
@@ -83,6 +84,9 @@
     "binary_key": "二进制键名",
     "remove_key": "删除键",
     "new_key": "添加新键",
+    "load_more": "加载更多键",
+    "load_all": "加载所有键",
+    "more_action": "更多操作",
     "nonexist_tab_content": "所选键不存在，请尝试刷新重试",
     "empty_server_content": "可以从左边选择并打开连接",
     "empty_server_list": "还没添加Redis服务器",
@@ -145,6 +149,7 @@
         "dbfilter_hide_title": "需要隐藏的数据库",
         "dbfilter_input": "输入数据库索引",
         "dbfilter_input_tip": "按回车确认",
+        "load_size": "单次加载键数量",
         "mark_color": "标记颜色"
       },
       "ssl": {

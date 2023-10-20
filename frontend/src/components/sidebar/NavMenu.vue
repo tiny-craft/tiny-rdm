@@ -10,7 +10,6 @@ import useDialogStore from 'stores/dialog.js'
 import Github from '@/components/icons/Github.vue'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
-import Help from '@/components/icons/Help.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import Record from '@/components/icons/Record.vue'
 

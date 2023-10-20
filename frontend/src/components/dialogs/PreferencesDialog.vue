@@ -60,46 +60,58 @@ const onClose = () => {
         :show-icon="false"
         :title="$t('preferences.name')"
         preset="dialog"
+        style="width: 500px"
         transform-origin="center">
         <!-- FIXME: set loading will slow down appear animation of dialog in linux -->
         <!-- <n-spin :show="loading"> -->
         <n-tabs v-model:value="tab" animated type="line">
             <n-tab-pane :tab="$t('preferences.general.name')" display-directive="show" name="general">
                 <n-form :disabled="loading" :model="prefStore.general" :show-require-mark="false" label-placement="top">
-                    <n-form-item :label="$t('preferences.general.theme')" required>
-                        <n-radio-group v-model:value="prefStore.general.theme" name="theme" size="medium">
-                            <n-radio-button v-for="opt in prefStore.themeOption" :key="opt.value" :value="opt.value">
-                                {{ opt.label }}
-                            </n-radio-button>
-                        </n-radio-group>
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.language')" required>
-                        <n-select
-                            v-model:value="prefStore.general.language"
-                            :options="prefStore.langOption"
-                            filterable />
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.font')" required>
-                        <n-select v-model:value="prefStore.general.font" :options="prefStore.fontOption" filterable />
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.font_size')">
-                        <n-input-number v-model:value="prefStore.general.fontSize" :max="65535" :min="1" />
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.proxy')">
-                        <n-space>
-                            <n-checkbox v-model:checked="prefStore.general.useSysProxy">
-                                {{ $t('preferences.general.use_system_proxy') }}
+                    <n-grid :x-gap="10">
+                        <n-form-item-gi :span="24" :label="$t('preferences.general.theme')" required>
+                            <n-radio-group v-model:value="prefStore.general.theme" name="theme" size="medium">
+                                <n-radio-button
+                                    v-for="opt in prefStore.themeOption"
+                                    :key="opt.value"
+                                    :value="opt.value">
+                                    {{ opt.label }}
+                                </n-radio-button>
+                            </n-radio-group>
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="24" :label="$t('preferences.general.language')" required>
+                            <n-select
+                                v-model:value="prefStore.general.language"
+                                :options="prefStore.langOption"
+                                filterable />
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="12" :label="$t('preferences.general.font')" required>
+                            <n-select
+                                v-model:value="prefStore.general.font"
+                                :options="prefStore.fontOption"
+                                filterable />
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="12" :label="$t('preferences.general.font_size')">
+                            <n-input-number v-model:value="prefStore.general.fontSize" :max="65535" :min="1" />
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="12" :label="$t('preferences.general.scan_size')">
+                            <n-input-number v-model:value="prefStore.general.scanSize" :min="1" />
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="24" :label="$t('preferences.general.proxy')">
+                            <n-space>
+                                <n-checkbox v-model:checked="prefStore.general.useSysProxy">
+                                    {{ $t('preferences.general.use_system_proxy') }}
+                                </n-checkbox>
+                                <n-checkbox v-model:checked="prefStore.general.useSysProxyHttp">
+                                    {{ $t('preferences.general.use_system_proxy_http') }}
+                                </n-checkbox>
+                            </n-space>
+                        </n-form-item-gi>
+                        <n-form-item-gi :span="24" :label="$t('preferences.general.update')">
+                            <n-checkbox v-model:checked="prefStore.general.checkUpdate">
+                                {{ $t('preferences.general.auto_check_update') }}
                             </n-checkbox>
-                            <n-checkbox v-model:checked="prefStore.general.useSysProxyHttp">
-                                {{ $t('preferences.general.use_system_proxy_http') }}
-                            </n-checkbox>
-                        </n-space>
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.update')">
-                        <n-checkbox v-model:checked="prefStore.general.checkUpdate">
-                            {{ $t('preferences.general.auto_check_update') }}
-                        </n-checkbox>
-                    </n-form-item>
+                        </n-form-item-gi>
+                    </n-grid>
                 </n-form>
             </n-tab-pane>
 

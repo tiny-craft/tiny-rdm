@@ -133,6 +133,15 @@ func (p *preferencesService) GetWindowSize() (width, height int) {
 	return
 }
 
+func (p *preferencesService) GetScanSize() int {
+	data := p.pref.GetPreferences()
+	size := data.General.ScanSize
+	if size <= 0 {
+		size = consts.DEFAULT_SCAN_SIZE
+	}
+	return size
+}
+
 type latestRelease struct {
 	Name    string `json:"name"`
 	TagName string `json:"tag_name"`

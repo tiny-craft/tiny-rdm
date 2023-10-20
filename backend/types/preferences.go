@@ -19,6 +19,7 @@ func NewPreferences() Preferences {
 			Theme:       "auto",
 			Language:    "auto",
 			FontSize:    consts.DEFAULT_FONT_SIZE,
+			ScanSize:    consts.DEFAULT_SCAN_SIZE,
 			CheckUpdate: true,
 		},
 		Editor: PreferencesEditor{
@@ -38,6 +39,7 @@ type PreferencesGeneral struct {
 	Language        string `json:"language" yaml:"language"`
 	Font            string `json:"font" yaml:"font,omitempty"`
 	FontSize        int    `json:"fontSize" yaml:"font_size"`
+	ScanSize        int    `json:"scanSize" yaml:"scan_size"`
 	UseSysProxy     bool   `json:"useSysProxy" yaml:"use_sys_proxy,omitempty"`
 	UseSysProxyHttp bool   `json:"useSysProxyHttp" yaml:"use_sys_proxy_http,omitempty"`
 	CheckUpdate     bool   `json:"checkUpdate" yaml:"check_update"`
