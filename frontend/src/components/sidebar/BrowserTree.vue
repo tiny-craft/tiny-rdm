@@ -5,7 +5,7 @@ import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import ToggleDb from '@/components/icons/ToggleDb.vue'
-import { find, get, includes, indexOf, isEmpty, remove, size } from 'lodash'
+import { find, get, includes, indexOf, isEmpty, remove, size, startsWith } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -211,6 +211,17 @@ const expandKey = (key) => {
     }
 }
 
+const resetExpandKey = (server, db, includeDB) => {
+    const prefix = `${server}/db${db}`
+    remove(expandedKeys.value, (k) => {
+        if (!!!includeDB) {
+            return k !== prefix && startsWith(k, prefix)
+        } else {
+            return startsWith(k, prefix)
+        }
+    })
+}
+
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -240,10 +251,11 @@ const handleSelectContextMenu = (key) => {
             nextTick().then(() => expandKey(nodeKey))
             break
         case 'db_reload':
+            resetExpandKey(props.server, db)
             connectionStore.reopenDatabase(props.server, db)
             break
         case 'db_close':
-            remove(expandedKeys.value, (k) => k === `${props.server}/db${db}`)
+            resetExpandKey(props.server, db, true)
             connectionStore.closeDatabase(props.server, db)
             break
         case 'db_newkey':
@@ -320,6 +332,7 @@ const handleSelectContextMenu = (key) => {
             console.warn('TODO: handle context menu:' + key)
     }
 }
+
 defineExpose({
     handleSelectContextMenu,
 })
