@@ -772,8 +772,6 @@ const useConnectionStore = defineStore('connections', {
         async loadAllKeys(connName, db) {
             const { match, type: keyType } = this.getKeyFilter(connName, db)
             const { keys } = await this._loadKeys(connName, db, match, keyType, true)
-            // remove current keys below prefix
-            this._deleteKeyNode(connName, db, '', true)
             this._addKeyNodes(connName, db, keys)
             this._tidyNode(connName, db, '')
         },

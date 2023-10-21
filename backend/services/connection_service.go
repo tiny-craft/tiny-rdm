@@ -770,7 +770,8 @@ func (c *connectionService) LoadAllKeys(connName string, db int, match, keyType 
 	}
 
 	client, ctx := item.client, item.ctx
-	keys, _, err := c.scanKeys(ctx, client, match, keyType, 0, 0)
+	cursor := item.cursor[db]
+	keys, _, err := c.scanKeys(ctx, client, match, keyType, cursor, 0)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
