@@ -166,7 +166,7 @@ const renderIconMenu = (items) => {
         {
             align: 'center',
             inline: true,
-            size: 2,
+            size: 3,
             wrapItem: false,
             wrap: false,
             style: 'margin-right: 5px',

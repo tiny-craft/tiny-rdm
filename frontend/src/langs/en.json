@@ -48,6 +48,8 @@
     "disconnect_all": "Disconnect all",
     "status": "Status",
     "filter": "Filter",
+    "tree_view": "Tree View",
+    "list_view": "List View",
     "sort_conn": "Sort Connections",
     "new_conn_title": "New Connection",
     "open_db": "Open Database",

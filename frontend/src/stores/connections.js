@@ -51,6 +51,8 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import useTabStore from './tab.js'
 import { types } from '@/consts/support_redis_type.js'
 import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
+import { KeyViewType } from '@/consts/key_view_type.js'
+import { nextTick } from 'vue'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -117,10 +119,12 @@ const useConnectionStore = defineStore('connections', {
         connections: [], // all connections
         serverStats: {}, // current server status info
         serverProfile: {}, // all server profile
-        keyFilter: {}, // all key filters in opened connections group by server+db
-        typeFilter: {}, // all key type filters in opened connections group by server+db
-        databases: {}, // all databases in opened connections group by server name
-        nodeMap: {}, // all nodes in opened connections group by server#db and type/key
+        keyFilter: {}, // all key filters in opened connections group by 'server+db'
+        typeFilter: {}, // all key type filters in opened connections group by 'server+db'
+        viewType: {}, // view type selection for all opened connections group by 'server'
+        databases: {}, // all databases in opened connections group by 'server name'
+        nodeMap: {}, // all nodes in opened connections group by 'server#db' and 'type/key'
+        keySet: {}, // all keys set in opened connections group by 'server#db
     }),
     getters: {
         anyConnectionOpened() {
@@ -321,6 +325,38 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * switch key view
+         * @param {string} connName
+         * @param {number} viewType
+         */
+        async switchKeyView(connName, viewType) {
+            if (viewType !== KeyViewType.Tree && viewType !== KeyViewType.List) {
+                return
+            }
+
+            const t = get(this.viewType, connName, KeyViewType.Tree)
+            if (t === viewType) {
+                return
+            }
+
+            this.viewType[connName] = viewType
+            const dbs = get(this.databases, connName, [])
+            for (const dbItem of dbs) {
+                if (!dbItem.opened) {
+                    continue
+                }
+
+                dbItem.children = undefined
+                dbItem.keys = 0
+                const { db = 0 } = dbItem
+                this._getNodeMap(connName, db).clear()
+                const keys = this._getKeySet(connName, db)
+                this._addKeyNodes(connName, db, keys)
+                this._tidyNode(connName, db, '')
+            }
+        },
+
+        /**
          * create a new connection or update current connection profile
          * @param {string} name set null if create a new connection
          * @param {{}} param
@@ -406,6 +442,7 @@ const useConnectionStore = defineStore('connections', {
             const dbs = []
             for (let i = 0; i < db.length; i++) {
                 this._getNodeMap(name, i).clear()
+                this._getKeySet(name, i).clear()
                 dbs.push({
                     key: `${name}/${db[i].name}`,
                     label: db[i].name,
@@ -438,6 +475,7 @@ const useConnectionStore = defineStore('connections', {
                 for (const db of dbs) {
                     this.removeKeyFilter(name, db.db)
                     this._getNodeMap(name, db.db).clear()
+                    this._getKeySet(name, db.db).clear()
                 }
             }
             this.removeKeyFilter(name, -1)
@@ -459,6 +497,8 @@ const useConnectionStore = defineStore('connections', {
             }
 
             this.databases = {}
+            this.nodeMap.clear()
+            this.keySet.clear()
             this.serverStats = {}
             const tabStore = useTabStore()
             tabStore.removeAllTab()
@@ -534,8 +574,8 @@ const useConnectionStore = defineStore('connections', {
          * @returns {Promise<void>}
          */
         async openDatabase(connName, db) {
-            const { match: filterPattern, type: keyType } = this.getKeyFilter(connName, db)
-            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern, keyType)
+            const { match: filterPattern, type: filterType } = this.getKeyFilter(connName, db)
+            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern, filterType)
             if (!success) {
                 throw new Error(msg)
             }
@@ -571,6 +611,7 @@ const useConnectionStore = defineStore('connections', {
             selDB.isLeaf = false
 
             this._getNodeMap(connName, db).clear()
+            this._getKeySet(connName, db).clear()
         },
 
         /**
@@ -588,6 +629,7 @@ const useConnectionStore = defineStore('connections', {
             selDB.opened = false
 
             this._getNodeMap(connName, db).clear()
+            this._getKeySet(connName, db).clear()
         },
 
         /**
@@ -752,13 +794,13 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * get node map
-         * @param connName
-         * @param db
+         * @param {string} connName
+         * @param {number} db
          * @returns {Map<string, DatabaseItem>}
          * @private
          */
         _getNodeMap(connName, db) {
-            if (this.nodeMap[`${connName}#${db}`] == null) {
+            if (!this.nodeMap.hasOwnProperty(`${connName}#${db}`)) {
                 this.nodeMap[`${connName}#${db}`] = new Map()
             }
             // construct a tree node list, the format of item key likes 'server/db#type/key'
@@ -766,16 +808,36 @@ const useConnectionStore = defineStore('connections', {
         },
 
         /**
+         * get all keys in a database
+         * @param {string} connName
+         * @param {number} db
+         * @return {Set<string|number[]>}
+         * @private
+         */
+        _getKeySet(connName, db) {
+            if (!this.keySet.hasOwnProperty(`${connName}#${db}`)) {
+                this.keySet[`${connName}#${db}`] = new Set()
+            }
+            // construct a key set
+            return this.keySet[`${connName}#${db}`]
+        },
+
+        /**
          * remove keys in db
          * @param {string} connName
          * @param {number} db
-         * @param {Array<string|number[]>} keys
+         * @param {Array<string|number[]>|Set<string|number[]>} keys
          * @param {boolean} [sortInsert]
          * @return {{success: boolean, newKey: number, newLayer: number, replaceKey: number}}
          * @private
          */
         _addKeyNodes(connName, db, keys, sortInsert) {
-            const result = { success: false, newLayer: 0, newKey: 0, replaceKey: 0 }
+            const result = {
+                success: false,
+                newLayer: 0,
+                newKey: 0,
+                replaceKey: 0,
+            }
             if (isEmpty(keys)) {
                 return result
             }
@@ -789,72 +851,105 @@ const useConnectionStore = defineStore('connections', {
                 selDB.children = []
             }
             const nodeMap = this._getNodeMap(connName, db)
+            const keySet = this._getKeySet(connName, db)
             const rootChildren = selDB.children
-            for (const key of keys) {
-                const k = decodeRedisKey(key)
-                const binaryKey = k !== key
-                const keyParts = binaryKey ? [nativeRedisKey(key)] : split(k, separator)
-                const len = size(keyParts)
-                const lastIdx = len - 1
-                let handlePath = ''
-                let children = rootChildren
-                for (let i = 0; i < len; i++) {
-                    handlePath += keyParts[i]
-                    if (i !== lastIdx) {
-                        // layer
-                        const nodeKey = `${ConnectionType.RedisKey}/${handlePath}`
-                        let selectedNode = nodeMap.get(nodeKey)
-                        if (selectedNode == null) {
-                            selectedNode = {
+            const viewType = get(this.viewType, connName, KeyViewType.Tree)
+            if (viewType === KeyViewType.List) {
+                // construct list view data
+                for (const key of keys) {
+                    const k = decodeRedisKey(key)
+                    const isBinaryKey = k !== key
+                    const nodeKey = `${ConnectionType.RedisValue}/${nativeRedisKey(key)}`
+                    const replaceKey = nodeMap.has(nodeKey)
+                    const selectedNode = {
+                        key: `${connName}/db${db}#${nodeKey}`,
+                        label: k,
+                        db,
+                        keys: 0,
+                        redisKey: k,
+                        redisKeyCode: isBinaryKey ? key : undefined,
+                        type: ConnectionType.RedisValue,
+                        isLeaf: true,
+                    }
+                    nodeMap.set(nodeKey, selectedNode)
+                    keySet.add(key)
+                    if (!replaceKey) {
+                        if (sortInsert) {
+                            const index = sortedIndexBy(rootChildren, selectedNode, 'key')
+                            rootChildren.splice(index, 0, selectedNode)
+                        } else {
+                            rootChildren.push(selectedNode)
+                        }
+                        result.newKey += 1
+                    } else {
+                        result.replaceKey += 1
+                    }
+                }
+            } else {
+                // construct tree view data
+                for (const key of keys) {
+                    const k = decodeRedisKey(key)
+                    const isBinaryKey = k !== key
+                    const keyParts = isBinaryKey ? [nativeRedisKey(key)] : split(k, separator)
+                    const len = size(keyParts)
+                    const lastIdx = len - 1
+                    let handlePath = ''
+                    let children = rootChildren
+                    for (let i = 0; i < len; i++) {
+                        handlePath += keyParts[i]
+                        if (i !== lastIdx) {
+                            // layer
+                            const nodeKey = `${ConnectionType.RedisKey}/${handlePath}`
+                            let selectedNode = nodeMap.get(nodeKey)
+                            if (selectedNode == null) {
+                                selectedNode = {
+                                    key: `${connName}/db${db}#${nodeKey}`,
+                                    label: keyParts[i],
+                                    db,
+                                    keys: 0,
+                                    redisKey: handlePath,
+                                    type: ConnectionType.RedisKey,
+                                    isLeaf: false,
+                                    children: [],
+                                }
+                                nodeMap.set(nodeKey, selectedNode)
+                                if (sortInsert) {
+                                    const index = sortedIndexBy(children, selectedNode, 'key')
+                                    children.splice(index, 0, selectedNode)
+                                } else {
+                                    children.push(selectedNode)
+                                }
+                                result.newLayer += 1
+                            }
+                            children = selectedNode.children
+                            handlePath += separator
+                        } else {
+                            // key
+                            const nodeKey = `${ConnectionType.RedisValue}/${handlePath}`
+                            const replaceKey = nodeMap.has(nodeKey)
+                            const selectedNode = {
                                 key: `${connName}/db${db}#${nodeKey}`,
-                                label: keyParts[i],
+                                label: isBinaryKey ? k : keyParts[i],
                                 db,
                                 keys: 0,
                                 redisKey: handlePath,
-                                type: ConnectionType.RedisKey,
-                                isLeaf: false,
-                                children: [],
+                                redisKeyCode: isBinaryKey ? key : undefined,
+                                type: ConnectionType.RedisValue,
+                                isLeaf: true,
                             }
                             nodeMap.set(nodeKey, selectedNode)
-                            if (sortInsert) {
-                                const index = sortedIndexBy(children, selectedNode, (elem) => {
-                                    return elem.key
-                                })
-                                children.splice(index, 0, selectedNode)
+                            keySet.add(key)
+                            if (!replaceKey) {
+                                if (sortInsert) {
+                                    const index = sortedIndexBy(children, selectedNode, 'key')
+                                    children.splice(index, 0, selectedNode)
+                                } else {
+                                    children.push(selectedNode)
+                                }
+                                result.newKey += 1
                             } else {
-                                children.push(selectedNode)
+                                result.replaceKey += 1
                             }
-                            result.newLayer += 1
-                        }
-                        children = selectedNode.children
-                        handlePath += separator
-                    } else {
-                        // key
-                        const nodeKey = `${ConnectionType.RedisValue}/${handlePath}`
-                        const replaceKey = nodeMap.has(nodeKey)
-                        const selectedNode = {
-                            key: `${connName}/db${db}#${nodeKey}`,
-                            label: binaryKey ? k : keyParts[i],
-                            db,
-                            keys: 0,
-                            redisKey: handlePath,
-                            redisKeyCode: binaryKey ? key : undefined,
-                            type: ConnectionType.RedisValue,
-                            isLeaf: true,
-                        }
-                        nodeMap.set(nodeKey, selectedNode)
-                        if (!replaceKey) {
-                            if (sortInsert) {
-                                const index = sortedIndexBy(children, selectedNode, (elem) => {
-                                    return elem.key > selectedNode.key
-                                })
-                                children.splice(index, 0, selectedNode)
-                            } else {
-                                children.push(selectedNode)
-                            }
-                            result.newKey += 1
-                        } else {
-                            result.replaceKey += 1
                         }
                     }
                 }
@@ -1408,8 +1503,9 @@ const useConnectionStore = defineStore('connections', {
             }
 
             const nodeMap = this._getNodeMap(connName, db)
+            const keySet = this._getKeySet(connName, db)
             if (isLayer === true) {
-                this._deleteChildrenKeyNodes(nodeMap, key)
+                this._deleteChildrenKeyNodes(nodeMap, keySet, key)
             }
             if (isEmpty(key)) {
                 // clear all key nodes
@@ -1447,12 +1543,18 @@ const useConnectionStore = defineStore('connections', {
 
                         if (isEmpty(anceNode.children)) {
                             nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
+                            keySet.delete(anceNode.redisKeyCode || anceNode.redisKey)
                         } else {
                             break
                         }
                     } else {
                         // last one, remove from db node
                         remove(dbRoot.children, { type: ConnectionType.RedisKey, redisKey: keyParts[0] })
+                        const node = nodeMap.get(`${ConnectionType.RedisValue}/${keyParts[0]}`)
+                        if (node != null) {
+                            nodeMap.delete(`${ConnectionType.RedisValue}/${keyParts[0]}`)
+                            keySet.delete(node.redisKeyCode || node.redisKey)
+                        }
                     }
                 }
             }
@@ -1463,12 +1565,14 @@ const useConnectionStore = defineStore('connections', {
         /**
          * delete node and all it's children from nodeMap
          * @param {Map<string, DatabaseItem>} nodeMap
+         * @param {Set<string|number[]>} keySet
          * @param {string} [key] clean nodeMap if key is empty
          * @private
          */
-        _deleteChildrenKeyNodes(nodeMap, key) {
+        _deleteChildrenKeyNodes(nodeMap, keySet, key) {
             if (isEmpty(key)) {
                 nodeMap.clear()
+                keySet.clear()
             } else {
                 const mapKey = `${ConnectionType.RedisKey}/${key}`
                 const node = nodeMap.get(mapKey)
@@ -1477,13 +1581,15 @@ const useConnectionStore = defineStore('connections', {
                         if (!nodeMap.delete(`${ConnectionType.RedisValue}/${child.redisKey}`)) {
                             console.warn('delete:', `${ConnectionType.RedisValue}/${child.redisKey}`)
                         }
+                        keySet.delete(child.redisKeyCode || child.redisKey)
                     } else if (child.type === ConnectionType.RedisKey) {
-                        this._deleteChildrenKeyNodes(nodeMap, child.redisKey)
+                        this._deleteChildrenKeyNodes(nodeMap, keySet, child.redisKey)
                     }
                 }
                 if (!nodeMap.delete(mapKey)) {
                     console.warn('delete map key', mapKey)
                 }
+                keySet.delete(node.redisKeyCode || node.redisKey)
             }
         },
 

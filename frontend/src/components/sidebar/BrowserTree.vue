@@ -28,6 +28,7 @@ import LoadAll from '@/components/icons/LoadAll.vue'
 
 const props = defineProps({
     server: String,
+    keyView: String,
 })
 
 const i18n = useI18n()
@@ -53,14 +54,6 @@ const selectedKeys = computed(() => {
 const data = computed(() => {
     const dbs = get(connectionStore.databases, props.server, [])
     return dbs
-    // return [
-    //     {
-    //         key: `${props.server}`,
-    //         label: props.server,
-    //         type: ConnectionType.Server,
-    //         children: dbs,
-    //     },
-    // ]
 })
 
 const backgroundColor = computed(() => {
@@ -490,7 +483,7 @@ const renderIconMenu = (items) => {
         {
             align: 'center',
             inline: true,
-            size: 2,
+            size: 3,
             wrapItem: false,
             wrap: false,
             style: 'margin-right: 5px',

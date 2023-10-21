@@ -1,5 +1,5 @@
 <script setup>
-import { useThemeVars } from 'naive-ui'
+import { NIcon, useThemeVars } from 'naive-ui'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
@@ -13,6 +13,9 @@ import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
 import Status from '@/components/icons/Status.vue'
+import SwitchButton from '@/components/common/SwitchButton.vue'
+import ListView from '@/components/icons/ListView.vue'
+import TreeView from '@/components/icons/TreeView.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
@@ -59,6 +62,12 @@ const filterTypeOptions = computed(() => {
     })
     return options
 })
+
+const viewType = ref(0)
+const onSwitchView = (selectView) => {
+    const { server } = tabStore.currentTab
+    connectionStore.switchKeyView(server, selectView)
+}
 </script>
 
 <template>
@@ -82,9 +91,16 @@ const filterTypeOptions = computed(() => {
         </div>
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-h">
+            <switch-button
+                v-model:value="viewType"
+                :icons="[TreeView, ListView]"
+                :t-tooltips="['interface.tree_view', 'interface.list_view']"
+                stroke-width="4"
+                unselect-stroke-width="3"
+                @update:value="onSwitchView" />
             <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="interface.status" @click="onInfo" />
             <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="interface.reload" @click="onRefresh" />
-            <div class="flex-item-expand"></div>
+            <div class="flex-item-expand" />
             <icon-button
                 :icon="Unlink"
                 size="20"
