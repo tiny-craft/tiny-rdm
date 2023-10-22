@@ -7,6 +7,9 @@ import { map, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
+import { useThemeVars } from 'naive-ui'
+
+const themeVars = useThemeVars()
 
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
@@ -72,7 +75,8 @@ defineExpose({
         :bordered="false"
         :title="$t('log.launch_log')"
         class="content-container flex-box-v"
-        content-style="display: flex;flex-direction: column; overflow: hidden;">
+        content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray"
+        :theme-overrides="{ borderRadius: '0px' }">
         <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('log.filter_server')">
                 <n-select
@@ -158,5 +162,6 @@ defineExpose({
 .content-container {
     padding: 5px;
     box-sizing: border-box;
+    border-left: 1px solid v-bind('themeVars.borderColor');
 }
 </style>

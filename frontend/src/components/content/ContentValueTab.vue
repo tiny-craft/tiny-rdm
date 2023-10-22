@@ -25,20 +25,20 @@ const activeTabStyle = computed(() => {
     const { name } = tabStore.currentTab
     const { markColor = '' } = connectionStore.serverProfile[name] || {}
     return {
-        backgroundColor: themeVars.value.bodyColor,
         borderTopWidth: markColor ? '3px' : '1px',
         borderTopColor: markColor || themeVars.value.borderColor,
-        borderBottomColor: themeVars.value.bodyColor,
-        borderTopLeftRadius: themeVars.value.borderRadius,
-        borderTopRightRadius: themeVars.value.borderRadius,
     }
 })
-const inactiveTabStyle = computed(() => ({
-    borderWidth: '0 0 1px',
-    // borderBottomColor: themeVars.value.borderColor,
-    borderTopLeftRadius: themeVars.value.borderRadius,
-    borderTopRightRadius: themeVars.value.borderRadius,
-}))
+
+const tabClass = (idx) => {
+    if (tabStore.activatedIndex === idx) {
+        return ['value-tab', 'value-tab-active']
+    } else if (tabStore.activatedIndex - 1 === idx) {
+        return ['value-tab', 'value-tab-inactive']
+    } else {
+        return ['value-tab', 'value-tab-inactive', 'value-tab-inactive2']
+    }
+}
 
 const tab = computed(() =>
     map(tabStore.tabs, (item) => ({
@@ -52,6 +52,7 @@ const tab = computed(() =>
     <n-tabs
         v-model:value="tabStore.activatedIndex"
         :closable="true"
+        :tabs-padding="2"
         :tab-style="{
             borderStyle: 'solid',
             borderWidth: '1px',
@@ -60,7 +61,6 @@ const tab = computed(() =>
         }"
         :theme-overrides="{
             tabFontWeightActive: 800,
-            tabBorderRadius: 0,
             tabGapSmallCard: 0,
             tabGapMediumCard: 0,
             tabGapLargeCard: 0,
@@ -76,10 +76,10 @@ const tab = computed(() =>
         <n-tab
             v-for="(t, i) in tab"
             :key="i"
-            :closable="tabStore.activatedIndex === i"
+            :closable="true"
             :name="i"
-            :style="tabStore.activatedIndex === i ? activeTabStyle : inactiveTabStyle"
-            style="--wails-draggable: none"
+            :style="tabStore.activatedIndex === i ? activeTabStyle : undefined"
+            :class="tabClass(i)"
             @dblclick.stop="() => {}">
             <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                 <n-icon :component="ToggleServer" size="18" />
@@ -89,4 +89,38 @@ const tab = computed(() =>
     </n-tabs>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.value-tab {
+    --wails-draggable: none;
+    position: relative;
+}
+
+.value-tab-active {
+    background-color: v-bind('themeVars.bodyColor') !important;
+    border-bottom-color: v-bind('themeVars.bodyColor') !important;
+}
+
+.value-tab-inactive {
+    border-color: #0000 !important;
+
+    &:hover {
+        background-color: v-bind('themeVars.borderColor') !important;
+    }
+}
+
+.value-tab-inactive2 {
+    &:after {
+        content: '';
+        position: absolute;
+        top: 25%;
+        height: 50%;
+        width: 1px;
+        background-color: v-bind('themeVars.borderColor');
+        right: -2px;
+    }
+
+    &:hover::after {
+        background-color: #0000;
+    }
+}
+</style>
