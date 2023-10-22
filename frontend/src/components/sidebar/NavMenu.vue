@@ -125,8 +125,6 @@ const openGithub = () => {
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">
             <n-dropdown
-                :animated="false"
-                :keyboard="false"
                 :options="preferencesOptions"
                 :render-label="renderContextLabel"
                 trigger="click"

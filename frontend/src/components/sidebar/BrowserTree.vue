@@ -690,7 +690,6 @@ const handleOutsideContextMenu = () => {
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded" />
         <n-dropdown
-            :animated="false"
             :options="contextMenuParam.options"
             :render-label="renderContextLabel"
             :show="contextMenuParam.show"
