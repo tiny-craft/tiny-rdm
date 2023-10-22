@@ -48,8 +48,6 @@
     "disconnect_all": "Disconnect all",
     "status": "Status",
     "filter": "Filter",
-    "tree_view": "Tree View",
-    "list_view": "List View",
     "sort_conn": "Sort Connections",
     "new_conn_title": "New Connection",
     "open_db": "Open Database",
@@ -151,6 +149,9 @@
         "dbfilter_hide_title": "Select the Databases to Hide",
         "dbfilter_input": "Input Database Index",
         "dbfilter_input_tip": "Press Enter to confirm",
+        "key_view": "Default Key View",
+        "key_view_tree": "Tree View",
+        "key_view_list": "List View",
         "load_size": "Size of Keys Per Load",
         "mark_color": "Mark Color"
       },

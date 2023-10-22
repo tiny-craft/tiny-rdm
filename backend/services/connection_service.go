@@ -507,7 +507,8 @@ func (c *connectionService) OpenConnection(name string) (resp types.JSResp) {
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"db": dbs,
+		"db":   dbs,
+		"view": selConn.KeyView,
 	}
 	return
 }

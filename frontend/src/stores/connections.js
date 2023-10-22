@@ -236,6 +236,7 @@ const useConnectionStore = defineStore('connections', {
                 execTimeout: 60,
                 dbFilterType: 'none',
                 dbFilterList: [],
+                keyView: KeyViewType.Tree,
                 loadSize: 10000,
                 markColor: '',
                 ssl: {
@@ -435,7 +436,7 @@ const useConnectionStore = defineStore('connections', {
             // if (connNode == null) {
             //     throw new Error('no such connection')
             // }
-            const { db } = data
+            const { db, view = KeyViewType.Tree } = data
             if (isEmpty(db)) {
                 throw new Error('no db loaded')
             }
@@ -456,6 +457,7 @@ const useConnectionStore = defineStore('connections', {
                 })
             }
             this.databases[name] = dbs
+            this.viewType[name] = view
         },
 
         /**

@@ -7,6 +7,7 @@ import useDialog, { ConnDialogType } from 'stores/dialog'
 import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
 import FileOpenInput from '@/components/common/FileOpenInput.vue'
+import { KeyViewType } from '@/consts/key_view_type.js'
 
 /**
  * Dialog for new or edit connection
@@ -258,37 +259,47 @@ const onClose = () => {
                         :rules="generalFormRules()"
                         :show-require-mark="false"
                         label-placement="top">
-                        <n-form-item :label="$t('dialogue.connection.conn_name')" path="name" required>
-                            <n-input
-                                v-model:value="generalForm.name"
-                                :placeholder="$t('dialogue.connection.name_tip')" />
-                        </n-form-item>
-                        <n-form-item v-if="!isEditMode" :label="$t('dialogue.connection.group')" required>
-                            <n-select v-model:value="generalForm.group" :options="groupOptions" />
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.addr')" path="addr" required>
-                            <n-input
-                                v-model:value="generalForm.addr"
-                                :placeholder="$t('dialogue.connection.addr_tip')" />
-                            <n-text style="width: 40px; text-align: center">:</n-text>
-                            <n-input-number
-                                v-model:value="generalForm.port"
-                                :max="65535"
-                                :min="1"
-                                style="width: 200px" />
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.pwd')" path="password">
-                            <n-input
-                                v-model:value="generalForm.password"
-                                :placeholder="$t('dialogue.connection.pwd_tip')"
-                                show-password-on="click"
-                                type="password" />
-                        </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.usr')" path="username">
-                            <n-input
-                                v-model:value="generalForm.username"
-                                :placeholder="$t('dialogue.connection.usr_tip')" />
-                        </n-form-item>
+                        <n-grid :x-gap="10">
+                            <n-form-item-gi
+                                :label="$t('dialogue.connection.conn_name')"
+                                :span="24"
+                                path="name"
+                                required>
+                                <n-input
+                                    v-model:value="generalForm.name"
+                                    :placeholder="$t('dialogue.connection.name_tip')" />
+                            </n-form-item-gi>
+                            <n-form-item-gi
+                                v-if="!isEditMode"
+                                :label="$t('dialogue.connection.group')"
+                                :span="24"
+                                required>
+                                <n-select v-model:value="generalForm.group" :options="groupOptions" />
+                            </n-form-item-gi>
+                            <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
+                                <n-input
+                                    v-model:value="generalForm.addr"
+                                    :placeholder="$t('dialogue.connection.addr_tip')" />
+                                <n-text style="width: 40px; text-align: center">:</n-text>
+                                <n-input-number
+                                    v-model:value="generalForm.port"
+                                    :max="65535"
+                                    :min="1"
+                                    style="width: 200px" />
+                            </n-form-item-gi>
+                            <n-form-item-gi :label="$t('dialogue.connection.pwd')" :span="12" path="password">
+                                <n-input
+                                    v-model:value="generalForm.password"
+                                    :placeholder="$t('dialogue.connection.pwd_tip')"
+                                    show-password-on="click"
+                                    type="password" />
+                            </n-form-item-gi>
+                            <n-form-item-gi :label="$t('dialogue.connection.usr')" :span="12" path="username">
+                                <n-input
+                                    v-model:value="generalForm.username"
+                                    :placeholder="$t('dialogue.connection.usr_tip')" />
+                            </n-form-item-gi>
+                        </n-grid>
                     </n-form>
                 </n-tab-pane>
 
@@ -336,6 +347,16 @@ const onClose = () => {
                                         {{ $t('common.second') }}
                                     </template>
                                 </n-input-number>
+                            </n-form-item-gi>
+                            <n-form-item-gi :label="$t('dialogue.connection.advn.key_view')" :span="12">
+                                <n-radio-group v-model:value="generalForm.keyView">
+                                    <n-radio-button
+                                        :label="$t('dialogue.connection.advn.key_view_tree')"
+                                        :value="KeyViewType.Tree" />
+                                    <n-radio-button
+                                        :label="$t('dialogue.connection.advn.key_view_list')"
+                                        :value="KeyViewType.List" />
+                                </n-radio-group>
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.advn.load_size')" :span="12">
                                 <n-input-number v-model:value="generalForm.loadSize" :min="0" />
@@ -403,20 +424,20 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.ssl.cert_file')">
                             <file-open-input
                                 v-model:value="generalForm.ssl.certFile"
-                                :placeholder="$t('dialogue.connection.ssl.cert_file_tip')"
-                                :disabled="!generalForm.ssl.enable" />
+                                :disabled="!generalForm.ssl.enable"
+                                :placeholder="$t('dialogue.connection.ssl.cert_file_tip')" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.ssl.key_file')">
                             <file-open-input
                                 v-model:value="generalForm.ssl.keyFile"
-                                :placeholder="$t('dialogue.connection.ssl.key_file_tip')"
-                                :disabled="!generalForm.ssl.enable" />
+                                :disabled="!generalForm.ssl.enable"
+                                :placeholder="$t('dialogue.connection.ssl.key_file_tip')" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.ssl.ca_file')">
                             <file-open-input
                                 v-model:value="generalForm.ssl.caFile"
-                                :placeholder="$t('dialogue.connection.ssl.ca_file_tip')"
-                                :disabled="!generalForm.ssl.enable" />
+                                :disabled="!generalForm.ssl.enable"
+                                :placeholder="$t('dialogue.connection.ssl.ca_file_tip')" />
                         </n-form-item>
                     </n-form>
                 </n-tab-pane>
@@ -467,8 +488,8 @@ const onClose = () => {
                         <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.pkfile')">
                             <file-open-input
                                 v-model:value="generalForm.ssh.pkFile"
-                                :placeholder="$t('dialogue.connection.ssh.pkfile_tip')"
-                                :disabled="!generalForm.ssh.enable" />
+                                :disabled="!generalForm.ssh.enable"
+                                :placeholder="$t('dialogue.connection.ssh.pkfile_tip')" />
                         </n-form-item>
                         <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.passphrase')">
                             <n-input

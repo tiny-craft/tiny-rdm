@@ -48,8 +48,6 @@
     "disconnect_all": "断开所有连接",
     "status": "状态",
     "filter": "筛选",
-    "tree_view": "树视图",
-    "list_view": "列表视图",
     "sort_conn": "调整连接顺序",
     "new_conn_title": "新建连接",
     "open_db": "打开数据库",
@@ -151,6 +149,9 @@
         "dbfilter_hide_title": "需要隐藏的数据库",
         "dbfilter_input": "输入数据库索引",
         "dbfilter_input_tip": "按回车确认",
+        "key_view": "默认键视图",
+        "key_view_tree": "树形列表",
+        "key_view_list": "平铺列表",
         "load_size": "单次加载键数量",
         "mark_color": "标记颜色"
       },
