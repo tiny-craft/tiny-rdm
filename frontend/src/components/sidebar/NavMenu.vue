@@ -1,9 +1,9 @@
 <script setup>
 import { computed, h } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
-import ToggleDb from '@/components/icons/ToggleDb.vue'
+import Database from '@/components/icons/Database.vue'
 import { useI18n } from 'vue-i18n'
-import ToggleServer from '@/components/icons/ToggleServer.vue'
+import Server from '@/components/icons/Server.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Config from '@/components/icons/Config.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -40,13 +40,13 @@ const menuOptions = computed(() => {
         {
             label: i18n.t('ribbon.browser'),
             key: 'browser',
-            icon: renderIcon(ToggleDb),
+            icon: renderIcon(Database),
             show: connectionStore.anyConnectionOpened,
         },
         {
             label: i18n.t('ribbon.server'),
             key: 'server',
-            icon: renderIcon(ToggleServer),
+            icon: renderIcon(Server),
         },
         {
             label: i18n.t('ribbon.log'),

@@ -4,9 +4,9 @@ import { h, nextTick, reactive, ref } from 'vue'
 import useConnectionStore from 'stores/connections.js'
 import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '@/consts/connection_type.js'
-import ToggleFolder from '@/components/icons/ToggleFolder.vue'
-import ToggleServer from '@/components/icons/ToggleServer.vue'
-import ToggleCluster from '@/components/icons/ToggleCluster.vue'
+import Folder from '@/components/icons/Folder.vue'
+import Server from '@/components/icons/Server.vue'
+import Cluster from '@/components/icons/Cluster.vue'
 import { debounce, get, includes, indexOf, isEmpty, split } from 'lodash'
 import Config from '@/components/icons/Config.vue'
 import Delete from '@/components/icons/Delete.vue'
@@ -185,8 +185,8 @@ const renderPrefix = ({ option }) => {
                 { size: 20 },
                 {
                     default: () =>
-                        h(ToggleFolder, {
-                            modelValue: opened,
+                        h(Folder, {
+                            open: opened,
                             fillColor: `rgba(255,206,120,${iconTransparency})`,
                         }),
                 },
@@ -194,14 +194,14 @@ const renderPrefix = ({ option }) => {
         case ConnectionType.Server:
             const connected = connectionStore.isConnected(option.name)
             const color = getServerMarkColor(option.name)
-            const icon = option.cluster === true ? ToggleCluster : ToggleServer
+            const icon = option.cluster === true ? Cluster : Server
             return h(
                 NIcon,
-                { size: 20, color: !!!connected ? color : undefined },
+                { size: 20, color: !!!connected ? color : '#dc423c' },
                 {
                     default: () =>
                         h(icon, {
-                            modelValue: !!connected,
+                            inverse: !!connected,
                             fillColor: `rgba(220,66,60,${iconTransparency})`,
                         }),
                 },

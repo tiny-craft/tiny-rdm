@@ -1,5 +1,5 @@
 <script setup>
-import ToggleServer from '@/components/icons/ToggleServer.vue'
+import Server from '@/components/icons/Server.vue'
 import useTabStore from 'stores/tab.js'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -52,7 +52,7 @@ const tab = computed(() =>
     <n-tabs
         v-model:value="tabStore.activatedIndex"
         :closable="true"
-        :tabs-padding="2"
+        :tabs-padding="0"
         :tab-style="{
             borderStyle: 'solid',
             borderWidth: '1px',
@@ -82,7 +82,9 @@ const tab = computed(() =>
             :class="tabClass(i)"
             @dblclick.stop="() => {}">
             <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
-                <n-icon :component="ToggleServer" size="18" />
+                <n-icon size="18">
+                    <server stroke-width="4" :inverse="tabStore.activatedIndex === i" />
+                </n-icon>
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-space>
         </n-tab>

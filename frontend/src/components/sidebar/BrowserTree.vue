@@ -4,7 +4,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import { NIcon, NSpace, NTag } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
-import ToggleDb from '@/components/icons/ToggleDb.vue'
+import Database from '@/components/icons/Database.vue'
 import { find, get, includes, indexOf, isEmpty, remove, size, startsWith } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -399,9 +399,9 @@ const renderPrefix = ({ option }) => {
         case ConnectionType.RedisDB:
             return h(
                 NIcon,
-                { size: 20 },
+                { size: 20, color: option.opened === true ? '#dc423c' : undefined },
                 {
-                    default: () => h(ToggleDb, { modelValue: option.opened === true }),
+                    default: () => h(Database, { inverse: option.opened === true }),
                 },
             )
         case ConnectionType.RedisKey:
