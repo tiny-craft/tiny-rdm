@@ -75,7 +75,7 @@ const infoFilter = ref('')
 <template>
     <n-scrollbar ref="scrollRef">
         <n-back-top :listen-to="scrollRef" />
-        <n-space vertical>
+        <n-space vertical :wrap-item="false" :size="5" style="padding: 5px">
             <n-card>
                 <template #header>
                     <n-space :wrap-item="false" align="center" inline size="small">

@@ -83,7 +83,7 @@ const tab = computed(() =>
             @dblclick.stop="() => {}">
             <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                 <n-icon size="18">
-                    <server stroke-width="4" :inverse="tabStore.activatedIndex === i" />
+                    <server stroke-width="4" />
                 </n-icon>
                 <n-ellipsis style="max-width: 150px">{{ t.label }}</n-ellipsis>
             </n-space>

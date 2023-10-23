@@ -87,13 +87,19 @@
     "load_more": "Load More Keys",
     "load_all": "Load All Left Keys",
     "more_action": "More Action",
-    "nonexist_tab_content": "Selected key does not exist. Please retry",
+    "nonexist_tab_content": "Selected key does not exist or no key is selected. Please retry",
     "empty_server_content": "Select and open a connection from the left",
     "empty_server_list": "No redis server",
     "action": "Action",
     "type": "Type",
     "score": "Score",
-    "total": "Length: {size}"
+    "total": "Length: {size}",
+    "sub_tab": {
+      "status": "Status",
+      "key_detail": "Key Detail",
+      "cli": "Command Line",
+      "slow_log": "Slow Log"
+    }
   },
   "ribbon": {
     "server": "Server",

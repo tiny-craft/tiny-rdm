@@ -1,4 +1,4 @@
-import { find, findIndex, get, size } from 'lodash'
+import { find, findIndex, get, isEmpty, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -6,6 +6,7 @@ const useTabStore = defineStore('tab', {
      * @typedef {Object} TabItem
      * @property {string} name connection name
      * @property {boolean} blank is blank tab
+     * @property {string} subTab secondary tab value
      * @property {string} [title] tab title
      * @property {string} [icon] tab icon
      * @property {string[]} selectedKeys
@@ -64,12 +65,16 @@ const useTabStore = defineStore('tab', {
          *
          * @param idx
          * @param {boolean} [switchNav]
+         * @param {string} [subTab]
          * @private
          */
-        _setActivatedIndex(idx, switchNav) {
+        _setActivatedIndex(idx, switchNav, subTab) {
             this.activatedIndex = idx
             if (switchNav === true) {
                 this.nav = idx >= 0 ? 'browser' : 'server'
+                if (!isEmpty(subTab)) {
+                    set(this.tabList, [idx, 'subTab'], subTab)
+                }
             } else {
                 if (idx < 0) {
                     this.nav = 'server'
@@ -79,6 +84,7 @@ const useTabStore = defineStore('tab', {
 
         /**
          * update or insert a new tab if not exists with the same name
+         * @param {string} subTab
          * @param {string} server
          * @param {number} [db]
          * @param {number} [type]
@@ -89,11 +95,13 @@ const useTabStore = defineStore('tab', {
          * @param {*} [value]
          * @param {string} [viewAs]
          */
-        upsertTab({ server, db, type, ttl, key, keyCode, size, value, viewAs }) {
+        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, value, viewAs }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
                     name: server,
+                    title: server,
+                    subTab,
                     server,
                     db,
                     type,
@@ -105,21 +113,23 @@ const useTabStore = defineStore('tab', {
                     viewAs,
                 })
                 tabIndex = this.tabList.length - 1
+            } else {
+                const tab = this.tabList[tabIndex]
+                tab.blank = false
+                tab.subTab = subTab
+                // tab.title = db !== undefined ? `${server}/db${db}` : `${server}`
+                tab.title = server
+                tab.server = server
+                tab.db = db
+                tab.type = type
+                tab.ttl = ttl
+                tab.key = key
+                tab.keyCode = keyCode
+                tab.size = size
+                tab.value = value
+                tab.viewAs = viewAs
             }
-            const tab = this.tabList[tabIndex]
-            tab.blank = false
-            // tab.title = db !== undefined ? `${server}/db${db}` : `${server}`
-            tab.title = server
-            tab.server = server
-            tab.db = db
-            tab.type = type
-            tab.ttl = ttl
-            tab.key = key
-            tab.keyCode = keyCode
-            tab.size = size
-            tab.value = value
-            tab.viewAs = viewAs
-            this._setActivatedIndex(tabIndex, true)
+            this._setActivatedIndex(tabIndex, true, subTab)
             // this.activatedTab = tab.name
         },
 
@@ -160,6 +170,14 @@ const useTabStore = defineStore('tab', {
             //     return
             // }
             // this.activatedIndex = tabIndex
+        },
+
+        switchSubTab(name) {
+            const tab = this.currentTab
+            if (tab == null) {
+                return
+            }
+            tab.subTab = name
         },
 
         /**

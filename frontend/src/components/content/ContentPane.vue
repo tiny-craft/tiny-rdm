@@ -1,16 +1,19 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
-import { types } from '@/consts/support_redis_type.js'
-import ContentValueHash from '@/components/content_value/ContentValueHash.vue'
-import ContentValueList from '@/components/content_value/ContentValueList.vue'
-import ContentValueString from '@/components/content_value/ContentValueString.vue'
-import ContentValueSet from '@/components/content_value/ContentValueSet.vue'
-import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
 import { get, isEmpty, keyBy, map, size, toUpper } from 'lodash'
 import useTabStore from 'stores/tab.js'
 import useConnectionStore from 'stores/connections.js'
 import ContentServerStatus from '@/components/content_value/ContentServerStatus.vue'
-import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
+import Status from '@/components/icons/Status.vue'
+import { useThemeVars } from 'naive-ui'
+import { BrowserTabType } from '@/consts/browser_tab_type.js'
+import Terminal from '@/components/icons/Terminal.vue'
+import Log from '@/components/icons/Log.vue'
+import Detail from '@/components/icons/Detail.vue'
+import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.vue'
+import ContentCli from '@/components/content_value/ContentCli.vue'
+
+const themeVars = useThemeVars()
 
 /**
  * @typedef {Object} ServerStatusItem
@@ -112,15 +115,6 @@ onUnmounted(() => {
     clearInterval(intervalId)
 })
 
-const valueComponents = {
-    [types.STRING]: ContentValueString,
-    [types.HASH]: ContentValueHash,
-    [types.LIST]: ContentValueList,
-    [types.SET]: ContentValueSet,
-    [types.ZSET]: ContentValueZset,
-    [types.STREAM]: ContentValueStream,
-}
-
 const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const tab = computed(() =>
@@ -162,6 +156,7 @@ const tabContent = computed(() => {
     }
     return {
         name: tab.name,
+        subTab: tab.subTab,
         type: toUpper(tab.type),
         db: tab.db,
         keyPath: tab.key,
@@ -177,7 +172,7 @@ const showServerStatus = computed(() => {
     return tabContent.value == null || isEmpty(tabContent.value.keyPath)
 })
 
-const showNonexists = computed(() => {
+const isBlankValue = computed(() => {
     return tabContent.value.value == null
 })
 
@@ -192,38 +187,104 @@ const onReloadKey = async () => {
     }
     await connectionStore.loadKeyValue(tab.name, tab.db, tab.key, tab.viewAs)
 }
+
+const selectedSubTab = computed(() => {
+    const { subTab = 'status' } = tabStore.currentTab || {}
+    return subTab
+})
+
+const onSwitchSubTab = (name) => {
+    tabStore.switchSubTab(name)
+}
 </script>
 
 <template>
     <div class="content-container flex-box-v">
-        <div v-if="showServerStatus" class="content-container flex-item-expand flex-box-v">
-            <!-- select nothing or select server node, display server status -->
-            <content-server-status
-                v-model:auto-refresh="currentServer.autoRefresh"
-                :auto-loading="currentServer.autoLoading"
-                :info="currentServer.info"
-                :loading="currentServer.loading"
-                :server="currentServer.name"
-                @refresh="refreshInfo(currentServer.name, true)" />
-        </div>
-        <div v-else-if="showNonexists" class="content-container flex-item-expand flex-box-v">
-            <n-empty :description="$t('interface.nonexist_tab_content')" class="empty-content">
-                <template #extra>
-                    <n-button :focusable="false" @click="onReloadKey">{{ $t('interface.reload') }}</n-button>
+        <n-tabs
+            :tabs-padding="5"
+            :theme-overrides="{
+                tabGapSmallLine: '10px',
+                tabGapMediumLine: '10px',
+                tabGapLargeLine: '10px',
+            }"
+            :value="selectedSubTab"
+            class="content-sub-tab"
+            default-value="status"
+            pane-class="content-sub-tab-pane"
+            placement="top"
+            tab-style="padding-left: 10px; padding-right: 10px;"
+            type="line"
+            @update:value="onSwitchSubTab">
+            <!-- server status pane -->
+            <n-tab-pane :name="BrowserTabType.Status.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <status :inverse="selectedSubTab === BrowserTabType.Status.toString()" stroke-width="4" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.status') }}</span>
+                    </n-space>
                 </template>
-            </n-empty>
-        </div>
-        <component
-            :is="valueComponents[tabContent.type]"
-            v-else
-            :db="tabContent.db"
-            :key-code="tabContent.keyCode"
-            :key-path="tabContent.keyPath"
-            :name="tabContent.name"
-            :size="tabContent.size"
-            :ttl="tabContent.ttl"
-            :value="tabContent.value"
-            :view-as="tabContent.viewAs" />
+                <content-server-status
+                    v-model:auto-refresh="currentServer.autoRefresh"
+                    :auto-loading="currentServer.autoLoading"
+                    :info="currentServer.info"
+                    :loading="currentServer.loading"
+                    :server="currentServer.name"
+                    @refresh="refreshInfo(currentServer.name, true)" />
+            </n-tab-pane>
+
+            <!-- key detail pane -->
+            <n-tab-pane :name="BrowserTabType.KeyDetail.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <detail
+                                :inverse="selectedSubTab === BrowserTabType.KeyDetail.toString()"
+                                fill-color="none" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.key_detail') }}</span>
+                    </n-space>
+                </template>
+                <content-value-wrapper
+                    :blank="isBlankValue"
+                    :type="tabContent.type"
+                    :db="tabContent.db"
+                    :key-code="tabContent.keyCode"
+                    :key-path="tabContent.keyPath"
+                    :name="tabContent.name"
+                    :size="tabContent.size"
+                    :ttl="tabContent.ttl"
+                    :value="tabContent.value"
+                    :view-as="tabContent.viewAs"
+                    @reload="onReloadKey" />
+            </n-tab-pane>
+
+            <!-- cli pane -->
+            <n-tab-pane :name="BrowserTabType.Cli.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <terminal :inverse="selectedSubTab === BrowserTabType.Cli.toString()" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.cli') }}</span>
+                    </n-space>
+                </template>
+                <content-cli />
+            </n-tab-pane>
+
+            <!-- slow log pane -->
+            <n-tab-pane :name="BrowserTabType.SlowLog.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <log :inverse="selectedSubTab === BrowserTabType.SlowLog.toString()" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.slow_log') }}</span>
+                    </n-space>
+                </template>
+            </n-tab-pane>
+        </n-tabs>
     </div>
 </template>
 
@@ -231,27 +292,24 @@ const onReloadKey = async () => {
 @import '@/styles/content';
 
 .content-container {
-    padding: 5px;
+    //padding: 5px 5px 0;
+    //padding-top: 0;
     box-sizing: border-box;
+    background-color: v-bind('themeVars.tabColor');
+}
+</style>
+
+<style lang="scss">
+.content-sub-tab {
+    margin-bottom: 5px;
+    background-color: v-bind('themeVars.bodyColor');
+    height: 100%;
 }
 
-//.tab-item {
-//    gap: 5px;
-//    padding: 0 5px 0 10px;
-//    align-items: center;
-//    max-width: 150px;
-//
-//    transition: all var(--transition-duration-fast) var(--transition-function-ease-in-out-bezier);
-//
-//    &-label {
-//        font-size: 15px;
-//        text-align: center;
-//    }
-//
-//    &-close {
-//        &:hover {
-//            background-color: rgb(176, 177, 182, 0.4);
-//        }
-//    }
-//}
+.content-sub-tab-pane {
+    padding: 0 !important;
+    height: 100%;
+    background-color: v-bind('themeVars.tabColor');
+    overflow: hidden;
+}
 </style>

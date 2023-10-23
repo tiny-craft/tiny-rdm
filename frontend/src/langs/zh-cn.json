@@ -87,13 +87,19 @@
     "load_more": "加载更多键",
     "load_all": "加载剩余所有键",
     "more_action": "更多操作",
-    "nonexist_tab_content": "所选键不存在，请尝试刷新重试",
+    "nonexist_tab_content": "所选键不存在或未选中任何键，请尝试刷新重试",
     "empty_server_content": "可以从左边选择并打开连接",
     "empty_server_list": "还没添加Redis服务器",
     "action": "操作",
     "type": "类型",
     "score": "分值",
-    "total": "总数：{size}"
+    "total": "总数：{size}",
+    "sub_tab": {
+      "status": "状态",
+      "key_detail": "键详情",
+      "cli": "命令行",
+      "slow_log": "慢日志"
+    }
   },
   "ribbon": {
     "server": "服务器",

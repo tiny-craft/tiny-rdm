@@ -75,7 +75,7 @@ body {
 }
 
 .content-wrapper {
-  //height: 100%;
+  height: 100%;
   flex-grow: 1;
   overflow: hidden;
   gap: 5px;
@@ -95,6 +95,7 @@ body {
   .value-wrapper {
     //border-top: v-bind('themeVars.borderColor') 1px solid;
     user-select: text;
+    height: 100%;
   }
 }
 

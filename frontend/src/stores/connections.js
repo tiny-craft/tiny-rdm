@@ -52,7 +52,7 @@ import useTabStore from './tab.js'
 import { types } from '@/consts/support_redis_type.js'
 import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
-import { nextTick } from 'vue'
+import { BrowserTabType } from '@/consts/browser_tab_type.js'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -668,6 +668,7 @@ const useConnectionStore = defineStore('connections', {
                         const k = decodeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
+                            subTab: BrowserTabType.KeyDetail,
                             server,
                             db,
                             type,
@@ -690,6 +691,7 @@ const useConnectionStore = defineStore('connections', {
                 }
 
                 tab.upsertTab({
+                    subTab: BrowserTabType.Status,
                     server,
                     db,
                     type: 'none',
