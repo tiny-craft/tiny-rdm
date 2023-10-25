@@ -94,6 +94,7 @@
     "type": "类型",
     "score": "分值",
     "total": "总数：{size}",
+    "cli_welcome": "欢迎使用Tiny RDM的Redis命令行控制台",
     "sub_tab": {
       "status": "状态",
       "key_detail": "键详情",

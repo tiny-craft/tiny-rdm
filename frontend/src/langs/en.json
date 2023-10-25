@@ -94,6 +94,7 @@
     "type": "Type",
     "score": "Score",
     "total": "Length: {size}",
+    "cli_welcome": "Welcome to Tiny RDM Redis Console",
     "sub_tab": {
       "status": "Status",
       "key_detail": "Key Detail",

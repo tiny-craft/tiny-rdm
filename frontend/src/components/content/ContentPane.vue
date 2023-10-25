@@ -203,6 +203,7 @@ const onSwitchSubTab = (name) => {
         <n-tabs
             :tabs-padding="5"
             :theme-overrides="{
+                tabFontWeightActive: 'normal',
                 tabGapSmallLine: '10px',
                 tabGapMediumLine: '10px',
                 tabGapLargeLine: '10px',
@@ -270,7 +271,7 @@ const onSwitchSubTab = (name) => {
                         <span>{{ $t('interface.sub_tab.cli') }}</span>
                     </n-space>
                 </template>
-                <content-cli />
+                <content-cli :name="currentServer.name" />
             </n-tab-pane>
 
             <!-- slow log pane -->
@@ -301,7 +302,6 @@ const onSwitchSubTab = (name) => {
 
 <style lang="scss">
 .content-sub-tab {
-    margin-bottom: 5px;
     background-color: v-bind('themeVars.bodyColor');
     height: 100%;
 }

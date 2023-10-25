@@ -71,7 +71,7 @@ func (c *connectionService) Start(ctx context.Context) {
 	c.ctx = ctx
 }
 
-func (c *connectionService) Stop(ctx context.Context) {
+func (c *connectionService) Stop() {
 	for _, item := range c.connMap {
 		if item.client != nil {
 			item.cancelFunc()
@@ -307,9 +307,13 @@ func (c *connectionService) ListConnection() (resp types.JSResp) {
 	return
 }
 
+func (c *connectionService) getConnection(name string) *types.Connection {
+	return c.conns.GetConnection(name)
+}
+
 // GetConnection get connection profile by name
 func (c *connectionService) GetConnection(name string) (resp types.JSResp) {
-	conn := c.conns.GetConnection(name)
+	conn := c.getConnection(name)
 	resp.Success = conn != nil
 	resp.Data = conn
 	return
