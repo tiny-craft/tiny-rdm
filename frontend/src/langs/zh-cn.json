@@ -108,7 +108,7 @@
     "log": "日志"
   },
   "dialogue": {
-    "close_confirm": "是否关闭当前连接",
+    "close_confirm": "是否关闭此连接（{name}）",
     "edit_close_confirm": "编辑前需要关闭相关连接，是否继续",
     "opening_connection": "正在打开连接...",
     "interrupt_connection": "中断连接",

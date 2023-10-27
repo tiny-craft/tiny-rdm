@@ -108,7 +108,7 @@
     "log": "Log"
   },
   "dialogue": {
-    "close_confirm": "Confirm close this tab and connection",
+    "close_confirm": "Confirm close this tab and connection ({name})",
     "edit_close_confirm": "Please close the relevant connections before editing. Do you want to continue?",
     "opening_connection": "Opening Connection...",
     "interrupt_connection": "Cancel",

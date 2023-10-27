@@ -16,6 +16,7 @@ import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
 import { EventsOn, WindowIsFullscreen, WindowIsMaximised, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
 import { isMacOS } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
+import ResizeableWrapper from '@/components/common/ResizeableWrapper.vue'
 
 const themeVars = useThemeVars()
 
@@ -25,8 +26,6 @@ const props = defineProps({
 
 const data = reactive({
     navMenuWidth: 60,
-    hoverResize: false,
-    resizing: false,
     toolbarHeight: 45,
 })
 
@@ -38,32 +37,9 @@ const logPaneRef = ref(null)
 // provide('preferences', preferences)
 
 const saveSidebarWidth = debounce(prefStore.savePreferences, 1000, { trailing: true })
-const handleResize = (evt) => {
-    if (data.resizing) {
-        prefStore.setAsideWidth(Math.max(evt.clientX - data.navMenuWidth, 300))
-        saveSidebarWidth()
-    }
+const handleResize = () => {
+    saveSidebarWidth()
 }
-
-const stopResize = () => {
-    data.resizing = false
-    document.removeEventListener('mousemove', handleResize)
-    document.removeEventListener('mouseup', stopResize)
-}
-
-const startResize = () => {
-    data.resizing = true
-    document.addEventListener('mousemove', handleResize)
-    document.addEventListener('mouseup', stopResize)
-}
-
-const asideWidthVal = computed(() => {
-    return prefStore.behavior.asideWidth + 'px'
-})
-
-const dragging = computed(() => {
-    return data.hoverResize || data.resizing
-})
 
 watch(
     () => tabStore.nav,
@@ -166,15 +142,6 @@ onMounted(async () => {
                         </transition>
                     </n-space>
                 </div>
-                <div
-                    :class="{
-                        'resize-divider-hover': data.hoverResize,
-                        'resize-divider-drag': data.resizing,
-                    }"
-                    class="resize-divider resize-divider-hide"
-                    @mousedown="startResize"
-                    @mouseout="data.hoverResize = false"
-                    @mouseover="data.hoverResize = true" />
                 <!-- browser tabs -->
                 <div v-show="tabStore.nav === 'browser'" class="app-toolbar-tab flex-item-expand">
                     <content-value-tab />
@@ -196,23 +163,19 @@ onMounted(async () => {
                 style="--wails-draggable: none">
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page -->
-                <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                    <div :style="{ width: asideWidthVal }" class="app-side flex-box-h flex-item">
+                <div v-show="tabStore.nav === 'browser'" class="flex-box-h flex-item-expand">
+                    <resizeable-wrapper
+                        v-model:size="prefStore.behavior.asideWidth"
+                        :min-size="300"
+                        :offset="data.navMenuWidth"
+                        class="flex-item"
+                        @update:size="handleResize">
                         <browser-pane
                             v-for="t in tabStore.tabs"
                             v-show="get(tabStore.currentTab, 'name') === t.name"
                             :key="t.name"
-                            class="flex-item-expand" />
-                        <div
-                            :class="{
-                                'resize-divider-hover': data.hoverResize,
-                                'resize-divider-drag': data.resizing,
-                            }"
-                            class="resize-divider"
-                            @mousedown="startResize"
-                            @mouseout="data.hoverResize = false"
-                            @mouseover="data.hoverResize = true" />
-                    </div>
+                            class="app-side flex-item-expand" />
+                    </resizeable-wrapper>
                     <content-pane
                         v-for="t in tabStore.tabs"
                         v-show="get(tabStore.currentTab, 'name') === t.name"
@@ -222,19 +185,15 @@ onMounted(async () => {
                 </div>
 
                 <!-- server list page -->
-                <div v-show="tabStore.nav === 'server'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                    <div :style="{ width: asideWidthVal }" class="app-side flex-box-h flex-item">
-                        <connection-pane class="flex-item-expand" />
-                        <div
-                            :class="{
-                                'resize-divider-hover': data.hoverResize,
-                                'resize-divider-drag': data.resizing,
-                            }"
-                            class="resize-divider"
-                            @mousedown="startResize"
-                            @mouseout="data.hoverResize = false"
-                            @mouseover="data.hoverResize = true" />
-                    </div>
+                <div v-show="tabStore.nav === 'server'" class="flex-box-h flex-item-expand">
+                    <resizeable-wrapper
+                        v-model:size="prefStore.behavior.asideWidth"
+                        :min-size="300"
+                        :offset="data.navMenuWidth"
+                        class="flex-item"
+                        @update:size="handleResize">
+                        <connection-pane class="app-side flex-item-expand" />
+                    </resizeable-wrapper>
                     <content-server-pane class="flex-item-expand" />
                 </div>
 
@@ -282,6 +241,7 @@ onMounted(async () => {
         //overflow: hidden;
         height: 100%;
         background-color: v-bind('themeVars.tabColor');
+        border-right: 1px solid v-bind('themeVars.borderColor');
     }
 }
 
@@ -303,10 +263,6 @@ onMounted(async () => {
 .resize-divider-drag {
     background-color: v-bind('themeVars.primaryColor');
     border-right-color: v-bind('themeVars.primaryColor');
-}
-
-.dragging {
-    cursor: col-resize !important;
 }
 
 .fade-enter-from,

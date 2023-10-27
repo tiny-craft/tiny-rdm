@@ -17,12 +17,12 @@ const tabStore = useTabStore()
 const connectionStore = useConnectionStore()
 
 const onCloseTab = (tabIndex) => {
-    $dialog.warning(i18n.t('dialogue.close_confirm'), () => {
-        const tab = get(tabStore.tabs, tabIndex)
-        if (tab != null) {
+    const tab = get(tabStore.tabs, tabIndex)
+    if (tab != null) {
+        $dialog.warning(i18n.t('dialogue.close_confirm', { name: tab.name }), () => {
             connectionStore.closeConnection(tab.name)
-        }
-    })
+        })
+    }
 }
 
 const tabMarkColor = computed(() => {
@@ -53,7 +53,7 @@ const tab = computed(() =>
     <n-tabs
         v-model:value="tabStore.activatedIndex"
         :closable="true"
-        :tabs-padding="0"
+        :tabs-padding="3"
         :theme-overrides="{
             tabFontWeightActive: 800,
             tabGapSmallCard: 0,
