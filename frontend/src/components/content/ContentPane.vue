@@ -63,10 +63,6 @@ const selectedSubTab = computed(() => {
     return subTab
 })
 
-const onSwitchSubTab = (name) => {
-    tabStore.switchSubTab(name)
-}
-
 // BUG: naive-ui tabs will set the bottom line to '0px' after switch to another page and back again
 // watch parent tabs' changing and call 'syncBarPosition' manually
 const tabsRef = ref(null)
@@ -102,7 +98,7 @@ watch(
             placement="top"
             tab-style="padding-left: 10px; padding-right: 10px;"
             type="line"
-            @update:value="onSwitchSubTab">
+            @update:value="tabStore.switchSubTab">
             <!-- server status pane -->
             <n-tab-pane :name="BrowserTabType.Status.toString()" display-directive="show:lazy">
                 <template #tab>

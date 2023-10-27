@@ -12,21 +12,12 @@ import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
-import Status from '@/components/icons/Status.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
 const tabStore = useTabStore()
 const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
 const browserTreeRef = ref(null)
-/**
- *
- * @type {ComputedRef<{server: string, db: number, key: string}>}
- */
-const currentSelect = computed(() => {
-    const { server, db, key } = tabStore.currentTab || {}
-    return { server, db, key }
-})
 
 const onInfo = () => {
     browserTreeRef.value?.handleSelectContextMenu('server_info')
@@ -96,7 +87,7 @@ const filterTypeOptions = computed(() => {
             <!--                stroke-width="4"-->
             <!--                unselect-stroke-width="3"-->
             <!--                @update:value="onSwitchView" />-->
-            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="interface.status" @click="onInfo" />
+            <!--            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="interface.status" @click="onInfo" />-->
             <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="interface.reload" @click="onRefresh" />
             <div class="flex-item-expand" />
             <icon-button

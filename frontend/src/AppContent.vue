@@ -79,6 +79,10 @@ const border = computed(() => {
     return `1px solid ${color}`
 })
 
+const logoWrapperWidth = computed(() => {
+    return `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`
+})
+
 const borderRadius = ref(10)
 const logoPaddingLeft = ref(10)
 const maximised = ref(false)
@@ -148,7 +152,8 @@ onMounted(async () => {
                 <div
                     id="app-toolbar-title"
                     :style="{
-                        width: `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`,
+                        width: logoWrapperWidth,
+                        minWidth: logoWrapperWidth,
                         paddingLeft: `${logoPaddingLeft}px`,
                     }">
                     <n-space :size="3" :wrap="false" :wrap-item="false" align="center">
@@ -192,7 +197,7 @@ onMounted(async () => {
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page -->
                 <div v-show="tabStore.nav === 'browser'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                    <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                    <div :style="{ width: asideWidthVal }" class="app-side flex-box-h flex-item">
                         <browser-pane
                             v-for="t in tabStore.tabs"
                             v-show="get(tabStore.currentTab, 'name') === t.name"
@@ -218,7 +223,7 @@ onMounted(async () => {
 
                 <!-- server list page -->
                 <div v-show="tabStore.nav === 'server'" :class="{ dragging }" class="flex-box-h flex-item-expand">
-                    <div id="app-side" :style="{ width: asideWidthVal }" class="flex-box-h flex-item">
+                    <div :style="{ width: asideWidthVal }" class="app-side flex-box-h flex-item">
                         <connection-pane class="flex-item-expand" />
                         <div
                             :class="{
@@ -273,7 +278,7 @@ onMounted(async () => {
         height: calc(100% - 60px);
     }
 
-    #app-side {
+    .app-side {
         //overflow: hidden;
         height: 100%;
         background-color: v-bind('themeVars.tabColor');

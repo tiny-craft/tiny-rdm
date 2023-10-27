@@ -10,8 +10,6 @@ const props = defineProps({
     server: String,
 })
 
-const emit = defineEmits(['update:autoRefresh', 'refresh'])
-
 const connectionStore = useConnectionStore()
 const serverInfo = ref({})
 const autoRefresh = ref(false)
@@ -169,7 +167,7 @@ const infoFilter = ref('')
                         <n-gi :span="6">
                             <n-statistic
                                 :label="$t('status.connected_clients')"
-                                :value="get(serverInfo.value, 'Clients.connected_clients', 0)" />
+                                :value="get(serverInfo, 'Clients.connected_clients', 0)" />
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic :value="totalKeys">

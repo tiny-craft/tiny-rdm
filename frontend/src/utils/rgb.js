@@ -5,6 +5,7 @@ import { padStart, size, startsWith } from 'lodash'
  * @property {number} r
  * @property {number} g
  * @property {number} b
+ * @property {number} [a]
  */
 
 /**
@@ -40,6 +41,28 @@ export function hexGammaCorrection(rgb, gamma) {
         r: Math.max(0, Math.min(255, Math.round(rgb.r * gamma))),
         g: Math.max(0, Math.min(255, Math.round(rgb.g * gamma))),
         b: Math.max(0, Math.min(255, Math.round(rgb.b * gamma))),
+    }
+}
+
+/**
+ * mix two colors
+ * @param rgba1
+ * @param rgba2
+ * @param weight
+ * @return {{a: number, r: number, b: number, g: number}}
+ */
+export function mixColors(rgba1, rgba2, weight = 0.5) {
+    if (rgba1.a === undefined) {
+        rgba1.a = 255
+    }
+    if (rgba2.a === undefined) {
+        rgba2.a = 255
+    }
+    return {
+        r: Math.floor(rgba1.r * (1 - weight) + rgba2.r * weight),
+        g: Math.floor(rgba1.g * (1 - weight) + rgba2.g * weight),
+        b: Math.floor(rgba1.b * (1 - weight) + rgba2.b * weight),
+        a: Math.floor(rgba1.a * (1 - weight) + rgba2.a * weight),
     }
 }
 

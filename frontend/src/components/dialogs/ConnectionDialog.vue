@@ -8,11 +8,13 @@ import Close from '@/components/icons/Close.vue'
 import useConnectionStore from 'stores/connections.js'
 import FileOpenInput from '@/components/common/FileOpenInput.vue'
 import { KeyViewType } from '@/consts/key_view_type.js'
+import { useThemeVars } from 'naive-ui'
 
 /**
  * Dialog for new or edit connection
  */
 
+const themeVars = useThemeVars()
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
@@ -396,10 +398,13 @@ const onClose = () => {
                                 <div
                                     v-for="color in predefineColors"
                                     :key="color"
-                                    :class="{
-                                        'color-preset-item_selected': generalForm.markColor === color,
+                                    :style="{
+                                        backgroundColor: color,
+                                        borderColor:
+                                            generalForm.markColor === color
+                                                ? themeVars.textColorBase
+                                                : themeVars.borderColor,
                                     }"
-                                    :style="{ backgroundColor: color }"
                                     class="color-preset-item"
                                     @click="generalForm.markColor = color">
                                     <n-icon v-if="isEmpty(color)" :component="Close" size="24" />
@@ -591,13 +596,9 @@ const onClose = () => {
     width: 24px;
     height: 24px;
     margin-right: 2px;
-    border: white 3px solid;
+    border-width: 3px;
+    border-style: solid;
     cursor: pointer;
     border-radius: 50%;
-
-    &_selected,
-    &:hover {
-        border-color: #cdd0d6;
-    }
 }
 </style>

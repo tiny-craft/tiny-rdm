@@ -7,6 +7,10 @@ import { get, map } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import useConnectionStore from 'stores/connections.js'
 
+/**
+ * Value content tab on head
+ */
+
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const tabStore = useTabStore()
@@ -21,18 +25,15 @@ const onCloseTab = (tabIndex) => {
     })
 }
 
-const activeTabStyle = computed(() => {
-    const { name } = tabStore.currentTab
+const tabMarkColor = computed(() => {
+    const { name } = tabStore?.currentTab || {}
     const { markColor = '' } = connectionStore.serverProfile[name] || {}
-    return {
-        borderTopWidth: markColor ? '3px' : '1px',
-        borderTopColor: markColor || themeVars.value.borderColor,
-    }
+    return markColor
 })
 
 const tabClass = (idx) => {
     if (tabStore.activatedIndex === idx) {
-        return ['value-tab', 'value-tab-active']
+        return ['value-tab', 'value-tab-active', tabMarkColor.value ? 'value-tab-active_mark' : '']
     } else if (tabStore.activatedIndex - 1 === idx) {
         return ['value-tab', 'value-tab-inactive']
     } else {
@@ -52,12 +53,6 @@ const tab = computed(() =>
     <n-tabs
         v-model:value="tabStore.activatedIndex"
         :closable="true"
-        :tab-style="{
-            borderStyle: 'solid',
-            borderWidth: '1px',
-            borderLeftColor: themeVars.borderColor,
-            borderRightColor: themeVars.borderColor,
-        }"
         :tabs-padding="0"
         :theme-overrides="{
             tabFontWeightActive: 800,
@@ -73,14 +68,7 @@ const tab = computed(() =>
         type="card"
         @close="onCloseTab"
         @update:value="(tabIndex) => tabStore.switchTab(tabIndex)">
-        <n-tab
-            v-for="(t, i) in tab"
-            :key="i"
-            :class="tabClass(i)"
-            :closable="true"
-            :name="i"
-            :style="tabStore.activatedIndex === i ? activeTabStyle : undefined"
-            @dblclick.stop="() => {}">
+        <n-tab v-for="(t, i) in tab" :key="i" :class="tabClass(i)" :closable="true" :name="i" @dblclick.stop="() => {}">
             <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                 <n-icon size="18">
                     <server stroke-width="4" />
@@ -95,11 +83,16 @@ const tab = computed(() =>
 .value-tab {
     --wails-draggable: none;
     position: relative;
+    border: 1px solid v-bind('themeVars.borderColor') !important;
 }
 
 .value-tab-active {
     background-color: v-bind('themeVars.bodyColor') !important;
     border-bottom-color: v-bind('themeVars.bodyColor') !important;
+
+    &_mark {
+        border-top: 3px solid v-bind('tabMarkColor') !important;
+    }
 }
 
 .value-tab-inactive {
