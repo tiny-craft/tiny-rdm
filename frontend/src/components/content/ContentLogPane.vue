@@ -73,10 +73,10 @@ defineExpose({
 <template>
     <n-card
         :bordered="false"
+        :theme-overrides="{ borderRadius: '0px' }"
         :title="$t('log.launch_log')"
         class="content-container flex-box-v"
-        content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray"
-        :theme-overrides="{ borderRadius: '0px' }">
+        content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray">
         <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('log.filter_server')">
                 <n-select

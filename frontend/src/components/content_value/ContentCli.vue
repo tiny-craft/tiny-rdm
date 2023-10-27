@@ -1,7 +1,7 @@
 <script setup>
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineExpose, onMounted, onUnmounted, ref, watch } from 'vue'
 import 'xterm/css/xterm.css'
 import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
 import { get, isEmpty, set, size } from 'lodash'
@@ -54,7 +54,6 @@ const newTerm = () => {
     return { term, fitAddon }
 }
 
-let intervalID
 onMounted(() => {
     const { term, fitAddon } = newTerm()
     termInst = term
@@ -69,16 +68,9 @@ onMounted(() => {
     EventsOn(`cmd:output:${props.name}`, receiveTermOutput)
     fitAddon.fit()
     term.focus()
-
-    intervalID = setInterval(() => {
-        if (props.activated) {
-            resizeTerm()
-        }
-    }, 1000)
 })
 
 onUnmounted(() => {
-    clearInterval(intervalID)
     // window.removeEventListener('resize', resizeTerm)
     EventsOff(`cmd:output:${props.name}`)
     termInst.dispose()
@@ -91,6 +83,10 @@ const resizeTerm = () => {
         fitAddonInst.fit()
     }
 }
+
+defineExpose({
+    resizeTerm,
+})
 
 watch(
     () => prefStore.general.fontSize,
@@ -125,7 +121,6 @@ const onTermData = (data) => {
 
             case 13: // enter
                 // try to process local command first
-                console.log('enter con', getCurrentInput())
                 switch (getCurrentInput()) {
                     case 'clear':
                     case 'clr':

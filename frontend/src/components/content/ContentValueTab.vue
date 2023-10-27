@@ -52,13 +52,13 @@ const tab = computed(() =>
     <n-tabs
         v-model:value="tabStore.activatedIndex"
         :closable="true"
-        :tabs-padding="0"
         :tab-style="{
             borderStyle: 'solid',
             borderWidth: '1px',
             borderLeftColor: themeVars.borderColor,
             borderRightColor: themeVars.borderColor,
         }"
+        :tabs-padding="0"
         :theme-overrides="{
             tabFontWeightActive: 800,
             tabGapSmallCard: 0,
@@ -76,10 +76,10 @@ const tab = computed(() =>
         <n-tab
             v-for="(t, i) in tab"
             :key="i"
+            :class="tabClass(i)"
             :closable="true"
             :name="i"
             :style="tabStore.activatedIndex === i ? activeTabStyle : undefined"
-            :class="tabClass(i)"
             @dblclick.stop="() => {}">
             <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                 <n-icon size="18">

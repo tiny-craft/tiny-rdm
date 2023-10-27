@@ -234,7 +234,7 @@ const useTabStore = defineStore('tab', {
         /**
          * set selected keys of current display browser tree
          * @param {string} server
-         * @param {string|string[]} keys
+         * @param {string|string[]} [keys]
          */
         setSelectedKeys(server, keys = null) {
             let tab = find(this.tabList, { name: server })

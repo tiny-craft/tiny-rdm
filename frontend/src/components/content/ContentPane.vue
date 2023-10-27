@@ -1,8 +1,7 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
-import { get, isEmpty, keyBy, map, size, toUpper } from 'lodash'
+import { computed, nextTick, ref, watch } from 'vue'
+import { find, map, toUpper } from 'lodash'
 import useTabStore from 'stores/tab.js'
-import useConnectionStore from 'stores/connections.js'
 import ContentServerStatus from '@/components/content_value/ContentServerStatus.vue'
 import Status from '@/components/icons/Status.vue'
 import { useThemeVars } from 'naive-ui'
@@ -24,98 +23,10 @@ const themeVars = useThemeVars()
  * @property {boolean} autoLoading loading status for auto refresh
  */
 
-/**
- *
- * @type {UnwrapNestedRefs<Object.<string, ServerStatusItem>>}
- */
-const serverStatusTab = reactive({})
-
-/**
- *
- * @param {string} serverName
- * @return {UnwrapRef<ServerStatusItem>}
- */
-const getServerInfo = (serverName) => {
-    if (isEmpty(serverName)) {
-        return {
-            name: serverName,
-            info: {},
-            autoRefresh: false,
-            autoLoading: false,
-            loading: false,
-        }
-    }
-    if (!serverStatusTab.hasOwnProperty(serverName)) {
-        serverStatusTab[serverName] = {
-            name: serverName,
-            info: {},
-            autoRefresh: false,
-            autoLoading: false,
-            loading: false,
-        }
-    }
-    return serverStatusTab[serverName]
-}
-const serverName = computed(() => {
-    if (tabContent.value != null) {
-        return tabContent.value.name
-    }
-    return ''
-})
-/**
- *
- * @type {ComputedRef<ServerStatusItem>}
- */
-const currentServer = computed(() => {
-    return getServerInfo(serverName.value)
+const props = defineProps({
+    server: String,
 })
 
-/**
- * refresh server status info
- * @param {string} serverName
- * @param {boolean} [force] force refresh will show loading indicator
- * @returns {Promise<void>}
- */
-const refreshInfo = async (serverName, force) => {
-    const info = getServerInfo(serverName)
-    if (force) {
-        info.loading = true
-    } else {
-        info.autoLoading = true
-    }
-    if (!isEmpty(serverName) && connectionStore.isConnected(serverName)) {
-        try {
-            info.info = await connectionStore.getServerInfo(serverName)
-        } finally {
-            info.loading = false
-            info.autoLoading = false
-        }
-    }
-}
-
-const refreshAllInfo = async (force) => {
-    for (const serverName in serverStatusTab) {
-        await refreshInfo(serverName, force)
-    }
-}
-
-let intervalId
-onMounted(() => {
-    refreshAllInfo(true)
-    intervalId = setInterval(() => {
-        for (const serverName in serverStatusTab) {
-            if (get(serverStatusTab, [serverName, 'autoRefresh'])) {
-                refreshInfo(serverName)
-            }
-        }
-    }, 5000)
-})
-
-onUnmounted(() => {
-    clearInterval(intervalId)
-})
-
-const connectionStore = useConnectionStore()
 const tabStore = useTabStore()
 const tab = computed(() =>
     map(tabStore.tabs, (item) => ({
@@ -124,35 +35,10 @@ const tab = computed(() =>
     })),
 )
 
-watch(
-    () => tabStore.nav,
-    (nav) => {
-        if (nav === 'browser') {
-            refreshInfo(serverName.value)
-        }
-    },
-)
-
-watch(
-    () => tabStore.tabList,
-    (tabs) => {
-        if (size(tabs) < size(serverStatusTab)) {
-            const tabMap = keyBy(tabs, 'name')
-            // remove unused server status tab
-            for (const t in serverStatusTab) {
-                if (!tabMap.hasOwnProperty(t)) {
-                    delete serverStatusTab[t]
-                }
-            }
-        }
-    },
-    { deep: true },
-)
-
 const tabContent = computed(() => {
-    const tab = tabStore.currentTab
+    const tab = find(tabStore.tabs, { name: props.server })
     if (tab == null) {
-        return null
+        return {}
     }
     return {
         name: tab.name,
@@ -168,25 +54,9 @@ const tabContent = computed(() => {
     }
 })
 
-const showServerStatus = computed(() => {
-    return tabContent.value == null || isEmpty(tabContent.value.keyPath)
-})
-
 const isBlankValue = computed(() => {
     return tabContent.value.value == null
 })
-
-/**
- * reload current selection key
- * @returns {Promise<null>}
- */
-const onReloadKey = async () => {
-    const tab = tabStore.currentTab
-    if (tab == null || isEmpty(tab.key)) {
-        return null
-    }
-    await connectionStore.loadKeyValue(tab.name, tab.db, tab.key, tab.viewAs)
-}
 
 const selectedSubTab = computed(() => {
     const { subTab = 'status' } = tabStore.currentTab || {}
@@ -196,11 +66,28 @@ const selectedSubTab = computed(() => {
 const onSwitchSubTab = (name) => {
     tabStore.switchSubTab(name)
 }
+
+// BUG: naive-ui tabs will set the bottom line to '0px' after switch to another page and back again
+// watch parent tabs' changing and call 'syncBarPosition' manually
+const tabsRef = ref(null)
+const cliRef = ref(null)
+watch(
+    () => tabContent.value?.name,
+    (name) => {
+        if (name === props.server) {
+            nextTick().then(() => {
+                tabsRef.value?.syncBarPosition()
+                cliRef.value?.resizeTerm()
+            })
+        }
+    },
+)
 </script>
 
 <template>
     <div class="content-container flex-box-v">
         <n-tabs
+            ref="tabsRef"
             :tabs-padding="5"
             :theme-overrides="{
                 tabFontWeightActive: 'normal',
@@ -217,7 +104,7 @@ const onSwitchSubTab = (name) => {
             type="line"
             @update:value="onSwitchSubTab">
             <!-- server status pane -->
-            <n-tab-pane :name="BrowserTabType.Status.toString()">
+            <n-tab-pane :name="BrowserTabType.Status.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -226,17 +113,11 @@ const onSwitchSubTab = (name) => {
                         <span>{{ $t('interface.sub_tab.status') }}</span>
                     </n-space>
                 </template>
-                <content-server-status
-                    v-model:auto-refresh="currentServer.autoRefresh"
-                    :auto-loading="currentServer.autoLoading"
-                    :info="currentServer.info"
-                    :loading="currentServer.loading"
-                    :server="currentServer.name"
-                    @refresh="refreshInfo(currentServer.name, true)" />
+                <content-server-status :server="props.server" />
             </n-tab-pane>
 
             <!-- key detail pane -->
-            <n-tab-pane :name="BrowserTabType.KeyDetail.toString()">
+            <n-tab-pane :name="BrowserTabType.KeyDetail.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -249,20 +130,19 @@ const onSwitchSubTab = (name) => {
                 </template>
                 <content-value-wrapper
                     :blank="isBlankValue"
-                    :type="tabContent.type"
                     :db="tabContent.db"
                     :key-code="tabContent.keyCode"
                     :key-path="tabContent.keyPath"
                     :name="tabContent.name"
                     :size="tabContent.size"
                     :ttl="tabContent.ttl"
+                    :type="tabContent.type"
                     :value="tabContent.value"
-                    :view-as="tabContent.viewAs"
-                    @reload="onReloadKey" />
+                    :view-as="tabContent.viewAs" />
             </n-tab-pane>
 
             <!-- cli pane -->
-            <n-tab-pane :name="BrowserTabType.Cli.toString()">
+            <n-tab-pane :name="BrowserTabType.Cli.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -271,7 +151,7 @@ const onSwitchSubTab = (name) => {
                         <span>{{ $t('interface.sub_tab.cli') }}</span>
                     </n-space>
                 </template>
-                <content-cli :name="currentServer.name" />
+                <content-cli ref="cliRef" :name="props.server" />
             </n-tab-pane>
 
             <!-- slow log pane -->
@@ -311,5 +191,9 @@ const onSwitchSubTab = (name) => {
     height: 100%;
     background-color: v-bind('themeVars.tabColor');
     overflow: hidden;
+}
+
+.n-tabs .n-tabs-bar {
+    transition: none !important;
 }
 </style>

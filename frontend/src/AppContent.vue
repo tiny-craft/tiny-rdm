@@ -208,7 +208,12 @@ onMounted(async () => {
                             @mouseout="data.hoverResize = false"
                             @mouseover="data.hoverResize = true" />
                     </div>
-                    <content-pane class="flex-item-expand" />
+                    <content-pane
+                        v-for="t in tabStore.tabs"
+                        v-show="get(tabStore.currentTab, 'name') === t.name"
+                        :key="t.name"
+                        :server="t.name"
+                        class="flex-item-expand" />
                 </div>
 
                 <!-- server list page -->

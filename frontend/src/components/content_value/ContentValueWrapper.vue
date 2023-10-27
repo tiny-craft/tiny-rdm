@@ -8,8 +8,10 @@ import ContentValueSet from '@/components/content_value/ContentValueSet.vue'
 import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
 import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 import { useThemeVars } from 'naive-ui'
+import useConnectionStore from 'stores/connections.js'
 
 const themeVars = useThemeVars()
+const connectionStore = useConnectionStore()
 
 const props = defineProps({
     blank: Boolean,
@@ -33,8 +35,6 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['reload'])
-
 const valueComponents = {
     [redisTypes.STRING]: ContentValueString,
     [redisTypes.HASH]: ContentValueHash,
@@ -43,29 +43,38 @@ const valueComponents = {
     [redisTypes.ZSET]: ContentValueZset,
     [redisTypes.STREAM]: ContentValueStream,
 }
+
+/**
+ * reload current selection key
+ * @returns {Promise<null>}
+ */
+const onReloadKey = async () => {
+    await connectionStore.loadKeyValue(props.name, props.db, props.key, props.viewAs)
+}
 </script>
 
 <template>
     <n-empty v-if="props.blank" :description="$t('interface.nonexist_tab_content')" class="empty-content">
         <template #extra>
-            <n-button :focusable="false" @click="emit('reload')">{{ $t('interface.reload') }}</n-button>
+            <n-button :focusable="false" @click="onReloadKey">{{ $t('interface.reload') }}</n-button>
         </template>
     </n-empty>
-    <component
-        class="content-value-wrapper"
-        :is="valueComponents[props.type]"
-        v-else
-        :db="props.db"
-        :key-code="props.keyCode"
-        :key-path="props.keyPath"
-        :name="props.name"
-        :size="props.size"
-        :ttl="props.ttl"
-        :value="props.value"
-        :view-as="props.viewAs" />
+    <keep-alive v-else>
+        <component
+            :is="valueComponents[props.type]"
+            :db="props.db"
+            :key-code="props.keyCode"
+            :key-path="props.keyPath"
+            :name="props.name"
+            :size="props.size"
+            :ttl="props.ttl"
+            :value="props.value"
+            :view-as="props.viewAs"
+            class="content-value-wrapper" />
+    </keep-alive>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .content-value-wrapper {
     background-color: v-bind('themeVars.bodyColor');
 }

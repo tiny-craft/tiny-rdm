@@ -13,9 +13,6 @@ import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
 import Status from '@/components/icons/Status.vue'
-import SwitchButton from '@/components/common/SwitchButton.vue'
-import ListView from '@/components/icons/ListView.vue'
-import TreeView from '@/components/icons/TreeView.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()

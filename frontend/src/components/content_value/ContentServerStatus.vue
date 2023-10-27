@@ -1,36 +1,74 @@
 <script setup>
 import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
+import useConnectionStore from 'stores/connections.js'
 
 const props = defineProps({
     server: String,
-    info: Object,
-    autoRefresh: false,
-    loading: false,
-    autoLoading: false,
 })
 
 const emit = defineEmits(['update:autoRefresh', 'refresh'])
 
+const connectionStore = useConnectionStore()
+const serverInfo = ref({})
+const autoRefresh = ref(false)
+const loading = ref(false) // loading status for refresh
+const autoLoading = ref(false) // loading status for auto refresh
+
+/**
+ * refresh server status info
+ * @param {boolean} [force] force refresh will show loading indicator
+ * @returns {Promise<void>}
+ */
+const refreshInfo = async (force) => {
+    if (force) {
+        loading.value = true
+    } else {
+        autoLoading.value = true
+    }
+    if (!isEmpty(props.server) && connectionStore.isConnected(props.server)) {
+        try {
+            serverInfo.value = await connectionStore.getServerInfo(props.server)
+        } finally {
+            loading.value = false
+            autoLoading.value = false
+        }
+    }
+}
+
+let intervalID
+onMounted(() => {
+    refreshInfo()
+    intervalID = setInterval(() => {
+        if (autoRefresh.value === true) {
+            refreshInfo()
+        }
+    }, 5000)
+})
+
+onUnmounted(() => {
+    clearInterval(intervalID)
+})
+
 const scrollRef = ref(null)
 const redisVersion = computed(() => {
-    return get(props.info, 'Server.redis_version', '')
+    return get(serverInfo.value, 'Server.redis_version', '')
 })
 
 const redisMode = computed(() => {
-    return get(props.info, 'Server.redis_mode', '')
+    return get(serverInfo.value, 'Server.redis_mode', '')
 })
 
 const role = computed(() => {
-    return get(props.info, 'Replication.role', '')
+    return get(serverInfo.value, 'Replication.role', '')
 })
 
 const timeUnit = ['common.unit_minute', 'common.unit_hour', 'common.unit_day']
 const uptime = computed(() => {
-    let seconds = get(props.info, 'Server.uptime_in_seconds', 0)
+    let seconds = get(serverInfo.value, 'Server.uptime_in_seconds', 0)
     seconds /= 60
     if (seconds < 60) {
         // minutes
@@ -46,7 +84,7 @@ const uptime = computed(() => {
 
 const units = ['B', 'KB', 'MB', 'GB', 'TB']
 const usedMemory = computed(() => {
-    let size = get(props.info, 'Memory.used_memory', 0)
+    let size = get(serverInfo.value, 'Memory.used_memory', 0)
     let unitIndex = 0
 
     while (size >= 1024 && unitIndex < units.length - 1) {
@@ -59,7 +97,7 @@ const usedMemory = computed(() => {
 
 const totalKeys = computed(() => {
     const regex = /^db\d+$/
-    const result = pickBy(props.info['Keyspace'], (value, key) => {
+    const result = pickBy(serverInfo.value['Keyspace'], (value, key) => {
         return regex.test(key)
     })
     const nums = mapValues(result, (v) => {
@@ -75,7 +113,7 @@ const infoFilter = ref('')
 <template>
     <n-scrollbar ref="scrollRef">
         <n-back-top :listen-to="scrollRef" />
-        <n-space vertical :wrap-item="false" :size="5" style="padding: 5px">
+        <n-space :size="5" :wrap-item="false" style="padding: 5px" vertical>
             <n-card>
                 <template #header>
                     <n-space :wrap-item="false" align="center" inline size="small">
@@ -103,19 +141,16 @@ const infoFilter = ref('')
                 <template #header-extra>
                     <n-space align="center" inline>
                         {{ $t('status.auto_refresh') }}
-                        <n-switch
-                            :loading="props.autoLoading"
-                            :value="props.autoRefresh"
-                            @update:value="(v) => emit('update:autoRefresh', v)" />
+                        <n-switch v-model:value="autoRefresh" :loading="autoLoading" />
                         <n-tooltip>
                             {{ $t('status.refresh') }}
                             <template #trigger>
                                 <n-button
-                                    :loading="props.autoLoading"
+                                    :loading="autoLoading"
                                     circle
                                     size="small"
                                     tertiary
-                                    @click="emit('refresh')">
+                                    @click="refreshInfo(true)">
                                     <template #icon>
                                         <n-icon :component="Refresh" />
                                     </template>
@@ -124,7 +159,7 @@ const infoFilter = ref('')
                         </n-tooltip>
                     </n-space>
                 </template>
-                <n-spin :show="props.loading">
+                <n-spin :show="loading">
                     <n-grid style="min-width: 500px" x-gap="5">
                         <n-gi :span="6">
                             <n-statistic :label="$t('status.uptime')" :value="uptime[0]">
@@ -134,7 +169,7 @@ const infoFilter = ref('')
                         <n-gi :span="6">
                             <n-statistic
                                 :label="$t('status.connected_clients')"
-                                :value="get(props.info, 'Clients.connected_clients', 0)" />
+                                :value="get(serverInfo.value, 'Clients.connected_clients', 0)" />
                         </n-gi>
                         <n-gi :span="6">
                             <n-statistic :value="totalKeys">
@@ -159,9 +194,9 @@ const infoFilter = ref('')
                         </template>
                     </n-input>
                 </template>
-                <n-spin :show="props.loading">
+                <n-spin :show="loading">
                     <n-tabs default-value="CPU" placement="left" type="line">
-                        <n-tab-pane v-for="(v, k) in props.info" :key="k" :disabled="isEmpty(v)" :name="k">
+                        <n-tab-pane v-for="(v, k) in serverInfo" :key="k" :disabled="isEmpty(v)" :name="k">
                             <n-data-table
                                 :columns="[
                                     {
