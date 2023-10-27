@@ -42,12 +42,12 @@ const handleSwitch = (idx) => {
 <template>
     <n-button-group>
         <n-tooltip
-            :show-arrow="false"
             v-for="(icon, i) in props.icons"
             :key="i"
-            :disabled="!(props.tTooltips && props.tTooltips[i])">
+            :disabled="!(props.tTooltips && props.tTooltips[i])"
+            :show-arrow="false">
             <template #trigger>
-                <n-button :tertiary="i !== props.value" :focusable="false" :size="props.size" @click="handleSwitch(i)">
+                <n-button :focusable="false" :size="props.size" :tertiary="i !== props.value" @click="handleSwitch(i)">
                     <template #icon>
                         <n-icon :size="props.iconSize">
                             <component
@@ -62,4 +62,4 @@ const handleSwitch = (idx) => {
     </n-button-group>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

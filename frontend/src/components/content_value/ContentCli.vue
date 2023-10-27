@@ -361,7 +361,7 @@ const receiveTermOutput = (data) => {
     <div ref="termRef" class="xterm" />
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .xterm {
     width: 100%;
     min-height: 100%;

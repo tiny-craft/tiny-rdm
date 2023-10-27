@@ -14,93 +14,93 @@ const props = defineProps({
 </script>
 
 <template>
-    <svg v-if="props.inverse" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg v-if="props.inverse" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <rect
-            x="6"
-            y="6"
-            width="36"
+            :stroke-width="props.strokeWidth"
+            fill="currentColor"
             height="36"
             rx="3"
-            fill="currentColor"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
-            stroke-linejoin="round" />
+            stroke-linejoin="round"
+            width="36"
+            x="6"
+            y="6" />
         <rect
-            x="13"
-            y="13"
-            width="8"
-            height="8"
-            fill="#FFF"
-            stroke="#FFF"
             :stroke-width="props.strokeWidth"
-            stroke-linejoin="round" />
+            fill="#FFF"
+            height="8"
+            stroke="#FFF"
+            stroke-linejoin="round"
+            width="8"
+            x="13"
+            y="13" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M27 13L35 13"
             stroke="#FFF"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M27 20L35 20"
             stroke="#FFF"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M13 28L35 28"
             stroke="#FFF"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M13 35H35"
             stroke="#FFF"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
     </svg>
-    <svg v-else viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg v-else fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <rect
-            x="6"
-            y="6"
-            width="36"
+            :stroke-width="props.strokeWidth"
+            fill="none"
             height="36"
             rx="3"
-            fill="none"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
-            stroke-linejoin="round" />
+            stroke-linejoin="round"
+            width="36"
+            x="6"
+            y="6" />
         <rect
-            x="13"
-            y="13"
-            width="8"
-            height="8"
-            fill="none"
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
-            stroke-linejoin="round" />
+            fill="none"
+            height="8"
+            stroke="currentColor"
+            stroke-linejoin="round"
+            width="8"
+            x="13"
+            y="13" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M27 13L35 13"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M27 20L35 20"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M13 28L35 28"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
+            :stroke-width="props.strokeWidth"
             d="M13 35H35"
             stroke="currentColor"
-            :stroke-width="props.strokeWidth"
             stroke-linecap="round"
             stroke-linejoin="round" />
     </svg>

@@ -28,4 +28,4 @@ const handleSelectFile = async () => {
     </n-input-group>
 </template>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

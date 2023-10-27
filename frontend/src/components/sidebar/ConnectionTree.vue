@@ -530,10 +530,10 @@ const onCancelOpen = () => {
 
     <!-- context menu -->
     <n-dropdown
+        :keyboard="true"
         :options="contextMenuParam.options"
         :render-label="renderContextLabel"
         :show="contextMenuParam.show"
-        :keyboard="true"
         :x="contextMenuParam.x"
         :y="contextMenuParam.y"
         placement="bottom-start"

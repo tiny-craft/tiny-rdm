@@ -16,52 +16,52 @@ const props = defineProps({
 <template>
     <svg v-if="props.inverse" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <rect
-            fill="currentColor"
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
+            fill="currentColor"
             height="8"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             width="8"
             x="4"
             y="34" />
         <rect
-            fill="currentColor"
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
+            fill="currentColor"
             height="12"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             width="32"
             x="8"
             y="6" />
         <path
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
             d="M24 34V18"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <path
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
             d="M8 34V26H40V34"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round" />
         <rect
-            fill="currentColor"
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
+            fill="currentColor"
             height="8"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             width="8"
             x="36"
             y="34" />
         <rect
-            fill="currentColor"
-            stroke="currentColor"
             :stroke-width="props.strokeWidth"
+            fill="currentColor"
             height="8"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             width="8"
