@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
-import { clone, find, get, isEmpty, map, pick, set, split } from 'lodash'
+import { cloneDeep, find, get, isEmpty, map, pick, set, split } from 'lodash'
 import {
     CheckForUpdate,
     GetFontList,
@@ -178,7 +178,7 @@ const usePreferencesStore = defineStore('preferences', {
         async loadPreferences() {
             const { success, data } = await GetPreferences()
             if (success) {
-                this.lastPref = clone(data)
+                this.lastPref = cloneDeep(data)
                 this._applyPreferences(data)
                 i18nGlobal.locale.value = this.currentLanguage
             }
