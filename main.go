@@ -53,7 +53,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 0},
+		BackgroundColour: options.NewRGBA(27, 38, 54, 0),
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
@@ -80,7 +80,7 @@ func main() {
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,
-			WindowIsTranslucent:  false,
+			WindowIsTranslucent:  true,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent:              true,

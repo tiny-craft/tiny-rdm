@@ -112,7 +112,7 @@ const infoFilter = ref('')
     <n-scrollbar ref="scrollRef">
         <n-back-top :listen-to="scrollRef" />
         <n-space :size="5" :wrap-item="false" style="padding: 5px" vertical>
-            <n-card>
+            <n-card embedded>
                 <template #header>
                     <n-space :wrap-item="false" align="center" inline size="small">
                         {{ props.server }}
@@ -184,7 +184,7 @@ const infoFilter = ref('')
                     </n-grid>
                 </n-spin>
             </n-card>
-            <n-card :title="$t('status.all_info')">
+            <n-card :title="$t('status.all_info')" embedded>
                 <template #header-extra>
                     <n-input v-model:value="infoFilter" clearable placeholder="">
                         <template #prefix>

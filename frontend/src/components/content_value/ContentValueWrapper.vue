@@ -69,13 +69,8 @@ const onReloadKey = async () => {
             :size="props.size"
             :ttl="props.ttl"
             :value="props.value"
-            :view-as="props.viewAs"
-            class="content-value-wrapper" />
+            :view-as="props.viewAs" />
     </keep-alive>
 </template>
 
-<style lang="scss" scoped>
-.content-value-wrapper {
-    background-color: v-bind('themeVars.bodyColor');
-}
-</style>
+<style lang="scss" scoped></style>

@@ -12,6 +12,7 @@ import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
 import usePreferencesStore from 'stores/preferences.js'
 import Record from '@/components/icons/Record.vue'
+import { extraTheme } from '@/utils/extra_theme.js'
 
 const themeVars = useThemeVars()
 
@@ -88,14 +89,14 @@ const renderContextLabel = (option) => {
 }
 
 const dialogStore = useDialogStore()
-const preferencesStore = usePreferencesStore()
+const prefStore = usePreferencesStore()
 const onSelectPreferenceMenu = (key) => {
     switch (key) {
         case 'preferences':
             dialogStore.openPreferencesDialog()
             break
         case 'update':
-            preferencesStore.checkForUpdate(true)
+            prefStore.checkForUpdate(true)
             break
         case 'about':
             dialogStore.openAboutDialog()
@@ -106,6 +107,10 @@ const onSelectPreferenceMenu = (key) => {
 const openGithub = () => {
     BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm')
 }
+
+const exThemeVars = computed(() => {
+    return extraTheme(prefStore.isDark)
+})
 </script>
 
 <template>
@@ -139,7 +144,9 @@ const openGithub = () => {
 <style lang="scss">
 #app-nav-menu {
     //height: 100vh;
-    //border-right: v-bind('themeVars.borderColor') solid 1px;
+    border-right: v-bind('exThemeVars.splitColor') solid 1px;
+    background-color: v-bind('exThemeVars.sidebarColor');
+    box-sizing: border-box;
 
     .nav-menu-item {
         align-items: center;

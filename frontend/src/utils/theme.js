@@ -1,3 +1,5 @@
+import { merge } from 'lodash'
+
 /**
  *
  * @type import('naive-ui').GlobalThemeOverrides
@@ -12,6 +14,7 @@ export const themeOverrides = {
         borderRadiusSmall: '3px',
         lineHeight: 1.5,
         scrollbarWidth: '8px',
+        tabColor: '#FFFFFF',
     },
     Tag: {
         // borderRadius: '3px'
@@ -39,4 +42,27 @@ export const themeOverrides = {
         labelTextColor: 'rgb(113,120,128)',
         labelFontWeight: '450',
     },
+    Radio: {
+        buttonColorActive: '#D13B37',
+        buttonTextColorActive: '#FFF',
+    },
 }
+
+/**
+ *
+ * @type import('naive-ui').GlobalThemeOverrides
+ */
+const _darkThemeOverrides = {
+    common: {
+        bodyColor: '#1A1A1A',
+        tabColor: '#18181C',
+    },
+    Tree: {
+        nodeTextColor: '#ceced0',
+    },
+    Card: {
+        colorEmbedded: '#18181C',
+    },
+}
+
+export const darkThemeOverrides = merge({}, themeOverrides, _darkThemeOverrides)

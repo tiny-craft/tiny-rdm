@@ -162,6 +162,5 @@ defineExpose({
 .content-container {
     padding: 5px;
     box-sizing: border-box;
-    border-left: 1px solid v-bind('themeVars.borderColor');
 }
 </style>

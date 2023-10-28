@@ -17,6 +17,7 @@ import { EventsOn, WindowIsFullscreen, WindowIsMaximised, WindowToggleMaximise }
 import { isMacOS } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
 import ResizeableWrapper from '@/components/common/ResizeableWrapper.vue'
+import { extraTheme } from '@/utils/extra_theme.js'
 
 const themeVars = useThemeVars()
 
@@ -33,6 +34,9 @@ const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
 const logPaneRef = ref(null)
+const exThemeVars = computed(() => {
+    return extraTheme(prefStore.isDark)
+})
 // const preferences = ref({})
 // provide('preferences', preferences)
 
@@ -51,8 +55,7 @@ watch(
 )
 
 const border = computed(() => {
-    const color = isMacOS() && false ? '#0000' : themeVars.value.borderColor
-    return `1px solid ${color}`
+    return isMacOS() ? 'none' : `1px solid ${themeVars.value.borderColor}`
 })
 
 const logoWrapperWidth = computed(() => {
@@ -108,15 +111,9 @@ onMounted(async () => {
     <!-- app content-->
     <n-spin
         :show="props.loading"
-        :style="{ backgroundColor: themeVars.bodyColor, borderRadius: `${borderRadius}px`, border }"
+        :style="{ borderRadius: `${borderRadius}px`, border }"
         :theme-overrides="{ opacitySpinning: 0 }">
-        <div
-            id="app-content-wrapper"
-            :style="{
-                backgroundColor: themeVars.bodyColor,
-                color: themeVars.textColorBase,
-            }"
-            class="flex-box-v">
+        <div id="app-content-wrapper" :style="{ color: themeVars.textColorBase }" class="flex-box-v">
             <!-- title bar -->
             <div
                 id="app-toolbar"
@@ -208,15 +205,16 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 #app-content-wrapper {
-    width: calc(100vw - 2px);
-    height: calc(100vh - 2px);
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
-    border-radius: 10px;
+    border-radius: 8px;
+    background-color: v-bind('themeVars.bodyColor');
 
     #app-toolbar {
-        background-color: v-bind('themeVars.tabColor');
-        border-bottom: 1px solid v-bind('themeVars.borderColor');
+        background-color: v-bind('exThemeVars.titleColor');
+        border-bottom: 1px solid v-bind('exThemeVars.splitColor');
 
         &-title {
             padding-left: 10px;
@@ -240,29 +238,9 @@ onMounted(async () => {
     .app-side {
         //overflow: hidden;
         height: 100%;
-        background-color: v-bind('themeVars.tabColor');
-        border-right: 1px solid v-bind('themeVars.borderColor');
+        background-color: v-bind('exThemeVars.sidebarColor');
+        border-right: 1px solid v-bind('exThemeVars.splitColor');
     }
-}
-
-.resize-divider {
-    width: 3px;
-    border-right: 1px solid v-bind('themeVars.borderColor');
-}
-
-.resize-divider-hide {
-    background-color: #0000;
-    border-right-color: #0000;
-}
-
-.resize-divider-hover {
-    background-color: v-bind('themeVars.borderColor');
-    border-right-color: v-bind('themeVars.borderColor');
-}
-
-.resize-divider-drag {
-    background-color: v-bind('themeVars.primaryColor');
-    border-right-color: v-bind('themeVars.primaryColor');
 }
 
 .fade-enter-from,

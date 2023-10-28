@@ -6,6 +6,8 @@ import { useI18n } from 'vue-i18n'
 import { get, map } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import useConnectionStore from 'stores/connections.js'
+import { extraTheme } from '@/utils/extra_theme.js'
+import usePreferencesStore from 'stores/preferences.js'
 
 /**
  * Value content tab on head
@@ -15,6 +17,7 @@ const themeVars = useThemeVars()
 const i18n = useI18n()
 const tabStore = useTabStore()
 const connectionStore = useConnectionStore()
+const prefStore = usePreferencesStore()
 
 const onCloseTab = (tabIndex) => {
     const tab = get(tabStore.tabs, tabIndex)
@@ -47,6 +50,10 @@ const tab = computed(() =>
         label: item.title,
     })),
 )
+
+const exThemeVars = computed(() => {
+    return extraTheme(prefStore.isDark)
+})
 </script>
 
 <template>
@@ -60,7 +67,6 @@ const tab = computed(() =>
             tabGapMediumCard: 0,
             tabGapLargeCard: 0,
             tabColor: '#0000',
-            // tabBorderColor: themeVars.borderColor,
             tabBorderColor: '#0000',
             tabTextColorCard: themeVars.closeIconColor,
         }"
@@ -83,12 +89,12 @@ const tab = computed(() =>
 .value-tab {
     --wails-draggable: none;
     position: relative;
-    border: 1px solid v-bind('themeVars.borderColor') !important;
+    border: 1px solid v-bind('exThemeVars.splitColor') !important;
 }
 
 .value-tab-active {
-    background-color: v-bind('themeVars.bodyColor') !important;
-    border-bottom-color: v-bind('themeVars.bodyColor') !important;
+    background-color: v-bind('themeVars.tabColor') !important;
+    border-bottom-color: v-bind('themeVars.tabColor') !important;
 
     &_mark {
         border-top: 3px solid v-bind('tabMarkColor') !important;
@@ -99,7 +105,7 @@ const tab = computed(() =>
     border-color: #0000 !important;
 
     &:hover {
-        background-color: v-bind('themeVars.borderColor') !important;
+        background-color: v-bind('exThemeVars.splitColor') !important;
     }
 }
 

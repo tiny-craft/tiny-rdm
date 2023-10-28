@@ -178,14 +178,14 @@ watch(
 
 <style lang="scss">
 .content-sub-tab {
-    background-color: v-bind('themeVars.bodyColor');
+    background-color: v-bind('themeVars.tabColor');
     height: 100%;
 }
 
 .content-sub-tab-pane {
     padding: 0 !important;
     height: 100%;
-    background-color: v-bind('themeVars.tabColor');
+    background-color: v-bind('themeVars.bodyColor');
     overflow: hidden;
 }
 
