@@ -10,9 +10,9 @@
  * @type ExtraTheme
  */
 export const extraLightTheme = {
-    titleColor: '#F0F0F4',
-    sidebarColor: '#F6F6F6',
-    splitColor: '#E0E0E6',
+    titleColor: '#F2F2F2',
+    sidebarColor: '#E9E9E9',
+    splitColor: '#DADADA',
 }
 
 /**
@@ -20,9 +20,9 @@ export const extraLightTheme = {
  * @type ExtraTheme
  */
 export const extraDarkTheme = {
-    titleColor: '#202020',
-    sidebarColor: '#202124',
-    splitColor: '#323138',
+    titleColor: '#363636',
+    sidebarColor: '#262626',
+    splitColor: '#474747',
 }
 
 /**

@@ -54,14 +54,18 @@ export const themeOverrides = {
  */
 const _darkThemeOverrides = {
     common: {
-        bodyColor: '#1A1A1A',
-        tabColor: '#18181C',
+        bodyColor: '#1E1E1E',
+        tabColor: '#1E1E1E',
+        borderColor: '#515151',
     },
     Tree: {
-        nodeTextColor: '#ceced0',
+        nodeTextColor: '#CECED0',
     },
     Card: {
         colorEmbedded: '#18181C',
+    },
+    Dropdown: {
+        color: '#272727',
     },
 }
 

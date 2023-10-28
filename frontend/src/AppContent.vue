@@ -54,42 +54,38 @@ watch(
     },
 )
 
-const border = computed(() => {
-    return isMacOS() ? 'none' : `1px solid ${themeVars.value.borderColor}`
-})
-
 const logoWrapperWidth = computed(() => {
     return `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`
 })
 
-const borderRadius = ref(10)
 const logoPaddingLeft = ref(10)
 const maximised = ref(false)
-const toggleWindowRadius = (on) => {
-    borderRadius.value = on ? 10 : 0
-}
+const hideRadius = ref(false)
+const wrapperStyle = computed(() => {
+    return hideRadius.value
+        ? {}
+        : {
+              border: `1px solid ${themeVars.value.borderColor}`,
+              borderRadius: '10px',
+          }
+})
 
 const onToggleFullscreen = (fullscreen) => {
+    hideRadius.value = fullscreen
     if (fullscreen) {
         logoPaddingLeft.value = 10
-        toggleWindowRadius(false)
     } else {
         logoPaddingLeft.value = isMacOS() ? 70 : 10
-        toggleWindowRadius(true)
     }
 }
 
 const onToggleMaximize = (isMaximised) => {
     if (isMaximised) {
         maximised.value = true
-        if (!isMacOS()) {
-            toggleWindowRadius(false)
-        }
+        hideRadius.value = isMacOS()
     } else {
         maximised.value = false
-        if (!isMacOS()) {
-            toggleWindowRadius(true)
-        }
+        hideRadius.value = !isMacOS()
     }
 }
 
@@ -111,9 +107,9 @@ onMounted(async () => {
     <!-- app content-->
     <n-spin
         :show="props.loading"
-        :style="{ borderRadius: `${borderRadius}px`, border }"
-        :theme-overrides="{ opacitySpinning: 0 }">
-        <div id="app-content-wrapper" :style="{ color: themeVars.textColorBase }" class="flex-box-v">
+        :theme-overrides="{ opacitySpinning: 0 }"
+        :style="{ backgroundColor: themeVars.bodyColor }">
+        <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v">
             <!-- title bar -->
             <div
                 id="app-toolbar"
@@ -209,8 +205,8 @@ onMounted(async () => {
     height: 100vh;
     overflow: hidden;
     box-sizing: border-box;
-    border-radius: 8px;
     background-color: v-bind('themeVars.bodyColor');
+    color: v-bind('themeVars.textColorBase');
 
     #app-toolbar {
         background-color: v-bind('exThemeVars.titleColor');
