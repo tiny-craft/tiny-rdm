@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { NIcon, NSpace, NTag } from 'naive-ui'
+import { NIcon, NSpace, NTag, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
@@ -31,6 +31,7 @@ const props = defineProps({
     keyView: String,
 })
 
+const themeVars = useThemeVars()
 const i18n = useI18n()
 const loading = ref(false)
 const loadingConnections = ref(false)
@@ -532,6 +533,7 @@ const getDatabaseMenu = (opened, loading, end) => {
                 icon: LoadList,
                 disabled: end === true,
                 loading: loading === true,
+                color: loading === true ? themeVars.value.primaryColor : '',
                 onClick: () => handleSelectContextMenu('db_loadmore'),
             }),
             h(IconButton, {
@@ -539,6 +541,7 @@ const getDatabaseMenu = (opened, loading, end) => {
                 icon: LoadAll,
                 disabled: end === true,
                 loading: loading === true,
+                color: loading === true ? themeVars.value.primaryColor : '',
                 onClick: () => handleSelectContextMenu('db_loadall'),
             }),
             h(IconButton, {

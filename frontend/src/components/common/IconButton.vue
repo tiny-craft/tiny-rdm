@@ -14,7 +14,7 @@ const props = defineProps({
     },
     color: {
         type: String,
-        default: 'currentColor',
+        default: '',
     },
     strokeWidth: {
         type: [Number, String],
@@ -38,9 +38,10 @@ const hasTooltip = computed(() => {
                 :focusable="false"
                 :loading="loading"
                 :text="!border"
+                :color="props.color"
                 @click.prevent="emit('click')">
                 <template #icon>
-                    <n-icon :color="props.color" :size="props.size">
+                    <n-icon :color="props.color || 'currentColor'" :size="props.size">
                         <component :is="props.icon" :stroke-width="props.strokeWidth" />
                     </n-icon>
                 </template>
@@ -54,9 +55,10 @@ const hasTooltip = computed(() => {
         :focusable="false"
         :loading="loading"
         :text="!border"
+        :color="props.color"
         @click.prevent="emit('click')">
         <template #icon>
-            <n-icon :color="props.color" :size="props.size">
+            <n-icon :color="props.color || 'currentColor'" :size="props.size">
                 <component :is="props.icon" :stroke-width="props.strokeWidth" />
             </n-icon>
         </template>
