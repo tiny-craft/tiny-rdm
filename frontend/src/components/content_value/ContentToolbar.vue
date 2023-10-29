@@ -128,7 +128,7 @@ const onDeleteKey = () => {
             </n-tooltip>
             <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="onRenameKey" />
         </n-button-group>
-        <n-tooltip>
+        <n-tooltip :show-arrow="false">
             <template #trigger>
                 <n-button :focusable="false" @click="onDeleteKey">
                     <template #icon>

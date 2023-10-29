@@ -107,8 +107,8 @@ onMounted(async () => {
     <!-- app content-->
     <n-spin
         :show="props.loading"
-        :theme-overrides="{ opacitySpinning: 0 }"
-        :style="{ backgroundColor: themeVars.bodyColor }">
+        :style="{ backgroundColor: themeVars.bodyColor }"
+        :theme-overrides="{ opacitySpinning: 0 }">
         <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v">
             <!-- title bar -->
             <div

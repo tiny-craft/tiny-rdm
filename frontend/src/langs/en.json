@@ -76,6 +76,7 @@
     "filter_field": "Filter Field",
     "filter_value": "Filter Value",
     "view_as": "View As",
+    "decode_with": "Decode/Decompress Type",
     "reload": "Reload",
     "open_connection": "Open Connection",
     "batch_delete": "Batch Delete",

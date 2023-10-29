@@ -1,18 +1,24 @@
 /**
- * string view mode
+ * string format types
  * @enum {string}
  */
-export const types = {
+export const formatTypes = {
     PLAIN_TEXT: 'Plain Text',
     JSON: 'JSON',
-    BASE64_TEXT: 'Base64 Text',
-    BASE64_JSON: 'Base64 JSON',
     HEX: 'Hex',
     BINARY: 'Binary',
+}
+
+/**
+ * string decode types
+ * @enum {string}
+ */
+export const decodeTypes = {
+    NONE: 'None',
+    BASE64: 'Base64',
     GZIP: 'GZip',
-    GZIP_JSON: 'GZip JSON',
     DEFLATE: 'Deflate',
-    DEFLATE_JSON: 'Deflate JSON',
     BROTLI: 'Brotli',
-    BROTLI_JSON: 'Brotli JSON',
+    // PHP: 'PHP',
+    // Java: 'Java',
 }

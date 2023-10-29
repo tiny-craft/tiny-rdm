@@ -1,5 +1,5 @@
 <script setup>
-import { types } from '@/consts/value_view_type.js'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import ContentValueString from '@/components/content_value/ContentValueString.vue'
 import ContentValueHash from '@/components/content_value/ContentValueHash.vue'
@@ -31,7 +31,11 @@ const props = defineProps({
     size: Number,
     viewAs: {
         type: String,
-        default: types.PLAIN_TEXT,
+        default: formatTypes.PLAIN_TEXT,
+    },
+    decode: {
+        type: String,
+        default: decodeTypes.NONE,
     },
 })
 
@@ -63,6 +67,7 @@ const onReloadKey = async () => {
         <component
             :is="valueComponents[props.type]"
             :db="props.db"
+            :decode="props.decode"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
             :name="props.name"

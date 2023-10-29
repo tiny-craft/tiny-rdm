@@ -79,7 +79,8 @@ body {
   flex-grow: 1;
   overflow: hidden;
   gap: 5px;
-  padding: 5px;
+  padding-top: 5px;
+  //padding: 5px;
   box-sizing: border-box;
 
   .tb2 {
@@ -97,6 +98,17 @@ body {
     user-select: text;
     height: 100%;
   }
+
+  .value-item-part {
+    padding: 0 5px;
+  }
+
+  .value-footer {
+    align-items: center;
+    gap: 0;
+    padding: 3px 10px 3px 10px;
+    min-height: 30px;
+  }
 }
 
 .n-dynamic-input-item {
@@ -113,14 +125,27 @@ body {
   padding-right: 10px;
 }
 
+.type-selector-header {
+  height: 30px;
+  line-height: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.type-selector-item {
+  min-width: 100px;
+  text-align: center;
+}
+
 .nav-pane-container {
   overflow: hidden;
 
   .nav-pane-bottom {
     align-items: center;
     gap: 8px;
-    padding: 3px 5px 5px 5px;
-    min-height: 35px;
+    padding: 3px 10px 3px 10px;
+    min-height: 30px;
     //border-top: v-bind('themeVars.borderColor') 1px solid;
   }
 }

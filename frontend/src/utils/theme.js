@@ -16,8 +16,15 @@ export const themeOverrides = {
         scrollbarWidth: '8px',
         tabColor: '#FFFFFF',
     },
+    Button: {
+        heightMedium: '32px',
+    },
     Tag: {
         // borderRadius: '3px'
+        heightLarge: '32px',
+    },
+    Input: {
+        heightMedium: '32px',
     },
     Tabs: {
         tabGapSmallCard: '2px',

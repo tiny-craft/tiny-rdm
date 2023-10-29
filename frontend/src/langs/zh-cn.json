@@ -76,6 +76,7 @@
     "filter_field": "筛选字段",
     "filter_value": "筛选值",
     "view_as": "查看方式",
+    "decode_with": "解码/解压方式",
     "reload": "重新载入",
     "open_connection": "打开连接",
     "batch_delete": "批量删除键",

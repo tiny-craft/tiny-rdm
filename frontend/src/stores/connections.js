@@ -657,14 +657,15 @@ const useConnectionStore = defineStore('connections', {
          * @param {number} db
          * @param {string|number[]} [key] when key is null or blank, update tab to display normal content (blank content or server status)
          * @param {string} [viewType]
+         * @param {string} [decodeType]
          */
-        async loadKeyValue(server, db, key, viewType) {
+        async loadKeyValue(server, db, key, viewType, decodeType) {
             try {
                 const tab = useTabStore()
                 if (!isEmpty(key)) {
-                    const { data, success, msg } = await GetKeyValue(server, db, key, viewType)
+                    const { data, success, msg } = await GetKeyValue(server, db, key, viewType, decodeType)
                     if (success) {
-                        const { type, ttl, value, size, viewAs } = data
+                        const { type, ttl, value, size, viewAs, decode } = data
                         const k = decodeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
@@ -678,6 +679,7 @@ const useConnectionStore = defineStore('connections', {
                             value,
                             size,
                             viewAs,
+                            decode,
                         })
                         return
                     } else {
@@ -1092,11 +1094,12 @@ const useConnectionStore = defineStore('connections', {
          * @param {any} value
          * @param {number} ttl
          * @param {string} [viewAs]
+         * @param {string} [decode]
          * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: {string}}>}
          */
-        async setKey(connName, db, key, keyType, value, ttl, viewAs) {
+        async setKey(connName, db, key, keyType, value, ttl, viewAs, decode) {
             try {
-                const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl, viewAs)
+                const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl, viewAs, decode)
                 if (success) {
                     // update tree view data
                     const { newKey = 0 } = this._addKeyNodes(connName, db, [key], true)

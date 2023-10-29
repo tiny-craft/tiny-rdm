@@ -51,6 +51,7 @@ const tabContent = computed(() => {
         value: tab.value,
         size: tab.size || 0,
         viewAs: tab.viewAs,
+        decode: tab.decode,
     }
 })
 
@@ -127,6 +128,7 @@ watch(
                 <content-value-wrapper
                     :blank="isBlankValue"
                     :db="tabContent.db"
+                    :decode="tabContent.decode"
                     :key-code="tabContent.keyCode"
                     :key-path="tabContent.keyPath"
                     :name="tabContent.name"

@@ -18,160 +18,171 @@ import (
 )
 
 // ConvertTo convert string to specified type
-// @param targetType  empty string indicates automatic detection of the string type
-func ConvertTo(str, targetType string) (value, resultType string) {
+// @param decodeType empty string indicates automatic detection
+// @param formatType empty string indicates automatic detection
+func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultFormat string) {
 	if len(str) <= 0 {
 		// empty content
-		if len(targetType) <= 0 {
-			resultType = types.PLAIN_TEXT
+		if len(formatType) <= 0 {
+			resultFormat = types.VIEWAS_PLAIN_TEXT
 		} else {
-			resultType = targetType
+			resultFormat = formatType
+		}
+		if len(decodeType) <= 0 {
+			resultDecode = types.DECODE_NONE
+		} else {
+			resultDecode = decodeType
 		}
 		return
 	}
 
-	switch targetType {
-	case types.PLAIN_TEXT:
-		value = str
-		resultType = targetType
-		return
-
-	case types.JSON:
-		value, _ = decodeJson(str)
-		resultType = targetType
-		return
-
-	case types.BASE64_TEXT, types.BASE64_JSON:
-		if base64Str, ok := decodeBase64(str); ok {
-			if targetType == types.BASE64_JSON {
-				value, _ = decodeJson(base64Str)
-			} else {
-				value = base64Str
-			}
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-
-	case types.HEX:
-		if hexStr, ok := decodeToHex(str); ok {
-			value = hexStr
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-
-	case types.BINARY:
-		if binStr, ok := decodeBinary(str); ok {
-			value = binStr
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-
-	case types.GZIP, types.GZIP_JSON:
-		if gzipStr, ok := decodeGZip(str); ok {
-			if targetType == types.GZIP_JSON {
-				value, _ = decodeJson(gzipStr)
-			} else {
-				value = gzipStr
-			}
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-
-	case types.DEFLATE, types.DEFLATE_JSON:
-		if deflateStr, ok := decodeDeflate(str); ok {
-			if targetType == types.DEFLATE_JSON {
-				value, _ = decodeJson(deflateStr)
-			} else {
-				value = deflateStr
-			}
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-
-	case types.BROTLI, types.BROTLI_JSON:
-		if brotliStr, ok := decodeBrotli(str); ok {
-			if targetType == types.BROTLI_JSON {
-				value, _ = decodeJson(brotliStr)
-			} else {
-				value = brotliStr
-			}
-		} else {
-			value = str
-		}
-		resultType = targetType
-		return
-	}
-
-	// type isn't specified or unknown, try to automatically detect and return converted value
-	return autoToType(str)
+	// decode first
+	value, resultDecode = decodeWith(str, decodeType)
+	// then format content
+	value, resultFormat = viewAs(value, formatType)
+	return
 }
 
-// attempt automatic convert to possible types
-// if no conversion is possible, it will return the origin string value and "plain text" type
-func autoToType(str string) (value, resultType string) {
-	if len(str) > 0 {
-		var ok bool
-		if value, ok = decodeJson(str); ok {
-			resultType = types.JSON
+func decodeWith(str, decodeType string) (value, resultDecode string) {
+	if len(decodeType) > 0 {
+		switch decodeType {
+		case types.DECODE_NONE:
+			value = str
+			resultDecode = decodeType
+			return
+
+		case types.DECODE_BASE64:
+			if base64Str, ok := decodeBase64(str); ok {
+				value = base64Str
+			} else {
+				value = str
+			}
+			resultDecode = decodeType
+			return
+
+		case types.DECODE_GZIP:
+			if gzipStr, ok := decodeGZip(str); ok {
+				value = gzipStr
+			} else {
+				value = str
+			}
+			resultDecode = decodeType
+			return
+
+		case types.DECODE_DEFLATE:
+			if gzipStr, ok := decodeDeflate(str); ok {
+				value = gzipStr
+			} else {
+				value = str
+			}
+			resultDecode = decodeType
+			return
+
+		case types.DECODE_BROTLI:
+			if gzipStr, ok := decodeBrotli(str); ok {
+				value = gzipStr
+			} else {
+				value = str
+			}
+			resultDecode = decodeType
 			return
 		}
+	}
 
+	return autoDecode(str)
+}
+
+// attempt try possible decode method
+// if no decode is possible, it will return the origin string value and "none" decode type
+func autoDecode(str string) (value, resultDecode string) {
+	if len(str) > 0 {
+		var ok bool
 		if value, ok = decodeBase64(str); ok {
-			if value, ok = decodeJson(value); ok {
-				resultType = types.BASE64_JSON
-				return
-			}
-			resultType = types.BASE64_TEXT
+			resultDecode = types.DECODE_BASE64
 			return
 		}
 
 		if value, ok = decodeGZip(str); ok {
-			if value, ok = decodeJson(value); ok {
-				resultType = types.GZIP_JSON
-				return
-			}
-			resultType = types.GZIP
+			resultDecode = types.DECODE_GZIP
 			return
 		}
 
 		if value, ok = decodeDeflate(str); ok {
-			if value, ok = decodeJson(value); ok {
-				resultType = types.DEFLATE_JSON
-				return
-			}
-			resultType = types.DEFLATE
+			resultDecode = types.DECODE_DEFLATE
 			return
 		}
 
 		if value, ok = decodeBrotli(str); ok {
-			if value, ok = decodeJson(value); ok {
-				resultType = types.BROTLI_JSON
-				return
+			resultDecode = types.DECODE_BROTLI
+			return
+		}
+	}
+
+	value = str
+	resultDecode = types.DECODE_NONE
+	return
+}
+
+func viewAs(str, formatType string) (value, resultFormat string) {
+	if len(formatType) > 0 {
+		switch formatType {
+		case types.VIEWAS_PLAIN_TEXT:
+			value = str
+			resultFormat = formatType
+			return
+
+		case types.VIEWAS_JSON:
+			if jsonStr, ok := decodeJson(str); ok {
+				value = jsonStr
+			} else {
+				value = str
 			}
-			resultType = types.BROTLI
+			resultFormat = formatType
+			return
+
+		case types.VIEWAS_HEX:
+			if hexStr, ok := decodeToHex(str); ok {
+				value = hexStr
+			} else {
+				value = str
+			}
+			resultFormat = formatType
+			return
+
+		case types.VIEWAS_BINARY:
+			if binStr, ok := decodeBinary(str); ok {
+				value = binStr
+			} else {
+				value = str
+			}
+			resultFormat = formatType
+			return
+		}
+	}
+
+	return autoViewAs(str)
+}
+
+// attempt automatic convert to possible types
+// if no conversion is possible, it will return the origin string value and "plain text" type
+func autoViewAs(str string) (value, resultFormat string) {
+	if len(str) > 0 {
+		var ok bool
+		if value, ok = decodeJson(str); ok {
+			resultFormat = types.VIEWAS_JSON
 			return
 		}
 
 		if containsBinary(str) {
 			if value, ok = decodeToHex(str); ok {
-				resultType = types.HEX
+				resultFormat = types.VIEWAS_HEX
 				return
 			}
 		}
 	}
 
 	value = str
-	resultType = types.PLAIN_TEXT
+	resultFormat = types.VIEWAS_PLAIN_TEXT
 	return
 }
 
@@ -241,65 +252,65 @@ func decodeBrotli(str string) (string, bool) {
 	return str, false
 }
 
-func SaveAs(str, targetType string) (value string, err error) {
-	switch targetType {
-	case types.PLAIN_TEXT:
-		return str, nil
-
-	case types.BASE64_TEXT:
-		base64Str, _ := encodeBase64(str)
-		return base64Str, nil
-
-	case types.HEX:
-		hexStr, _ := encodeHex(str)
-		return hexStr, nil
-
-	case types.BINARY:
-		binStr, _ := encodeBinary(str)
-		return binStr, nil
-
-	case types.JSON, types.BASE64_JSON, types.GZIP_JSON, types.DEFLATE_JSON, types.BROTLI_JSON:
+func SaveAs(str, viewType, decodeType string) (value string, err error) {
+	value = str
+	switch viewType {
+	case types.VIEWAS_JSON:
 		if jsonStr, ok := encodeJson(str); ok {
-			switch targetType {
-			case types.BASE64_JSON:
-				base64Str, _ := encodeBase64(jsonStr)
-				return base64Str, nil
-			case types.GZIP_JSON:
-				gzipStr, _ := encodeGZip(jsonStr)
-				return gzipStr, nil
-			case types.DEFLATE_JSON:
-				deflateStr, _ := encodeDeflate(jsonStr)
-				return deflateStr, nil
-			case types.BROTLI_JSON:
-				brotliStr, _ := encodeBrotli(jsonStr)
-				return brotliStr, nil
-			default:
-				return jsonStr, nil
-			}
+			value = jsonStr
 		} else {
-			return str, errors.New("invalid json")
+			err = errors.New("invalid json data")
+			return
 		}
 
-	case types.GZIP:
+	case types.VIEWAS_HEX:
+		if hexStr, ok := encodeHex(str); ok {
+			value = hexStr
+		} else {
+			err = errors.New("invalid hex data")
+			return
+		}
+
+	case types.VIEWAS_BINARY:
+		if binStr, ok := encodeBinary(str); ok {
+			value = binStr
+		} else {
+			err = errors.New("invalid binary data")
+			return
+		}
+	}
+
+	switch decodeType {
+	case types.DECODE_NONE:
+		return
+
+	case types.DECODE_BASE64:
+		value, _ = encodeBase64(value)
+		return
+
+	case types.DECODE_GZIP:
 		if gzipStr, ok := encodeGZip(str); ok {
-			return gzipStr, nil
+			value = gzipStr
 		} else {
-			return str, errors.New("fail to build gzip data")
+			err = errors.New("fail to build gzip")
 		}
+		return
 
-	case types.DEFLATE:
+	case types.DECODE_DEFLATE:
 		if deflateStr, ok := encodeDeflate(str); ok {
-			return deflateStr, nil
+			value = deflateStr
 		} else {
-			return str, errors.New("fail to build deflate data")
+			err = errors.New("fail to build deflate")
 		}
+		return
 
-	case types.BROTLI:
+	case types.DECODE_BROTLI:
 		if brotliStr, ok := encodeBrotli(str); ok {
-			return brotliStr, nil
+			value = brotliStr
 		} else {
-			return str, errors.New("fail to build brotli data")
+			err = errors.New("fail to build brotli")
 		}
+		return
 	}
 	return str, errors.New("fail to save with unknown error")
 }

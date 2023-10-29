@@ -1,17 +1,20 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
 import { useThemeVars } from 'naive-ui'
-import { types } from '@/consts/value_view_type.js'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import Close from '@/components/icons/Close.vue'
-import Edit from '@/components/icons/Edit.vue'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { isEmpty, map, toLower } from 'lodash'
+import { isEmpty, toLower } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
+import DropdownSelector from '@/components/content_value/DropdownSelector.vue'
+import Code from '@/components/icons/Code.vue'
+import Conversion from '@/components/icons/Conversion.vue'
+import EditFile from '@/components/icons/EditFile.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -32,7 +35,11 @@ const props = defineProps({
     size: Number,
     viewAs: {
         type: String,
-        default: types.PLAIN_TEXT,
+        default: formatTypes.PLAIN_TEXT,
+    },
+    decode: {
+        type: String,
+        default: decodeTypes.NONE,
     },
 })
 
@@ -44,43 +51,20 @@ const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
-const viewOption = computed(() =>
-    map(types, (t) => {
-        return {
-            value: t,
-            label: t,
-        }
-    }),
-)
-// const viewAs = ref(types.PLAIN_TEXT)
-
-const autoDetectFormat = () => {
-    // auto check format when loaded
-    // if (IsJson(props.value)) {
-    //     viewAs.value = types.JSON
-    // } else {
-    //     viewAs.value = types.PLAIN_TEXT
-    // }
-}
-
-onMounted(() => {
-    autoDetectFormat()
-})
-watch(
-    () => props.value,
-    (value) => {
-        autoDetectFormat()
-    },
-)
+// const viewOption = computed(() =>
+//     map(types, (t) => {
+//         return {
+//             value: t,
+//             label: t,
+//             key: t,
+//         }
+//     }),
+// )
 
 const keyType = redisTypes.STRING
 const viewLanguage = computed(() => {
     switch (props.viewAs) {
-        case types.JSON:
-        case types.BASE64_JSON:
-        case types.GZIP_JSON:
-        case types.DEFLATE_JSON:
-        case types.BROTLI_JSON:
+        case formatTypes.JSON:
             return 'json'
         default:
             return 'plaintext'
@@ -88,7 +72,11 @@ const viewLanguage = computed(() => {
 })
 
 const onViewTypeUpdate = (viewType) => {
-    connectionStore.loadKeyValue(props.name, props.db, keyName.value, viewType)
+    connectionStore.loadKeyValue(props.name, props.db, keyName.value, viewType, props.decode)
+}
+
+const onDecodeTypeUpdate = (decodeType) => {
+    connectionStore.loadKeyValue(props.name, props.db, keyName.value, props.viewAs, decodeType)
 }
 
 /**
@@ -133,6 +121,7 @@ const onSaveValue = async () => {
             editValue.value,
             -1,
             props.viewAs,
+            props.decode,
         )
         if (success) {
             await connectionStore.loadKeyValue(props.name, props.db, keyName.value)
@@ -157,15 +146,9 @@ const onSaveValue = async () => {
             :key-path="keyPath"
             :key-type="keyType"
             :server="props.name"
-            :ttl="ttl" />
-        <div class="tb2 flex-box-h">
-            <n-text>{{ $t('interface.view_as') }}</n-text>
-            <n-select
-                :options="viewOption"
-                :value="props.viewAs"
-                filterable
-                style="width: 160px"
-                @update:value="onViewTypeUpdate" />
+            :ttl="ttl"
+            class="value-item-part" />
+        <div class="tb2 value-item-part flex-box-h">
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">
                 <n-button :focusable="false" @click="onCopyValue">
@@ -176,7 +159,7 @@ const onSaveValue = async () => {
                 </n-button>
                 <n-button :focusable="false" plain @click="onEditValue">
                     <template #icon>
-                        <n-icon :component="Edit" size="18" />
+                        <n-icon :component="EditFile" size="18" />
                     </template>
                     {{ $t('interface.edit_value') }}
                 </n-button>
@@ -196,7 +179,7 @@ const onSaveValue = async () => {
                 </n-button>
             </n-button-group>
         </div>
-        <div class="value-wrapper flex-item-expand flex-box-v">
+        <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
             <n-scrollbar v-if="!inEdit" class="flex-item-expand">
                 <n-code :code="props.value" :language="viewLanguage" show-line-numbers style="cursor: text" word-wrap />
             </n-scrollbar>
@@ -208,6 +191,24 @@ const onSaveValue = async () => {
                 class="flex-item-expand"
                 type="textarea" />
         </div>
+        <div class="value-footer flex-box-h">
+            <div class="flex-item-expand"></div>
+            <dropdown-selector
+                :icon="Code"
+                :options="formatTypes"
+                :tooltip="$t('interface.view_as')"
+                :value="props.viewAs"
+                @update:value="onViewTypeUpdate" />
+
+            <n-divider vertical />
+
+            <dropdown-selector
+                :icon="Conversion"
+                :options="decodeTypes"
+                :tooltip="$t('interface.decode_with')"
+                :value="props.decode"
+                @update:value="onDecodeTypeUpdate" />
+        </div>
     </div>
 </template>
 
@@ -216,5 +217,10 @@ const onSaveValue = async () => {
     overflow: hidden;
     border-top: v-bind('themeVars.borderColor') 1px solid;
     padding: 5px;
+}
+
+.value-footer {
+    border-top: v-bind('themeVars.borderColor') 1px solid;
+    background-color: v-bind('themeVars.bodyColor');
 }
 </style>

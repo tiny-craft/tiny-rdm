@@ -791,7 +791,7 @@ func (c *connectionService) LoadAllKeys(connName string, db int, match, keyType 
 }
 
 // GetKeyValue get value by key
-func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs string) (resp types.JSResp) {
+func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, decodeType string) (resp types.JSResp) {
 	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -831,7 +831,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 	case "string":
 		var str string
 		str, err = client.Get(ctx, key).Result()
-		value, viewAs = strutil.ConvertTo(str, viewAs)
+		value, decodeType, viewAs = strutil.ConvertTo(str, decodeType, viewAs)
 		size, _ = client.StrLen(ctx, key).Result()
 	case "list":
 		value, err = client.LRange(ctx, key, 0, -1).Result()
@@ -928,13 +928,14 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs s
 		"value":  value,
 		"size":   size,
 		"viewAs": viewAs,
+		"decode": decodeType,
 	}
 	return
 }
 
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
-func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs string) (resp types.JSResp) {
+func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs, decode string) (resp types.JSResp) {
 	item, err := c.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -958,7 +959,7 @@ func (c *connectionService) SetKeyValue(connName string, db int, k any, keyType 
 			return
 		} else {
 			var saveStr string
-			if saveStr, err = strutil.SaveAs(str, viewAs); err != nil {
+			if saveStr, err = strutil.SaveAs(str, viewAs, decode); err != nil {
 				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, viewAs, err.Error())
 				return
 			}
