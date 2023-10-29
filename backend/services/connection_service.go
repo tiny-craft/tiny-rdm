@@ -825,17 +825,19 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 	}
 
 	var value any
-	var size int64
+	var size, length int64
 	var cursor uint64
 	switch strings.ToLower(keyType) {
 	case "string":
 		var str string
 		str, err = client.Get(ctx, key).Result()
 		value, decodeType, viewAs = strutil.ConvertTo(str, decodeType, viewAs)
-		size, _ = client.StrLen(ctx, key).Result()
+		length, _ = client.StrLen(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	case "list":
 		value, err = client.LRange(ctx, key, 0, -1).Result()
-		size, _ = client.LLen(ctx, key).Result()
+		length, _ = client.LLen(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	case "hash":
 		//value, err = client.HGetAll(ctx, key).Result()
 		items := map[string]string{}
@@ -855,7 +857,8 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 			}
 		}
 		value = items
-		size, _ = client.HLen(ctx, key).Result()
+		length, _ = client.HLen(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	case "set":
 		//value, err = client.SMembers(ctx, key).Result()
 		items := []string{}
@@ -873,7 +876,8 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 			}
 		}
 		value = items
-		size, _ = client.SCard(ctx, key).Result()
+		length, _ = client.SCard(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	case "zset":
 		//value, err = client.ZRangeWithScores(ctx, key, 0, -1).Result()
 		var items []types.ZSetItem
@@ -899,7 +903,8 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 			}
 		}
 		value = items
-		size, _ = client.ZCard(ctx, key).Result()
+		length, _ = client.ZCard(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	case "stream":
 		var msgs []redis.XMessage
 		items := []types.StreamItem{}
@@ -915,7 +920,8 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 			})
 		}
 		value = items
-		size, _ = client.XLen(ctx, key).Result()
+		length, _ = client.XLen(ctx, key).Result()
+		size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -927,6 +933,7 @@ func (c *connectionService) GetKeyValue(connName string, db int, k any, viewAs, 
 		"ttl":    ttl,
 		"value":  value,
 		"size":   size,
+		"length": length,
 		"viewAs": viewAs,
 		"decode": decodeType,
 	}

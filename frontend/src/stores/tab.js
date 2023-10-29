@@ -92,11 +92,12 @@ const useTabStore = defineStore('tab', {
          * @param {string} [key]
          * @param {string} [keyCode]
          * @param {number} [size]
+         * @param {number} [length]
          * @param {*} [value]
          * @param {string} [viewAs]
          * @param {string} [decode]
          */
-        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, value, viewAs, decode }) {
+        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, value, viewAs, decode }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -110,6 +111,7 @@ const useTabStore = defineStore('tab', {
                     key,
                     keyCode,
                     size,
+                    length,
                     value,
                     viewAs,
                     decode,
@@ -128,6 +130,7 @@ const useTabStore = defineStore('tab', {
                 tab.key = key
                 tab.keyCode = keyCode
                 tab.size = size
+                tab.length = length
                 tab.value = value
                 tab.viewAs = viewAs
                 tab.decode = decode

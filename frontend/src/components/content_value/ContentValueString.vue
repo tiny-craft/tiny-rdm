@@ -15,6 +15,7 @@ import DropdownSelector from '@/components/content_value/DropdownSelector.vue'
 import Code from '@/components/icons/Code.vue'
 import Conversion from '@/components/icons/Conversion.vue'
 import EditFile from '@/components/icons/EditFile.vue'
+import bytes from 'bytes'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -33,6 +34,7 @@ const props = defineProps({
     },
     value: String,
     size: Number,
+    length: Number,
     viewAs: {
         type: String,
         default: formatTypes.PLAIN_TEXT,
@@ -192,6 +194,9 @@ const onSaveValue = async () => {
                 type="textarea" />
         </div>
         <div class="value-footer flex-box-h">
+            <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>
+            <n-divider v-if="!isNaN(props.length)" vertical />
+            <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
             <dropdown-selector
                 :icon="Code"
@@ -199,9 +204,7 @@ const onSaveValue = async () => {
                 :tooltip="$t('interface.view_as')"
                 :value="props.viewAs"
                 @update:value="onViewTypeUpdate" />
-
             <n-divider vertical />
-
             <dropdown-selector
                 :icon="Conversion"
                 :options="decodeTypes"
@@ -221,6 +224,6 @@ const onSaveValue = async () => {
 
 .value-footer {
     border-top: v-bind('themeVars.borderColor') 1px solid;
-    background-color: v-bind('themeVars.bodyColor');
+    background-color: v-bind('themeVars.tableHeaderColor');
 }
 </style>

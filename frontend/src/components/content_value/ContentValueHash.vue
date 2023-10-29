@@ -3,14 +3,17 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput } from 'naive-ui'
+import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
 import useConnectionStore from 'stores/connections.js'
 import { isEmpty } from 'lodash'
+import bytes from 'bytes'
 
 const i18n = useI18n()
+const themeVars = useThemeVars()
+
 const props = defineProps({
     name: String,
     db: Number,
@@ -25,6 +28,7 @@ const props = defineProps({
     },
     value: Object,
     size: Number,
+    length: Number,
 })
 
 /**
@@ -259,8 +263,9 @@ const onUpdateFilter = (filters, sourceColumn) => {
             :key-path="props.keyPath"
             :key-type="keyType"
             :server="props.name"
-            :ttl="ttl" />
-        <div class="tb2 flex-box-h">
+            :ttl="ttl"
+            class="value-item-part" />
+        <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>
                     <n-select
@@ -277,9 +282,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                         @update:value="onFilterInput" />
                 </n-input-group>
             </div>
-            <div class="tb2-extra-info flex-item-expand">
-                <n-tag size="large">{{ $t('interface.total', { size: props.size }) }}</n-tag>
-            </div>
+            <div class="flex-item-expand"></div>
             <n-button :focusable="false" plain @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
@@ -287,7 +290,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
-        <div class="value-wrapper fill-height flex-box-h">
+        <div class="value-wrapper value-item-part fill-height flex-box-h">
             <n-data-table
                 :key="(row) => row.no"
                 :bordered="false"
@@ -303,7 +306,18 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 virtual-scroll
                 @update:filters="onUpdateFilter" />
         </div>
+        <div class="value-footer flex-box-h">
+            <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ props.length }}</n-text>
+            <n-divider v-if="!isNaN(props.length)" vertical />
+            <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
+            <div class="flex-item-expand"></div>
+        </div>
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.value-footer {
+    border-top: v-bind('themeVars.borderColor') 1px solid;
+    background-color: v-bind('themeVars.tableHeaderColor');
+}
+</style>

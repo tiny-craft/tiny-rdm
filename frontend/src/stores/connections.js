@@ -665,7 +665,7 @@ const useConnectionStore = defineStore('connections', {
                 if (!isEmpty(key)) {
                     const { data, success, msg } = await GetKeyValue(server, db, key, viewType, decodeType)
                     if (success) {
-                        const { type, ttl, value, size, viewAs, decode } = data
+                        const { type, ttl, value, size, length, viewAs, decode } = data
                         const k = decodeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
@@ -678,6 +678,7 @@ const useConnectionStore = defineStore('connections', {
                             key: k,
                             value,
                             size,
+                            length,
                             viewAs,
                             decode,
                         })
@@ -702,6 +703,7 @@ const useConnectionStore = defineStore('connections', {
                     keyCode: null,
                     value: null,
                     size: 0,
+                    length: 0,
                 })
             } finally {
             }

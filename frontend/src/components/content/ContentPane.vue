@@ -50,6 +50,7 @@ const tabContent = computed(() => {
         ttl: tab.ttl,
         value: tab.value,
         size: tab.size || 0,
+        length: tab.length || 0,
         viewAs: tab.viewAs,
         decode: tab.decode,
     }
@@ -131,6 +132,7 @@ watch(
                     :decode="tabContent.decode"
                     :key-code="tabContent.keyCode"
                     :key-path="tabContent.keyPath"
+                    :length="tabContent.length"
                     :name="tabContent.name"
                     :size="tabContent.size"
                     :ttl="tabContent.ttl"

@@ -75,6 +75,9 @@
     "search": "Search",
     "filter_field": "Filter Field",
     "filter_value": "Filter Value",
+    "length": "Length",
+    "entries": "Entries",
+    "memory_usage": "Memory Usage",
     "view_as": "View As",
     "decode_with": "Decode/Decompress Type",
     "reload": "Reload",
@@ -94,7 +97,6 @@
     "action": "Action",
     "type": "Type",
     "score": "Score",
-    "total": "Length: {size}",
     "cli_welcome": "Welcome to Tiny RDM Redis Console",
     "sub_tab": {
       "status": "Status",

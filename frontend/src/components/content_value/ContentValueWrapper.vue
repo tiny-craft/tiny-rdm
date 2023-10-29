@@ -29,6 +29,7 @@ const props = defineProps({
     },
     value: [String, Object],
     size: Number,
+    length: Number,
     viewAs: {
         type: String,
         default: formatTypes.PLAIN_TEXT,
@@ -70,6 +71,7 @@ const onReloadKey = async () => {
             :decode="props.decode"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
+            :length="props.length"
             :name="props.name"
             :size="props.size"
             :ttl="props.ttl"

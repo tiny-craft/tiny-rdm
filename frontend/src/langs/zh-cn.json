@@ -75,6 +75,9 @@
     "search": "搜索",
     "filter_field": "筛选字段",
     "filter_value": "筛选值",
+    "length": "长度",
+    "entries": "条目",
+    "memory_usage": "内存占用",
     "view_as": "查看方式",
     "decode_with": "解码/解压方式",
     "reload": "重新载入",
@@ -94,7 +97,6 @@
     "action": "操作",
     "type": "类型",
     "score": "分值",
-    "total": "总数：{size}",
     "cli_welcome": "欢迎使用Tiny RDM的Redis命令行控制台",
     "sub_tab": {
       "status": "状态",
