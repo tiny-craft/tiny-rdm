@@ -11,6 +11,8 @@ import Log from '@/components/icons/Log.vue'
 import Detail from '@/components/icons/Detail.vue'
 import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.vue'
 import ContentCli from '@/components/content_value/ContentCli.vue'
+import Monitor from '@/components/icons/Monitor.vue'
+import Pub from '@/components/icons/Pub.vue'
 
 const themeVars = useThemeVars()
 
@@ -106,7 +108,10 @@ watch(
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
-                            <status :inverse="selectedSubTab === BrowserTabType.Status.toString()" stroke-width="4" />
+                            <status
+                                :inverse="selectedSubTab === BrowserTabType.Status.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
                         </n-icon>
                         <span>{{ $t('interface.sub_tab.status') }}</span>
                     </n-space>
@@ -121,7 +126,8 @@ watch(
                         <n-icon size="16">
                             <detail
                                 :inverse="selectedSubTab === BrowserTabType.KeyDetail.toString()"
-                                fill-color="none" />
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
                         </n-icon>
                         <span>{{ $t('interface.sub_tab.key_detail') }}</span>
                     </n-space>
@@ -146,7 +152,10 @@ watch(
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
-                            <terminal :inverse="selectedSubTab === BrowserTabType.Cli.toString()" />
+                            <terminal
+                                :inverse="selectedSubTab === BrowserTabType.Cli.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
                         </n-icon>
                         <span>{{ $t('interface.sub_tab.cli') }}</span>
                     </n-space>
@@ -155,13 +164,46 @@ watch(
             </n-tab-pane>
 
             <!-- slow log pane -->
-            <n-tab-pane :name="BrowserTabType.SlowLog.toString()">
+            <n-tab-pane :disabled="true" :name="BrowserTabType.SlowLog.toString()">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
-                            <log :inverse="selectedSubTab === BrowserTabType.SlowLog.toString()" />
+                            <log
+                                :inverse="selectedSubTab === BrowserTabType.SlowLog.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
                         </n-icon>
                         <span>{{ $t('interface.sub_tab.slow_log') }}</span>
+                    </n-space>
+                </template>
+            </n-tab-pane>
+
+            <!-- command monitor pane -->
+            <n-tab-pane :disabled="true" :name="BrowserTabType.CmdMonitor.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <monitor
+                                :inverse="selectedSubTab === BrowserTabType.CmdMonitor.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.cmd_monitor') }}</span>
+                    </n-space>
+                </template>
+            </n-tab-pane>
+
+            <!-- pub/sub message pane -->
+            <n-tab-pane :disabled="true" :name="BrowserTabType.PubMessage.toString()">
+                <template #tab>
+                    <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
+                        <n-icon size="16">
+                            <pub
+                                :inverse="selectedSubTab === BrowserTabType.PubMessage.toString()"
+                                :stroke-color="themeVars.tabColor"
+                                stroke-width="4" />
+                        </n-icon>
+                        <span>{{ $t('interface.sub_tab.pub_message') }}</span>
                     </n-space>
                 </template>
             </n-tab-pane>

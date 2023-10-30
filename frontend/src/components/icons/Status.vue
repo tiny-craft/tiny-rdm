@@ -8,6 +8,10 @@ const props = defineProps({
         type: [Number, String],
         default: 3,
     },
+    strokeColor: {
+        type: String,
+        default: '#FFF',
+    },
 })
 </script>
 
@@ -18,9 +22,9 @@ const props = defineProps({
             fill="currentColor"
             stroke="currentColor"
             stroke-width="3" />
-        <path :stroke-width="props.strokeWidth" d="M24 17V31" stroke="#FFF" stroke-linecap="round" />
-        <path :stroke-width="props.strokeWidth" d="M32 24V31" stroke="#FFF" stroke-linecap="round" />
-        <path :stroke-width="props.strokeWidth" d="M16 22V31" stroke="#FFF" stroke-linecap="round" />
+        <path :stroke="props.strokeColor" :stroke-width="props.strokeWidth" d="M24 17V31" stroke-linecap="round" />
+        <path :stroke="props.strokeColor" :stroke-width="props.strokeWidth" d="M32 24V31" stroke-linecap="round" />
+        <path :stroke="props.strokeColor" :stroke-width="props.strokeWidth" d="M16 22V31" stroke-linecap="round" />
     </svg>
     <svg v-else fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <rect

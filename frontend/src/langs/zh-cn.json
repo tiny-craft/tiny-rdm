@@ -102,7 +102,9 @@
       "status": "状态",
       "key_detail": "键详情",
       "cli": "命令行",
-      "slow_log": "慢日志"
+      "slow_log": "慢日志",
+      "cmd_monitor": "监控命令",
+      "pub_message": "推送/订阅"
     }
   },
   "ribbon": {

@@ -101,8 +101,10 @@
     "sub_tab": {
       "status": "Status",
       "key_detail": "Key Detail",
-      "cli": "Command Line",
-      "slow_log": "Slow Log"
+      "cli": "Console",
+      "slow_log": "Slow Log",
+      "cmd_monitor": "Monitor Commands",
+      "pub_message": "Pub/Sub"
     }
   },
   "ribbon": {
