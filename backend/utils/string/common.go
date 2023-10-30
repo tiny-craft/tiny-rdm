@@ -1,9 +1,10 @@
 package strutil
 
-import "unicode/utf8"
+import (
+	"unicode"
+)
 
 func containsBinary(str string) bool {
-	//buf := []byte(str)
 	//size := 0
 	//for start := 0; start < len(buf); start += size {
 	//	var r rune
@@ -11,9 +12,11 @@ func containsBinary(str string) bool {
 	//		return true
 	//	}
 	//}
-
-	if !utf8.ValidString(str) {
-		return true
+	rs := []rune(str)
+	for _, r := range rs {
+		if !unicode.IsPrint(r) {
+			return true
+		}
 	}
 	return false
 }

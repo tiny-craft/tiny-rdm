@@ -69,6 +69,16 @@ const wrapperStyle = computed(() => {
               borderRadius: '10px',
           }
 })
+const spinStyle = computed(() => {
+    return hideRadius.value
+        ? {
+              backgroundColor: themeVars.value.bodyColor,
+          }
+        : {
+              backgroundColor: themeVars.value.bodyColor,
+              borderRadius: '10px',
+          }
+})
 
 const onToggleFullscreen = (fullscreen) => {
     hideRadius.value = fullscreen
@@ -82,10 +92,14 @@ const onToggleFullscreen = (fullscreen) => {
 const onToggleMaximize = (isMaximised) => {
     if (isMaximised) {
         maximised.value = true
-        hideRadius.value = isMacOS()
+        if (!isMacOS()) {
+            hideRadius.value = true
+        }
     } else {
         maximised.value = false
-        hideRadius.value = !isMacOS()
+        if (!isMacOS()) {
+            hideRadius.value = false
+        }
     }
 }
 
@@ -105,10 +119,7 @@ onMounted(async () => {
 
 <template>
     <!-- app content-->
-    <n-spin
-        :show="props.loading"
-        :style="{ backgroundColor: themeVars.bodyColor }"
-        :theme-overrides="{ opacitySpinning: 0 }">
+    <n-spin :show="props.loading" :style="spinStyle" :theme-overrides="{ opacitySpinning: 0 }">
         <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v">
             <!-- title bar -->
             <div
@@ -156,7 +167,7 @@ onMounted(async () => {
                 style="--wails-draggable: none">
                 <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page -->
-                <div v-show="tabStore.nav === 'browser'" class="flex-box-h flex-item-expand">
+                <div v-show="tabStore.nav === 'browser'" class="content-area flex-box-h flex-item-expand">
                     <resizeable-wrapper
                         v-model:size="prefStore.behavior.asideWidth"
                         :min-size="300"
@@ -178,7 +189,7 @@ onMounted(async () => {
                 </div>
 
                 <!-- server list page -->
-                <div v-show="tabStore.nav === 'server'" class="flex-box-h flex-item-expand">
+                <div v-show="tabStore.nav === 'server'" class="content-area flex-box-h flex-item-expand">
                     <resizeable-wrapper
                         v-model:size="prefStore.behavior.asideWidth"
                         :min-size="300"
@@ -191,7 +202,7 @@ onMounted(async () => {
                 </div>
 
                 <!-- log page -->
-                <div v-show="tabStore.nav === 'log'" class="flex-box-h flex-item-expand">
+                <div v-show="tabStore.nav === 'log'" class="content-area flex-box-h flex-item-expand">
                     <content-log-pane ref="logPaneRef" class="flex-item-expand" />
                 </div>
             </div>
@@ -229,6 +240,10 @@ onMounted(async () => {
 
     #app-content {
         height: calc(100% - 60px);
+
+        .content-area {
+            overflow: hidden;
+        }
     }
 
     .app-side {

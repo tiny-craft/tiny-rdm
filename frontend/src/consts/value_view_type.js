@@ -5,6 +5,8 @@
 export const formatTypes = {
     PLAIN_TEXT: 'Plain Text',
     JSON: 'JSON',
+    // XML: 'XML',
+    // YML: 'YML',
     HEX: 'Hex',
     BINARY: 'Binary',
 }

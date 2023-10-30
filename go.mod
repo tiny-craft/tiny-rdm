@@ -6,6 +6,7 @@ require (
 	github.com/adrg/sysfont v0.1.2
 	github.com/andybalholm/brotli v1.0.6
 	github.com/google/uuid v1.3.1
+	github.com/klauspost/compress v1.17.2
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.6.0
@@ -33,7 +34,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/samber/lo v1.38.1 // indirect
-	github.com/stretchr/testify v1.8.3 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
