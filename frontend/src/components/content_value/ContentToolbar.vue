@@ -13,6 +13,7 @@ import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed } from 'vue'
 import { isEmpty, padStart } from 'lodash'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 
 const props = defineProps({
     server: String,
@@ -32,6 +33,14 @@ const props = defineProps({
     ttl: {
         type: Number,
         default: -1,
+    },
+    viewAs: {
+        type: String,
+        default: formatTypes.PLAIN_TEXT,
+    },
+    decode: {
+        type: String,
+        default: decodeTypes.NONE,
     },
 })
 
@@ -69,7 +78,7 @@ const ttlString = computed(() => {
 })
 
 const onReloadKey = () => {
-    connectionStore.loadKeyValue(props.server, props.db, keyName.value)
+    connectionStore.loadKeyValue(props.server, props.db, keyName.value, props.viewAs, props.decode)
 }
 
 const onCopyKey = () => {

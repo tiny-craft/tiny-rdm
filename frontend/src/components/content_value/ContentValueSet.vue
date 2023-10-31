@@ -10,6 +10,7 @@ import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useConnectionStore from 'stores/connections.js'
 import bytes from 'bytes'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -29,6 +30,14 @@ const props = defineProps({
     value: Array,
     size: Number,
     length: Number,
+    viewAs: {
+        type: String,
+        default: formatTypes.PLAIN_TEXT,
+    },
+    decode: {
+        type: String,
+        default: decodeTypes.NONE,
+    },
 })
 
 /**
@@ -186,11 +195,13 @@ const onUpdateFilter = (filters, sourceColumn) => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
+            :decode="props.decode"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
             :key-type="keyType"
             :server="props.name"
             :ttl="ttl"
+            :view-as="props.viewAs"
             class="value-item-part" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">

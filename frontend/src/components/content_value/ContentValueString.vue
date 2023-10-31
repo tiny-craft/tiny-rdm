@@ -144,11 +144,13 @@ const onSaveValue = async () => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
+            :decode="props.decode"
             :key-code="keyCode"
             :key-path="keyPath"
             :key-type="keyType"
             :server="props.name"
             :ttl="ttl"
+            :view-as="props.viewAs"
             class="value-item-part" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-item-expand"></div>
