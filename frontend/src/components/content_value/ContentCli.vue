@@ -58,7 +58,7 @@ onMounted(() => {
     const { term, fitAddon } = newTerm()
     termInst = term
     fitAddonInst = fitAddon
-    // window.addEventListener('resize', resizeTerm)
+    window.addEventListener('resize', resizeTerm)
 
     term.writeln('\r\n' + i18nGlobal.t('interface.cli_welcome'))
     // term.write('\x1b[4h') // insert mode
@@ -71,7 +71,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    // window.removeEventListener('resize', resizeTerm)
+    window.removeEventListener('resize', resizeTerm)
     EventsOff(`cmd:output:${props.name}`)
     termInst.dispose()
     termInst = null
