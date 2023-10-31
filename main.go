@@ -10,6 +10,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
+	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"runtime"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/services"
@@ -54,6 +55,7 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: options.NewRGBA(27, 38, 54, 0),
+		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
@@ -61,6 +63,9 @@ func main() {
 
 			services.GA().SetSecretKey(gaMeasurementID, gaSecretKey)
 			services.GA().Startup(version)
+		},
+		OnDomReady: func(ctx context.Context) {
+			runtime2.WindowShow(ctx)
 		},
 		OnShutdown: func(ctx context.Context) {
 			connSvc.Stop()
