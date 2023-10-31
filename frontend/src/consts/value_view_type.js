@@ -20,6 +20,7 @@ export const decodeTypes = {
     BASE64: 'Base64',
     GZIP: 'GZip',
     DEFLATE: 'Deflate',
+    ZSTD: 'ZStd',
     BROTLI: 'Brotli',
     // PHP: 'PHP',
     // Java: 'Java',

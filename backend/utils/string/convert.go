@@ -2,14 +2,15 @@ package strutil
 
 import (
 	"bytes"
-	"compress/flate"
-	"compress/gzip"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/andybalholm/brotli"
+	"github.com/klauspost/compress/flate"
+	"github.com/klauspost/compress/gzip"
+	"github.com/klauspost/compress/zstd"
 	"io"
 	"strconv"
 	"strings"
@@ -70,8 +71,17 @@ func decodeWith(str, decodeType string) (value, resultDecode string) {
 			return
 
 		case types.DECODE_DEFLATE:
-			if gzipStr, ok := decodeDeflate(str); ok {
-				value = gzipStr
+			if falteStr, ok := decodeDeflate(str); ok {
+				value = falteStr
+			} else {
+				value = str
+			}
+			resultDecode = decodeType
+			return
+
+		case types.DECODE_ZSTD:
+			if zstdStr, ok := decodeZStd(str); ok {
+				value = zstdStr
 			} else {
 				value = str
 			}
@@ -79,8 +89,8 @@ func decodeWith(str, decodeType string) (value, resultDecode string) {
 			return
 
 		case types.DECODE_BROTLI:
-			if gzipStr, ok := decodeBrotli(str); ok {
-				value = gzipStr
+			if brotliStr, ok := decodeBrotli(str); ok {
+				value = brotliStr
 			} else {
 				value = str
 			}
@@ -109,6 +119,11 @@ func autoDecode(str string) (value, resultDecode string) {
 
 		if value, ok = decodeDeflate(str); ok {
 			resultDecode = types.DECODE_DEFLATE
+			return
+		}
+
+		if value, ok = decodeZStd(str); ok {
+			resultDecode = types.DECODE_ZSTD
 			return
 		}
 
@@ -244,6 +259,16 @@ func decodeDeflate(str string) (string, bool) {
 	return str, false
 }
 
+func decodeZStd(str string) (string, bool) {
+	if reader, err := zstd.NewReader(strings.NewReader(str)); err == nil {
+		defer reader.Close()
+		if decompressed, err := io.ReadAll(reader); err == nil {
+			return string(decompressed), true
+		}
+	}
+	return str, false
+}
+
 func decodeBrotli(str string) (string, bool) {
 	reader := brotli.NewReader(strings.NewReader(str))
 	if decompressed, err := io.ReadAll(reader); err == nil {
@@ -301,6 +326,14 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 			value = deflateStr
 		} else {
 			err = errors.New("fail to build deflate")
+		}
+		return
+
+	case types.DECODE_ZSTD:
+		if zstdStr, ok := encodeZStd(str); ok {
+			value = zstdStr
+		} else {
+			err = errors.New("fail to build zstd")
 		}
 		return
 
@@ -387,6 +420,26 @@ func encodeDeflate(str string) (string, bool) {
 	}
 	if deflateStr, err := compress([]byte(str)); err == nil {
 		return deflateStr, true
+	}
+	return str, false
+}
+
+func encodeZStd(str string) (string, bool) {
+	var compress = func(b []byte) (string, error) {
+		var buf bytes.Buffer
+		writer, err := zstd.NewWriter(&buf)
+		if err != nil {
+			return "", err
+		}
+		if _, err = writer.Write([]byte(str)); err != nil {
+			writer.Close()
+			return "", err
+		}
+		writer.Close()
+		return string(buf.Bytes()), nil
+	}
+	if zstdStr, err := compress([]byte(str)); err == nil {
+		return zstdStr, true
 	}
 	return str, false
 }
