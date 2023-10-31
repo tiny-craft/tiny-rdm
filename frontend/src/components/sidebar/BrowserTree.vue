@@ -259,6 +259,9 @@ const handleSelectContextMenu = (key) => {
             resetExpandKey(props.server, db, true)
             connectionStore.closeDatabase(props.server, db)
             break
+        case 'db_flush':
+            dialogStore.openDeleteKeyDialog(props.server, db, '*')
+            break
         case 'db_newkey':
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
@@ -548,7 +551,7 @@ const getDatabaseMenu = (opened, loading, end) => {
                 tTooltip: 'interface.batch_delete',
                 icon: Delete,
                 disabled: loading === true,
-                onClick: () => handleSelectContextMenu('key_remove'),
+                onClick: () => handleSelectContextMenu('db_flush'),
             }),
             // h(IconButton, {
             //     tTooltip: 'interface.more_action',
