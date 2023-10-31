@@ -4,7 +4,7 @@ import { FitAddon } from 'xterm-addon-fit'
 import { computed, defineExpose, onMounted, onUnmounted, ref, watch } from 'vue'
 import 'xterm/css/xterm.css'
 import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
-import { get, isEmpty, set, size } from 'lodash'
+import { get, isEmpty, set } from 'lodash'
 import { CloseCli, StartCli } from 'wailsjs/go/services/cliService.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { i18nGlobal } from '@/utils/i18n.js'
@@ -102,6 +102,21 @@ const prefixContent = computed(() => {
     return '\x1b[33m' + promptPrefix.value + '\x1b[0m'
 })
 
+const prefixLen = computed(() => {
+    let len = 0
+    for (let i = 0; i < promptPrefix.value.length; i++) {
+        const char = promptPrefix.value.charCodeAt(i)
+        if (char >= 0x0000 && char <= 0x00ff) {
+            // single byte ASCII char
+            len += 1
+        } else {
+            // multibyte Unicode char
+            len += 2
+        }
+    }
+    return len
+})
+
 let promptPrefix = ref('')
 let inputCursor = 0
 const inputHistory = []
@@ -193,7 +208,7 @@ const moveInputCursor = (step) => {
     }
 
     if (updateCursor) {
-        termInst.write(`\x1B[${size(promptPrefix.value) + inputCursor + 1}G`)
+        termInst.write(`\x1B[${prefixLen.value + inputCursor + 1}G`)
     }
 }
 
