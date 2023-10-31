@@ -53,6 +53,9 @@ export const themeOverrides = {
         buttonColorActive: '#D13B37',
         buttonTextColorActive: '#FFF',
     },
+    Message: {
+        margin: '0 0 38px 0',
+    },
 }
 
 /**
