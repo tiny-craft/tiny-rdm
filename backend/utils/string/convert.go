@@ -350,13 +350,10 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 
 func encodeJson(str string) (string, bool) {
 	var data any
-	if (strings.HasPrefix(str, "{") && strings.HasSuffix(str, "}")) ||
-		(strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]")) {
-		if err := json.Unmarshal([]byte(str), &data); err == nil {
-			var jsonByte []byte
-			if jsonByte, err = json.Marshal(data); err == nil {
-				return string(jsonByte), true
-			}
+	if err := json.Unmarshal([]byte(str), &data); err == nil {
+		var jsonByte []byte
+		if jsonByte, err = json.Marshal(data); err == nil {
+			return string(jsonByte), true
 		}
 	}
 	return str, false
