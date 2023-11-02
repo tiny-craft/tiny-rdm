@@ -20,6 +20,7 @@ import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
+import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
 
 hljs.registerLanguage('json', json)
 hljs.registerLanguage('plaintext', plaintext)
@@ -73,6 +74,7 @@ watch(
             <add-fields-dialog />
             <rename-key-dialog />
             <delete-key-dialog />
+            <flush-db-dialog />
             <set-ttl-dialog />
             <preferences-dialog />
             <about-dialog />

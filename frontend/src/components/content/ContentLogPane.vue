@@ -1,9 +1,9 @@
 <script setup>
-import { computed, nextTick, reactive, ref } from 'vue'
+import { computed, h, nextTick, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useConnectionStore from 'stores/connections.js'
-import { map, uniqBy } from 'lodash'
+import { map, size, split, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
@@ -131,6 +131,17 @@ defineExpose({
                         resizable: true,
                         filter(value, row) {
                             return value === '' || !!~row.cmd.indexOf(value.toString())
+                        },
+                        render({ cmd }, index) {
+                            const cmdList = split(cmd, '\n')
+                            if (size(cmdList) > 1) {
+                                return h(
+                                    'div',
+                                    null,
+                                    map(cmdList, (c) => h('div', null, c)),
+                                )
+                            }
+                            return cmd
                         },
                     },
                     {

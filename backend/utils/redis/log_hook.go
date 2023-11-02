@@ -99,7 +99,7 @@ func (l *LogHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.Proc
 		err := next(ctx, cmds)
 		cost := time.Since(t).Milliseconds()
 		b := make([]byte, 0, 64)
-		for _, cmd := range cmds {
+		for i, cmd := range cmds {
 			log.Println("pipeline: ", cmd)
 			if l.cmdExec != nil {
 				for i, arg := range cmd.Args() {
@@ -108,7 +108,9 @@ func (l *LogHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.Proc
 					}
 					b = appendArg(b, arg)
 				}
-				b = append(b, '\n')
+				if i != len(cmds) {
+					b = append(b, '\n')
+				}
 			}
 		}
 		if l.cmdExec != nil {

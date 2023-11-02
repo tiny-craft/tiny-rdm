@@ -63,6 +63,12 @@ const useDialogStore = defineStore('dialog', {
         },
         deleteKeyDialogVisible: false,
 
+        flushDBParam: {
+            server: '',
+            db: 0,
+        },
+        flushDBDialogVisible: false,
+
         selectTTL: -1,
         ttlDialogVisible: false,
 
@@ -162,6 +168,15 @@ const useDialogStore = defineStore('dialog', {
         },
         closeDeleteKeyDialog() {
             this.deleteKeyDialogVisible = false
+        },
+
+        openFlushDBDialog(server, db) {
+            this.flushDBParam.server = server
+            this.flushDBParam.db = db
+            this.flushDBDialogVisible = true
+        },
+        closeFlushDBDialog() {
+            this.flushDBDialogVisible = false
         },
 
         /**

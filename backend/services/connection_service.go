@@ -1521,6 +1521,45 @@ func (c *connectionService) DeleteKey(connName string, db int, k any, async bool
 	return
 }
 
+// FlushDB flush database
+func (c *connectionService) FlushDB(connName string, db int, async bool) (resp types.JSResp) {
+	item, err := c.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	flush := func(ctx context.Context, cli redis.UniversalClient) {
+		cli.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+			pipe.Select(ctx, db)
+			if async {
+				pipe.FlushDBAsync(ctx)
+			} else {
+				pipe.FlushDB(ctx)
+			}
+			return nil
+		})
+	}
+
+	client, ctx := item.client, item.ctx
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			flush(ctx, cli)
+			return nil
+		})
+	} else {
+		flush(ctx, client)
+	}
+
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}
+
 // RenameKey rename key
 func (c *connectionService) RenameKey(connName string, db int, key, newKey string) (resp types.JSResp) {
 	item, err := c.getRedisClient(connName, db)

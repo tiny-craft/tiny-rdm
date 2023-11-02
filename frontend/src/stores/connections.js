@@ -25,6 +25,7 @@ import {
     DeleteConnection,
     DeleteGroup,
     DeleteKey,
+    FlushDB,
     GetCmdHistory,
     GetConnection,
     GetKeyValue,
@@ -1664,6 +1665,30 @@ const useConnectionStore = defineStore('connections', {
             } finally {
             }
             return false
+        },
+
+        /**
+         * flush database
+         * @param connName
+         * @param db
+         * @param async
+         * @return {Promise<boolean>}
+         */
+        async flushDatabase(connName, db, async) {
+            try {
+                const { success = false } = await FlushDB(connName, db, async)
+
+                if (success === true) {
+                    // update tree view data
+                    this._deleteKeyNode(connName, db)
+                    // set tab content empty
+                    const tab = useTabStore()
+                    tab.emptyTab(connName)
+                    return true
+                }
+            } finally {
+            }
+            return true
         },
 
         /**

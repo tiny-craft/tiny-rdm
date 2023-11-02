@@ -117,8 +117,8 @@ const menuOptions = {
                     key: 'd1',
                 },
                 {
-                    key: 'key_remove',
-                    label: i18n.t('interface.batch_delete'),
+                    key: 'db_flush',
+                    label: i18n.t('interface.flush_db'),
                     icon: renderIcon(Delete),
                 },
                 {
@@ -163,7 +163,7 @@ const menuOptions = {
         },
         {
             key: 'key_remove',
-            label: i18n.t('interface.batch_delete'),
+            label: i18n.t('interface.batch_delete_key'),
             icon: renderIcon(Delete),
         },
     ],
@@ -260,7 +260,7 @@ const handleSelectContextMenu = (key) => {
             connectionStore.closeDatabase(props.server, db)
             break
         case 'db_flush':
-            dialogStore.openDeleteKeyDialog(props.server, db, '*')
+            dialogStore.openFlushDBDialog(props.server, db)
             break
         case 'db_newkey':
         case 'key_newkey':
@@ -548,7 +548,7 @@ const getDatabaseMenu = (opened, loading, end) => {
                 onClick: () => handleSelectContextMenu('db_loadall'),
             }),
             h(IconButton, {
-                tTooltip: 'interface.batch_delete',
+                tTooltip: 'interface.flush_db',
                 icon: Delete,
                 disabled: loading === true,
                 onClick: () => handleSelectContextMenu('db_flush'),
@@ -585,7 +585,7 @@ const getLayerMenu = () => {
             onClick: () => handleSelectContextMenu('key_newkey'),
         }),
         h(IconButton, {
-            tTooltip: 'interface.batch_delete',
+            tTooltip: 'interface.batch_delete_key',
             icon: Delete,
             onClick: () => handleSelectContextMenu('key_remove'),
         }),

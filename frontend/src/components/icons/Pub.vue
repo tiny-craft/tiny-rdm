@@ -10,7 +10,7 @@ const props = defineProps({
     },
     strokeColor: {
         type: String,
-        default: '#FFF',
+        default: 'currentColor',
     },
 })
 </script>
