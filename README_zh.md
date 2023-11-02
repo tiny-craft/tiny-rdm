@@ -13,14 +13,14 @@
 <strong>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux</strong>
 </div>
 
-![screenshot](screenshots/light_zh.png)
+![screenshot](screenshots/dark_zh.png)
 
 ## 功能特性
 
 * 极度轻量，基于Webview2，无内嵌浏览器（感谢[Wails](https://github.com/wailsapp/wails)）
-* 更精美的界面和直观的结构布局（感谢[Naive UI](https://github.com/tusen-ai/naive-ui)
+* 更精美的界面，无边框窗口，提供浅色/深色主题（感谢[Naive UI](https://github.com/tusen-ai/naive-ui)
   和 [IconPark](https://iconpark.oceanengine.com)）
-* 多国语言支持：英文/中文（点我贡献和完善多国语言支持）
+* 多国语言支持：英文/中文（[需要更多语言支持？点我贡献语言](.github/CONTRIBUTING_zh.md)）
 * 更好用的连接管理：支持SSH隧道/SSL/哨兵模式/集群模式
 * 可视化键值操作，增删查改一应俱全
 * 支持多种数据查看格式以及转码/解压方式
@@ -29,6 +29,7 @@
 
 ## 未来版本规划
 - [ ] List/Hash/Set/Sorted Set的分页展示和查询
+- [ ] List/Hash/Set/Sorted Set值的转码显示
 - [ ] 慢日志展示
 - [ ] 命令实时监控
 - [ ] 发布/订阅支持

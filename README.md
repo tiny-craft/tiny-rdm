@@ -13,20 +13,29 @@
 <strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong>
 </div>
 
-![](screenshots/light_en.png)
+![](screenshots/dark_en.png)
 
 ## Feature
 
-* Built on Webview, no embedded browsers (Thanks to [Wails](https://github.com/wailsapp/wails)).
-* More elegant UI and visualized layout (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
+* Super lightweight, built on Webview2, without embedded browsers (Thanks to [Wails](https://github.com/wailsapp/wails)).
+* More elegant UI, frameless, offering light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
   and [IconPark](https://iconpark.oceanengine.com)).
-* Multi-language support (Click here to contribute and support more languages).
-* Convenient data viewing and editing.
-* More features under continuous development...
+* Multi-language support ([Need more languages ? Click here to contribute](.github/CONTRIBUTING.md)).
+* Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode.
+* Visualize key value operations, CRUD support for Lists, Hashes, Strings, Sets, Sorted Sets, and Streams.
+* Support multiple data viewing format and decode/decompression methods.
+* Operation command execution logs.
+* Provides command-line operations.
+
+## Roadmap
+- [ ] Pagination and querying for List/Hash/Set/Sorted Set
+- [ ] Decode/decompression display for value of List/Hash/Set/Sorted Set
+- [ ] Slow logs
+- [ ] Real-time commands monitoring
+- [ ] Pub/Sub operations
 
 ## Installation
 
-We publish binaries for Mac, Windows, and Linux.
 Available to download for free from [here](https://github.com/tiny-craft/tiny-rdm/releases).
 
 > If you can't open it after installation on macOS, exec the following command then reopen:
@@ -34,9 +43,9 @@ Available to download for free from [here](https://github.com/tiny-craft/tiny-rd
 >  sudo xattr -d com.apple.quarantine /Applications/Tiny\ RDM.app
 > ```
 
-## Build
+## Build Guidelines
 ### Prerequisites
-* Go >= 1.21
+* Go (latest version)
 * Node.js >= 16
 * NPM >= 9
 
