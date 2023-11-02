@@ -91,4 +91,18 @@ const onDropdownShow = (show) => {
     </n-dropdown>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.type-selector-header {
+    height: 30px;
+    line-height: 30px;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.type-selector-item {
+    min-width: 100px;
+    text-align: center;
+}
+</style>

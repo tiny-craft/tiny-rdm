@@ -117,10 +117,11 @@ func autoDecode(str string) (value, resultDecode string) {
 			return
 		}
 
-		if value, ok = decodeDeflate(str); ok {
-			resultDecode = types.DECODE_DEFLATE
-			return
-		}
+		// FIXME: skip decompress with deflate due to incorrect format checking
+		//if value, ok = decodeDeflate(str); ok {
+		//	resultDecode = types.DECODE_DEFLATE
+		//	return
+		//}
 
 		if value, ok = decodeZStd(str); ok {
 			resultDecode = types.DECODE_ZSTD
@@ -202,6 +203,7 @@ func autoViewAs(str string) (value, resultFormat string) {
 }
 
 func decodeJson(str string) (string, bool) {
+	str = strings.TrimSpace(str)
 	if (strings.HasPrefix(str, "{") && strings.HasSuffix(str, "}")) ||
 		(strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]")) {
 		var out bytes.Buffer
