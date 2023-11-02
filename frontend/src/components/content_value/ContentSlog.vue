@@ -1,11 +1,9 @@
 <script setup>
-import { computed, h, nextTick, reactive, ref } from 'vue'
-import IconButton from '@/components/common/IconButton.vue'
+import { h, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useConnectionStore from 'stores/connections.js'
-import { map, size, split, uniqBy } from 'lodash'
+import { debounce, isEmpty, map, size, split } from 'lodash'
 import { useI18n } from 'vue-i18n'
-import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
 import { useThemeVars } from 'naive-ui'
 
@@ -13,86 +11,93 @@ const themeVars = useThemeVars()
 
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
-const data = reactive({
-    loading: false,
-    server: '',
-    keyword: '',
-    history: [],
+const props = defineProps({
+    server: {
+        type: String,
+    },
+    db: {
+        type: Number,
+        default: 0,
+    },
 })
-const filterServerOption = computed(() => {
-    const serverSet = uniqBy(data.history, 'server')
-    const options = map(serverSet, ({ server }) => ({
-        label: server,
-        value: server,
-    }))
-    options.splice(0, 0, {
-        label: i18n.t('common.all'),
-        value: '',
-    })
-    return options
+
+const data = reactive({
+    list: [],
+    sortOrder: 'descend',
+    listLimit: 20,
+    loading: false,
+    autoLoading: false,
+    client: '',
+    keyword: '',
 })
 
 const tableRef = ref(null)
 
-const loadHistory = () => {
+const _loadSlowLog = () => {
     data.loading = true
     connectionStore
-        .getCmdHistory()
+        .getSlowLog(props.server, props.db, data.listLimit)
         .then((list) => {
-            data.history = list || []
+            data.list = list || []
         })
         .finally(() => {
             data.loading = false
-            tableRef.value?.scrollTo({ top: 999999 })
+            tableRef.value?.scrollTo({ top: data.sortOrder === 'ascend' ? 999999 : 0 })
         })
 }
+const loadSlowLog = debounce(_loadSlowLog, 1000, { leading: true, trailing: true })
 
-const cleanHistory = async () => {
-    $dialog.warning(i18n.t('log.confirm_clean_log'), () => {
-        data.loading = true
-        connectionStore
-            .cleanCmdHistory()
-            .then((success) => {
-                if (success) {
-                    data.history = []
-                    tableRef.value?.scrollTo({ top: 0 })
-                    $message.success(i18n.t('common.success'))
-                }
-            })
-            .finally(() => {
-                data.loading = false
-            })
-    })
-}
-
-defineExpose({
-    refresh: () => nextTick().then(loadHistory),
+let intervalID
+onMounted(() => {
+    loadSlowLog()
+    intervalID = setInterval(() => {
+        if (data.autoLoading === true) {
+            loadSlowLog()
+        }
+    }, 5000)
 })
+
+onUnmounted(() => {
+    clearInterval(intervalID)
+})
+
+const onListLimitChanged = (limit) => {
+    loadSlowLog()
+}
 </script>
 
 <template>
     <n-card
         :bordered="false"
         :theme-overrides="{ borderRadius: '0px' }"
-        :title="$t('log.title')"
+        :title="$t('slog.title')"
         class="content-container flex-box-v"
         content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray">
         <n-form :disabled="data.loading" class="flex-item" inline>
-            <n-form-item :label="$t('log.filter_server')">
-                <n-select
-                    v-model:value="data.server"
-                    :consistent-menu-width="false"
-                    :options="filterServerOption"
-                    style="min-width: 100px" />
+            <n-form-item :label="$t('slog.limit')">
+                <n-input-number
+                    v-model:value="data.listLimit"
+                    :max="9999"
+                    style="width: 120px"
+                    @update:value="onListLimitChanged" />
             </n-form-item>
-            <n-form-item :label="$t('log.filter_keyword')">
+            <n-form-item :label="$t('slog.auto_refresh')">
+                <n-switch v-model:value="data.autoLoading" :loading="data.loading" />
+            </n-form-item>
+            <n-form-item label="&nbsp;">
+                <n-tooltip>
+                    {{ $t('slog.refresh') }}
+                    <template #trigger>
+                        <n-button :loading="data.loading" circle size="small" tertiary @click="_loadSlowLog">
+                            <template #icon>
+                                <n-icon :component="Refresh" />
+                            </template>
+                        </n-button>
+                    </template>
+                </n-tooltip>
+            </n-form-item>
+            <n-form-item :label="$t('slog.filter')">
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
-            </n-form-item>
-            <n-form-item label="&nbsp;">
-                <icon-button :icon="Refresh" border t-tooltip="log.refresh" @click="loadHistory" />
-            </n-form-item>
-            <n-form-item label="&nbsp;">
-                <icon-button :icon="Delete" border t-tooltip="log.clean_log" @click="cleanHistory" />
             </n-form-item>
         </n-form>
         <div class="content-value fill-height flex-box-h">
@@ -100,9 +105,9 @@ defineExpose({
                 ref="tableRef"
                 :columns="[
                     {
-                        title: $t('log.exec_time'),
+                        title: $t('slog.exec_time'),
                         key: 'timestamp',
-                        defaultSortOrder: 'ascend',
+                        sortOrder: data.sortOrder,
                         sorter: 'default',
                         width: 180,
                         align: 'center',
@@ -112,23 +117,38 @@ defineExpose({
                         },
                     },
                     {
-                        title: $t('log.server'),
-                        key: 'server',
-                        filterOptionValue: data.server,
+                        title: $t('slog.client'),
+                        key: 'client',
+                        filterOptionValue: data.client,
+                        resizable: true,
                         filter(value, row) {
-                            return value === '' || row.server === value.toString()
+                            return value === '' || row.client === value.toString() || row.addr === value.toString()
                         },
-                        width: 150,
+                        width: 200,
                         align: 'center',
                         titleAlign: 'center',
                         ellipsis: true,
+                        render({ client, addr }, index) {
+                            let content = ''
+                            if (!isEmpty(client)) {
+                                content += client
+                            }
+                            if (!isEmpty(addr)) {
+                                if (!isEmpty(content)) {
+                                    content += ' - '
+                                }
+                                content += addr
+                            }
+                            return content
+                        },
                     },
                     {
-                        title: $t('log.cmd'),
+                        title: $t('slog.cmd'),
                         key: 'cmd',
                         titleAlign: 'center',
                         filterOptionValue: data.keyword,
                         resizable: true,
+                        width: 100,
                         filter(value, row) {
                             return value === '' || !!~row.cmd.indexOf(value.toString())
                         },
@@ -145,7 +165,7 @@ defineExpose({
                         },
                     },
                     {
-                        title: $t('log.cost_time'),
+                        title: $t('slog.cost_time'),
                         key: 'cost',
                         width: 100,
                         align: 'center',
@@ -160,7 +180,8 @@ defineExpose({
                         },
                     },
                 ]"
-                :data="data.history"
+                @update:sorter="({ order }) => (data.sortOrder = order)"
+                :data="data.list"
                 class="flex-item-expand"
                 flex-height />
         </div>

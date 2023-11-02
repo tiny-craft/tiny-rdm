@@ -273,7 +273,7 @@
     "about": "关于"
   },
   "log": {
-    "launch_log": "运行日志",
+    "title": "运行日志",
     "filter_server": "筛选服务器",
     "filter_keyword": "筛选关键字",
     "clean_log": "清空运行日志",
@@ -290,6 +290,17 @@
     "total_keys": "键总数",
     "memory_used": "内存使用",
     "all_info": "全部信息",
+    "refresh": "立即刷新",
+    "auto_refresh": "自动刷新"
+  },
+  "slog": {
+    "title": "慢日志",
+    "limit": "条数",
+    "filter": "筛选",
+    "exec_time": "执行时间",
+    "client": "客户端",
+    "cmd": "命令",
+    "cost_time": "耗时",
     "refresh": "立即刷新",
     "auto_refresh": "自动刷新"
   }

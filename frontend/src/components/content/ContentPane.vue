@@ -13,6 +13,7 @@ import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.
 import ContentCli from '@/components/content_value/ContentCli.vue'
 import Monitor from '@/components/icons/Monitor.vue'
 import Pub from '@/components/icons/Pub.vue'
+import ContentSlog from '@/components/content_value/ContentSlog.vue'
 
 const themeVars = useThemeVars()
 
@@ -164,7 +165,7 @@ watch(
             </n-tab-pane>
 
             <!-- slow log pane -->
-            <n-tab-pane :disabled="true" :name="BrowserTabType.SlowLog.toString()">
+            <n-tab-pane :name="BrowserTabType.SlowLog.toString()" display-directive="if">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -176,10 +177,11 @@ watch(
                         <span>{{ $t('interface.sub_tab.slow_log') }}</span>
                     </n-space>
                 </template>
+                <content-slog :db="tabContent.db" :server="props.server" />
             </n-tab-pane>
 
             <!-- command monitor pane -->
-            <n-tab-pane :disabled="true" :name="BrowserTabType.CmdMonitor.toString()">
+            <n-tab-pane :disabled="true" :name="BrowserTabType.CmdMonitor.toString()" display-directive="if">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">

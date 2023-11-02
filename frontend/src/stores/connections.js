@@ -29,6 +29,7 @@ import {
     GetCmdHistory,
     GetConnection,
     GetKeyValue,
+    GetSlowLogs,
     ListConnection,
     LoadAllKeys,
     LoadNextKeys,
@@ -1741,6 +1742,23 @@ const useConnectionStore = defineStore('connections', {
                 return success === true
             } catch {
                 return false
+            }
+        },
+
+        /**
+         * get slow log list
+         * @param {string} server
+         * @param {number} db
+         * @param {number} num
+         * @return {Promise<[]>}
+         */
+        async getSlowLog(server, db, num) {
+            try {
+                const { success, data = { list: [] } } = await GetSlowLogs(server, db, num)
+                const { list } = data
+                return list
+            } catch {
+                return []
             }
         },
 

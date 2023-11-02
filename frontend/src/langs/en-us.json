@@ -274,7 +274,7 @@
     "about": "About"
   },
   "log": {
-    "launch_log": "Launch Log",
+    "title": "Launch Log",
     "filter_server": "Filter Server",
     "filter_keyword": "Filter Keyword",
     "clean_log": "Clean Launch Log",
@@ -292,6 +292,17 @@
     "memory_used": "Memory",
     "all_info": "Information",
     "refresh": "Refresh",
+    "auto_refresh": "Auto Refresh"
+  },
+  "slog": {
+    "title": "Slow Log",
+    "limit": "Limit",
+    "filter": "Filter",
+    "exec_time": "Time",
+    "client": "Client",
+    "cmd": "Command",
+    "cost_time": "Cost",
+    "refresh": "Refresh Now",
     "auto_refresh": "Auto Refresh"
   }
 }

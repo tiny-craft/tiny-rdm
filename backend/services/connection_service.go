@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,6 +30,14 @@ import (
 type cmdHistoryItem struct {
 	Timestamp int64  `json:"timestamp"`
 	Server    string `json:"server"`
+	Cmd       string `json:"cmd"`
+	Cost      int64  `json:"cost"`
+}
+
+type slowLogItem struct {
+	Timestamp int64  `json:"timestamp"`
+	Client    string `json:"client"`
+	Addr      string `json:"addr"`
 	Cmd       string `json:"cmd"`
 	Cost      int64  `json:"cost"`
 }
@@ -1610,6 +1619,59 @@ func (c *connectionService) GetCmdHistory(pageNo, pageSize int) (resp types.JSRe
 func (c *connectionService) CleanCmdHistory() (resp types.JSResp) {
 	c.cmdHistory = []cmdHistoryItem{}
 	resp.Success = true
+	return
+}
+
+// GetSlowLogs get slow log list
+func (c *connectionService) GetSlowLogs(connName string, db int, num int64) (resp types.JSResp) {
+	item, err := c.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	var logs []redis.SlowLog
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		var mu sync.Mutex
+		err = cluster.ForEachShard(ctx, func(ctx context.Context, cli *redis.Client) error {
+			if subLogs, _ := client.SlowLogGet(ctx, num).Result(); len(subLogs) > 0 {
+				mu.Lock()
+				logs = append(logs, subLogs...)
+				mu.Unlock()
+			}
+			return nil
+		})
+	} else {
+		logs, err = client.SlowLogGet(ctx, num).Result()
+	}
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	sort.Slice(logs, func(i, j int) bool {
+		return logs[i].Time.UnixMilli() > logs[j].Time.UnixMilli()
+	})
+	if len(logs) > int(num) {
+		logs = logs[:num]
+	}
+
+	list := sliceutil.Map(logs, func(i int) slowLogItem {
+		return slowLogItem{
+			Timestamp: logs[i].Time.UnixMilli(),
+			Client:    logs[i].ClientName,
+			Addr:      logs[i].ClientAddr,
+			Cmd:       sliceutil.JoinString(logs[i].Args, " "),
+			Cost:      logs[i].Duration.Milliseconds(),
+		}
+	})
+
+	resp.Success = true
+	resp.Data = map[string]any{
+		"list": list,
+	}
 	return
 }
 
