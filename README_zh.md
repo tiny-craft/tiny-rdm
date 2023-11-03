@@ -13,7 +13,11 @@
 <strong>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux</strong>
 </div>
 
-![screenshot](screenshots/dark_zh.png)
+<picture>
+ <source media="(prefers-color-scheme: dark)" srcset="screenshots/dark_zh.png">
+ <source media="(prefers-color-scheme: light)" srcset="screenshots/light_zh.png">
+ <img alt="screenshot" src="screenshots/dark_zh.png">
+</picture>
 
 ## 功能特性
 

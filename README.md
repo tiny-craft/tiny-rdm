@@ -13,7 +13,11 @@
 <strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong>
 </div>
 
-![](screenshots/dark_en.png)
+<picture>
+ <source media="(prefers-color-scheme: dark)" srcset="screenshots/dark_en.png">
+ <source media="(prefers-color-scheme: light)" srcset="screenshots/light_en.png">
+ <img alt="screenshot" src="screenshots/dark_en.png">
+</picture>
 
 ## Feature
 
