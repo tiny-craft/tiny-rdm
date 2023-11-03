@@ -1659,9 +1659,14 @@ func (c *connectionService) GetSlowLogs(connName string, db int, num int64) (res
 	}
 
 	list := sliceutil.Map(logs, func(i int) slowLogItem {
+		var name string
+		var e error
+		if name, e = url.QueryUnescape(logs[i].ClientName); e != nil {
+			name = logs[i].ClientName
+		}
 		return slowLogItem{
 			Timestamp: logs[i].Time.UnixMilli(),
-			Client:    logs[i].ClientName,
+			Client:    name,
 			Addr:      logs[i].ClientAddr,
 			Cmd:       sliceutil.JoinString(logs[i].Args, " "),
 			Cost:      logs[i].Duration.Milliseconds(),
