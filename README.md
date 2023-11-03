@@ -24,15 +24,17 @@
 * Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode.
 * Visualize key value operations, CRUD support for Lists, Hashes, Strings, Sets, Sorted Sets, and Streams.
 * Support multiple data viewing format and decode/decompression methods.
+* Use SCAN for segmented loading, making it easy to list millions of keys.
 * Operation command execution logs.
 * Provides command-line operations.
+* Provides slow logs.
 
 ## Roadmap
 - [ ] Pagination and querying for List/Hash/Set/Sorted Set
 - [ ] Decode/decompression display for value of List/Hash/Set/Sorted Set
-- [ ] Slow logs
 - [ ] Real-time commands monitoring
 - [ ] Pub/Sub operations
+- [ ] Embedding Monaco Editor
 
 ## Installation
 
