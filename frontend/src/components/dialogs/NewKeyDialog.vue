@@ -10,10 +10,10 @@ import NewListValue from '@/components/new_value/NewListValue.vue'
 import NewZSetValue from '@/components/new_value/NewZSetValue.vue'
 import NewSetValue from '@/components/new_value/NewSetValue.vue'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from 'stores/connections.js'
 import { NSpace } from 'naive-ui'
 import useTabStore from 'stores/tab.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -33,7 +33,7 @@ const formRules = computed(() => {
     }
 })
 const dbOptions = computed(() =>
-    map(keys(connectionStore.databases[newForm.server]), (key) => ({
+    map(keys(browserStore.databases[newForm.server]), (key) => ({
         label: key,
         value: parseInt(key),
     })),
@@ -101,7 +101,7 @@ const renderTypeLabel = (option) => {
     )
 }
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const onAdd = async () => {
     await newFormRef.value?.validate().catch((err) => {
@@ -117,7 +117,7 @@ const onAdd = async () => {
         if (value == null) {
             value = defaultValue[type]
         }
-        const { success, msg, nodeKey } = await connectionStore.setKey(
+        const { success, msg, nodeKey } = await browserStore.setKey(
             server,
             db,
             key,
@@ -130,7 +130,7 @@ const onAdd = async () => {
         if (success) {
             // select current key
             tabStore.setSelectedKeys(server, nodeKey)
-            connectionStore.loadKeyValue(server, db, key).then(() => {})
+            browserStore.loadKeyValue(server, db, key).then(() => {})
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }

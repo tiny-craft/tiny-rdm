@@ -2,8 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const filterForm = reactive({
@@ -39,11 +39,11 @@ watch(
     },
 )
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const onConfirm = () => {
     const { server, db, type, pattern } = filterForm
-    connectionStore.setKeyFilter(server, db, pattern, type)
-    connectionStore.reopenDatabase(server, db)
+    browserStore.setKeyFilter(server, db, pattern, type)
+    browserStore.reopenDatabase(server, db)
 }
 
 const onClose = () => {

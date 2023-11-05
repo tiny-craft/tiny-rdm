@@ -29,6 +29,7 @@ func main() {
 	// Create an instance of the app structure
 	sysSvc := services.System()
 	connSvc := services.Connection()
+	browserSvc := services.Browser()
 	cliSvc := services.Cli()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
@@ -59,6 +60,7 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			sysSvc.Start(ctx)
 			connSvc.Start(ctx)
+			browserSvc.Start(ctx)
 			cliSvc.Start(ctx)
 
 			services.GA().SetSecretKey(gaMeasurementID, gaSecretKey)
@@ -68,12 +70,13 @@ func main() {
 			runtime2.WindowShow(ctx)
 		},
 		OnShutdown: func(ctx context.Context) {
-			connSvc.Stop()
+			browserSvc.Stop()
 			cliSvc.CloseAll()
 		},
 		Bind: []interface{}{
 			sysSvc,
 			connSvc,
+			browserSvc,
 			cliSvc,
 			prefSvc,
 		},

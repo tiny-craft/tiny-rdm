@@ -8,9 +8,9 @@ import { useI18n } from 'vue-i18n'
 import AddListValue from '@/components/new_value/AddListValue.vue'
 import AddHashValue from '@/components/new_value/AddHashValue.vue'
 import AddZSetValue from '@/components/new_value/AddZSetValue.vue'
-import useConnectionStore from 'stores/connections.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
 import { isEmpty, size, slice } from 'lodash'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -78,7 +78,7 @@ watch(
     },
 )
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const onAdd = async () => {
     try {
         const { server, db, key, keyCode, type } = newForm
@@ -92,14 +92,14 @@ const onAdd = async () => {
                 {
                     let data
                     if (newForm.opType === 1) {
-                        data = await connectionStore.prependListItem(server, db, keyName, value)
+                        data = await browserStore.prependListItem(server, db, keyName, value)
                     } else {
-                        data = await connectionStore.appendListItem(server, db, keyName, value)
+                        data = await browserStore.appendListItem(server, db, keyName, value)
                     }
                     const { success, msg } = data
                     if (success) {
                         if (newForm.reload) {
-                            connectionStore.loadKeyValue(server, db, keyName).then(() => {})
+                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
                         }
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
@@ -110,16 +110,10 @@ const onAdd = async () => {
 
             case types.HASH:
                 {
-                    const { success, msg } = await connectionStore.addHashField(
-                        server,
-                        db,
-                        keyName,
-                        newForm.opType,
-                        value,
-                    )
+                    const { success, msg } = await browserStore.addHashField(server, db, keyName, newForm.opType, value)
                     if (success) {
                         if (newForm.reload) {
-                            connectionStore.loadKeyValue(server, db, keyName).then(() => {})
+                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
                         }
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
@@ -130,10 +124,10 @@ const onAdd = async () => {
 
             case types.SET:
                 {
-                    const { success, msg } = await connectionStore.addSetItem(server, db, keyName, value)
+                    const { success, msg } = await browserStore.addSetItem(server, db, keyName, value)
                     if (success) {
                         if (newForm.reload) {
-                            connectionStore.loadKeyValue(server, db, keyName).then(() => {})
+                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
                         }
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
@@ -144,16 +138,10 @@ const onAdd = async () => {
 
             case types.ZSET:
                 {
-                    const { success, msg } = await connectionStore.addZSetItem(
-                        server,
-                        db,
-                        keyName,
-                        newForm.opType,
-                        value,
-                    )
+                    const { success, msg } = await browserStore.addZSetItem(server, db, keyName, newForm.opType, value)
                     if (success) {
                         if (newForm.reload) {
-                            connectionStore.loadKeyValue(server, db, keyName).then(() => {})
+                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
                         }
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
@@ -165,7 +153,7 @@ const onAdd = async () => {
             case types.STREAM:
                 {
                     if (size(value) > 2) {
-                        const { success, msg } = await connectionStore.addStreamValue(
+                        const { success, msg } = await browserStore.addStreamValue(
                             server,
                             db,
                             keyName,
@@ -174,7 +162,7 @@ const onAdd = async () => {
                         )
                         if (success) {
                             if (newForm.reload) {
-                                connectionStore.loadKeyValue(server, db, keyName).then(() => {})
+                                browserStore.loadKeyValue(server, db, keyName).then(() => {})
                             }
                             $message.success(i18n.t('dialogue.handle_succ'))
                         } else {

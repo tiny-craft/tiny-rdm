@@ -8,12 +8,12 @@ import Timer from '@/components/icons/Timer.vue'
 import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
-import useConnectionStore from 'stores/connections.js'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed } from 'vue'
 import { isEmpty, padStart } from 'lodash'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import useBrowserStore from 'stores/browser.js'
 
 const props = defineProps({
     server: String,
@@ -45,7 +45,7 @@ const props = defineProps({
 })
 
 const dialogStore = useDialog()
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const i18n = useI18n()
 
 const binaryKey = computed(() => {
@@ -78,7 +78,7 @@ const ttlString = computed(() => {
 })
 
 const onReloadKey = () => {
-    connectionStore.loadKeyValue(props.server, props.db, keyName.value, props.viewAs, props.decode)
+    browserStore.loadKeyValue(props.server, props.db, keyName.value, props.viewAs, props.decode)
 }
 
 const onCopyKey = () => {
@@ -103,7 +103,7 @@ const onRenameKey = () => {
 
 const onDeleteKey = () => {
     $dialog.warning(i18n.t('dialogue.remove_tip', { name: props.keyPath }), () => {
-        connectionStore.deleteKey(props.server, props.db, keyName.value).then((success) => {
+        browserStore.deleteKey(props.server, props.db, keyName.value).then((success) => {
             if (success) {
                 $message.success(i18n.t('dialogue.delete_key_succ', { key: props.keyPath }))
             }

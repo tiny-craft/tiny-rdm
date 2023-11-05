@@ -2,16 +2,16 @@
 import { computed, h, nextTick, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import useConnectionStore from 'stores/connections.js'
 import { map, size, split, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
 import { useThemeVars } from 'naive-ui'
+import useBrowserStore from 'stores/browser.js'
 
 const themeVars = useThemeVars()
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const i18n = useI18n()
 const data = reactive({
     loading: false,
@@ -36,7 +36,7 @@ const tableRef = ref(null)
 
 const loadHistory = () => {
     data.loading = true
-    connectionStore
+    browserStore
         .getCmdHistory()
         .then((list) => {
             data.history = list || []
@@ -50,7 +50,7 @@ const loadHistory = () => {
 const cleanHistory = async () => {
     $dialog.warning(i18n.t('log.confirm_clean_log'), () => {
         data.loading = true
-        connectionStore
+        browserStore
             .cleanCmdHistory()
             .then((success) => {
                 if (success) {

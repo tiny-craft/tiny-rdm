@@ -9,10 +9,10 @@ import Config from '@/components/icons/Config.vue'
 import useDialogStore from 'stores/dialog.js'
 import Github from '@/components/icons/Github.vue'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
-import useConnectionStore from 'stores/connections.js'
 import usePreferencesStore from 'stores/preferences.js'
 import Record from '@/components/icons/Record.vue'
 import { extraTheme } from '@/utils/extra_theme.js'
+import useBrowserStore from 'stores/browser.js'
 
 const themeVars = useThemeVars()
 
@@ -34,7 +34,7 @@ const renderIcon = (icon) => {
     return () => h(NIcon, null, { default: () => h(icon, { strokeWidth: 3 }) })
 }
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const i18n = useI18n()
 const menuOptions = computed(() => {
     return [
@@ -42,7 +42,7 @@ const menuOptions = computed(() => {
             label: i18n.t('ribbon.browser'),
             key: 'browser',
             icon: renderIcon(Database),
-            show: connectionStore.anyConnectionOpened,
+            show: browserStore.anyConnectionOpened,
         },
         {
             label: i18n.t('ribbon.server'),

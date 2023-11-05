@@ -25,6 +25,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import { parseHexColor } from '@/utils/rgb.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
+import useBrowserStore from 'stores/browser.js'
 
 const props = defineProps({
     server: String,
@@ -37,6 +38,7 @@ const loading = ref(false)
 const loadingConnections = ref(false)
 const expandedKeys = ref([props.server])
 const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
 
@@ -53,7 +55,7 @@ const selectedKeys = computed(() => {
 })
 
 const data = computed(() => {
-    const dbs = get(connectionStore.databases, props.server, [])
+    const dbs = get(browserStore.databases, props.server, [])
     return dbs
 })
 
@@ -229,7 +231,7 @@ const handleSelectContextMenu = (key) => {
     if (selectedKey == null) {
         return
     }
-    const node = connectionStore.getNode(selectedKey)
+    const node = browserStore.getNode(selectedKey)
     const { db = 0, key: nodeKey, redisKey: rk = '', redisKeyCode: rkc, label } = node || {}
     const redisKey = rkc || rk
     const redisKeyName = !!rkc ? label : redisKey
@@ -241,23 +243,23 @@ const handleSelectContextMenu = (key) => {
         case 'server_reload':
             expandedKeys.value = [props.server]
             tabStore.setSelectedKeys(props.server)
-            connectionStore.openConnection(props.server, true).then(() => {
+            browserStore.openConnection(props.server, true).then(() => {
                 $message.success(i18n.t('dialogue.reload_succ'))
             })
             break
         case 'server_close':
-            connectionStore.closeConnection(props.server)
+            browserStore.closeConnection(props.server)
             break
         case 'db_open':
             nextTick().then(() => expandKey(nodeKey))
             break
         case 'db_reload':
             resetExpandKey(props.server, db)
-            connectionStore.reopenDatabase(props.server, db)
+            browserStore.reopenDatabase(props.server, db)
             break
         case 'db_close':
             resetExpandKey(props.server, db, true)
-            connectionStore.closeDatabase(props.server, db)
+            browserStore.closeDatabase(props.server, db)
             break
         case 'db_flush':
             dialogStore.openFlushDBDialog(props.server, db)
@@ -267,21 +269,21 @@ const handleSelectContextMenu = (key) => {
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
         case 'db_filter':
-            const { match: pattern, type } = connectionStore.getKeyFilter(props.server, db)
+            const { match: pattern, type } = browserStore.getKeyFilter(props.server, db)
             dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
         // case 'key_reload':
-        //     connectionStore.loadKeys(props.server, db, redisKey)
+        //     browserStore.loadKeys(props.server, db, redisKey)
         //     break
         case 'value_reload':
-            connectionStore.loadKeyValue(props.server, db, redisKey)
+            browserStore.loadKeyValue(props.server, db, redisKey)
             break
         case 'key_remove':
             dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
             break
         case 'value_remove':
             $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKeyName }), () => {
-                connectionStore.deleteKey(props.server, db, redisKey).then((success) => {
+                browserStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: redisKeyName }))
                     }
@@ -303,7 +305,7 @@ const handleSelectContextMenu = (key) => {
         case 'db_loadmore':
             if (node != null && !!!node.loading && !!!node.fullLoaded) {
                 node.loading = true
-                connectionStore
+                browserStore
                     .loadMoreKeys(props.server, db)
                     .then((end) => {
                         // fully loaded
@@ -320,7 +322,7 @@ const handleSelectContextMenu = (key) => {
         case 'db_loadall':
             if (node != null && !!!node.loading) {
                 node.loading = true
-                connectionStore
+                browserStore
                     .loadAllKeys(props.server, db)
                     .catch((e) => {
                         $message.error(e.message)
@@ -376,14 +378,14 @@ const onUpdateSelectedKeys = (keys, options) => {
                     const { key, db } = node
                     const redisKey = node.redisKeyCode || node.redisKey
                     if (!includes(selectedKeys.value, key)) {
-                        connectionStore.loadKeyValue(props.server, db, redisKey)
+                        browserStore.loadKeyValue(props.server, db, redisKey)
                     }
                     return
                 }
             }
         }
         // default is load blank key to display server status
-        connectionStore.loadKeyValue(props.server, 0)
+        browserStore.loadKeyValue(props.server, 0)
     } finally {
         tabStore.setSelectedKeys(props.server, keys)
     }
@@ -434,7 +436,7 @@ const renderLabel = ({ option }) => {
             return h('b', {}, { default: () => option.label })
         case ConnectionType.RedisDB:
             const { name: server, db, opened = false } = option
-            let { match: matchPattern, type: typeFilter } = connectionStore.getKeyFilter(server, db)
+            let { match: matchPattern, type: typeFilter } = browserStore.getKeyFilter(server, db)
             const items = []
             if (opened) {
                 items.push(`${option.label} (${option.keys || 0}/${Math.max(option.maxKeys || 0, option.keys || 0)})`)
@@ -457,8 +459,8 @@ const renderLabel = ({ option }) => {
                             },
                             onClose: () => {
                                 // remove type filter
-                                connectionStore.setKeyFilter(server, db, matchPattern)
-                                connectionStore.reopenDatabase(server, db)
+                                browserStore.setKeyFilter(server, db, matchPattern)
+                                browserStore.reopenDatabase(server, db)
                             },
                         },
                         { default: () => typeFilter },
@@ -476,8 +478,8 @@ const renderLabel = ({ option }) => {
                             size: 'small',
                             onClose: () => {
                                 // remove key match pattern
-                                connectionStore.setKeyFilter(server, db, '*', typeFilter)
-                                connectionStore.reopenDatabase(server, db)
+                                browserStore.setKeyFilter(server, db, '*', typeFilter)
+                                browserStore.reopenDatabase(server, db)
                             },
                         },
                         { default: () => matchPattern },
@@ -652,7 +654,7 @@ const onLoadTree = async (node) => {
         case ConnectionType.RedisDB:
             loading.value = true
             try {
-                await connectionStore.openDatabase(props.server, node.db)
+                await browserStore.openDatabase(props.server, node.db)
             } catch (e) {
                 $message.error(e.message)
                 node.isLeaf = undefined

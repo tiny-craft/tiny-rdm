@@ -8,10 +8,10 @@ import ContentValueSet from '@/components/content_value/ContentValueSet.vue'
 import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
 import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 import { useThemeVars } from 'naive-ui'
-import useConnectionStore from 'stores/connections.js'
+import useBrowserStore from 'stores/browser.js'
 
 const themeVars = useThemeVars()
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 
 const props = defineProps({
     blank: Boolean,
@@ -54,7 +54,7 @@ const valueComponents = {
  * @returns {Promise<null>}
  */
 const onReloadKey = async () => {
-    await connectionStore.loadKeyValue(props.name, props.db, props.key, props.viewAs)
+    await browserStore.loadKeyValue(props.name, props.db, props.key, props.viewAs)
 }
 </script>
 

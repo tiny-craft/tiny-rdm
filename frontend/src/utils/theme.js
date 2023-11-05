@@ -12,6 +12,7 @@ export const themeOverrides = {
         primaryColorSuppl: '#FF6B6B',
         borderRadius: '4px',
         borderRadiusSmall: '3px',
+        heightMedium: '32px',
         lineHeight: 1.5,
         scrollbarWidth: '8px',
         tabColor: '#FFFFFF',

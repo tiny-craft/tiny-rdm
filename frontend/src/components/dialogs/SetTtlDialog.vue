@@ -2,9 +2,9 @@
 import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import useTabStore from 'stores/tab.js'
-import useConnectionStore from 'stores/connections.js'
 import Binary from '@/components/icons/Binary.vue'
 import { isEmpty } from 'lodash'
+import useBrowserStore from 'stores/browser.js'
 
 const ttlForm = reactive({
     server: '',
@@ -15,7 +15,7 @@ const ttlForm = reactive({
 })
 
 const dialogStore = useDialog()
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 
 watch(
@@ -51,7 +51,7 @@ const onConfirm = async () => {
             return
         }
         const key = isEmpty(ttlForm.keyCode) ? ttlForm.key : ttlForm.keyCode
-        const success = await connectionStore.setTTL(tab.name, tab.db, key, ttlForm.ttl)
+        const success = await browserStore.setTTL(tab.name, tab.db, key, ttlForm.ttl)
         if (success) {
             tabStore.updateTTL({
                 server: ttlForm.server,

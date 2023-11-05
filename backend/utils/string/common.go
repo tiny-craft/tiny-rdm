@@ -14,7 +14,7 @@ func containsBinary(str string) bool {
 	//}
 	rs := []rune(str)
 	for _, r := range rs {
-		if !unicode.IsPrint(r) {
+		if !unicode.IsPrint(r) && r != '\n' {
 			return true
 		}
 	}

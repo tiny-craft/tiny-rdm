@@ -7,10 +7,10 @@ import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
-import useConnectionStore from 'stores/connections.js'
 import { isEmpty } from 'lodash'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -60,7 +60,7 @@ const filterOption = [
 ]
 const filterType = ref(1)
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.HASH
 const currentEditRow = ref({
@@ -142,14 +142,14 @@ const actionColumn = {
             },
             onDelete: async () => {
                 try {
-                    const { success, msg } = await connectionStore.removeHashField(
+                    const { success, msg } = await browserStore.removeHashField(
                         props.name,
                         props.db,
                         keyName.value,
                         row.key,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
+                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.key }))
                         // update display value
                         // if (!isEmpty(removed)) {
@@ -166,7 +166,7 @@ const actionColumn = {
             },
             onSave: async () => {
                 try {
-                    const { success, msg } = await connectionStore.setHash(
+                    const { success, msg } = await browserStore.setHash(
                         props.name,
                         props.db,
                         keyName.value,
@@ -175,7 +175,7 @@ const actionColumn = {
                         currentEditRow.value.value,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
+                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.save_value_succ'))
                         // update display value
                         // if (!isEmpty(updated)) {

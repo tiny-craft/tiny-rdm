@@ -8,7 +8,6 @@ import { get } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from 'stores/connections.js'
 import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
@@ -24,7 +23,6 @@ const onInfo = () => {
 }
 
 const i18n = useI18n()
-const connectionStore = useConnectionStore()
 const onDisconnect = () => {
     browserTreeRef.value?.handleSelectContextMenu('server_close')
 }
@@ -55,7 +53,7 @@ const filterTypeOptions = computed(() => {
 // const viewType = ref(0)
 // const onSwitchView = (selectView) => {
 //     const { server } = tabStore.currentTab
-//     connectionStore.switchKeyView(server, selectView)
+//     browserStore.switchKeyView(server, selectView)
 // }
 </script>
 

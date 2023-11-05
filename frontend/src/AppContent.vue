@@ -9,7 +9,6 @@ import ConnectionPane from './components/sidebar/ConnectionPane.vue'
 import ContentServerPane from './components/content/ContentServerPane.vue'
 import useTabStore from './stores/tab.js'
 import usePreferencesStore from './stores/preferences.js'
-import useConnectionStore from './stores/connections.js'
 import ContentLogPane from './components/content/ContentLogPane.vue'
 import ContentValueTab from '@/components/content/ContentValueTab.vue'
 import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
@@ -32,7 +31,6 @@ const data = reactive({
 
 const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
-const connectionStore = useConnectionStore()
 const logPaneRef = ref(null)
 const exThemeVars = computed(() => {
     return extraTheme(prefStore.isDark)

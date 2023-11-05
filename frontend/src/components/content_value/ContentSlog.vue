@@ -1,15 +1,15 @@
 <script setup>
 import { h, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import useConnectionStore from 'stores/connections.js'
 import { debounce, isEmpty, map, size, split } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 import { useThemeVars } from 'naive-ui'
+import useBrowserStore from 'stores/browser.js'
 
 const themeVars = useThemeVars()
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const i18n = useI18n()
 const props = defineProps({
     server: {
@@ -35,7 +35,7 @@ const tableRef = ref(null)
 
 const _loadSlowLog = () => {
     data.loading = true
-    connectionStore
+    browserStore
         .getSlowLog(props.server, props.db, data.listLimit)
         .then((list) => {
             data.list = list || []
@@ -180,10 +180,10 @@ const onListLimitChanged = (limit) => {
                         },
                     },
                 ]"
-                @update:sorter="({ order }) => (data.sortOrder = order)"
                 :data="data.list"
                 class="flex-item-expand"
-                flex-height />
+                flex-height
+                @update:sorter="({ order }) => (data.sortOrder = order)" />
         </div>
     </n-card>
 </template>

@@ -2,8 +2,8 @@
 import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from 'stores/connections.js'
 import { isEmpty, size } from 'lodash'
+import useBrowserStore from 'stores/browser.js'
 
 const deleteForm = reactive({
     server: '',
@@ -16,7 +16,7 @@ const deleteForm = reactive({
 })
 
 const dialogStore = useDialog()
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 watch(
     () => dialogStore.deleteKeyDialogVisible,
     (visible) => {
@@ -36,7 +36,7 @@ watch(
 const scanAffectedKey = async () => {
     try {
         deleteForm.loadingAffected = true
-        const { keys = [] } = await connectionStore.scanKeys(deleteForm.server, deleteForm.db, deleteForm.key)
+        const { keys = [] } = await browserStore.scanKeys(deleteForm.server, deleteForm.db, deleteForm.key)
         deleteForm.affectedKeys = keys || []
         deleteForm.showAffected = true
     } finally {
@@ -53,7 +53,7 @@ const i18n = useI18n()
 const onConfirmDelete = async () => {
     try {
         const { server, db, key, async } = deleteForm
-        const success = await connectionStore.deleteKeyPrefix(server, db, key, async)
+        const success = await browserStore.deleteKeyPrefix(server, db, key, async)
         if (success) {
             $message.success(i18n.t('dialogue.handle_succ'))
         }

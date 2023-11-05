@@ -9,6 +9,7 @@ import useConnectionStore from 'stores/connections.js'
 import FileOpenInput from '@/components/common/FileOpenInput.vue'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import { useThemeVars } from 'naive-ui'
+import useBrowserStore from 'stores/browser.js'
 
 /**
  * Dialog for new or edit connection
@@ -17,6 +18,7 @@ import { useThemeVars } from 'naive-ui'
 const themeVars = useThemeVars()
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const i18n = useI18n()
 
 const editName = ref('')
@@ -45,7 +47,7 @@ const closingConnection = computed(() => {
     if (isEmpty(editName.value)) {
         return false
     }
-    return connectionStore.isConnected(editName.value)
+    return browserStore.isConnected(editName.value)
 })
 
 const groupOptions = computed(() => {

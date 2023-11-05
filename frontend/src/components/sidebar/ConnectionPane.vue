@@ -6,12 +6,10 @@ import AddLink from '@/components/icons/AddLink.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
-import useConnectionStore from 'stores/connections.js'
 import { ref } from 'vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
-const connectionStore = useConnectionStore()
 const filterPattern = ref('')
 </script>
 

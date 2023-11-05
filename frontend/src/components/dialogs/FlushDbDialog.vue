@@ -2,7 +2,7 @@
 import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
-import useConnectionStore from 'stores/connections.js'
+import useBrowserStore from 'stores/browser.js'
 
 const flushForm = reactive({
     server: '',
@@ -13,7 +13,7 @@ const flushForm = reactive({
 })
 
 const dialogStore = useDialog()
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 watch(
     () => dialogStore.flushDBDialogVisible,
     (visible) => {
@@ -31,7 +31,7 @@ const i18n = useI18n()
 const onConfirmFlush = async () => {
     try {
         const { server, db, async } = flushForm
-        const success = await connectionStore.flushDatabase(server, db, async)
+        const success = await browserStore.flushDatabase(server, db, async)
         if (success) {
             $message.success(i18n.t('dialogue.handle_succ'))
         }

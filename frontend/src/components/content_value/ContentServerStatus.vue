@@ -4,13 +4,13 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import useConnectionStore from 'stores/connections.js'
+import useBrowserStore from 'stores/browser.js'
 
 const props = defineProps({
     server: String,
 })
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const serverInfo = ref({})
 const autoRefresh = ref(false)
 const loading = ref(false) // loading status for refresh
@@ -27,9 +27,9 @@ const refreshInfo = async (force) => {
     } else {
         autoLoading.value = true
     }
-    if (!isEmpty(props.server) && connectionStore.isConnected(props.server)) {
+    if (!isEmpty(props.server) && browserStore.isConnected(props.server)) {
         try {
-            serverInfo.value = await connectionStore.getServerInfo(props.server)
+            serverInfo.value = await browserStore.getServerInfo(props.server)
         } finally {
             loading.value = false
             autoLoading.value = false

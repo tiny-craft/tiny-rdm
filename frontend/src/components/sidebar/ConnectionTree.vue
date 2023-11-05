@@ -19,11 +19,13 @@ import Edit from '@/components/icons/Edit.vue'
 import { hexGammaCorrection, parseHexColor, toHexColor } from '@/utils/rgb.js'
 import IconButton from '@/components/common/IconButton.vue'
 import usePreferencesStore from 'stores/preferences.js'
+import useBrowserStore from 'stores/browser.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const connectingServer = ref('')
 const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const prefStore = usePreferencesStore()
 const dialogStore = useDialogStore()
@@ -66,7 +68,7 @@ const menuOptions = {
         },
     ],
     [ConnectionType.Server]: ({ name }) => {
-        const connected = connectionStore.isConnected(name)
+        const connected = browserStore.isConnected(name)
         if (connected) {
             return [
                 {
@@ -192,7 +194,7 @@ const renderPrefix = ({ option }) => {
                 },
             )
         case ConnectionType.Server:
-            const connected = connectionStore.isConnected(option.name)
+            const connected = browserStore.isConnected(option.name)
             const color = getServerMarkColor(option.name)
             const icon = option.cluster === true ? Cluster : Server
             return h(
@@ -265,7 +267,7 @@ const renderSuffix = ({ option }) => {
     if (includes(selectedKeys.value, option.key)) {
         switch (option.type) {
             case ConnectionType.Server:
-                const connected = connectionStore.isConnected(option.name)
+                const connected = browserStore.isConnected(option.name)
                 return renderIconMenu(getServerMenu(connected))
             case ConnectionType.Group:
                 return renderIconMenu(getGroupMenu())
@@ -290,8 +292,8 @@ const onUpdateSelectedKeys = (keys, option) => {
 const openConnection = async (name) => {
     try {
         connectingServer.value = name
-        if (!connectionStore.isConnected(name)) {
-            await connectionStore.openConnection(name)
+        if (!browserStore.isConnected(name)) {
+            await browserStore.openConnection(name)
         }
         // check if connection already canceled before finish open
         if (!isEmpty(connectingServer.value)) {
@@ -388,9 +390,9 @@ const handleSelectContextMenu = (key) => {
             break
         case 'server_edit':
             // ask for close relevant connections before edit
-            if (connectionStore.isConnected(name)) {
+            if (browserStore.isConnected(name)) {
                 $dialog.warning(i18n.t('dialogue.edit_close_confirm'), () => {
-                    connectionStore.closeConnection(name)
+                    browserStore.closeConnection(name)
                     dialogStore.openEditDialog(name)
                 })
             } else {
@@ -404,7 +406,7 @@ const handleSelectContextMenu = (key) => {
             removeConnection(name)
             break
         case 'server_close':
-            connectionStore.closeConnection(name).then((closed) => {
+            browserStore.closeConnection(name).then((closed) => {
                 if (closed) {
                     $message.success(i18n.t('dialogue.handle_succ'))
                 }
@@ -475,7 +477,7 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
 
 const onCancelOpen = () => {
     if (!isEmpty(connectingServer.value)) {
-        connectionStore.closeConnection(connectingServer.value)
+        browserStore.closeConnection(connectingServer.value)
         connectingServer.value = ''
     }
 }

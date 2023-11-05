@@ -8,6 +8,7 @@ import { useThemeVars } from 'naive-ui'
 import useConnectionStore from 'stores/connections.js'
 import { extraTheme } from '@/utils/extra_theme.js'
 import usePreferencesStore from 'stores/preferences.js'
+import useBrowserStore from 'stores/browser.js'
 
 /**
  * Value content tab on head
@@ -17,13 +18,14 @@ const themeVars = useThemeVars()
 const i18n = useI18n()
 const tabStore = useTabStore()
 const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const prefStore = usePreferencesStore()
 
 const onCloseTab = (tabIndex) => {
     const tab = get(tabStore.tabs, tabIndex)
     if (tab != null) {
         $dialog.warning(i18n.t('dialogue.close_confirm', { name: tab.name }), () => {
-            connectionStore.closeConnection(tab.name)
+            browserStore.closeConnection(tab.name)
         })
     }
 }

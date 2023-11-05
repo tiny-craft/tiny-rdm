@@ -8,9 +8,9 @@ import { isEmpty, size } from 'lodash'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
-import useConnectionStore from 'stores/connections.js'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -48,7 +48,7 @@ const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.LIST
 const currentEditRow = ref({
@@ -99,14 +99,14 @@ const actionColumn = {
             },
             onDelete: async () => {
                 try {
-                    const { success, msg } = await connectionStore.removeListItem(
+                    const { success, msg } = await browserStore.removeListItem(
                         props.name,
                         props.db,
                         keyName.value,
                         row.no - 1,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
+                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: '#' + row.no }))
                         // update display value
                         // if (!isEmpty(removed)) {
@@ -121,7 +121,7 @@ const actionColumn = {
             },
             onSave: async () => {
                 try {
-                    const { success, msg } = await connectionStore.updateListItem(
+                    const { success, msg } = await browserStore.updateListItem(
                         props.name,
                         props.db,
                         keyName.value,
@@ -129,7 +129,7 @@ const actionColumn = {
                         currentEditRow.value.value,
                     )
                     if (success) {
-                        connectionStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
+                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.save_value_succ'))
                         // update display value
                         // if (!isEmpty(updated)) {

@@ -10,12 +10,12 @@ import Close from '@/components/icons/Close.vue'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
-import useConnectionStore from 'stores/connections.js'
 import DropdownSelector from '@/components/content_value/DropdownSelector.vue'
 import Code from '@/components/icons/Code.vue'
 import Conversion from '@/components/icons/Conversion.vue'
 import EditFile from '@/components/icons/EditFile.vue'
 import bytes from 'bytes'
+import useBrowserStore from 'stores/browser.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -74,11 +74,11 @@ const viewLanguage = computed(() => {
 })
 
 const onViewTypeUpdate = (viewType) => {
-    connectionStore.loadKeyValue(props.name, props.db, keyName.value, viewType, props.decode)
+    browserStore.loadKeyValue(props.name, props.db, keyName.value, viewType, props.decode)
 }
 
 const onDecodeTypeUpdate = (decodeType) => {
-    connectionStore.loadKeyValue(props.name, props.db, keyName.value, props.viewAs, decodeType)
+    browserStore.loadKeyValue(props.name, props.db, keyName.value, props.viewAs, decodeType)
 }
 
 /**
@@ -110,12 +110,12 @@ const onCancelEdit = () => {
 /**
  * Save value
  */
-const connectionStore = useConnectionStore()
+const browserStore = useBrowserStore()
 const saving = ref(false)
 const onSaveValue = async () => {
     saving.value = true
     try {
-        const { success, msg } = await connectionStore.setKey(
+        const { success, msg } = await browserStore.setKey(
             props.name,
             props.db,
             keyName.value,
@@ -126,7 +126,7 @@ const onSaveValue = async () => {
             props.decode,
         )
         if (success) {
-            await connectionStore.loadKeyValue(props.name, props.db, keyName.value)
+            await browserStore.loadKeyValue(props.name, props.db, keyName.value)
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
