@@ -1,5 +1,19 @@
 import { defineStore } from 'pinia'
-import { endsWith, find, get, isEmpty, join, remove, size, slice, sortedIndexBy, split, sumBy, toUpper } from 'lodash'
+import {
+    endsWith,
+    find,
+    get,
+    isEmpty,
+    join,
+    remove,
+    set,
+    size,
+    slice,
+    sortedIndexBy,
+    split,
+    sumBy,
+    toUpper,
+} from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -46,6 +60,7 @@ const useBrowserStore = defineStore('browser', {
      * @property {string} [redisKey] - redis key, type == ConnectionType.RedisKey || type == ConnectionType.RedisValue only
      * @property {string} [redisKeyCode] - redis key char code array, optional for redis key which contains binary data
      * @property {number} [keys] - children key count
+     * @property {number} [maxKeys] - max key count for database
      * @property {boolean} [isLeaf]
      * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
      * @property {boolean} [expanded] - current node is expanded
@@ -257,7 +272,7 @@ const useBrowserStore = defineStore('browser', {
             if (!success) {
                 throw new Error(msg)
             }
-            const { keys = [], end = false } = data
+            const { keys = [], end = false, maxKeys = 0 } = data
             const selDB = this.getDatabase(connName, db)
             if (selDB == null) {
                 return
@@ -265,6 +280,7 @@ const useBrowserStore = defineStore('browser', {
 
             selDB.opened = true
             selDB.fullLoaded = end
+            selDB.maxKeys = maxKeys
             if (isEmpty(keys)) {
                 selDB.children = []
             } else {
@@ -733,6 +749,34 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
+         * update max key by value
+         * @param {string} connName
+         * @param {number} db
+         * @param {number} updateValue
+         * @private
+         */
+        _updateDBMaxKeys(connName, db, updateValue) {
+            const database = this.getDatabase(connName, db)
+            if (database != null) {
+                const maxKeys = get(database, 'maxKeys', 0)
+                database.maxKeys = Math.max(0, maxKeys + updateValue)
+            }
+        },
+
+        /**
+         * set db max keys to 0
+         * @param connName
+         * @param db
+         * @private
+         */
+        _emptyDBMaxKeys(connName, db) {
+            const database = this.getDatabase(connName, db)
+            if (database != null) {
+                set(database, 'maxKeys', 0)
+            }
+        },
+
+        /**
          * get tree node by key name
          * @param key
          * @return {DatabaseItem|null}
@@ -784,6 +828,7 @@ const useBrowserStore = defineStore('browser', {
                     const { newKey = 0 } = this._addKeyNodes(connName, db, [key], true)
                     if (newKey > 0) {
                         this._tidyNode(connName, db, key)
+                        this._updateDBMaxKeys(connName, db, newKey)
                     }
                     return { success, nodeKey: `${connName}/db${db}#${ConnectionType.RedisValue}/${key}` }
                 } else {
@@ -1287,14 +1332,17 @@ const useBrowserStore = defineStore('browser', {
          */
         async deleteKey(connName, db, key, soft) {
             try {
+                let deleteCount = 0
                 if (soft !== true) {
-                    await DeleteKey(connName, db, key)
+                    const { data } = await DeleteKey(connName, db, key)
+                    deleteCount = get(data, 'deleteCount', 0)
                 }
 
                 const k = nativeRedisKey(key)
                 // update tree view data
                 this._deleteKeyNode(connName, db, k)
                 this._tidyNode(connName, db, k, true)
+                this._updateDBMaxKeys(connName, db, -deleteCount)
 
                 // set tab content empty
                 const tab = useTabStore()
@@ -1327,6 +1375,7 @@ const useBrowserStore = defineStore('browser', {
                     // for (const key of keys) {
                     //     await this._deleteKeyNode(connName, db, key)
                     // }
+                    const deleteCount = get(data, 'deleteCount', 0)
                     const separator = this._getSeparator(connName)
                     if (endsWith(prefix, '*')) {
                         prefix = prefix.substring(0, prefix.length - 1)
@@ -1336,6 +1385,7 @@ const useBrowserStore = defineStore('browser', {
                     }
                     this._deleteKeyNode(connName, db, prefix, true)
                     this._tidyNode(connName, db, prefix, true)
+                    this._updateDBMaxKeys(connName, db, -deleteCount)
                     return true
                 }
             } finally {
@@ -1357,6 +1407,7 @@ const useBrowserStore = defineStore('browser', {
                 if (success === true) {
                     // update tree view data
                     this._deleteKeyNode(connName, db)
+                    this._emptyDBMaxKeys(connName, db)
                     // set tab content empty
                     const tab = useTabStore()
                     tab.emptyTab(connName)

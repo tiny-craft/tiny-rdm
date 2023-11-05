@@ -284,6 +284,25 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 	return
 }
 
+// load current database size
+func (b *browserService) loadDBSize(ctx context.Context, client redis.UniversalClient) int64 {
+	if cluster, isCluster := client.(*redis.ClusterClient); isCluster {
+		var keyCount atomic.Int64
+		cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			if size, serr := cli.DBSize(ctx).Result(); serr != nil {
+				return serr
+			} else {
+				keyCount.Add(size)
+			}
+			return nil
+		})
+		return keyCount.Load()
+	} else {
+		keyCount, _ := client.DBSize(ctx).Result()
+		return keyCount
+	}
+}
+
 // save current scan cursor
 func (b *browserService) setClientCursor(connName string, db int, cursor uint64) {
 	if _, ok := b.connMap[connName]; ok {
@@ -433,11 +452,13 @@ func (b *browserService) LoadNextKeys(connName string, db int, match, keyType st
 		return
 	}
 	b.setClientCursor(connName, db, cursor)
+	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"keys": keys,
-		"end":  cursor == 0,
+		"keys":    keys,
+		"end":     cursor == 0,
+		"maxKeys": maxKeys,
 	}
 	return
 }
@@ -1192,7 +1213,8 @@ func (b *browserService) DeleteKey(connName string, db int, k any, async bool) (
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"deleted": deletedKeys,
+		"deleted":     deletedKeys,
+		"deleteCount": len(deletedKeys),
 	}
 	return
 }
