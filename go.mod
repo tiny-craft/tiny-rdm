@@ -5,9 +5,9 @@ go 1.21
 require (
 	github.com/adrg/sysfont v0.1.2
 	github.com/andybalholm/brotli v1.0.6
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/klauspost/compress v1.17.2
-	github.com/redis/go-redis/v9 v9.2.1
+	github.com/redis/go-redis/v9 v9.3.0
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.6.0
 	golang.org/x/crypto v0.14.0
