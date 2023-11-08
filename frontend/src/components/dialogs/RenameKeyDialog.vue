@@ -3,6 +3,7 @@ import { reactive, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import useBrowserStore from 'stores/browser.js'
+import useTabStore from 'stores/tab.js'
 
 const renameForm = reactive({
     server: '',
@@ -13,6 +14,7 @@ const renameForm = reactive({
 
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
+const tab = useTabStore()
 watch(
     () => dialogStore.renameDialogVisible,
     (visible) => {
@@ -30,9 +32,10 @@ const i18n = useI18n()
 const onRename = async () => {
     try {
         const { server, db, key, newKey } = renameForm
-        const { success, msg } = await browserStore.renameKey(server, db, key, newKey)
+        const { success, msg, nodeKey } = await browserStore.renameKey(server, db, key, newKey)
         if (success) {
-            await browserStore.loadKeyValue(server, db, newKey)
+            tab.setSelectedKeys(server, nodeKey)
+            browserStore.loadKeySummary({ server, db, key: newKey })
             $message.success(i18n.t('dialogue.handle_succ'))
         } else {
             $message.error(msg)

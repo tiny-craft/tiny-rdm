@@ -90,6 +90,8 @@
     "new_key": "Add Key",
     "load_more": "Load More Keys",
     "load_all": "Load All Left Keys",
+    "load_more_entries": "Load More",
+    "load_all_entries": "Load All",
     "more_action": "More Action",
     "nonexist_tab_content": "Selected key does not exist or no key is selected. Please retry",
     "empty_server_content": "Select and open a connection from the left",

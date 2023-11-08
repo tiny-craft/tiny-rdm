@@ -90,6 +90,8 @@
     "new_key": "添加新键",
     "load_more": "加载更多键",
     "load_all": "加载剩余所有键",
+    "load_more_entries": "加载更多",
+    "load_all_entries": "加载全部",
     "more_action": "更多操作",
     "nonexist_tab_content": "所选键不存在或未选中任何键，请尝试刷新重试",
     "empty_server_content": "可以从左边选择并打开连接",

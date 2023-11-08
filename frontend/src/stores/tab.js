@@ -1,4 +1,4 @@
-import { find, findIndex, get, isEmpty, set, size } from 'lodash'
+import { assign, find, findIndex, get, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -11,12 +11,18 @@ const useTabStore = defineStore('tab', {
      * @property {string} [icon] tab icon
      * @property {string[]} selectedKeys
      * @property {string} [type] key type
-     * @property {Object|Array} [value] key value
+     * @property {*} [value] key value
      * @property {string} [server] server name
      * @property {int} [db] database index
      * @property {string} [key] current key name
      * @property {number[]|null|undefined} [keyCode] current key name as char array
+     * @param {number} [size] memory usage
+     * @param {number} [length] length of content or entries
      * @property {int} [ttl] ttl of current key
+     * @param {string} [viewAs]
+     * @param {string} [decode]
+     * @param {boolean} [end]
+     * @param {boolean} [loading]
      */
 
     /**
@@ -82,6 +88,10 @@ const useTabStore = defineStore('tab', {
             }
         },
 
+        openBlank(server) {
+            this.upsertTab({ server, db: 0 })
+        },
+
         /**
          * update or insert a new tab if not exists with the same name
          * @param {string} subTab
@@ -94,10 +104,8 @@ const useTabStore = defineStore('tab', {
          * @param {number} [size]
          * @param {number} [length]
          * @param {*} [value]
-         * @param {string} [viewAs]
-         * @param {string} [decode]
          */
-        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, value, viewAs, decode }) {
+        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -112,9 +120,7 @@ const useTabStore = defineStore('tab', {
                     keyCode,
                     size,
                     length,
-                    value,
-                    viewAs,
-                    decode,
+                    value: undefined,
                 })
                 tabIndex = this.tabList.length - 1
             } else {
@@ -131,16 +137,239 @@ const useTabStore = defineStore('tab', {
                 tab.keyCode = keyCode
                 tab.size = size
                 tab.length = length
-                tab.value = value
-                tab.viewAs = viewAs
-                tab.decode = decode
+                tab.value = undefined
             }
             this._setActivatedIndex(tabIndex, true, subTab)
             // this.activatedTab = tab.name
         },
 
         /**
-         * update ttl by tag
+         * keep update value in tab
+         * @param {string} server
+         * @param {number} db
+         * @param {string} key
+         * @param {*} value
+         * @param {string} [viewAs]
+         * @param {string] [decode]
+         * @param {boolean} reset
+         * @param {boolean} [end] keep end status if not set
+         */
+        updateValue({ server, db, key, value, viewAs, decode, reset, end }) {
+            const tab = find(this.tabList, { name: server, db, key })
+            if (tab == null) {
+                return
+            }
+
+            tab.viewAs = viewAs || tab.viewAs
+            tab.decode = decode || tab.decode
+            if (typeof end === 'boolean') {
+                tab.end = end
+            }
+            if (!reset && typeof value === 'object') {
+                if (value instanceof Array) {
+                    tab.value = tab.value || []
+                    tab.value.push(...value)
+                } else {
+                    tab.value = assign(value, tab.value || {})
+                }
+            } else {
+                tab.value = value
+            }
+        },
+
+        /**
+         * update or insert value entries
+         * @param {string} server
+         * @param {number} db
+         * @param {string} key
+         * @param {string} type
+         * @param {string[]|Object.<string, number>|Object.<number, string>} entries
+         * @param {boolean} [prepend] for list only
+         * @param {boolean} [reset]
+         * @param {boolean} [nocheck] ignore conflict checking for hash/set/zset
+         */
+        upsertValueEntries({ server, db, key, type, entries, prepend, reset, nocheck }) {
+            const tab = find(this.tabList, { name: server, db, key })
+            if (tab == null) {
+                return
+            }
+
+            switch (type.toLowerCase()) {
+                case 'list': // string[] | Object.<number, string>
+                    if (entries instanceof Array) {
+                        // append or prepend items
+                        if (reset === true) {
+                            tab.value = entries
+                        } else {
+                            tab.value = tab.value || []
+                            if (prepend === true) {
+                                tab.value = [...entries, ...tab.value]
+                            } else {
+                                tab.value.push(...entries)
+                            }
+                            tab.length += size(entries)
+                        }
+                    } else {
+                        // replace by index
+                        tab.value = tab.value || []
+                        for (const idx in entries) {
+                            set(tab.value, idx, entries[idx])
+                        }
+                    }
+                    break
+
+                case 'hash': // Object.<string, string>
+                    if (reset === true) {
+                        tab.value = {}
+                        tab.length = 0
+                    } else {
+                        tab.value = tab.value || {}
+                    }
+                    for (const k in entries) {
+                        if (nocheck !== true && !tab.value.hasOwnProperty(k)) {
+                            tab.length += 1
+                        }
+                        tab.value[k] = entries[k]
+                    }
+                    break
+
+                case 'set': // string[] | Object.{string, string}
+                    if (reset === true) {
+                        tab.value = entries
+                    } else {
+                        tab.value = tab.value || []
+                        if (entries instanceof Array) {
+                            // add items
+                            for (const elem of entries) {
+                                if (nocheck !== true && indexOf(tab.value, elem) === -1) {
+                                    tab.value.push(elem)
+                                    tab.length += 1
+                                }
+                            }
+                        } else {
+                            // replace items
+                            for (const k in entries) {
+                                const idx = indexOf(tab.value, k)
+                                if (idx !== -1) {
+                                    tab.value[idx] = entries[k]
+                                } else {
+                                    tab.value.push(entries[k])
+                                    tab.length += 1
+                                }
+                            }
+                        }
+                    }
+                    break
+
+                case 'zset': // {value: string, score: number}
+                    if (reset === true) {
+                        tab.value = Object.entries(entries).map(([value, score]) => ({ value, score }))
+                    } else {
+                        tab.value = tab.value || []
+                        for (const val in entries) {
+                            if (nocheck !== true) {
+                                const ent = find(tab.value, (e) => e.value === val)
+                                if (ent != null) {
+                                    ent.score = entries[val]
+                                } else {
+                                    tab.value.push({ value: val, score: entries[val] })
+                                    tab.length += 1
+                                }
+                            } else {
+                                tab.value.push({ value: val, score: entries[val] })
+                                tab.length += 1
+                            }
+                        }
+                    }
+                    break
+
+                case 'stream': // [{id: string, value: []any}]
+                    if (reset === true) {
+                        tab.value = entries
+                    } else {
+                        tab.value = tab.value || []
+                        tab.value = [...entries, ...tab.value]
+                    }
+                    break
+            }
+        },
+
+        /**
+         * remove value entries
+         * @param {string} server
+         * @param {number} db
+         * @param {string} key
+         * @param {string} type
+         * @param {string[] | number[]} entries
+         */
+        removeValueEntries({ server, db, key, type, entries }) {
+            const tab = find(this.tabList, { name: server, db, key })
+            if (tab == null) {
+                return
+            }
+
+            switch (type.toLowerCase()) {
+                case 'list': // string[] | number[]
+                    tab.value = tab.value || []
+                    if (typeof entries[0] === 'number') {
+                        // remove by index、
+                        entries.sort((a, b) => b - a)
+                        const removed = pullAt(tab.value, ...entries)
+                        tab.length -= size(removed)
+                    } else {
+                        // append or prepend items
+                        for (const elem of entries) {
+                            if (!isEmpty(remove(tab.value, elem))) {
+                                tab.length -= 1
+                            }
+                        }
+                    }
+                    break
+
+                case 'hash': // string[]
+                    tab.value = tab.value || {}
+                    for (const k of entries) {
+                        if (tab.value.hasOwnProperty(k)) {
+                            delete tab.value[k]
+                            tab.length -= 1
+                        }
+                    }
+                    break
+
+                case 'set': // []string
+                    tab.value = tab.value || []
+                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v) >= 0))
+                    break
+
+                case 'zset': // string[]
+                    tab.value = tab.value || []
+                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v.value) >= 0))
+                    break
+
+                case 'stream': // string[]
+                    tab.value = tab.value || []
+                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v.id) >= 0))
+                    break
+            }
+        },
+
+        /**
+         * update loading status of content in tab
+         * @param {string} server
+         * @param {number} db
+         * @param {boolean} loading
+         */
+        updateLoading({ server, db, loading }) {
+            const tab = find(this.tabList, { name: server, db })
+            if (tab == null) {
+                return
+            }
+
+            tab.loading = loading
+        },
+
+        /**
+         * update ttl in tab
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} key

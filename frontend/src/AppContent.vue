@@ -26,7 +26,7 @@ const props = defineProps({
 
 const data = reactive({
     navMenuWidth: 60,
-    toolbarHeight: 45,
+    toolbarHeight: 38,
 })
 
 const tabStore = useTabStore()

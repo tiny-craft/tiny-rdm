@@ -43,7 +43,10 @@ const props = defineProps({
         type: String,
         default: decodeTypes.NONE,
     },
+    loading: Boolean,
 })
+
+const emit = defineEmits(['reload', 'rename', 'delete'])
 
 /**
  *
@@ -52,16 +55,6 @@ const props = defineProps({
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
-
-// const viewOption = computed(() =>
-//     map(types, (t) => {
-//         return {
-//             value: t,
-//             label: t,
-//             key: t,
-//         }
-//     }),
-// )
 
 const keyType = redisTypes.STRING
 const viewLanguage = computed(() => {
@@ -74,11 +67,23 @@ const viewLanguage = computed(() => {
 })
 
 const onViewTypeUpdate = (viewType) => {
-    browserStore.loadKeyValue(props.name, props.db, keyName.value, viewType, props.decode)
+    browserStore.loadKeyDetail({
+        server: props.name,
+        db: props.db,
+        key: keyName.value,
+        viewType,
+        decodeType: props.decode,
+    })
 }
 
 const onDecodeTypeUpdate = (decodeType) => {
-    browserStore.loadKeyValue(props.name, props.db, keyName.value, props.viewAs, decodeType)
+    browserStore.loadKeyDetail({
+        server: props.name,
+        db: props.db,
+        key: keyName.value,
+        viewType: props.viewAs,
+        decodeType,
+    })
 }
 
 /**
@@ -126,7 +131,7 @@ const onSaveValue = async () => {
             props.decode,
         )
         if (success) {
-            await browserStore.loadKeyValue(props.name, props.db, keyName.value)
+            await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -144,14 +149,16 @@ const onSaveValue = async () => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
-            :decode="props.decode"
             :key-code="keyCode"
             :key-path="keyPath"
             :key-type="keyType"
+            :loading="loading"
             :server="props.name"
             :ttl="ttl"
-            :view-as="props.viewAs"
-            class="value-item-part" />
+            class="value-item-part"
+            @delete="emit('delete')"
+            @reload="emit('reload')"
+            @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-item-expand"></div>
             <n-button-group v-if="!inEdit">

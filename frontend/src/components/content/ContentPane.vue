@@ -56,11 +56,13 @@ const tabContent = computed(() => {
         length: tab.length || 0,
         viewAs: tab.viewAs,
         decode: tab.decode,
+        end: tab.end,
+        loading: tab.loading === true,
     }
 })
 
 const isBlankValue = computed(() => {
-    return tabContent.value.value == null
+    return tabContent.value?.keyPath == null
 })
 
 const selectedSubTab = computed(() => {
@@ -133,19 +135,7 @@ watch(
                         <span>{{ $t('interface.sub_tab.key_detail') }}</span>
                     </n-space>
                 </template>
-                <content-value-wrapper
-                    :blank="isBlankValue"
-                    :db="tabContent.db"
-                    :decode="tabContent.decode"
-                    :key-code="tabContent.keyCode"
-                    :key-path="tabContent.keyPath"
-                    :length="tabContent.length"
-                    :name="tabContent.name"
-                    :size="tabContent.size"
-                    :ttl="tabContent.ttl"
-                    :type="tabContent.type"
-                    :value="tabContent.value"
-                    :view-as="tabContent.viewAs" />
+                <content-value-wrapper :blank="isBlankValue" :content="tabContent" />
             </n-tab-pane>
 
             <!-- cli pane -->

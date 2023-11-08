@@ -276,7 +276,11 @@ const handleSelectContextMenu = (key) => {
         //     browserStore.loadKeys(props.server, db, redisKey)
         //     break
         case 'value_reload':
-            browserStore.loadKeyValue(props.server, db, redisKey)
+            browserStore.reloadKey({
+                server: props.server,
+                db,
+                key: redisKey,
+            })
             break
         case 'key_remove':
             dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
@@ -378,14 +382,18 @@ const onUpdateSelectedKeys = (keys, options) => {
                     const { key, db } = node
                     const redisKey = node.redisKeyCode || node.redisKey
                     if (!includes(selectedKeys.value, key)) {
-                        browserStore.loadKeyValue(props.server, db, redisKey)
+                        browserStore.loadKeySummary({
+                            server: props.server,
+                            db,
+                            key: redisKey,
+                        })
                     }
                     return
                 }
             }
         }
         // default is load blank key to display server status
-        browserStore.loadKeyValue(props.server, 0)
+        tabStore.openBlank(props.server)
     } finally {
         tabStore.setSelectedKeys(props.server, keys)
     }
@@ -640,7 +648,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
-                tabStore.setSelectedKeys(props.server, option.key)
+                onUpdateSelectedKeys([option.key], [option])
             })
         },
         // onMouseover() {

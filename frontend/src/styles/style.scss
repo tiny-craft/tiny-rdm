@@ -92,7 +92,8 @@ body {
   .value-wrapper {
     //border-top: v-bind('themeVars.borderColor') 1px solid;
     user-select: text;
-    height: 100%;
+    //height: 100%;
+    box-sizing: border-box;
   }
 
   .value-item-part {
@@ -135,4 +136,8 @@ body {
 
 .n-modal-mask {
   --wails-draggable: drag;
+}
+
+.n-tabs .n-tabs-nav {
+  line-height: 1.3;
 }

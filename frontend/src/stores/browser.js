@@ -24,7 +24,8 @@ import {
     DeleteKey,
     FlushDB,
     GetCmdHistory,
-    GetKeyValue,
+    GetKeyDetail,
+    GetKeySummary,
     GetSlowLogs,
     LoadAllKeys,
     LoadNextKeys,
@@ -58,7 +59,7 @@ const useBrowserStore = defineStore('browser', {
      * @property {number} type
      * @property {number} [db] - database index, type == ConnectionType.RedisDB only
      * @property {string} [redisKey] - redis key, type == ConnectionType.RedisKey || type == ConnectionType.RedisValue only
-     * @property {string} [redisKeyCode] - redis key char code array, optional for redis key which contains binary data
+     * @property {number[]} [redisKeyCode] - redis key char code array, optional for redis key which contains binary data
      * @property {number} [keys] - children key count
      * @property {number} [maxKeys] - max key count for database
      * @property {boolean} [isLeaf]
@@ -344,20 +345,23 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * load redis key
+         * load key summary info
          * @param {string} server
          * @param {number} db
-         * @param {string|number[]} [key] when key is null or blank, update tab to display normal content (blank content or server status)
-         * @param {string} [viewType]
-         * @param {string} [decodeType]
+         * @param {string|number[]} [key] null or blank indicate that update tab to display normal content (blank content or server status)
+         * @return {Promise<void>}
          */
-        async loadKeyValue(server, db, key, viewType, decodeType) {
+        async loadKeySummary({ server, db, key }) {
             try {
                 const tab = useTabStore()
                 if (!isEmpty(key)) {
-                    const { data, success, msg } = await GetKeyValue(server, db, key, viewType, decodeType)
+                    const { data, success, msg } = await GetKeySummary({
+                        server,
+                        db,
+                        key,
+                    })
                     if (success) {
-                        const { type, ttl, value, size, length, viewAs, decode } = data
+                        const { type, ttl, size, length } = data
                         const k = decodeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
@@ -368,16 +372,13 @@ const useBrowserStore = defineStore('browser', {
                             ttl,
                             keyCode: binaryKey ? key : undefined,
                             key: k,
-                            value,
                             size,
                             length,
-                            viewAs,
-                            decode,
                         })
                         return
                     } else {
                         if (!isEmpty(msg)) {
-                            $message.error('load key fail: ' + msg)
+                            $message.error('load key summary fail: ' + msg)
                         }
                         // its danger to delete "non-exists" key, just remove from tree view
                         await this.deleteKey(server, db, key, true)
@@ -397,7 +398,72 @@ const useBrowserStore = defineStore('browser', {
                     size: 0,
                     length: 0,
                 })
+            } catch (e) {
+                $message.error('')
             } finally {
+            }
+        },
+
+        /**
+         * reload key
+         * @param server
+         * @param db
+         * @param key
+         * @return {Promise<void>}
+         */
+        async reloadKey({ server, db, key }) {
+            const tab = useTabStore()
+            try {
+                tab.updateLoading({ server, db, loading: true })
+                await this.loadKeySummary({ server, db, key })
+                await this.loadKeyDetail({ server, db, key, reset: true })
+            } finally {
+                tab.updateLoading({ server, db, loading: false })
+            }
+        },
+
+        /**
+         * load key content
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string} [viewType]
+         * @param {string} [decodeType]
+         * @param {string} [matchPattern]
+         * @param {boolean} [reset]
+         * @param {boolean} [full]
+         * @return {Promise<void>}
+         */
+        async loadKeyDetail({ server, db, key, viewType, decodeType, matchPattern, reset, full }) {
+            const tab = useTabStore()
+            try {
+                tab.updateLoading({ server, db, loading: true })
+                const { data, success, msg } = await GetKeyDetail({
+                    server,
+                    db,
+                    key,
+                    viewAs: viewType,
+                    decodeType,
+                    matchPattern,
+                    full: full === true,
+                    reset,
+                    lite: true,
+                })
+                if (success) {
+                    const { value, viewAs, decodeType: decode, end } = data
+                    tab.updateValue({
+                        server,
+                        db,
+                        key: decodeRedisKey(key),
+                        value,
+                        viewAs,
+                        decode,
+                        reset: reset || full === true,
+                        end,
+                    })
+                }
+            } finally {
+                tab.updateLoading({ server, db, loading: false })
             }
         },
 
@@ -857,7 +923,14 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { data, success, msg } = await SetHashValue(connName, db, key, field, newField || '', value || '')
                 if (success) {
-                    const { updated = {} } = data
+                    const { updated = {}, removed = [], replaced = {} } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        tab.removeValueEntries({ server: connName, db, key, type: 'hash', entries: removed })
+                    }
+                    if (!isEmpty(updated)) {
+                        tab.upsertValueEntries({ server: connName, db, key, type: 'hash', entries: updated })
+                    }
                     return { success, updated }
                 } else {
                     return { success, msg }
@@ -881,6 +954,8 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await AddHashField(connName, db, key, action, fieldItems)
                 if (success) {
                     const { updated = {} } = data
+                    const tab = useTabStore()
+                    tab.upsertValueEntries({ server: connName, db, key, type: 'hash', entries: updated })
                     return { success, updated }
                 } else {
                     return { success: false, msg }
@@ -903,6 +978,10 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await SetHashValue(connName, db, key, field, '', '')
                 if (success) {
                     const { removed = [] } = data
+                    if (!isEmpty(removed)) {
+                        const tab = useTabStore()
+                        tab.removeValueEntries({ server: connName, db, key, type: 'hash', entries: removed })
+                    }
                     return { success, removed }
                 } else {
                     return { success, msg }
@@ -935,13 +1014,24 @@ const useBrowserStore = defineStore('browser', {
          * @param db
          * @param key
          * @param values
-         * @returns {Promise<[msg]: string, success: boolean, [item]: []>}
+         * @returns {Promise<{[msg]: string, success: boolean, [item]: []}>}
          */
         async prependListItem(connName, db, key, values) {
             try {
                 const { data, success, msg } = await AddListItem(connName, db, key, 0, values)
                 if (success) {
                     const { left = [] } = data
+                    if (!isEmpty(left)) {
+                        const tab = useTabStore()
+                        tab.upsertValueEntries({
+                            server: connName,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: right,
+                            prepend: true,
+                        })
+                    }
                     return { success, item: left }
                 } else {
                     return { success: false, msg }
@@ -957,13 +1047,24 @@ const useBrowserStore = defineStore('browser', {
          * @param db
          * @param key
          * @param values
-         * @returns {Promise<[msg]: string, success: boolean, [item]: any[]>}
+         * @returns {Promise<{[msg]: string, success: boolean, [item]: any[]}>}
          */
         async appendListItem(connName, db, key, values) {
             try {
                 const { data, success, msg } = await AddListItem(connName, db, key, 1, values)
                 if (success) {
                     const { right = [] } = data
+                    if (!isEmpty(right)) {
+                        const tab = useTabStore()
+                        tab.upsertValueEntries({
+                            server: connName,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: right,
+                            prepend: false,
+                        })
+                    }
                     return { success, item: right }
                 } else {
                     return { success: false, msg }
@@ -987,6 +1088,16 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await SetListItem(connName, db, key, index, value)
                 if (success) {
                     const { updated = {} } = data
+                    if (!isEmpty(updated)) {
+                        const tab = useTabStore()
+                        tab.upsertValueEntries({
+                            server: connName,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: updated,
+                        })
+                    }
                     return { success, updated }
                 } else {
                     return { success, msg }
@@ -1009,6 +1120,16 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await SetListItem(connName, db, key, index, '')
                 if (success) {
                     const { removed = [] } = data
+                    if (!isEmpty(removed)) {
+                        const tab = useTabStore()
+                        tab.removeValueEntries({
+                            server: connName,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: removed,
+                        })
+                    }
                     return { success, removed }
                 } else {
                     return { success, msg }
@@ -1023,13 +1144,18 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} connName
          * @param {number} db
          * @param {string|number} key
-         * @param {string} value
+         * @param {string|string[]} value
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async addSetItem(connName, db, key, value) {
             try {
-                const { success, msg } = await SetSetItem(connName, db, key, false, [value])
+                if (!value instanceof Array) {
+                    value = [value]
+                }
+                const { data, success, msg } = await SetSetItem(connName, db, key, false, value)
                 if (success) {
+                    const tab = useTabStore()
+                    tab.upsertValueEntries({ server: connName, db, key, type: 'set', entries: value })
                     return { success }
                 } else {
                     return { success, msg }
@@ -1052,6 +1178,8 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { success, msg } = await UpdateSetItem(connName, db, key, value, newValue)
                 if (success) {
+                    const tab = useTabStore()
+                    tab.upsertValueEntries({ server: connName, db, key, type: 'set', entries: { [value]: newValue } })
                     return { success: true }
                 } else {
                     return { success, msg }
@@ -1073,6 +1201,8 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { success, msg } = await SetSetItem(connName, db, key, true, [value])
                 if (success) {
+                    const tab = useTabStore()
+                    tab.removeValueEntries({ server: connName, db, key, type: 'set', entries: [value] })
                     return { success }
                 } else {
                     return { success, msg }
@@ -1094,6 +1224,8 @@ const useBrowserStore = defineStore('browser', {
         async addZSetItem(connName, db, key, action, vs) {
             try {
                 const { success, msg } = await AddZSetValue(connName, db, key, action, vs)
+                const tab = useTabStore()
+                tab.upsertValueEntries({ server: connName, db, key, type: 'zset', entries: vs })
                 if (success) {
                     return { success }
                 } else {
@@ -1119,6 +1251,13 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await UpdateZSetValue(connName, db, key, value, newValue, score)
                 if (success) {
                     const { updated, removed } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(updated)) {
+                        tab.upsertValueEntries({ server: connName, db, key, type: 'zset', entries: updated })
+                    }
+                    if (!isEmpty(removed)) {
+                        tab.removeValueEntries({ server: connName, db, key, type: 'zset', entries: removed })
+                    }
                     return { success, updated, removed }
                 } else {
                     return { success, msg }
@@ -1141,7 +1280,11 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await UpdateZSetValue(connName, db, key, value, '', 0)
                 if (success) {
                     const { removed } = data
-                    return { success, removed }
+                    if (!isEmpty(removed)) {
+                        const tab = useTabStore()
+                        tab.removeValueEntries({ server: connName, db, key, type: 'zset', entries: removed })
+                    }
+                    return { success }
                 } else {
                     return { success, msg }
                 }
@@ -1157,14 +1300,22 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {string} id
          * @param {string[]} values field1, value1, filed2, value2...
-         * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
+         * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async addStreamValue(connName, db, key, id, values) {
             try {
                 const { data = {}, success, msg } = await AddStreamValue(connName, db, key, id, values)
                 if (success) {
-                    const { updated = {} } = data
-                    return { success, updated }
+                    const { updateID } = data
+                    const tab = useTabStore()
+                    tab.upsertValueEntries({
+                        server: connName,
+                        db,
+                        key,
+                        type: 'stream',
+                        entries: [{ id: updateID, value: values }],
+                    })
+                    return { success }
                 } else {
                     return { success: false, msg }
                 }
@@ -1179,7 +1330,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string[]|string} ids
-         * @returns {Promise<{[msg]: {}, success: boolean, [removed]: string[]}>}
+         * @returns {Promise<{[msg]: {}, success: boolean}>}
          */
         async removeStreamValues(connName, db, key, ids) {
             if (typeof ids === 'string') {
@@ -1188,8 +1339,9 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { data = {}, success, msg } = await RemoveStreamValues(connName, db, key, ids)
                 if (success) {
-                    const { removed = [] } = data
-                    return { success, removed }
+                    const tab = useTabStore()
+                    tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
+                    return { success }
                 } else {
                     return { success, msg }
                 }
@@ -1424,7 +1576,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string} key
          * @param {string} newKey
-         * @returns {Promise<{[msg]: string, success: boolean}>}
+         * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: string}>}
          */
         async renameKey(connName, db, key, newKey) {
             const { success = false, msg } = await RenameKey(connName, db, key, newKey)
@@ -1432,7 +1584,7 @@ const useBrowserStore = defineStore('browser', {
                 // delete old key and add new key struct
                 this._deleteKeyNode(connName, db, key)
                 this._addKeyNodes(connName, db, [newKey])
-                return { success: true }
+                return { success: true, nodeKey: `${connName}/db${db}#${ConnectionType.RedisValue}/${newKey}` }
             } else {
                 return { success: false, msg }
             }

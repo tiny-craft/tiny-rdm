@@ -6,11 +6,14 @@ import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, NInputNumber, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
-import { isEmpty } from 'lodash'
+import { isEmpty, size } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
+import LoadList from '@/components/icons/LoadList.vue'
+import LoadAll from '@/components/icons/LoadAll.vue'
+import IconButton from '@/components/common/IconButton.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -38,7 +41,11 @@ const props = defineProps({
         type: String,
         default: decodeTypes.NONE,
     },
+    end: Boolean,
+    loading: Boolean,
 })
+
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
 
 /**
  *
@@ -178,7 +185,6 @@ const actionColumn = {
                         row.value,
                     )
                     if (success) {
-                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.value }))
                     } else {
                         $message.error(msg)
@@ -203,7 +209,6 @@ const actionColumn = {
                         currentEditRow.value.score,
                     )
                     if (success) {
-                        browserStore.loadKeyValue(props.name, props.db, keyName.value).then((r) => {})
                         $message.success(i18n.t('dialogue.save_value_succ'))
                     } else {
                         $message.error(msg)
@@ -235,15 +240,22 @@ const columns = reactive([
 
 const tableData = computed(() => {
     const data = []
-    let index = 0
-    for (const elem of props.value) {
-        data.push({
-            no: ++index,
-            value: elem.value,
-            score: elem.score,
-        })
+    if (!isEmpty(props.value)) {
+        let index = 0
+        for (const elem of props.value) {
+            data.push({
+                no: ++index,
+                value: elem.value,
+                score: elem.score,
+            })
+        }
     }
     return data
+})
+
+const entries = computed(() => {
+    const len = size(tableData.value)
+    return `${len} / ${Math.max(len, props.length)}`
 })
 
 const onAddRow = () => {
@@ -293,14 +305,16 @@ const onUpdateFilter = (filters, sourceColumn) => {
     <div class="content-wrapper flex-box-v">
         <content-toolbar
             :db="props.db"
-            :decode="props.decode"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
             :key-type="keyType"
+            :loading="props.loading"
             :server="props.name"
             :ttl="ttl"
-            :view-as="props.viewAs"
-            class="value-item-part" />
+            class="value-item-part"
+            @delete="emit('delete')"
+            @reload="emit('reload')"
+            @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>
@@ -324,6 +338,22 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 </n-input-group>
             </div>
             <div class="flex-item-expand"></div>
+            <n-button-group>
+                <icon-button
+                    :disabled="props.end || props.loading"
+                    :icon="LoadList"
+                    border
+                    size="18"
+                    t-tooltip="interface.load_more_entries"
+                    @click="emit('loadmore')" />
+                <icon-button
+                    :disabled="props.end || props.loading"
+                    :icon="LoadAll"
+                    border
+                    size="18"
+                    t-tooltip="interface.load_all_entries"
+                    @click="emit('loadall')" />
+            </n-button-group>
             <n-button :focusable="false" plain @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
@@ -331,24 +361,25 @@ const onUpdateFilter = (filters, sourceColumn) => {
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
-        <div class="value-wrapper value-item-part fill-height flex-box-h">
+        <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
             <n-data-table
                 :key="(row) => row.no"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="tableData"
+                :loading="props.loading"
                 :single-column="true"
                 :single-line="false"
+                class="flex-item-expand"
                 flex-height
-                max-height="100%"
                 size="small"
                 striped
                 virtual-scroll
                 @update:filters="onUpdateFilter" />
         </div>
         <div class="value-footer flex-box-h">
-            <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ props.length }}</n-text>
+            <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>

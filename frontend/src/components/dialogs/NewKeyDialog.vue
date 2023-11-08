@@ -130,7 +130,7 @@ const onAdd = async () => {
         if (success) {
             // select current key
             tabStore.setSelectedKeys(server, nodeKey)
-            browserStore.loadKeyValue(server, db, key).then(() => {})
+            browserStore.loadKeySummary({ server, db, key })
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }

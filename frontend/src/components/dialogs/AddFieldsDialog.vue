@@ -11,6 +11,7 @@ import AddZSetValue from '@/components/new_value/AddZSetValue.vue'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
 import { isEmpty, size, slice } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
+import useTabStore from 'stores/tab.js'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -79,6 +80,7 @@ watch(
 )
 
 const browserStore = useBrowserStore()
+const tab = useTabStore()
 const onAdd = async () => {
     try {
         const { server, db, key, keyCode, type } = newForm
@@ -87,6 +89,7 @@ const onAdd = async () => {
             value = defaultValue[type]
         }
         const keyName = isEmpty(keyCode) ? key : keyCode
+        let updated = false
         switch (type) {
             case types.LIST:
                 {
@@ -98,9 +101,7 @@ const onAdd = async () => {
                     }
                     const { success, msg } = data
                     if (success) {
-                        if (newForm.reload) {
-                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
-                        }
+                        updated = true
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
@@ -112,9 +113,7 @@ const onAdd = async () => {
                 {
                     const { success, msg } = await browserStore.addHashField(server, db, keyName, newForm.opType, value)
                     if (success) {
-                        if (newForm.reload) {
-                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
-                        }
+                        updated = true
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
@@ -126,9 +125,7 @@ const onAdd = async () => {
                 {
                     const { success, msg } = await browserStore.addSetItem(server, db, keyName, value)
                     if (success) {
-                        if (newForm.reload) {
-                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
-                        }
+                        updated = true
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
@@ -140,9 +137,7 @@ const onAdd = async () => {
                 {
                     const { success, msg } = await browserStore.addZSetItem(server, db, keyName, newForm.opType, value)
                     if (success) {
-                        if (newForm.reload) {
-                            browserStore.loadKeyValue(server, db, keyName).then(() => {})
-                        }
+                        updated = true
                         $message.success(i18n.t('dialogue.handle_succ'))
                     } else {
                         $message.error(msg)
@@ -161,9 +156,7 @@ const onAdd = async () => {
                             slice(value, 1),
                         )
                         if (success) {
-                            if (newForm.reload) {
-                                browserStore.loadKeyValue(server, db, keyName).then(() => {})
-                            }
+                            updated = true
                             $message.success(i18n.t('dialogue.handle_succ'))
                         } else {
                             $message.error(msg)
@@ -171,6 +164,12 @@ const onAdd = async () => {
                     }
                 }
                 break
+        }
+
+        if (updated) {
+            if (newForm.reload) {
+                browserStore.reloadKey({ server, db, key: keyName })
+            }
         }
         dialogStore.closeAddFieldsDialog()
     } catch (e) {

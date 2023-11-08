@@ -1,9 +1,8 @@
 <script setup>
 import { h, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import { debounce, isEmpty, map, size, split } from 'lodash'
+import { debounce, isEmpty, map, size } from 'lodash'
 import { useI18n } from 'vue-i18n'
-import dayjs from 'dayjs'
 import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
 

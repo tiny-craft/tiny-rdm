@@ -11,9 +11,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed } from 'vue'
-import { isEmpty, padStart } from 'lodash'
-import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
-import useBrowserStore from 'stores/browser.js'
+import { padStart } from 'lodash'
 
 const props = defineProps({
     server: String,
@@ -34,30 +32,16 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
-    viewAs: {
-        type: String,
-        default: formatTypes.PLAIN_TEXT,
-    },
-    decode: {
-        type: String,
-        default: decodeTypes.NONE,
-    },
+    loading: Boolean,
 })
 
+const emit = defineEmits(['reload', 'rename', 'delete'])
+
 const dialogStore = useDialog()
-const browserStore = useBrowserStore()
 const i18n = useI18n()
 
 const binaryKey = computed(() => {
     return !!props.keyCode
-})
-
-/**
- *
- * @type {ComputedRef<string|number[]>}
- */
-const keyName = computed(() => {
-    return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
 
 const ttlString = computed(() => {
@@ -77,10 +61,6 @@ const ttlString = computed(() => {
     return s
 })
 
-const onReloadKey = () => {
-    browserStore.loadKeyValue(props.server, props.db, keyName.value, props.viewAs, props.decode)
-}
-
 const onCopyKey = () => {
     ClipboardSetText(props.keyPath)
         .then((succ) => {
@@ -92,33 +72,20 @@ const onCopyKey = () => {
             $message.error(e.message)
         })
 }
-
-const onRenameKey = () => {
-    if (binaryKey.value) {
-        $message.error(i18n.t('dialogue.rename_binary_key_fail'))
-    } else {
-        dialogStore.openRenameKeyDialog(props.server, props.db, props.keyPath)
-    }
-}
-
-const onDeleteKey = () => {
-    $dialog.warning(i18n.t('dialogue.remove_tip', { name: props.keyPath }), () => {
-        browserStore.deleteKey(props.server, props.db, keyName.value).then((success) => {
-            if (success) {
-                $message.success(i18n.t('dialogue.delete_key_succ', { key: props.keyPath }))
-            }
-        })
-    })
-}
 </script>
 
 <template>
     <div class="content-toolbar flex-box-h">
         <n-input-group>
             <redis-type-tag :binary-key="binaryKey" :type="props.keyType" size="large" />
-            <n-input v-model:value="props.keyPath">
+            <n-input v-model:value="props.keyPath" readonly>
                 <template #suffix>
-                    <icon-button :icon="Refresh" size="18" t-tooltip="interface.reload" @click="onReloadKey" />
+                    <icon-button
+                        :icon="Refresh"
+                        :loading="props.loading"
+                        size="18"
+                        t-tooltip="interface.reload"
+                        @click="emit('reload')" />
                 </template>
             </n-input>
             <icon-button :icon="Copy" border size="18" t-tooltip="interface.copy_key" @click="onCopyKey" />
@@ -135,11 +102,11 @@ const onDeleteKey = () => {
                 </template>
                 TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}
             </n-tooltip>
-            <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="onRenameKey" />
+            <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="emit('rename')" />
         </n-button-group>
         <n-tooltip :show-arrow="false">
             <template #trigger>
-                <n-button :focusable="false" @click="onDeleteKey">
+                <n-button :focusable="false" @click="emit('delete')">
                     <template #icon>
                         <n-icon :component="Delete" size="18" />
                     </template>

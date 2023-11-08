@@ -29,12 +29,22 @@ type slowLogItem struct {
 	Cost      int64  `json:"cost"`
 }
 
+type entryCursor struct {
+	DB      int
+	Type    string
+	Key     string
+	Pattern string
+	Cursor  uint64
+	XLast   string // last stream pos
+}
+
 type connectionItem struct {
-	client     redis.UniversalClient
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	cursor     map[int]uint64 // current cursor of databases
-	stepSize   int64
+	client      redis.UniversalClient
+	ctx         context.Context
+	cancelFunc  context.CancelFunc
+	cursor      map[int]uint64      // current cursor of databases
+	entryCursor map[int]entryCursor // current entry cursor of databases
+	stepSize    int64
 }
 
 type browserService struct {
@@ -261,11 +271,12 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 		}
 		ctx, cancelFunc := context.WithCancel(b.ctx)
 		item = connectionItem{
-			client:     client,
-			ctx:        ctx,
-			cancelFunc: cancelFunc,
-			cursor:     map[int]uint64{},
-			stepSize:   int64(selConn.LoadSize),
+			client:      client,
+			ctx:         ctx,
+			cancelFunc:  cancelFunc,
+			cursor:      map[int]uint64{},
+			entryCursor: map[int]entryCursor{},
+			stepSize:    int64(selConn.LoadSize),
 		}
 		if item.stepSize <= 0 {
 			item.stepSize = consts.DEFAULT_LOAD_SIZE
@@ -484,6 +495,345 @@ func (b *browserService) LoadAllKeys(connName string, db int, match, keyType str
 	resp.Data = map[string]any{
 		"keys": keys,
 	}
+	return
+}
+
+// GetKeySummary get key summary info
+func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	key := strutil.DecodeRedisKey(param.Key)
+	var keyType string
+	var dur time.Duration
+	keyType, err = client.Type(ctx, key).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	if keyType == "none" {
+		resp.Msg = "key not exists"
+		return
+	}
+
+	var data types.KeySummary
+	data.Type = strings.ToLower(keyType)
+	if dur, err = client.TTL(ctx, key).Result(); err != nil {
+		data.TTL = -1
+	} else {
+		if dur < 0 {
+			data.TTL = -1
+		} else {
+			data.TTL = int64(dur.Seconds())
+		}
+	}
+
+	data.Size, _ = client.MemoryUsage(ctx, key, 0).Result()
+	switch data.Type {
+	case "string":
+		data.Length, _ = client.StrLen(ctx, key).Result()
+	case "list":
+		data.Length, _ = client.LLen(ctx, key).Result()
+	case "hash":
+		data.Length, _ = client.HLen(ctx, key).Result()
+	case "set":
+		data.Length, _ = client.SCard(ctx, key).Result()
+	case "zset":
+		data.Length, _ = client.ZCard(ctx, key).Result()
+	case "stream":
+		data.Length, _ = client.XLen(ctx, key).Result()
+	default:
+		resp.Msg = "unknown key type"
+		return
+	}
+
+	resp.Success = true
+	resp.Data = data
+	return
+}
+
+// GetKeyDetail get key detail
+func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx, entryCors := item.client, item.ctx, item.entryCursor
+	key := strutil.DecodeRedisKey(param.Key)
+	var keyType string
+	keyType, err = client.Type(ctx, key).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	if keyType == "none" {
+		resp.Msg = "key not exists"
+		return
+	}
+
+	var data types.KeyDetail
+	//var cursor uint64
+	matchPattern := param.MatchPattern
+	if len(matchPattern) <= 0 {
+		matchPattern = "*"
+	}
+
+	// define get entry cursor function
+	getEntryCursor := func() (uint64, string) {
+		if entry, ok := entryCors[param.DB]; !ok || entry.Key != key || entry.Pattern != matchPattern {
+			// not the same key or match pattern, reset cursor
+			entry = entryCursor{
+				DB:      param.DB,
+				Key:     key,
+				Pattern: matchPattern,
+				Cursor:  0,
+			}
+			entryCors[param.DB] = entry
+			return 0, ""
+		} else {
+			return entry.Cursor, entry.XLast
+		}
+	}
+	// define set entry cursor function
+	setEntryCursor := func(cursor uint64) {
+		entryCors[param.DB] = entryCursor{
+			DB:      param.DB,
+			Type:    "",
+			Key:     key,
+			Pattern: matchPattern,
+			Cursor:  cursor,
+		}
+	}
+	// define set last stream pos function
+	setEntryXLast := func(last string) {
+		entryCors[param.DB] = entryCursor{
+			DB:      param.DB,
+			Type:    "",
+			Key:     key,
+			Pattern: matchPattern,
+			XLast:   last,
+		}
+	}
+
+	switch strings.ToLower(keyType) {
+	case "string":
+		var str string
+		str, err = client.Get(ctx, key).Result()
+		data.Value, data.DecodeType, data.ViewAs = strutil.ConvertTo(str, param.DecodeType, param.ViewAs)
+
+	case "list":
+		loadListHandle := func() ([]string, bool, error) {
+			var items []string
+			var cursor uint64
+			if param.Full {
+				// load all
+				cursor = 0
+				items, err = client.LRange(ctx, key, 0, -1).Result()
+			} else {
+				cursor, _ = getEntryCursor()
+				scanSize := int64(Preferences().GetScanSize())
+				items, err = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
+				cursor = cursor + uint64(scanSize)
+				if len(items) < int(scanSize) {
+					cursor = 0
+				}
+			}
+			setEntryCursor(cursor)
+			if err != nil {
+				return items, false, err
+			}
+			return items, cursor == 0, nil
+		}
+
+		data.Value, data.End, err = loadListHandle()
+
+	case "hash":
+		loadHashHandle := func() (map[string]string, bool, error) {
+			items := map[string]string{}
+			scanSize := int64(Preferences().GetScanSize())
+			var loadedVal []string
+			var cursor uint64
+			if param.Full {
+				// load all
+				cursor = 0
+				for {
+					loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", scanSize).Result()
+					if err != nil {
+						return nil, false, err
+					}
+					for i := 0; i < len(loadedVal); i += 2 {
+						items[loadedVal[i]] = loadedVal[i+1]
+					}
+					if cursor == 0 {
+						break
+					}
+				}
+			} else {
+				cursor, _ = getEntryCursor()
+				loadedVal, cursor, err = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
+				if err != nil {
+					return nil, false, err
+				}
+				for i := 0; i < len(loadedVal); i += 2 {
+					items[loadedVal[i]] = loadedVal[i+1]
+				}
+			}
+			setEntryCursor(cursor)
+			return items, cursor == 0, nil
+		}
+
+		data.Value, data.End, err = loadHashHandle()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+
+	case "set":
+		loadSetHandle := func() ([]string, bool, error) {
+			var items []string
+			var cursor uint64
+			scanSize := int64(Preferences().GetScanSize())
+			var loadedKey []string
+			if param.Full {
+				// load all
+				cursor = 0
+				for {
+					loadedKey, cursor, err = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+					if err != nil {
+						return items, false, err
+					}
+					items = append(items, loadedKey...)
+					if cursor == 0 {
+						break
+					}
+				}
+			} else {
+				cursor, _ = getEntryCursor()
+				loadedKey, cursor, err = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+				items = append(items, loadedKey...)
+			}
+			setEntryCursor(cursor)
+			return items, cursor == 0, nil
+		}
+
+		data.Value, data.End, err = loadSetHandle()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+
+	case "zset":
+		loadZSetHandle := func() ([]types.ZSetItem, bool, error) {
+			var items []types.ZSetItem
+			var cursor uint64
+			scanSize := int64(Preferences().GetScanSize())
+			var loadedVal []string
+			if param.Full {
+				// load all
+				cursor = 0
+				for {
+					loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+					if err != nil {
+						return items, false, err
+					}
+					var score float64
+					for i := 0; i < len(loadedVal); i += 2 {
+						if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
+							items = append(items, types.ZSetItem{
+								Value: loadedVal[i],
+								Score: score,
+							})
+						}
+					}
+					if cursor == 0 {
+						break
+					}
+				}
+			} else {
+				cursor, _ = getEntryCursor()
+				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+				var score float64
+				for i := 0; i < len(loadedVal); i += 2 {
+					if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
+						items = append(items, types.ZSetItem{
+							Value: loadedVal[i],
+							Score: score,
+						})
+					}
+				}
+			}
+			setEntryCursor(cursor)
+			return items, cursor == 0, nil
+		}
+
+		data.Value, data.End, err = loadZSetHandle()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+
+	case "stream":
+		loadStreamHandle := func() ([]types.StreamItem, bool, error) {
+			var msgs []redis.XMessage
+			var items []types.StreamItem
+			var last string
+			if param.Full {
+				// load all
+				last = ""
+				msgs, err = client.XRevRange(ctx, key, "+", "-").Result()
+			} else {
+				scanSize := int64(Preferences().GetScanSize())
+				_, last = getEntryCursor()
+				if len(last) <= 0 {
+					last = "+"
+				}
+				if last != "+" {
+					// add 1 more item when continue scan
+					msgs, err = client.XRevRangeN(ctx, key, last, "-", scanSize+1).Result()
+					msgs = msgs[1:]
+				} else {
+					msgs, err = client.XRevRangeN(ctx, key, last, "-", scanSize).Result()
+				}
+				scanCount := len(msgs)
+				if scanCount <= 0 || scanCount < int(scanSize) {
+					last = ""
+				} else if scanCount > 0 {
+					last = msgs[scanCount-1].ID
+				}
+			}
+			setEntryXLast(last)
+			for _, msg := range msgs {
+				items = append(items, types.StreamItem{
+					ID:    msg.ID,
+					Value: msg.Values,
+				})
+			}
+			if err != nil {
+				return items, false, err
+			}
+			return items, last == "", nil
+		}
+
+		data.Value, data.End, err = loadStreamHandle()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+	}
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	resp.Data = data
 	return
 }
 
@@ -774,6 +1124,7 @@ func (b *browserService) SetHashValue(connName string, db int, k any, field, new
 	key := strutil.DecodeRedisKey(k)
 	var removedField []string
 	updatedField := map[string]string{}
+	replacedField := map[string]string{}
 	if len(field) <= 0 {
 		// old filed is empty, add new field
 		_, err = client.HSet(ctx, key, newField, value).Result()
@@ -795,6 +1146,7 @@ func (b *browserService) SetHashValue(connName string, db int, k any, field, new
 		_, err = client.HSet(ctx, key, newField, value).Result()
 		removedField = append(removedField, field)
 		updatedField[newField] = value
+		replacedField[field] = newField
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -803,8 +1155,9 @@ func (b *browserService) SetHashValue(connName string, db int, k any, field, new
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"removed": removedField,
-		"updated": updatedField,
+		"removed":  removedField,
+		"updated":  updatedField,
+		"replaced": replacedField,
 	}
 	return
 }
@@ -944,10 +1297,11 @@ func (b *browserService) SetSetItem(connName string, db int, k any, remove bool,
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
+	var affected int64
 	if remove {
-		_, err = client.SRem(ctx, key, members...).Result()
+		affected, err = client.SRem(ctx, key, members...).Result()
 	} else {
-		_, err = client.SAdd(ctx, key, members...).Result()
+		affected, err = client.SAdd(ctx, key, members...).Result()
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -955,6 +1309,9 @@ func (b *browserService) SetSetItem(connName string, db int, k any, remove bool,
 	}
 
 	resp.Success = true
+	resp.Data = map[string]any{
+		"affected": affected,
+	}
 	return
 }
 
@@ -1003,6 +1360,9 @@ func (b *browserService) UpdateZSetValue(connName string, db int, k any, value, 
 			Score:  score,
 			Member: value,
 		}).Result()
+		if err == nil {
+			updated[value] = score
+		}
 	} else {
 		// remove old value and add new one
 		_, err = client.ZRem(ctx, key, value).Result()
@@ -1075,7 +1435,8 @@ func (b *browserService) AddStreamValue(connName string, db int, k any, ID strin
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	_, err = client.XAdd(ctx, &redis.XAddArgs{
+	var updateID string
+	updateID, err = client.XAdd(ctx, &redis.XAddArgs{
 		Stream: key,
 		ID:     ID,
 		Values: fieldItems,
@@ -1086,6 +1447,9 @@ func (b *browserService) AddStreamValue(connName string, db int, k any, ID strin
 	}
 
 	resp.Success = true
+	resp.Data = map[string]any{
+		"updateID": updateID,
+	}
 	return
 }
 
@@ -1099,8 +1463,18 @@ func (b *browserService) RemoveStreamValues(connName string, db int, k any, IDs 
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	_, err = client.XDel(ctx, key, IDs...).Result()
+
+	var affected int64
+	affected, err = client.XDel(ctx, key, IDs...).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
 	resp.Success = true
+	resp.Data = map[string]any{
+		"affected": affected,
+	}
 	return
 }
 
