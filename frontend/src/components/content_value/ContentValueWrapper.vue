@@ -8,7 +8,7 @@ import ContentValueZset from '@/components/content_value/ContentValueZSet.vue'
 import ContentValueStream from '@/components/content_value/ContentValueStream.vue'
 import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { isEmpty } from 'lodash'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useDialogStore from 'stores/dialog.js'
@@ -121,10 +121,14 @@ onMounted(() => {
     loadData(false, false)
 })
 
+const contentRef = ref(null)
 watch(
     () => data.value?.keyPath,
     () => {
         // onReload()
+        if (contentRef.value?.reset != null) {
+            contentRef.value?.reset()
+        }
         loadData(false, false)
     },
 )
@@ -138,6 +142,7 @@ watch(
     </n-empty>
     <keep-alive v-else>
         <component
+            ref="contentRef"
             :is="valueComponents[data.type]"
             :db="data.db"
             :decode="data.decode || decodeTypes.NONE"

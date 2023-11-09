@@ -195,6 +195,12 @@ const clearFilter = () => {
 const onUpdateFilter = (filters, sourceColumn) => {
     valueColumn.filterOptionValue = filters[sourceColumn.key]
 }
+
+defineExpose({
+    reset: () => {
+        clearFilter()
+    },
+})
 </script>
 
 <template>

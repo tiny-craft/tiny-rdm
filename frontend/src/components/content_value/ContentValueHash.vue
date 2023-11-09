@@ -261,6 +261,12 @@ const onUpdateFilter = (filters, sourceColumn) => {
             break
     }
 }
+
+defineExpose({
+    reset: () => {
+        clearFilter()
+    },
+})
 </script>
 
 <template>
