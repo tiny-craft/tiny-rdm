@@ -21,7 +21,7 @@
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.0",
+    "@vitejs/plugin-vue": "^4.4.1",
     "naive-ui": "^2.35.0",
     "prettier": "^3.0.3",
     "unplugin-auto-import": "^0.16.7",

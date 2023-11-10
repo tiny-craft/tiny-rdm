@@ -1,6 +1,6 @@
 ## Tiny RDM 代码贡献指南
 
-### 多国语言贡献 {#language}
+### 多国语言贡献
 
 #### 增加新的语言
 1. 创建文件：在[frontend/src/langs](../frontend/src/langs/)目录下新增语言配置JSON文件，文件名格式为“{语言}-{地区}.json”，如英文为“en-us.json”，简体中文为“zh-cn.json”，建议直接复制[en-us.json](../frontend/src/langs/en-us.json)文件进行改名。
@@ -19,7 +19,7 @@
     ```
 4. 检查应用中对应翻译语境无问题后，可提交审核（[查看如何提交](#pull_request)）
 
-### 代码提交`(待完善)` {#pull_request}
+### 代码提交`(待完善)`
 
 #### PR提交规范
 PR提交格式为“<type>: <description>”

@@ -1,6 +1,6 @@
 ## Tiny RDM Contribute Guide
 
-### Multi-language Contributions {#language}
+### Multi-language Contributions
 
 #### Adding New Language
 
@@ -21,7 +21,7 @@
    ```
 4. Submit review once there are no issues with the translation context in the application. (learn how to submit)
 
-### Code Submission`(To be completed)` {#pull_request}
+### Code Submission`(To be completed)`
 
 #### Pull Request Title
 The format of PR's title like "<type>: <description>"
