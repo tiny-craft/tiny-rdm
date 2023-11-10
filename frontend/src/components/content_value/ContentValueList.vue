@@ -89,6 +89,10 @@ const valueColumn = reactive({
     },
 })
 
+const cancelEdit = () => {
+    currentEditRow.value.no = 0
+}
+
 const actionColumn = {
     key: 'action',
     title: i18n.t('interface.action'),
@@ -141,9 +145,7 @@ const actionColumn = {
                     currentEditRow.value.no = 0
                 }
             },
-            onCancel: () => {
-                currentEditRow.value.no = 0
-            },
+            onCancel: cancelEdit,
         })
     },
 }
@@ -198,6 +200,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
 defineExpose({
     reset: () => {
         clearFilter()
+        cancelEdit()
     },
 })
 </script>

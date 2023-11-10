@@ -143,6 +143,12 @@ const onSaveValue = async () => {
         saving.value = false
     }
 }
+
+defineExpose({
+    reset: () => {
+        inEdit.value = false
+    },
+})
 </script>
 
 <template>

@@ -12,10 +12,10 @@ import (
 	"github.com/klauspost/compress/gzip"
 	"github.com/klauspost/compress/zstd"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 	"tinyrdm/backend/types"
-	"unicode/utf8"
 )
 
 // ConvertTo convert string to specified type
@@ -215,9 +215,11 @@ func decodeJson(str string) (string, bool) {
 }
 
 func decodeBase64(str string) (string, bool) {
-	if decodedStr, err := base64.StdEncoding.DecodeString(str); err == nil {
-		if s := string(decodedStr); utf8.ValidString(s) {
-			return s, true
+	if match, _ := regexp.MatchString(`^\d+$`, str); !match {
+		if decodedStr, err := base64.StdEncoding.DecodeString(str); err == nil {
+			if s := string(decodedStr); !containsBinary(s) {
+				return s, true
+			}
 		}
 	}
 	return str, false
