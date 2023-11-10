@@ -142,8 +142,8 @@ watch(
     </n-empty>
     <keep-alive v-else>
         <component
-            ref="contentRef"
             :is="valueComponents[data.type]"
+            ref="contentRef"
             :db="data.db"
             :decode="data.decode || decodeTypes.NONE"
             :end="data.end"

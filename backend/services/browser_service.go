@@ -490,10 +490,12 @@ func (b *browserService) LoadAllKeys(connName string, db int, match, keyType str
 		return
 	}
 	b.setClientCursor(connName, db, 0)
+	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"keys": keys,
+		"keys":    keys,
+		"maxKeys": maxKeys,
 	}
 	return
 }

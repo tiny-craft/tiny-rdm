@@ -272,9 +272,14 @@ const handleSelectContextMenu = (key) => {
             const { match: pattern, type } = browserStore.getKeyFilter(props.server, db)
             dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
-        // case 'key_reload':
-        //     browserStore.loadKeys(props.server, db, redisKey)
-        //     break
+        case 'key_reload':
+            if (node != null && !!!node.loading) {
+                node.loading = true
+                browserStore.reloadLayer(props.server, db, redisKey).finally(() => {
+                    delete node.loading
+                })
+            }
+            break
         case 'value_reload':
             browserStore.reloadKey({
                 server: props.server,
@@ -519,7 +524,7 @@ const renderIconMenu = (items) => {
     )
 }
 
-const getDatabaseMenu = (opened, loading, end) => {
+const calcDBMenu = (opened, loading, end) => {
     const btns = []
     if (opened) {
         btns.push(
@@ -581,14 +586,16 @@ const getDatabaseMenu = (opened, loading, end) => {
     return btns
 }
 
-const getLayerMenu = () => {
+const calcLayerMenu = (loading, end) => {
     return [
-        // disable reload by layer, due to conflict with partial loading keys
-        // h(IconButton, {
-        //     tTooltip: 'interface.reload',
-        //     icon: Refresh,
-        //     onClick: () => handleSelectContextMenu('key_reload'),
-        // }),
+        // reload layer enable only full loaded
+        h(IconButton, {
+            tTooltip: end === true ? 'interface.reload' : 'interface.reload',
+            icon: Refresh,
+            loading: loading === true,
+            disabled: end !== true,
+            onClick: () => handleSelectContextMenu('key_reload'),
+        }),
         h(IconButton, {
             tTooltip: 'interface.new_key',
             icon: Add,
@@ -602,7 +609,7 @@ const getLayerMenu = () => {
     ]
 }
 
-const getValueMenu = () => {
+const calcValueMenu = () => {
     return [
         h(IconButton, {
             tTooltip: 'interface.remove_key',
@@ -617,11 +624,12 @@ const renderSuffix = ({ option }) => {
     if ((option.type === ConnectionType.RedisDB && option.opened) || includes(selectedKeys.value, option.key)) {
         switch (option.type) {
             case ConnectionType.RedisDB:
-                return renderIconMenu(getDatabaseMenu(option.opened, option.loading, option.fullLoaded))
+                return renderIconMenu(calcDBMenu(option.opened, option.loading, option.fullLoaded))
             case ConnectionType.RedisKey:
-                return renderIconMenu(getLayerMenu())
+                const fullLoaded = browserStore.isFullLoaded(props.server, option.db)
+                return renderIconMenu(calcLayerMenu(option.loading, fullLoaded))
             case ConnectionType.RedisValue:
-                return renderIconMenu(getValueMenu())
+                return renderIconMenu(calcValueMenu())
         }
     }
     return null

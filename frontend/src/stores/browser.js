@@ -139,7 +139,7 @@ const useBrowserStore = defineStore('browser', {
          * get database by server name and index
          * @param {string} connName
          * @param {number} db
-         * @return {{}|null}
+         * @return {DatabaseItem|null}
          */
         getDatabase(connName, db) {
             const dbs = this.databases[connName]
@@ -150,6 +150,20 @@ const useBrowserStore = defineStore('browser', {
                 }
             }
             return null
+        },
+
+        /**
+         * get full loaded status of database
+         * @param connName
+         * @param db
+         * @return {boolean}
+         */
+        isFullLoaded(connName, db) {
+            const selDB = this.getDatabase(connName, db)
+            if (selDB != null) {
+                return selDB.fullLoaded === true
+            }
+            return false
         },
 
         /**
@@ -473,9 +487,9 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} connName
          * @param {number} db
          * @param {string} match
-         * @param {string} matchType
+         * @param {string} [matchType]
          * @param {boolean} [full]
-         * @returns {Promise<{keys: string[], end: boolean}>}
+         * @returns {Promise<{keys: string[], maxKeys: number, end: boolean}>}
          */
         async scanKeys(connName, db, match, matchType, full) {
             let resp
@@ -488,8 +502,8 @@ const useBrowserStore = defineStore('browser', {
             if (!success) {
                 throw new Error(msg)
             }
-            const { keys = [], end } = data
-            return { keys, end, success }
+            const { keys = [], maxKeys, end } = data
+            return { keys, end, maxKeys, success }
         },
 
         /**
@@ -499,7 +513,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|null} prefix
          * @param {string|null} matchType
          * @param {boolean} [all]
-         * @return {Promise<{keys: Array<string|number[]>, end: boolean}>}
+         * @return {Promise<{keys: Array<string|number[]>, maxKeys: number, end: boolean}>}
          * @private
          */
         async _loadKeys(connName, db, prefix, matchType, all) {
@@ -523,7 +537,8 @@ const useBrowserStore = defineStore('browser', {
          */
         async loadMoreKeys(connName, db) {
             const { match, type: keyType } = this.getKeyFilter(connName, db)
-            const { keys, end } = await this._loadKeys(connName, db, match, keyType, false)
+            const { keys, maxKeys, end } = await this._loadKeys(connName, db, match, keyType, false)
+            this._setDBMaxKeys(connName, db, maxKeys)
             // remove current keys below prefix
             this._addKeyNodes(connName, db, keys)
             this._tidyNode(connName, db, '')
@@ -538,9 +553,42 @@ const useBrowserStore = defineStore('browser', {
          */
         async loadAllKeys(connName, db) {
             const { match, type: keyType } = this.getKeyFilter(connName, db)
-            const { keys } = await this._loadKeys(connName, db, match, keyType, true)
+            const { keys, maxKeys } = await this._loadKeys(connName, db, match, keyType, true)
+            this._setDBMaxKeys(connName, db, maxKeys)
             this._addKeyNodes(connName, db, keys)
             this._tidyNode(connName, db, '')
+        },
+
+        /**
+         * reload keys under layer
+         * @param {string} connName
+         * @param {number} db
+         * @param {string} prefix
+         * @return {Promise<void>}
+         */
+        async reloadLayer(connName, db, prefix) {
+            if (isEmpty(prefix)) {
+                return
+            }
+            let match = prefix
+            const separator = this._getSeparator(connName)
+            if (!endsWith(match, separator)) {
+                match += separator + '*'
+            } else {
+                match += '*'
+            }
+            // FIXME: ignore original match pattern due to redis not support combination matching
+            const { match: originMatch, type: keyType } = this.getKeyFilter(connName, db)
+            const { keys, maxKeys, success } = await this._loadKeys(connName, db, match, keyType, true)
+            if (!success) {
+                return
+            }
+
+            this._setDBMaxKeys(connName, db, maxKeys)
+            // remove current keys below prefix
+            this._deleteKeyNode(connName, db, prefix, true)
+            this._addKeyNodes(connName, db, keys)
+            this._tidyNode(connName, db, prefix)
         },
 
         /**
@@ -816,13 +864,16 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * update max key by value
+         * update max key by increase/decrease value
          * @param {string} connName
          * @param {number} db
-         * @param {number} updateValue
+         * @param {number} [updateValue]
          * @private
          */
         _updateDBMaxKeys(connName, db, updateValue) {
+            if (updateValue === undefined) {
+                return
+            }
             const database = this.getDatabase(connName, db)
             if (database != null) {
                 const maxKeys = get(database, 'maxKeys', 0)
@@ -831,15 +882,16 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * set db max keys to 0
-         * @param connName
-         * @param db
+         * set db max keys value
+         * @param {string} connName
+         * @param {number} db
+         * @param {number} maxKeys
          * @private
          */
-        _emptyDBMaxKeys(connName, db) {
+        _setDBMaxKeys(connName, db, maxKeys) {
             const database = this.getDatabase(connName, db)
             if (database != null) {
-                set(database, 'maxKeys', 0)
+                set(database, 'maxKeys', maxKeys)
             }
         },
 
@@ -1588,7 +1640,7 @@ const useBrowserStore = defineStore('browser', {
                 if (success === true) {
                     // update tree view data
                     this._deleteKeyNode(connName, db)
-                    this._emptyDBMaxKeys(connName, db)
+                    this._setDBMaxKeys(connName, db, 0)
                     // set tab content empty
                     const tab = useTabStore()
                     tab.emptyTab(connName)
