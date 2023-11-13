@@ -629,7 +629,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 	case "string":
 		var str string
 		str, err = client.Get(ctx, key).Result()
-		data.Value, data.DecodeType, data.ViewAs = strutil.ConvertTo(str, param.DecodeType, param.ViewAs)
+		data.Value = strutil.EncodeRedisKey(str)
+		//data.Value, data.DecodeType, data.ViewAs = strutil.ConvertTo(str, param.DecodeType, param.ViewAs)
 
 	case "list":
 		loadListHandle := func() ([]string, bool, error) {
@@ -839,184 +840,56 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 	return
 }
 
-// GetKeyValue get value by key
-func (b *browserService) GetKeyValue(connName string, db int, k any, viewAs, decodeType string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
-
-	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
-	var keyType string
-	var dur time.Duration
-	keyType, err = client.Type(ctx, key).Result()
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
-
-	if keyType == "none" {
-		resp.Msg = "key not exists"
-		return
-	}
-
-	var ttl int64
-	if dur, err = client.TTL(ctx, key).Result(); err != nil {
-		ttl = -1
-	} else {
-		if dur < 0 {
-			ttl = -1
-		} else {
-			ttl = int64(dur.Seconds())
-		}
-	}
-
-	var value any
-	var size, length int64
-	var cursor uint64
-	switch strings.ToLower(keyType) {
-	case "string":
-		var str string
-		str, err = client.Get(ctx, key).Result()
-		value, decodeType, viewAs = strutil.ConvertTo(str, decodeType, viewAs)
-		length, _ = client.StrLen(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	case "list":
-		value, err = client.LRange(ctx, key, 0, -1).Result()
-		length, _ = client.LLen(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	case "hash":
-		//value, err = client.HGetAll(ctx, key).Result()
-		items := map[string]string{}
-		scanSize := int64(Preferences().GetScanSize())
-		for {
-			var loadedVal []string
-			loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", scanSize).Result()
-			if err != nil {
-				resp.Msg = err.Error()
-				return
-			}
-			for i := 0; i < len(loadedVal); i += 2 {
-				items[loadedVal[i]] = loadedVal[i+1]
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-		value = items
-		length, _ = client.HLen(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	case "set":
-		//value, err = client.SMembers(ctx, key).Result()
-		items := []string{}
-		scanSize := int64(Preferences().GetScanSize())
-		for {
-			var loadedKey []string
-			loadedKey, cursor, err = client.SScan(ctx, key, cursor, "*", scanSize).Result()
-			if err != nil {
-				resp.Msg = err.Error()
-				return
-			}
-			items = append(items, loadedKey...)
-			if cursor == 0 {
-				break
-			}
-		}
-		value = items
-		length, _ = client.SCard(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	case "zset":
-		//value, err = client.ZRangeWithScores(ctx, key, 0, -1).Result()
-		var items []types.ZSetItem
-		scanSize := int64(Preferences().GetScanSize())
-		for {
-			var loadedVal []string
-			loadedVal, cursor, err = client.ZScan(ctx, key, cursor, "*", scanSize).Result()
-			if err != nil {
-				resp.Msg = err.Error()
-				return
-			}
-			var score float64
-			for i := 0; i < len(loadedVal); i += 2 {
-				if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
-					items = append(items, types.ZSetItem{
-						Value: loadedVal[i],
-						Score: score,
-					})
-				}
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-		value = items
-		length, _ = client.ZCard(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	case "stream":
-		var msgs []redis.XMessage
-		items := []types.StreamItem{}
-		msgs, err = client.XRevRange(ctx, key, "+", "-").Result()
-		if err != nil {
-			resp.Msg = err.Error()
-			return
-		}
-		for _, msg := range msgs {
-			items = append(items, types.StreamItem{
-				ID:    msg.ID,
-				Value: msg.Values,
-			})
-		}
-		value = items
-		length, _ = client.XLen(ctx, key).Result()
-		size, _ = client.MemoryUsage(ctx, key, 0).Result()
-	}
-	if err != nil {
-		resp.Msg = err.Error()
-		return
-	}
+// ConvertValue convert value with decode method and format
+// blank decodeType indicate auto decode
+// blank viewAs indicate auto format
+func (b *browserService) ConvertValue(value any, decode, format string) (resp types.JSResp) {
+	str := strutil.DecodeRedisKey(value)
+	value, decode, format = strutil.ConvertTo(str, decode, format)
 	resp.Success = true
 	resp.Data = map[string]any{
-		"type":   keyType,
-		"ttl":    ttl,
 		"value":  value,
-		"size":   size,
-		"length": length,
-		"viewAs": viewAs,
-		"decode": decodeType,
+		"decode": decode,
+		"format": format,
 	}
 	return
 }
 
 // SetKeyValue set value by key
 // @param ttl <= 0 means keep current ttl
-func (b *browserService) SetKeyValue(connName string, db int, k any, keyType string, value any, ttl int64, viewAs, decode string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
+	key := strutil.DecodeRedisKey(param.Key)
 	var expiration time.Duration
-	if ttl < 0 {
+	if param.TTL < 0 {
 		if expiration, err = client.PTTL(ctx, key).Result(); err != nil {
 			expiration = redis.KeepTTL
 		}
 	} else {
-		expiration = time.Duration(ttl) * time.Second
+		expiration = time.Duration(param.TTL) * time.Second
 	}
-	switch strings.ToLower(keyType) {
+	// use default decode type and format
+	if len(param.Decode) <= 0 {
+		param.Decode = types.DECODE_NONE
+	}
+	if len(param.Format) <= 0 {
+		param.Format = types.VIEWAS_PLAIN_TEXT
+	}
+	switch strings.ToLower(param.KeyType) {
 	case "string":
-		if str, ok := value.(string); !ok {
+		if str, ok := param.Value.(string); !ok {
 			resp.Msg = "invalid string value"
 			return
 		} else {
 			var saveStr string
-			if saveStr, err = strutil.SaveAs(str, viewAs, decode); err != nil {
-				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, viewAs, err.Error())
+			if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, param.Format, err.Error())
 				return
 			}
 			_, err = client.Set(ctx, key, saveStr, 0).Result()
@@ -1026,7 +899,7 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 			}
 		}
 	case "list":
-		if strs, ok := value.([]any); !ok {
+		if strs, ok := param.Value.([]any); !ok {
 			resp.Msg = "invalid list value"
 			return
 		} else {
@@ -1036,7 +909,7 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 			}
 		}
 	case "hash":
-		if strs, ok := value.([]any); !ok {
+		if strs, ok := param.Value.([]any); !ok {
 			resp.Msg = "invalid hash value"
 			return
 		} else {
@@ -1054,7 +927,7 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 			}
 		}
 	case "set":
-		if strs, ok := value.([]any); !ok || len(strs) <= 0 {
+		if strs, ok := param.Value.([]any); !ok || len(strs) <= 0 {
 			resp.Msg = "invalid set value"
 			return
 		} else {
@@ -1066,7 +939,7 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 			}
 		}
 	case "zset":
-		if strs, ok := value.([]any); !ok || len(strs) <= 0 {
+		if strs, ok := param.Value.([]any); !ok || len(strs) <= 0 {
 			resp.Msg = "invalid zset value"
 			return
 		} else {
@@ -1086,7 +959,7 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 			}
 		}
 	case "stream":
-		if strs, ok := value.([]any); !ok {
+		if strs, ok := param.Value.([]any); !ok {
 			resp.Msg = "invalid stream value"
 			return
 		} else {
@@ -1109,46 +982,52 @@ func (b *browserService) SetKeyValue(connName string, db int, k any, keyType str
 	}
 	resp.Success = true
 	resp.Data = map[string]any{
-		"value": value,
+		"value": param.Value,
 	}
 	return
 }
 
 // SetHashValue set hash field
-func (b *browserService) SetHashValue(connName string, db int, k any, field, newField, value string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
+	key := strutil.DecodeRedisKey(param.Key)
+	str := strutil.DecodeRedisKey(param.Value)
+	var saveStr string
+	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+		resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, param.Format, err.Error())
+		return
+	}
 	var removedField []string
-	updatedField := map[string]string{}
-	replacedField := map[string]string{}
-	if len(field) <= 0 {
+	updatedField := map[string]any{}
+	replacedField := map[string]any{}
+	if len(param.Field) <= 0 {
 		// old filed is empty, add new field
-		_, err = client.HSet(ctx, key, newField, value).Result()
-		updatedField[newField] = value
-	} else if len(newField) <= 0 {
+		_, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
+		updatedField[param.NewField] = saveStr
+	} else if len(param.NewField) <= 0 {
 		// new field is empty, delete old field
-		_, err = client.HDel(ctx, key, field, value).Result()
-		removedField = append(removedField, field)
-	} else if field == newField {
-		// replace field
-		_, err = client.HSet(ctx, key, newField, value).Result()
-		updatedField[newField] = value
+		_, err = client.HDel(ctx, key, param.Field).Result()
+		removedField = append(removedField, param.Field)
+	} else if param.Field == param.NewField {
+		// update field value
+		_, err = client.HSet(ctx, key, param.Field, saveStr).Result()
+		updatedField[param.NewField] = saveStr
 	} else {
 		// remove old field and add new field
-		if _, err = client.HDel(ctx, key, field).Result(); err != nil {
+		if _, err = client.HDel(ctx, key, param.Field).Result(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
-		_, err = client.HSet(ctx, key, newField, value).Result()
-		removedField = append(removedField, field)
-		updatedField[newField] = value
-		replacedField[field] = newField
+		_, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
+		removedField = append(removedField, param.Field)
+		updatedField[param.NewField] = saveStr
+		replacedField[param.Field] = param.NewField
 	}
 	if err != nil {
 		resp.Msg = err.Error()

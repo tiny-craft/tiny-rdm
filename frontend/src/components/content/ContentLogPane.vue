@@ -2,7 +2,7 @@
 import { computed, h, nextTick, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import { map, size, split, uniqBy } from 'lodash'
+import { map, size, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'

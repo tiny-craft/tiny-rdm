@@ -37,3 +37,25 @@ type KeyDetail struct {
 	DecodeType string `json:"decodeType,omitempty"`
 	End        bool   `json:"end"`
 }
+
+type SetKeyParam struct {
+	Server  string `json:"server"`
+	DB      int    `json:"db"`
+	Key     any    `json:"key"`
+	KeyType string `json:"keyType"`
+	Value   any    `json:"value"`
+	TTL     int64  `json:"ttl"`
+	Format  string `json:"format,omitempty"`
+	Decode  string `json:"decode,omitempty"`
+}
+
+type SetHashParam struct {
+	Server   string `json:"server"`
+	DB       int    `json:"db"`
+	Key      any    `json:"key"`
+	Field    string `json:"field,omitempty"`
+	NewField string `json:"newField,omitempty"`
+	Value    any    `json:"value"`
+	Format   string `json:"format,omitempty"`
+	Decode   string `json:"decode,omitempty"`
+}

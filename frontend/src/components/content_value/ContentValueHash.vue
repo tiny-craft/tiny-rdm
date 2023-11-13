@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -14,6 +14,8 @@ import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
+import Edit from '@/components/icons/Edit.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -33,7 +35,7 @@ const props = defineProps({
     value: Object,
     size: Number,
     length: Number,
-    viewAs: {
+    format: {
         type: String,
         default: formatTypes.PLAIN_TEXT,
     },
@@ -74,30 +76,26 @@ const currentEditRow = ref({
     no: 0,
     key: '',
     value: null,
+    format: formatTypes.PLAIN_TEXT,
+    decode: decodeTypes.NONE,
 })
+
+const inEdit = computed(() => {
+    return currentEditRow.value.no > 0
+})
+const tableRef = ref(null)
 const fieldColumn = reactive({
     key: 'key',
     title: i18n.t('common.field'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
+    ellipsis: {
+        tooltip: true,
+    },
     filterOptionValue: null,
     filter(value, row) {
         return !!~row.key.indexOf(value.toString())
-    },
-    // sorter: (row1, row2) => row1.key - row2.key,
-    render: (row) => {
-        const isEdit = currentEditRow.value.no === row.no
-        if (isEdit) {
-            return h(NInput, {
-                value: currentEditRow.value.key,
-                'onUpdate:value': (val) => {
-                    currentEditRow.value.key = val
-                },
-            })
-        } else {
-            return row.key
-        }
     },
 })
 const valueColumn = reactive({
@@ -106,34 +104,58 @@ const valueColumn = reactive({
     align: 'center',
     titleAlign: 'center',
     resizable: true,
+    ellipsis: {
+        tooltip: true,
+    },
     filterOptionValue: null,
     filter(value, row) {
         return !!~row.value.indexOf(value.toString())
     },
-    // sorter: (row1, row2) => row1.value - row2.value,
-    // ellipsis: {
-    //     tooltip: true
-    // },
-    render: (row) => {
-        const isEdit = currentEditRow.value.no === row.no
-        if (isEdit) {
-            return h(NInput, {
-                value: currentEditRow.value.value,
-                type: 'textarea',
-                autosize: { minRow: 2, maxRows: 5 },
-                style: 'text-align: left;',
-                'onUpdate:value': (val) => {
-                    currentEditRow.value.value = val
-                },
-            })
-        } else {
-            return h(NCode, { language: 'plaintext', wordWrap: true }, { default: () => row.value })
-        }
-    },
 })
 
-const cancelEdit = () => {
+const startEdit = async ({ no, key, value }) => {
+    currentEditRow.value.value = value
+    currentEditRow.value.no = no
+    currentEditRow.value.key = key
+}
+
+const saveEdit = async (field, value, decode, format) => {
+    try {
+        const row = tableData.value[currentEditRow.value.no - 1]
+        if (row == null) {
+            throw new Error('row not exists')
+        }
+
+        const { updated, success, msg } = await browserStore.setHash({
+            server: props.name,
+            db: props.db,
+            key: keyName.value,
+            field: row.key,
+            newField: field,
+            value,
+            decode,
+            format,
+        })
+        if (success) {
+            row.key = field
+            row.value = updated[row.key] || ''
+            $message.success(i18n.t('dialogue.save_value_succ'))
+        } else {
+            $message.error(msg)
+        }
+    } catch (e) {
+        $message.error(e.message)
+    } finally {
+        resetEdit()
+    }
+}
+
+const resetEdit = () => {
     currentEditRow.value.no = 0
+    currentEditRow.value.key = ''
+    currentEditRow.value.value = null
+    currentEditRow.value.format = formatTypes.PLAIN_TEXT
+    currentEditRow.value.decode = decodeTypes.NONE
 }
 
 const actionColumn = {
@@ -145,13 +167,9 @@ const actionColumn = {
     fixed: 'right',
     render: (row) => {
         return h(EditableTableColumn, {
-            editing: currentEditRow.value.no === row.no,
+            editing: false,
             bindKey: row.key,
-            onEdit: () => {
-                currentEditRow.value.no = row.no
-                currentEditRow.value.key = row.key
-                currentEditRow.value.value = row.value
-            },
+            onEdit: () => startEdit(row),
             onDelete: async () => {
                 try {
                     const { success, msg } = await browserStore.removeHashField(
@@ -169,43 +187,45 @@ const actionColumn = {
                     $message.error(e.message)
                 }
             },
-            onSave: async () => {
-                try {
-                    const { success, msg } = await browserStore.setHash(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.key,
-                        currentEditRow.value.key,
-                        currentEditRow.value.value,
-                    )
-                    if (success) {
-                        $message.success(i18n.t('dialogue.save_value_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
-                } catch (e) {
-                    $message.error(e.message)
-                } finally {
-                    currentEditRow.value.no = 0
-                }
-            },
-            onCancel: cancelEdit,
         })
     },
 }
-const columns = reactive([
-    {
-        key: 'no',
-        title: '#',
-        width: 80,
-        align: 'center',
-        titleAlign: 'center',
-    },
-    fieldColumn,
-    valueColumn,
-    actionColumn,
-])
+
+const columns = computed(() => {
+    if (!inEdit.value) {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+            },
+            fieldColumn,
+            valueColumn,
+            actionColumn,
+        ]
+    } else {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+                render(row) {
+                    if (row.no === currentEditRow.value.no) {
+                        // editing row, show edit state
+                        return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
+                    } else {
+                        return row.no
+                    }
+                },
+            },
+            fieldColumn,
+        ]
+    }
+})
 
 const tableData = computed(() => {
     const data = []
@@ -220,6 +240,17 @@ const tableData = computed(() => {
     return data
 })
 
+const rowProps = (row) => {
+    return {
+        onClick: () => {
+            // in edit mode, switch edit row by click
+            if (inEdit.value) {
+                startEdit(row)
+            }
+        },
+    }
+}
+
 const entries = computed(() => {
     const len = size(tableData.value)
     return `${len} / ${Math.max(len, props.length)}`
@@ -232,12 +263,12 @@ const onAddRow = () => {
 const filterValue = ref('')
 const onFilterInput = (val) => {
     switch (filterType.value) {
-        case filterOption[0].value:
+        case filterOption.value[0].value:
             // filter field
             valueColumn.filterOptionValue = null
             fieldColumn.filterOptionValue = val
             break
-        case filterOption[1].value:
+        case filterOption.value[1].value:
             // filter value
             fieldColumn.filterOptionValue = null
             valueColumn.filterOptionValue = val
@@ -256,10 +287,10 @@ const clearFilter = () => {
 
 const onUpdateFilter = (filters, sourceColumn) => {
     switch (filterType.value) {
-        case filterOption[0].value:
+        case filterOption.value[0].value:
             fieldColumn.filterOptionValue = filters[sourceColumn.key]
             break
-        case filterOption[1].value:
+        case filterOption.value[1].value:
             valueColumn.filterOptionValue = filters[sourceColumn.key]
             break
     }
@@ -268,7 +299,7 @@ const onUpdateFilter = (filters, sourceColumn) => {
 defineExpose({
     reset: () => {
         clearFilter()
-        cancelEdit()
+        resetEdit()
     },
 })
 </script>
@@ -328,14 +359,17 @@ defineExpose({
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
-        <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
+        <div id="content-table" class="value-wrapper value-item-part flex-box-h flex-item-expand">
+            <!-- table -->
             <n-data-table
                 :key="(row) => row.no"
+                ref="tableRef"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="tableData"
                 :loading="props.loading"
+                :row-props="rowProps"
                 :single-column="true"
                 :single-line="false"
                 class="flex-item-expand"
@@ -344,6 +378,20 @@ defineExpose({
                 striped
                 virtual-scroll
                 @update:filters="onUpdateFilter" />
+
+            <!-- edit pane -->
+            <content-entry-editor
+                v-show="inEdit"
+                :decode="currentEditRow.decode"
+                :field="currentEditRow.key"
+                :format="currentEditRow.format"
+                :key-label="$t('common.field')"
+                :value="currentEditRow.value"
+                :value-label="$t('common.value')"
+                class="flex-item-expand"
+                style="width: 100%"
+                @cancel="resetEdit"
+                @save="saveEdit" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>

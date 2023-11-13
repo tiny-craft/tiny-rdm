@@ -10,7 +10,6 @@ import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
 import { computed, onMounted, ref, watch } from 'vue'
 import { isEmpty } from 'lodash'
-import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useDialogStore from 'stores/dialog.js'
 
 const themeVars = useThemeVars()
@@ -45,6 +44,7 @@ const props = defineProps({
 const data = computed(() => {
     return props.content
 })
+const initializing = ref(false)
 
 const binaryKey = computed(() => {
     return !!data.value.keyCode
@@ -116,22 +116,29 @@ const onLoadAll = () => {
     loadData(false, true)
 }
 
-onMounted(() => {
+const initContent = async () => {
     // onReload()
-    loadData(false, false)
-})
-
-const contentRef = ref(null)
-watch(
-    () => data.value?.keyPath,
-    () => {
-        // onReload()
+    try {
+        initializing.value = true
         if (contentRef.value?.reset != null) {
             contentRef.value?.reset()
         }
-        loadData(false, false)
-    },
-)
+        await loadData(false, false)
+        if (contentRef.value?.beforeShow != null) {
+            await contentRef.value?.beforeShow()
+        }
+    } finally {
+        initializing.value = false
+    }
+}
+
+onMounted(() => {
+    // onReload()
+    initContent()
+})
+
+const contentRef = ref(null)
+watch(() => data.value?.keyPath, initContent)
 </script>
 
 <template>
@@ -145,17 +152,15 @@ watch(
             :is="valueComponents[data.type]"
             ref="contentRef"
             :db="data.db"
-            :decode="data.decode || decodeTypes.NONE"
             :end="data.end"
             :key-code="data.keyCode"
             :key-path="data.keyPath"
             :length="data.length"
-            :loading="data.loading === true"
+            :loading="data.loading === true || initializing"
             :name="data.name"
             :size="data.size"
             :ttl="data.ttl"
             :value="data.value"
-            :view-as="data.viewAs || formatTypes.PLAIN_TEXT"
             @delete="onDelete"
             @loadall="onLoadAll"
             @loadmore="onLoadMore"

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, h, ref } from 'vue'
-import { map } from 'lodash'
+import { get, map } from 'lodash'
 import { NIcon, NText } from 'naive-ui'
 
 const props = defineProps({
@@ -16,6 +16,8 @@ const props = defineProps({
         type: String,
     },
     icon: [String, Object],
+    default: String,
+    disabled: Boolean,
 })
 
 const emit = defineEmits(['update:value'])
@@ -56,7 +58,7 @@ const onDropdownSelect = (key) => {
 }
 
 const buttonText = computed(() => {
-    return props.value || get(dropdownOption.value, [1, 'label'], 'None')
+    return props.value || get(dropdownOption.value, [1, 'label'], props.default)
 })
 
 const showDropdown = ref(false)
@@ -67,6 +69,7 @@ const onDropdownShow = (show) => {
 
 <template>
     <n-dropdown
+        :disabled="props.disabled"
         :options="dropdownOption"
         :render-label="renderLabel"
         :show-arrow="true"
@@ -78,7 +81,7 @@ const onDropdownShow = (show) => {
         <n-tooltip :disabled="showDropdown" :show-arrow="false">
             {{ props.tooltip }}
             <template #trigger>
-                <n-button :focusable="false" quaternary>
+                <n-button :disabled="disabled" :focusable="false" quaternary>
                     <template #icon>
                         <n-icon>
                             <component :is="icon" />

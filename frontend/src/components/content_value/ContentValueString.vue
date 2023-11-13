@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import Copy from '@/components/icons/Copy.vue'
@@ -10,12 +10,11 @@ import Close from '@/components/icons/Close.vue'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
-import DropdownSelector from '@/components/content_value/DropdownSelector.vue'
-import Code from '@/components/icons/Code.vue'
-import Conversion from '@/components/icons/Conversion.vue'
 import EditFile from '@/components/icons/EditFile.vue'
 import bytes from 'bytes'
 import useBrowserStore from 'stores/browser.js'
+import { decodeRedisKey } from '@/utils/key_convert.js'
+import FormatSelector from '@/components/content_value/FormatSelector.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -32,17 +31,9 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
-    value: String,
+    value: [String, Array],
     size: Number,
     length: Number,
-    viewAs: {
-        type: String,
-        default: formatTypes.PLAIN_TEXT,
-    },
-    decode: {
-        type: String,
-        default: decodeTypes.NONE,
-    },
     loading: Boolean,
 })
 
@@ -58,7 +49,7 @@ const keyName = computed(() => {
 
 const keyType = redisTypes.STRING
 const viewLanguage = computed(() => {
-    switch (props.viewAs) {
+    switch (viewAs.format) {
         case formatTypes.JSON:
             return 'json'
         default:
@@ -66,31 +57,48 @@ const viewLanguage = computed(() => {
     }
 })
 
-const onViewTypeUpdate = (viewType) => {
-    browserStore.loadKeyDetail({
-        server: props.name,
-        db: props.db,
-        key: keyName.value,
-        viewType,
-        decodeType: props.decode,
-    })
-}
+const viewAs = reactive({
+    value: '',
+    format: formatTypes.PLAIN_TEXT,
+    decode: decodeTypes.NONE,
+})
 
-const onDecodeTypeUpdate = (decodeType) => {
-    browserStore.loadKeyDetail({
-        server: props.name,
-        db: props.db,
-        key: keyName.value,
-        viewType: props.viewAs,
-        decodeType,
+const displayValue = computed(() => {
+    if (props.loading) {
+        return ''
+    }
+    return viewAs.value || decodeRedisKey(props.value)
+})
+
+watch(
+    () => props.value,
+    (val, oldVal) => {
+        if (val !== undefined && oldVal !== undefined) {
+            onFormatChanged(viewAs.decode, viewAs.format)
+        }
+    },
+)
+
+const onFormatChanged = async (decode = '', format = '') => {
+    const {
+        value,
+        decode: retDecode,
+        format: retFormat,
+    } = await browserStore.convertValue({
+        value: props.value,
+        decode,
+        format,
     })
+    viewAs.value = value
+    viewAs.decode = decode || retDecode
+    viewAs.format = format || retFormat
 }
 
 /**
  * Copy value
  */
 const onCopyValue = () => {
-    ClipboardSetText(props.value)
+    ClipboardSetText(displayValue.value)
         .then((succ) => {
             if (succ) {
                 $message.success(i18n.t('dialogue.copy_succ'))
@@ -104,7 +112,7 @@ const onCopyValue = () => {
 const editValue = ref('')
 const inEdit = ref(false)
 const onEditValue = () => {
-    editValue.value = props.value
+    editValue.value = displayValue.value
     inEdit.value = true
 }
 
@@ -120,16 +128,16 @@ const saving = ref(false)
 const onSaveValue = async () => {
     saving.value = true
     try {
-        const { success, msg } = await browserStore.setKey(
-            props.name,
-            props.db,
-            keyName.value,
-            toLower(keyType),
-            editValue.value,
-            -1,
-            props.viewAs,
-            props.decode,
-        )
+        const { success, msg } = await browserStore.setKey({
+            server: props.name,
+            db: props.db,
+            key: keyName.value,
+            keyType: toLower(keyType),
+            value: editValue.value,
+            ttl: -1,
+            format: viewAs.format,
+            decode: viewAs.decode,
+        })
         if (success) {
             await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
             $message.success(i18n.t('dialogue.save_value_succ'))
@@ -146,8 +154,10 @@ const onSaveValue = async () => {
 
 defineExpose({
     reset: () => {
+        viewAs.value = ''
         inEdit.value = false
     },
+    beforeShow: () => onFormatChanged(),
 })
 </script>
 
@@ -198,7 +208,7 @@ defineExpose({
         </div>
         <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
             <n-scrollbar v-if="!inEdit" class="flex-item-expand">
-                <n-code :code="props.value" :language="viewLanguage" style="cursor: text" word-wrap />
+                <n-code :code="displayValue" :language="viewLanguage" style="cursor: text" word-wrap />
             </n-scrollbar>
             <n-input
                 v-else
@@ -213,19 +223,11 @@ defineExpose({
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
-            <dropdown-selector
-                :icon="Code"
-                :options="formatTypes"
-                :tooltip="$t('interface.view_as')"
-                :value="props.viewAs"
-                @update:value="onViewTypeUpdate" />
-            <n-divider vertical />
-            <dropdown-selector
-                :icon="Conversion"
-                :options="decodeTypes"
-                :tooltip="$t('interface.decode_with')"
-                :value="props.decode"
-                @update:value="onDecodeTypeUpdate" />
+            <format-selector
+                :decode="viewAs.decode"
+                :disabled="inEdit"
+                :format="viewAs.format"
+                @format-changed="onFormatChanged" />
         </div>
     </div>
 </template>

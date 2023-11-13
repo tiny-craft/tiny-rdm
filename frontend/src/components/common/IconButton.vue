@@ -7,6 +7,7 @@ const emit = defineEmits(['click'])
 const props = defineProps({
     tooltip: String,
     tTooltip: String,
+    type: String,
     icon: [String, Object],
     size: {
         type: [Number, String],
@@ -39,6 +40,7 @@ const hasTooltip = computed(() => {
                 :focusable="false"
                 :loading="loading"
                 :text="!border"
+                :type="type"
                 @click.prevent="emit('click')">
                 <template #icon>
                     <n-icon :color="props.color || 'currentColor'" :size="props.size">
@@ -56,6 +58,7 @@ const hasTooltip = computed(() => {
         :focusable="false"
         :loading="loading"
         :text="!border"
+        :type="type"
         @click.prevent="emit('click')">
         <template #icon>
             <n-icon :color="props.color || 'currentColor'" :size="props.size">

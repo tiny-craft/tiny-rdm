@@ -22,6 +22,7 @@ import {
     AddZSetValue,
     CleanCmdHistory,
     CloseConnection,
+    ConvertValue,
     DeleteKey,
     FlushDB,
     GetCmdHistory,
@@ -50,6 +51,7 @@ import { KeyViewType } from '@/consts/key_view_type.js'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { types } from '@/consts/support_redis_type.js'
 import useConnectionStore from 'stores/connections.js'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 
 const useBrowserStore = defineStore('browser', {
     /**
@@ -480,6 +482,24 @@ const useBrowserStore = defineStore('browser', {
             } finally {
                 tab.updateLoading({ server, db, loading: false })
             }
+        },
+
+        /**
+         * convert value by decode type or format
+         * @param {string|number[]} value
+         * @param {string} [decode]
+         * @param {string} [format]
+         * @return {Promise<{[format]: string, [decode]: string, value: string}>}
+         */
+        async convertValue({ value, decode, format }) {
+            try {
+                const { data, success } = await ConvertValue(value, decode, format)
+                if (success) {
+                    const { value: retVal, decode: retDecode, format: retFormat } = data
+                    return { value: retVal, decode: retDecode, format: retFormat }
+                }
+            } catch (e) {}
+            return { value, decode, format }
         },
 
         /**
@@ -929,27 +949,50 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * set redis key
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} keyType
          * @param {any} value
          * @param {number} ttl
-         * @param {string} [viewAs]
+         * @param {string} [format]
          * @param {string} [decode]
          * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: {string}}>}
          */
-        async setKey(connName, db, key, keyType, value, ttl, viewAs, decode) {
+        async setKey({
+            server,
+            db,
+            key,
+            keyType,
+            value,
+            ttl,
+            format = formatTypes.PLAIN_TEXT,
+            decode = decodeTypes.NONE,
+        }) {
             try {
-                const { data, success, msg } = await SetKeyValue(connName, db, key, keyType, value, ttl, viewAs, decode)
+                const { data, success, msg } = await SetKeyValue({
+                    server,
+                    db,
+                    key,
+                    keyType,
+                    value,
+                    ttl,
+                    format,
+                    decode,
+                })
                 if (success) {
+                    const { value } = data
                     // update tree view data
-                    const { newKey = 0 } = this._addKeyNodes(connName, db, [key], true)
+                    const { newKey = 0 } = this._addKeyNodes(server, db, [key], true)
                     if (newKey > 0) {
-                        this._tidyNode(connName, db, key)
-                        this._updateDBMaxKeys(connName, db, newKey)
+                        this._tidyNode(server, db, key)
+                        this._updateDBMaxKeys(server, db, newKey)
                     }
-                    return { success, nodeKey: `${connName}/db${db}#${ConnectionType.RedisValue}/${key}` }
+                    return {
+                        success,
+                        nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${key}`,
+                        updatedValue: value,
+                    }
                 } else {
                     return { success, msg }
                 }
@@ -959,30 +1002,54 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * update hash field
+         * update hash entry
          * when field is set, newField is null, delete field
          * when field is null, newField is set, add new field
          * when both field and newField are set, and field === newField, update field
          * when both field and newField are set, and field !== newField, delete field and add newField
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} field
-         * @param {string} newField
-         * @param {string} value
+         * @param {string} [newField]
+         * @param {string} [value]
+         * @param {string} [decode]
+         * @param {string} [format]
+         * @param {boolean} [refresh]
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
-        async setHash(connName, db, key, field, newField, value) {
+        async setHash({
+            server,
+            db,
+            key,
+            field,
+            newField = '',
+            value = '',
+            decode = decodeTypes.NONE,
+            format = formatTypes.PLAIN_TEXT,
+            refresh,
+        }) {
             try {
-                const { data, success, msg } = await SetHashValue(connName, db, key, field, newField || '', value || '')
+                const { data, success, msg } = await SetHashValue({
+                    server,
+                    db,
+                    key,
+                    field,
+                    newField,
+                    value,
+                    decode,
+                    format,
+                })
                 if (success) {
                     const { updated = {}, removed = [], replaced = {} } = data
-                    const tab = useTabStore()
-                    if (!isEmpty(removed)) {
-                        tab.removeValueEntries({ server: connName, db, key, type: 'hash', entries: removed })
-                    }
-                    if (!isEmpty(updated)) {
-                        tab.upsertValueEntries({ server: connName, db, key, type: 'hash', entries: updated })
+                    if (refresh === true) {
+                        const tab = useTabStore()
+                        if (!isEmpty(removed)) {
+                            tab.removeValueEntries({ server, db, key, type: 'hash', entries: removed })
+                        }
+                        if (!isEmpty(updated)) {
+                            tab.upsertValueEntries({ server, db, key, type: 'hash', entries: updated })
+                        }
                     }
                     return { success, updated }
                 } else {
