@@ -14,6 +14,7 @@ import ContentCli from '@/components/content_value/ContentCli.vue'
 import Monitor from '@/components/icons/Monitor.vue'
 import Pub from '@/components/icons/Pub.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 
 const themeVars = useThemeVars()
 
@@ -54,9 +55,9 @@ const tabContent = computed(() => {
         value: tab.value,
         size: tab.size || 0,
         length: tab.length || 0,
-        viewAs: tab.viewAs,
-        decode: tab.decode,
-        end: tab.end,
+        decode: tab.decode || decodeTypes.NONE,
+        format: tab.format || formatTypes.PLAIN_TEXT,
+        end: tab.end === true,
         loading: tab.loading === true,
     }
 })

@@ -30,7 +30,7 @@ const props = defineProps({
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
-const emit = defineEmits(['update:field', 'update:value', 'update:decode', 'update:format', 'viewAs', 'save', 'cancel'])
+const emit = defineEmits(['update:field', 'update:value', 'update:decode', 'update:format', 'save', 'cancel'])
 const model = reactive({
     field: '',
     value: '',
@@ -89,14 +89,11 @@ const onFormatChanged = async (decode = '', format = '') => {
 }
 
 const onUpdateValue = (value) => {
-    // TODO: reconvert back to origin format
     // emit('update:value', value)
     viewAs.value = value
 }
 
 const onSave = () => {
-    // TODO: convert value by decode and format
-    // viewAs.decode, viewAs.format
     emit('save', viewAs.field, viewAs.value, viewAs.decode, viewAs.format)
 }
 </script>

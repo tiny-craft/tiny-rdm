@@ -16,6 +16,8 @@ import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
 import Edit from '@/components/icons/Edit.vue'
+import FormatSelector from '@/components/content_value/FormatSelector.vue'
+import { decodeRedisKey } from '@/utils/key_convert.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -32,7 +34,10 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
-    value: Object,
+    value: {
+        type: Array,
+        default: () => [],
+    },
     size: Number,
     length: Number,
     format: {
@@ -72,7 +77,7 @@ const filterType = ref(1)
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.HASH
-const currentEditRow = ref({
+const currentEditRow = reactive({
     no: 0,
     key: '',
     value: null,
@@ -81,7 +86,7 @@ const currentEditRow = ref({
 })
 
 const inEdit = computed(() => {
-    return currentEditRow.value.no > 0
+    return currentEditRow.no > 0
 })
 const tableRef = ref(null)
 const fieldColumn = reactive({
@@ -95,7 +100,10 @@ const fieldColumn = reactive({
     },
     filterOptionValue: null,
     filter(value, row) {
-        return !!~row.key.indexOf(value.toString())
+        return !!~row.k.indexOf(value.toString())
+    },
+    render(row) {
+        return decodeRedisKey(row.k)
     },
 })
 const valueColumn = reactive({
@@ -111,17 +119,20 @@ const valueColumn = reactive({
     filter(value, row) {
         return !!~row.value.indexOf(value.toString())
     },
+    render(row) {
+        return row.dv
+    },
 })
 
 const startEdit = async ({ no, key, value }) => {
-    currentEditRow.value.value = value
-    currentEditRow.value.no = no
-    currentEditRow.value.key = key
+    currentEditRow.value = value
+    currentEditRow.no = no
+    currentEditRow.key = key
 }
 
 const saveEdit = async (field, value, decode, format) => {
     try {
-        const row = tableData.value[currentEditRow.value.no - 1]
+        const row = props.value[currentEditRow.no - 1]
         if (row == null) {
             throw new Error('row not exists')
         }
@@ -130,15 +141,21 @@ const saveEdit = async (field, value, decode, format) => {
             server: props.name,
             db: props.db,
             key: keyName.value,
-            field: row.key,
+            field: row.k,
             newField: field,
             value,
             decode,
             format,
         })
         if (success) {
-            row.key = field
-            row.value = updated[row.key] || ''
+            row.k = field
+            row.v = updated[row.k] || ''
+            const { value: displayVal } = await browserStore.convertValue({
+                value: row.v,
+                decode: props.decode,
+                format: props.format,
+            })
+            row.dv = displayVal
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -151,11 +168,11 @@ const saveEdit = async (field, value, decode, format) => {
 }
 
 const resetEdit = () => {
-    currentEditRow.value.no = 0
-    currentEditRow.value.key = ''
-    currentEditRow.value.value = null
-    currentEditRow.value.format = formatTypes.PLAIN_TEXT
-    currentEditRow.value.decode = decodeTypes.NONE
+    currentEditRow.no = 0
+    currentEditRow.key = ''
+    currentEditRow.value = null
+    currentEditRow.format = formatTypes.PLAIN_TEXT
+    currentEditRow.decode = decodeTypes.NONE
 }
 
 const actionColumn = {
@@ -165,21 +182,21 @@ const actionColumn = {
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
-    render: (row) => {
+    render: (row, index) => {
         return h(EditableTableColumn, {
             editing: false,
-            bindKey: row.key,
-            onEdit: () => startEdit(row),
+            bindKey: row.k,
+            onEdit: () => startEdit({ no: index + 1, key: row.k, value: row.v }),
             onDelete: async () => {
                 try {
                     const { success, msg } = await browserStore.removeHashField(
                         props.name,
                         props.db,
                         keyName.value,
-                        row.key,
+                        row.k,
                     )
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.key }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.k }))
                     } else {
                         $message.error(msg)
                     }
@@ -200,6 +217,9 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
+                render(row, index) {
+                    return index + 1
+                },
             },
             fieldColumn,
             valueColumn,
@@ -213,12 +233,12 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
-                render(row) {
-                    if (row.no === currentEditRow.value.no) {
+                render(row, index) {
+                    if (index + 1 === currentEditRow.no) {
                         // editing row, show edit state
                         return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
                     } else {
-                        return row.no
+                        return index + 1
                     }
                 },
             },
@@ -227,32 +247,19 @@ const columns = computed(() => {
     }
 })
 
-const tableData = computed(() => {
-    const data = []
-    let index = 0
-    for (const key in props.value) {
-        data.push({
-            no: ++index,
-            key,
-            value: props.value[key],
-        })
-    }
-    return data
-})
-
-const rowProps = (row) => {
+const rowProps = (row, index) => {
     return {
         onClick: () => {
             // in edit mode, switch edit row by click
             if (inEdit.value) {
-                startEdit(row)
+                startEdit({ no: index + 1, key: row.k, value: row.v })
             }
         },
     }
 }
 
 const entries = computed(() => {
-    const len = size(tableData.value)
+    const len = size(props.value)
     return `${len} / ${Math.max(len, props.length)}`
 })
 
@@ -294,6 +301,10 @@ const onUpdateFilter = (filters, sourceColumn) => {
             valueColumn.filterOptionValue = filters[sourceColumn.key]
             break
     }
+}
+
+const onFormatChanged = (selDecode, selFormat) => {
+    emit('reload', selDecode, selFormat)
 }
 
 defineExpose({
@@ -367,7 +378,7 @@ defineExpose({
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="tableData"
+                :data="props.value"
                 :loading="props.loading"
                 :row-props="rowProps"
                 :single-column="true"
@@ -398,6 +409,12 @@ defineExpose({
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
+            <format-selector
+                v-show="!inEdit"
+                :decode="props.decode"
+                :disabled="inEdit"
+                :format="props.format"
+                @format-changed="onFormatChanged" />
         </div>
     </div>
 </template>

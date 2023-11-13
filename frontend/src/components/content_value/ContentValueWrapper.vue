@@ -11,6 +11,7 @@ import useBrowserStore from 'stores/browser.js'
 import { computed, onMounted, ref, watch } from 'vue'
 import { isEmpty } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
+import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -36,7 +37,7 @@ const props = defineProps({
  *      value: [String, Object],
  *      size: Number,
  *      length: Number,
- *      viewAs: String,
+ *      format: String,
  *      decode: String,
  *      end: Boolean
  * }>}
@@ -65,7 +66,8 @@ const keyName = computed(() => {
 
 const loadData = async (reset, full) => {
     try {
-        const { name, db, view, decodeType, matchPattern } = data.value
+        const { name, db, view, decodeType, matchPattern, decode, format } = data.value
+        reset = reset === true
         await browserStore.loadKeyDetail({
             server: name,
             db: db,
@@ -73,17 +75,31 @@ const loadData = async (reset, full) => {
             viewType: view,
             decodeType: decodeType,
             matchPattern: matchPattern,
-            reset: reset === true,
+            decode: reset ? decodeTypes.NONE : decode,
+            format: reset ? formatTypes.PLAIN_TEXT : format,
+            reset,
             full: full === true,
         })
     } finally {
     }
 }
 
-const onReload = async () => {
+/**
+ * reload current key
+ * @param {string} [selDecode]
+ * @param {string} [selFormat]
+ * @return {Promise<void>}
+ */
+const onReload = async (selDecode, selFormat) => {
     try {
-        const { name, db, keyCode, keyPath } = data.value
-        await browserStore.reloadKey({ server: name, db, key: keyCode || keyPath })
+        const { name, db, keyCode, keyPath, decode, format } = data.value
+        await browserStore.reloadKey({
+            server: name,
+            db,
+            key: keyCode || keyPath,
+            decode: selDecode || decode,
+            format: selFormat || format,
+        })
     } finally {
     }
 }
@@ -116,6 +132,7 @@ const onLoadAll = () => {
     loadData(false, true)
 }
 
+const contentRef = ref(null)
 const initContent = async () => {
     // onReload()
     try {
@@ -123,7 +140,7 @@ const initContent = async () => {
         if (contentRef.value?.reset != null) {
             contentRef.value?.reset()
         }
-        await loadData(false, false)
+        await loadData(true, false)
         if (contentRef.value?.beforeShow != null) {
             await contentRef.value?.beforeShow()
         }
@@ -137,7 +154,6 @@ onMounted(() => {
     initContent()
 })
 
-const contentRef = ref(null)
 watch(() => data.value?.keyPath, initContent)
 </script>
 
@@ -152,7 +168,9 @@ watch(() => data.value?.keyPath, initContent)
             :is="valueComponents[data.type]"
             ref="contentRef"
             :db="data.db"
+            :decode="data.decode"
             :end="data.end"
+            :format="data.format"
             :key-code="data.keyCode"
             :key-path="data.keyPath"
             :length="data.length"

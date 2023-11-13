@@ -423,17 +423,19 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * reload key
-         * @param server
-         * @param db
-         * @param key
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string} [decode]
+         * @param {string} [format]
          * @return {Promise<void>}
          */
-        async reloadKey({ server, db, key }) {
+        async reloadKey({ server, db, key, decode, format }) {
             const tab = useTabStore()
             try {
                 tab.updateLoading({ server, db, loading: true })
                 await this.loadKeySummary({ server, db, key })
-                await this.loadKeyDetail({ server, db, key, reset: true })
+                await this.loadKeyDetail({ server, db, key, decode, format, reset: true })
             } finally {
                 tab.updateLoading({ server, db, loading: false })
             }
@@ -444,14 +446,14 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
-         * @param {string} [viewType]
-         * @param {string} [decodeType]
+         * @param {string} [format]
+         * @param {string} [decode]
          * @param {string} [matchPattern]
          * @param {boolean} [reset]
          * @param {boolean} [full]
          * @return {Promise<void>}
          */
-        async loadKeyDetail({ server, db, key, viewType, decodeType, matchPattern, reset, full }) {
+        async loadKeyDetail({ server, db, key, format, decode, matchPattern, reset, full }) {
             const tab = useTabStore()
             try {
                 tab.updateLoading({ server, db, loading: true })
@@ -459,25 +461,27 @@ const useBrowserStore = defineStore('browser', {
                     server,
                     db,
                     key,
-                    viewAs: viewType,
-                    decodeType,
+                    format,
+                    decode,
                     matchPattern,
                     full: full === true,
                     reset,
                     lite: true,
                 })
                 if (success) {
-                    const { value, viewAs, decodeType: decode, end } = data
+                    const { value, decode: retDecode, format: retFormat, end } = data
                     tab.updateValue({
                         server,
                         db,
                         key: decodeRedisKey(key),
                         value,
-                        viewAs,
-                        decode,
+                        decode: retDecode,
+                        format: retFormat,
                         reset: reset || full === true,
                         end,
                     })
+                } else {
+                    $message.error('load key detail fail:' + msg)
                 }
             } finally {
                 tab.updateLoading({ server, db, loading: false })

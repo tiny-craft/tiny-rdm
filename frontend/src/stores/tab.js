@@ -19,8 +19,8 @@ const useTabStore = defineStore('tab', {
      * @param {number} [size] memory usage
      * @param {number} [length] length of content or entries
      * @property {int} [ttl] ttl of current key
-     * @param {string} [viewAs]
      * @param {string} [decode]
+     * @param {string} [format]
      * @param {boolean} [end]
      * @param {boolean} [loading]
      */
@@ -149,18 +149,18 @@ const useTabStore = defineStore('tab', {
          * @param {number} db
          * @param {string} key
          * @param {*} value
-         * @param {string} [viewAs]
+         * @param {string} [format]
          * @param {string] [decode]
          * @param {boolean} reset
          * @param {boolean} [end] keep end status if not set
          */
-        updateValue({ server, db, key, value, viewAs, decode, reset, end }) {
+        updateValue({ server, db, key, value, format, decode, reset, end }) {
             const tab = find(this.tabList, { name: server, db, key })
             if (tab == null) {
                 return
             }
 
-            tab.viewAs = viewAs || tab.viewAs
+            tab.format = format || tab.format
             tab.decode = decode || tab.decode
             if (typeof end === 'boolean') {
                 tab.end = end

@@ -23,19 +23,25 @@ type KeyDetailParam struct {
 	Server       string `json:"server"`
 	DB           int    `json:"db"`
 	Key          any    `json:"key"`
-	ViewAs       string `json:"viewAs,omitempty"`
-	DecodeType   string `json:"decodeType,omitempty"`
+	Format       string `json:"format,omitempty"`
+	Decode       string `json:"decode,omitempty"`
 	MatchPattern string `json:"matchPattern,omitempty"`
 	Reset        bool   `json:"reset"`
 	Full         bool   `json:"full"`
 }
 
+type HashEntryItem struct {
+	Key          string `json:"k"`
+	Value        any    `json:"v"`
+	DisplayValue string `json:"dv"`
+}
+
 type KeyDetail struct {
-	Value      any    `json:"value"`
-	Length     int64  `json:"length,omitempty"`
-	ViewAs     string `json:"viewAs,omitempty"`
-	DecodeType string `json:"decodeType,omitempty"`
-	End        bool   `json:"end"`
+	Value  any    `json:"value"`
+	Length int64  `json:"length,omitempty"`
+	Format string `json:"format,omitempty"`
+	Decode string `json:"decode,omitempty"`
+	End    bool   `json:"end"`
 }
 
 type SetKeyParam struct {

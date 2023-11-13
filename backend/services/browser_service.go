@@ -630,7 +630,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		var str string
 		str, err = client.Get(ctx, key).Result()
 		data.Value = strutil.EncodeRedisKey(str)
-		//data.Value, data.DecodeType, data.ViewAs = strutil.ConvertTo(str, param.DecodeType, param.ViewAs)
+		//data.Value, data.Decode, data.Format = strutil.ConvertTo(str, param.Decode, param.Format)
 
 	case "list":
 		loadListHandle := func() ([]string, bool, error) {
@@ -659,11 +659,13 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		data.Value, data.End, err = loadListHandle()
 
 	case "hash":
-		loadHashHandle := func() (map[string]string, bool, error) {
-			items := map[string]string{}
+		loadHashHandle := func() ([]types.HashEntryItem, bool, error) {
+			//items := map[string]string{}
 			scanSize := int64(Preferences().GetScanSize())
+			items := make([]types.HashEntryItem, 0, scanSize)
 			var loadedVal []string
 			var cursor uint64
+			var doConvert = len(param.Decode) > 0 && len(param.Format) > 0
 			if param.Full {
 				// load all
 				cursor = 0
@@ -672,8 +674,18 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					if err != nil {
 						return nil, false, err
 					}
+					var v string
 					for i := 0; i < len(loadedVal); i += 2 {
-						items[loadedVal[i]] = loadedVal[i+1]
+						if doConvert {
+							v, _, _ = strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format)
+						} else {
+							v = loadedVal[i+1]
+						}
+						items = append(items, types.HashEntryItem{
+							Key:          loadedVal[i],
+							Value:        strutil.EncodeRedisKey(loadedVal[i+1]),
+							DisplayValue: v,
+						})
 					}
 					if cursor == 0 {
 						break
@@ -685,8 +697,18 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				if err != nil {
 					return nil, false, err
 				}
+				var v string
 				for i := 0; i < len(loadedVal); i += 2 {
-					items[loadedVal[i]] = loadedVal[i+1]
+					if doConvert {
+						v, _, _ = strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format)
+					} else {
+						v = loadedVal[i+1]
+					}
+					items = append(items, types.HashEntryItem{
+						Key:          loadedVal[i],
+						Value:        strutil.EncodeRedisKey(loadedVal[i+1]),
+						DisplayValue: v,
+					})
 				}
 			}
 			setEntryCursor(cursor)
@@ -694,6 +716,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 		data.Value, data.End, err = loadHashHandle()
+		data.Decode, data.Format = param.Decode, param.Format
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -841,8 +864,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 }
 
 // ConvertValue convert value with decode method and format
-// blank decodeType indicate auto decode
-// blank viewAs indicate auto format
+// blank decode indicate auto decode
+// blank format indicate auto format
 func (b *browserService) ConvertValue(value any, decode, format string) (resp types.JSResp) {
 	str := strutil.DecodeRedisKey(value)
 	value, decode, format = strutil.ConvertTo(str, decode, format)
