@@ -963,16 +963,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} [decode]
          * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: {string}}>}
          */
-        async setKey({
-            server,
-            db,
-            key,
-            keyType,
-            value,
-            ttl,
-            format = formatTypes.PLAIN_TEXT,
-            decode = decodeTypes.NONE,
-        }) {
+        async setKey({ server, db, key, keyType, value, ttl, format = formatTypes.RAW, decode = decodeTypes.NONE }) {
             try {
                 const { data, success, msg } = await SetKeyValue({
                     server,
@@ -1030,7 +1021,7 @@ const useBrowserStore = defineStore('browser', {
             newField = '',
             value = '',
             decode = decodeTypes.NONE,
-            format = formatTypes.PLAIN_TEXT,
+            format = formatTypes.RAW,
             refresh,
         }) {
             try {

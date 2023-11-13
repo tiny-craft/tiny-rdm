@@ -1,9 +1,9 @@
 package types
 
-const VIEWAS_PLAIN_TEXT = "Plain Text"
-const VIEWAS_JSON = "JSON"
-const VIEWAS_HEX = "Hex"
-const VIEWAS_BINARY = "Binary"
+const FORMAT_RAW = "Raw"
+const FORMAT_JSON = "JSON"
+const FORMAT_HEX = "Hex"
+const FORMAT_BINARY = "Binary"
 
 const DECODE_NONE = "None"
 const DECODE_BASE64 = "Base64"

@@ -76,7 +76,7 @@ const loadData = async (reset, full) => {
             decodeType: decodeType,
             matchPattern: matchPattern,
             decode: reset ? decodeTypes.NONE : decode,
-            format: reset ? formatTypes.PLAIN_TEXT : format,
+            format: reset ? formatTypes.RAW : format,
             reset,
             full: full === true,
         })

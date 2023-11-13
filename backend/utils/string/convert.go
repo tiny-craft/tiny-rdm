@@ -25,7 +25,7 @@ func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultF
 	if len(str) <= 0 {
 		// empty content
 		if len(formatType) <= 0 {
-			resultFormat = types.VIEWAS_PLAIN_TEXT
+			resultFormat = types.FORMAT_RAW
 		} else {
 			resultFormat = formatType
 		}
@@ -142,12 +142,12 @@ func autoDecode(str string) (value, resultDecode string) {
 func viewAs(str, formatType string) (value, resultFormat string) {
 	if len(formatType) > 0 {
 		switch formatType {
-		case types.VIEWAS_PLAIN_TEXT:
+		case types.FORMAT_RAW:
 			value = str
 			resultFormat = formatType
 			return
 
-		case types.VIEWAS_JSON:
+		case types.FORMAT_JSON:
 			if jsonStr, ok := decodeJson(str); ok {
 				value = jsonStr
 			} else {
@@ -156,7 +156,7 @@ func viewAs(str, formatType string) (value, resultFormat string) {
 			resultFormat = formatType
 			return
 
-		case types.VIEWAS_HEX:
+		case types.FORMAT_HEX:
 			if hexStr, ok := decodeToHex(str); ok {
 				value = hexStr
 			} else {
@@ -165,7 +165,7 @@ func viewAs(str, formatType string) (value, resultFormat string) {
 			resultFormat = formatType
 			return
 
-		case types.VIEWAS_BINARY:
+		case types.FORMAT_BINARY:
 			if binStr, ok := decodeBinary(str); ok {
 				value = binStr
 			} else {
@@ -185,20 +185,20 @@ func autoViewAs(str string) (value, resultFormat string) {
 	if len(str) > 0 {
 		var ok bool
 		if value, ok = decodeJson(str); ok {
-			resultFormat = types.VIEWAS_JSON
+			resultFormat = types.FORMAT_JSON
 			return
 		}
 
 		if containsBinary(str) {
 			if value, ok = decodeToHex(str); ok {
-				resultFormat = types.VIEWAS_HEX
+				resultFormat = types.FORMAT_HEX
 				return
 			}
 		}
 	}
 
 	value = str
-	resultFormat = types.VIEWAS_PLAIN_TEXT
+	resultFormat = types.FORMAT_RAW
 	return
 }
 
@@ -284,7 +284,7 @@ func decodeBrotli(str string) (string, bool) {
 func SaveAs(str, viewType, decodeType string) (value string, err error) {
 	value = str
 	switch viewType {
-	case types.VIEWAS_JSON:
+	case types.FORMAT_JSON:
 		if jsonStr, ok := encodeJson(str); ok {
 			value = jsonStr
 		} else {
@@ -292,7 +292,7 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 			return
 		}
 
-	case types.VIEWAS_HEX:
+	case types.FORMAT_HEX:
 		if hexStr, ok := encodeHex(str); ok {
 			value = hexStr
 		} else {
@@ -300,7 +300,7 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 			return
 		}
 
-	case types.VIEWAS_BINARY:
+	case types.FORMAT_BINARY:
 		if binStr, ok := encodeBinary(str); ok {
 			value = binStr
 		} else {

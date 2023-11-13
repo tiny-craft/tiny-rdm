@@ -12,7 +12,7 @@ const props = defineProps({
     },
     format: {
         type: String,
-        default: formatTypes.PLAIN_TEXT,
+        default: formatTypes.RAW,
     },
     disabled: Boolean,
 })
@@ -23,7 +23,7 @@ const onFormatChanged = (selDecode, selFormat) => {
         selDecode = decodeTypes.NONE
     }
     if (!some(formatTypes, (val) => val === selFormat)) {
-        selFormat = formatTypes.PLAIN_TEXT
+        selFormat = formatTypes.RAW
     }
     emit('formatChanged', selDecode, selFormat)
     if (selDecode !== props.decode) {
@@ -38,7 +38,7 @@ const onFormatChanged = (selDecode, selFormat) => {
 <template>
     <n-space :size="0" :wrap="false" :wrap-item="false" align="center" justify="start" style="margin-top: 5px">
         <dropdown-selector
-            :default="formatTypes.PLAIN_TEXT"
+            :default="formatTypes.RAW"
             :disabled="props.disabled"
             :icon="Code"
             :options="formatTypes"

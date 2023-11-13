@@ -902,7 +902,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		param.Decode = types.DECODE_NONE
 	}
 	if len(param.Format) <= 0 {
-		param.Format = types.VIEWAS_PLAIN_TEXT
+		param.Format = types.FORMAT_RAW
 	}
 	switch strings.ToLower(param.KeyType) {
 	case "string":

@@ -135,6 +135,9 @@ const valueColumn = reactive({
     align: 'center',
     titleAlign: 'center',
     resizable: true,
+    ellipsis: {
+        tooltip: true,
+    },
     filterOptionValue: null,
     filter(value, row) {
         return !!~row.value.indexOf(value.toString())

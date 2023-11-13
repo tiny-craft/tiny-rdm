@@ -59,7 +59,7 @@ const viewLanguage = computed(() => {
 
 const viewAs = reactive({
     value: '',
-    format: formatTypes.PLAIN_TEXT,
+    format: formatTypes.RAW,
     decode: decodeTypes.NONE,
 })
 

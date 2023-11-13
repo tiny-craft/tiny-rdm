@@ -56,7 +56,7 @@ const tabContent = computed(() => {
         size: tab.size || 0,
         length: tab.length || 0,
         decode: tab.decode || decodeTypes.NONE,
-        format: tab.format || formatTypes.PLAIN_TEXT,
+        format: tab.format || formatTypes.RAW,
         end: tab.end === true,
         loading: tab.loading === true,
     }

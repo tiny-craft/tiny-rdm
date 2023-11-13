@@ -51,7 +51,7 @@ const loading = ref(false)
 const viewAs = reactive({
     field: '',
     value: '',
-    format: formatTypes.PLAIN_TEXT,
+    format: formatTypes.RAW,
     decode: decodeTypes.NONE,
 })
 const displayValue = computed(() => {

@@ -3,7 +3,7 @@
  * @enum {string}
  */
 export const formatTypes = {
-    PLAIN_TEXT: 'Plain Text',
+    RAW: 'Raw',
     JSON: 'JSON',
     // XML: 'XML',
     // YML: 'YML',

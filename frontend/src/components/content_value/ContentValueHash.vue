@@ -42,7 +42,7 @@ const props = defineProps({
     length: Number,
     format: {
         type: String,
-        default: formatTypes.PLAIN_TEXT,
+        default: formatTypes.RAW,
     },
     decode: {
         type: String,
@@ -81,7 +81,7 @@ const currentEditRow = reactive({
     no: 0,
     key: '',
     value: null,
-    format: formatTypes.PLAIN_TEXT,
+    format: formatTypes.RAW,
     decode: decodeTypes.NONE,
 })
 
@@ -171,7 +171,7 @@ const resetEdit = () => {
     currentEditRow.no = 0
     currentEditRow.key = ''
     currentEditRow.value = null
-    currentEditRow.format = formatTypes.PLAIN_TEXT
+    currentEditRow.format = formatTypes.RAW
     currentEditRow.decode = decodeTypes.NONE
 }
 

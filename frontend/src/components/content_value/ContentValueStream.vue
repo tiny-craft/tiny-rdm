@@ -38,7 +38,7 @@ const props = defineProps({
     length: Number,
     viewAs: {
         type: String,
-        default: formatTypes.PLAIN_TEXT,
+        default: formatTypes.RAW,
     },
     decode: {
         type: String,
