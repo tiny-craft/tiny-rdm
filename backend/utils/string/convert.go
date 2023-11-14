@@ -106,31 +106,34 @@ func decodeWith(str, decodeType string) (value, resultDecode string) {
 // if no decode is possible, it will return the origin string value and "none" decode type
 func autoDecode(str string) (value, resultDecode string) {
 	if len(str) > 0 {
-		var ok bool
-		if value, ok = decodeBase64(str); ok {
-			resultDecode = types.DECODE_BASE64
-			return
-		}
+		// pure digit content may incorrect regard as some encoded type, skip decode
+		if match, _ := regexp.MatchString(`^\d+$`, str); !match {
+			var ok bool
+			if value, ok = decodeBase64(str); ok {
+				resultDecode = types.DECODE_BASE64
+				return
+			}
 
-		if value, ok = decodeGZip(str); ok {
-			resultDecode = types.DECODE_GZIP
-			return
-		}
+			if value, ok = decodeGZip(str); ok {
+				resultDecode = types.DECODE_GZIP
+				return
+			}
 
-		// FIXME: skip decompress with deflate due to incorrect format checking
-		//if value, ok = decodeDeflate(str); ok {
-		//	resultDecode = types.DECODE_DEFLATE
-		//	return
-		//}
+			// FIXME: skip decompress with deflate due to incorrect format checking
+			//if value, ok = decodeDeflate(str); ok {
+			//	resultDecode = types.DECODE_DEFLATE
+			//	return
+			//}
 
-		if value, ok = decodeZStd(str); ok {
-			resultDecode = types.DECODE_ZSTD
-			return
-		}
+			if value, ok = decodeZStd(str); ok {
+				resultDecode = types.DECODE_ZSTD
+				return
+			}
 
-		if value, ok = decodeBrotli(str); ok {
-			resultDecode = types.DECODE_BROTLI
-			return
+			if value, ok = decodeBrotli(str); ok {
+				resultDecode = types.DECODE_BROTLI
+				return
+			}
 		}
 	}
 
@@ -215,11 +218,9 @@ func decodeJson(str string) (string, bool) {
 }
 
 func decodeBase64(str string) (string, bool) {
-	if match, _ := regexp.MatchString(`^\d+$`, str); !match {
-		if decodedStr, err := base64.StdEncoding.DecodeString(str); err == nil {
-			if s := string(decodedStr); !containsBinary(s) {
-				return s, true
-			}
+	if decodedStr, err := base64.StdEncoding.DecodeString(str); err == nil {
+		if s := string(decodedStr); !containsBinary(s) {
+			return s, true
 		}
 	}
 	return str, false

@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { isEmpty, size } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
@@ -14,6 +14,9 @@ import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import Edit from '@/components/icons/Edit.vue'
+import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
+import FormatSelector from '@/components/content_value/FormatSelector.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -33,7 +36,7 @@ const props = defineProps({
     value: Array,
     size: Number,
     length: Number,
-    viewAs: {
+    format: {
         type: String,
         default: formatTypes.RAW,
     },
@@ -58,40 +61,87 @@ const keyName = computed(() => {
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.SET
-const currentEditRow = ref({
+const currentEditRow = reactive({
     no: 0,
     value: null,
+    format: formatTypes.RAW,
+    decode: decodeTypes.NONE,
 })
-
+const inEdit = computed(() => {
+    return currentEditRow.no > 0
+})
 const valueColumn = reactive({
     key: 'value',
     title: i18n.t('common.value'),
     align: 'center',
     titleAlign: 'center',
+    ellipsis: {
+        tooltip: true,
+    },
     filterOptionValue: null,
-    filter(value, row) {
-        return !!~row.value.indexOf(value.toString())
+    filter: (value, row) => {
+        return !!~row.v.indexOf(value.toString())
     },
     render: (row) => {
-        const isEdit = currentEditRow.value.no === row.no
-        if (isEdit) {
-            return h(NInput, {
-                value: currentEditRow.value.value,
-                type: 'textarea',
-                autosize: { minRow: 2, maxRows: 5 },
-                style: 'text-align: left;',
-                'onUpdate:value': (val) => {
-                    currentEditRow.value.value = val
-                },
-            })
-        } else {
-            return h(NCode, { language: 'plaintext', wordWrap: true }, { default: () => row.value })
-        }
+        // if (!isEmpty(row.dv)) {
+        //     return h(NCode, { language: 'json', wordWrap: true, code: row.dv })
+        // }
+        return row.dv || row.v
     },
 })
 
-const cancelEdit = () => {
-    currentEditRow.value.no = 0
+const startEdit = async (no, value) => {
+    currentEditRow.value = value
+    currentEditRow.no = no
+}
+
+/**
+ *
+ * @param {string|number} pos
+ * @param {string} value
+ * @param {string} decode
+ * @param {string} format
+ * @return {Promise<void>}
+ */
+const saveEdit = async (pos, value, decode, format) => {
+    try {
+        const index = parseInt(pos) - 1
+        const row = props.value[index]
+        if (row == null) {
+            throw new Error('row not exists')
+        }
+
+        const { added, success, msg } = await browserStore.updateSetItem({
+            server: props.name,
+            db: props.db,
+            key: keyName.value,
+            value: row.v,
+            newValue: value,
+            decode,
+            format,
+        })
+        if (success) {
+            row.v = added
+            const { value: displayVal } = await browserStore.convertValue({
+                value: row.v,
+                decode: props.decode,
+                format: props.format,
+            })
+            row.dv = displayVal
+            $message.success(i18n.t('dialogue.save_value_succ'))
+        } else {
+            $message.error(msg)
+        }
+    } catch (e) {
+        $message.error(e.message)
+    } finally {
+        resetEdit()
+    }
+}
+
+const resetEdit = () => {
+    currentEditRow.no = 0
+    currentEditRow.value = null
 }
 
 const actionColumn = {
@@ -101,14 +151,12 @@ const actionColumn = {
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
-    render: (row) => {
+    render: (row, index) => {
         return h(EditableTableColumn, {
-            editing: currentEditRow.value.no === row.no,
-            bindKey: row.value,
+            editing: false,
+            bindKey: `#${index + 1}`,
             onEdit: () => {
-                currentEditRow.value.no = row.no
-                currentEditRow.value.key = row.key
-                currentEditRow.value.value = row.value
+                startEdit(index + 1, row.v)
             },
             onDelete: async () => {
                 try {
@@ -116,10 +164,10 @@ const actionColumn = {
                         props.name,
                         props.db,
                         keyName.value,
-                        row.value,
+                        row.v,
                     )
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.value }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
                     } else {
                         $message.error(msg)
                     }
@@ -127,58 +175,61 @@ const actionColumn = {
                     $message.error(e.message)
                 }
             },
-            onSave: async () => {
-                try {
-                    const { success, msg } = await browserStore.updateSetItem(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.value,
-                        currentEditRow.value.value,
-                    )
-                    if (success) {
-                        $message.success(i18n.t('dialogue.save_value_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
-                } catch (e) {
-                    $message.error(e.message)
-                } finally {
-                    currentEditRow.value.no = 0
-                }
-            },
-            onCancel: cancelEdit,
         })
     },
 }
+
 const columns = computed(() => {
-    return [
-        {
-            key: 'no',
-            title: '#',
-            width: 80,
-            align: 'center',
-            titleAlign: 'center',
-        },
-        valueColumn,
-        actionColumn,
-    ]
+    if (!inEdit.value) {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+                render: (row, index) => {
+                    return index + 1
+                },
+            },
+            valueColumn,
+            actionColumn,
+        ]
+    } else {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+                render: (row, index) => {
+                    if (index + 1 === currentEditRow.no) {
+                        // editing row, show edit state
+                        return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
+                    } else {
+                        return index + 1
+                    }
+                },
+            },
+            valueColumn,
+        ]
+    }
 })
 
-const tableData = computed(() => {
-    const data = []
-    const len = size(props.value)
-    for (let i = 0; i < len; i++) {
-        data.push({
-            no: i + 1,
-            value: props.value[i],
-        })
+const rowProps = (row, index) => {
+    return {
+        onClick: () => {
+            // in edit mode, switch edit row by click
+            if (inEdit.value) {
+                startEdit(index + 1, row.v)
+            }
+        },
     }
-    return data
-})
+}
 
 const entries = computed(() => {
-    const len = size(tableData.value)
+    const len = size(props.value)
     return `${len} / ${Math.max(len, props.length)}`
 })
 
@@ -199,10 +250,14 @@ const onUpdateFilter = (filters, sourceColumn) => {
     valueColumn.filterOptionValue = filters[sourceColumn.key]
 }
 
+const onFormatChanged = (selDecode, selFormat) => {
+    emit('reload', selDecode, selFormat)
+}
+
 defineExpose({
     reset: () => {
         clearFilter()
-        cancelEdit()
+        resetEdit()
     },
 })
 </script>
@@ -254,14 +309,15 @@ defineExpose({
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
-        <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
+        <div class="value-wrapper value-item-part flex-box-h flex-item-expand">
+            <!-- table -->
             <n-data-table
-                :key="(row) => row.no"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="tableData"
+                :data="props.value"
                 :loading="props.loading"
+                :row-props="rowProps"
                 :single-column="true"
                 :single-line="false"
                 class="flex-item-expand"
@@ -270,12 +326,33 @@ defineExpose({
                 striped
                 virtual-scroll
                 @update:filters="onUpdateFilter" />
+
+            <!-- edit pane -->
+            <content-entry-editor
+                v-show="inEdit"
+                :decode="currentEditRow.decode"
+                :field="currentEditRow.no"
+                :field-label="$t('common.index')"
+                :field-readonly="true"
+                :format="currentEditRow.format"
+                :value="currentEditRow.value"
+                :value-label="$t('common.value')"
+                class="flex-item-expand"
+                style="width: 100%"
+                @cancel="resetEdit"
+                @save="saveEdit" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
+            <format-selector
+                v-show="!inEdit"
+                :decode="props.decode"
+                :disabled="inEdit"
+                :format="props.format"
+                @format-changed="onFormatChanged" />
         </div>
     </div>
 </template>

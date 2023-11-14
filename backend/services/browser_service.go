@@ -580,6 +580,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		resp.Msg = "key not exists"
 		return
 	}
+	var doConvert bool
+	if (len(param.Decode) > 0 && param.Decode != types.DECODE_NONE) ||
+		(len(param.Format) > 0 && param.Format != types.FORMAT_RAW) {
+		doConvert = true
+	}
 
 	var data types.KeyDetail
 	//var cursor uint64
@@ -636,14 +641,15 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		loadListHandle := func() ([]types.ListEntryItem, bool, error) {
 			var loadVal []string
 			var cursor uint64
+			var subErr error
 			if param.Full {
 				// load all
 				cursor = 0
-				loadVal, err = client.LRange(ctx, key, 0, -1).Result()
+				loadVal, subErr = client.LRange(ctx, key, 0, -1).Result()
 			} else {
 				cursor, _ = getEntryCursor()
 				scanSize := int64(Preferences().GetScanSize())
-				loadVal, err = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
+				loadVal, subErr = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
 				cursor = cursor + uint64(scanSize)
 				if len(loadVal) < int(scanSize) {
 					cursor = 0
@@ -652,12 +658,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			setEntryCursor(cursor)
 
 			items := make([]types.ListEntryItem, len(loadVal))
-			doConvert := len(param.Decode) > 0 && len(param.Format) > 0
 			for i, val := range loadVal {
-				items[i] = types.ListEntryItem{
-					Value:        val,
-					DisplayValue: "",
-				}
 				items[i].Value = val
 				if doConvert {
 					if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
@@ -665,8 +666,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					}
 				}
 			}
-			if err != nil {
-				return items, false, err
+			if subErr != nil {
+				return items, false, subErr
 			}
 			return items, cursor == 0, nil
 		}
@@ -685,14 +686,14 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			items := make([]types.HashEntryItem, 0, scanSize)
 			var loadedVal []string
 			var cursor uint64
-			doConvert := len(param.Decode) > 0 && len(param.Format) > 0
+			var subErr error
 			if param.Full {
 				// load all
 				cursor = 0
 				for {
-					loadedVal, cursor, err = client.HScan(ctx, key, cursor, "*", scanSize).Result()
-					if err != nil {
-						return nil, false, err
+					loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, "*", scanSize).Result()
+					if subErr != nil {
+						return nil, false, subErr
 					}
 					for i := 0; i < len(loadedVal); i += 2 {
 						items = append(items, types.HashEntryItem{
@@ -711,9 +712,9 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				}
 			} else {
 				cursor, _ = getEntryCursor()
-				loadedVal, cursor, err = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
-				if err != nil {
-					return nil, false, err
+				loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
+				if subErr != nil {
+					return nil, false, subErr
 				}
 				for i := 0; i < len(loadedVal); i += 2 {
 					items = append(items, types.HashEntryItem{
@@ -739,30 +740,39 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "set":
-		loadSetHandle := func() ([]string, bool, error) {
-			var items []string
+		loadSetHandle := func() ([]types.SetEntryItem, bool, error) {
+			var items []types.SetEntryItem
 			var cursor uint64
+			var subErr error
 			scanSize := int64(Preferences().GetScanSize())
 			var loadedKey []string
 			if param.Full {
 				// load all
 				cursor = 0
 				for {
-					loadedKey, cursor, err = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
-					if err != nil {
-						return items, false, err
+					loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+					if subErr != nil {
+						return items, false, subErr
 					}
-					items = append(items, loadedKey...)
 					if cursor == 0 {
 						break
 					}
 				}
 			} else {
 				cursor, _ = getEntryCursor()
-				loadedKey, cursor, err = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
-				items = append(items, loadedKey...)
+				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
 			}
 			setEntryCursor(cursor)
+
+			items = make([]types.SetEntryItem, len(loadedKey))
+			for i, val := range loadedKey {
+				items[i].Value = val
+				if doConvert {
+					if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+						items[i].DisplayValue = dv
+					}
+				}
+			}
 			return items, cursor == 0, nil
 		}
 
@@ -1245,23 +1255,36 @@ func (b *browserService) SetSetItem(connName string, db int, k any, remove bool,
 }
 
 // UpdateSetItem replace member of set
-func (b *browserService) UpdateSetItem(connName string, db int, k any, value, newValue string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
-	_, _ = client.SRem(ctx, key, value).Result()
-	_, err = client.SAdd(ctx, key, newValue).Result()
+	key := strutil.DecodeRedisKey(param.Key)
+	// remove old value
+	str := strutil.DecodeRedisKey(param.Value)
+	_, _ = client.SRem(ctx, key, str).Result()
+
+	// insert new value
+	str = strutil.DecodeRedisKey(param.NewValue)
+	var saveStr string
+	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
+		return
+	}
+	_, err = client.SAdd(ctx, key, saveStr).Result()
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	resp.Success = true
+	resp.Data = map[string]any{
+		"added": saveStr,
+	}
 	return
 }
 

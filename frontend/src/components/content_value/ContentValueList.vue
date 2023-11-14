@@ -84,7 +84,6 @@ const valueColumn = reactive({
     },
     render: (row) => {
         // if (!isEmpty(row.dv)) {
-        //     console.log(row.dv)
         //     return h(NCode, { language: 'json', wordWrap: true, code: row.dv })
         // }
         return row.dv || row.v
@@ -96,6 +95,14 @@ const startEdit = async (no, value) => {
     currentEditRow.no = no
 }
 
+/**
+ *
+ * @param {string|number} pos
+ * @param {string} value
+ * @param {string} decode
+ * @param {string} format
+ * @return {Promise<void>}
+ */
 const saveEdit = async (pos, value, decode, format) => {
     try {
         const index = parseInt(pos) - 1
@@ -149,8 +156,6 @@ const actionColumn = {
             editing: false,
             bindKey: `#${index + 1}`,
             onEdit: () => {
-                currentEditRow.no = index + 1
-                currentEditRow.value = row
                 startEdit(index + 1, row.v)
             },
             onDelete: async () => {
@@ -162,7 +167,7 @@ const actionColumn = {
                         index,
                     )
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: '#' + row.no }))
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: `#${index + 1}` }))
                     } else {
                         $message.error(msg)
                     }
@@ -307,7 +312,6 @@ defineExpose({
         <div class="value-wrapper value-item-part flex-box-h flex-item-expand">
             <!-- table -->
             <n-data-table
-                :key="(row) => row.no"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"

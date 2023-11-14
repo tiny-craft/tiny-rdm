@@ -163,28 +163,30 @@ watch(() => data.value?.keyPath, initContent)
             <n-button :focusable="false" @click="onReload">{{ $t('interface.reload') }}</n-button>
         </template>
     </n-empty>
-    <keep-alive v-else>
-        <component
-            :is="valueComponents[data.type]"
-            ref="contentRef"
-            :db="data.db"
-            :decode="data.decode"
-            :end="data.end"
-            :format="data.format"
-            :key-code="data.keyCode"
-            :key-path="data.keyPath"
-            :length="data.length"
-            :loading="data.loading === true || initializing"
-            :name="data.name"
-            :size="data.size"
-            :ttl="data.ttl"
-            :value="data.value"
-            @delete="onDelete"
-            @loadall="onLoadAll"
-            @loadmore="onLoadMore"
-            @reload="onReload"
-            @rename="onRename" />
-    </keep-alive>
+    <!-- FIXME: keep alive may cause virtual list null value error. -->
+    <!--    <keep-alive v-else>-->
+    <component
+        :is="valueComponents[data.type]"
+        v-else
+        ref="contentRef"
+        :db="data.db"
+        :decode="data.decode"
+        :end="data.end"
+        :format="data.format"
+        :key-code="data.keyCode"
+        :key-path="data.keyPath"
+        :length="data.length"
+        :loading="data.loading === true || initializing"
+        :name="data.name"
+        :size="data.size"
+        :ttl="data.ttl"
+        :value="data.value"
+        @delete="onDelete"
+        @loadall="onLoadAll"
+        @loadmore="onLoadMore"
+        @reload="onReload"
+        @rename="onRename" />
+    <!--    </keep-alive>-->
 </template>
 
 <style lang="scss" scoped></style>

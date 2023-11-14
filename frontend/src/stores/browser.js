@@ -1200,7 +1200,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} format
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
-        async updateListItem({ server, db, key, index, value, decode, format }) {
+        async updateListItem({ server, db, key, index, value, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
             try {
                 const { data, success, msg } = await SetListItem({ server, db, key, index, value, decode, format })
                 if (success) {
@@ -1266,7 +1266,7 @@ const useBrowserStore = defineStore('browser', {
          */
         async addSetItem(connName, db, key, value) {
             try {
-                if (!value instanceof Array) {
+                if ((!value) instanceof Array) {
                     value = [value]
                 }
                 const { data, success, msg } = await SetSetItem(connName, db, key, false, value)
@@ -1284,20 +1284,23 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * update value of set item
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
-         * @param {string} value
-         * @param {string} newValue
-         * @returns {Promise<{[msg]: string, success: boolean}>}
+         * @param {string|number[]} value
+         * @param {string|number[]} newValue
+         * @param {string} [decode]
+         * @param {string} [format]
+         * @returns {Promise<{[msg]: string, success: boolean, [added]: string|number[]}>}
          */
-        async updateSetItem(connName, db, key, value, newValue) {
+        async updateSetItem({ server, db, key, value, newValue, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
             try {
-                const { success, msg } = await UpdateSetItem(connName, db, key, value, newValue)
+                const { data, success, msg } = await UpdateSetItem({ server, db, key, value, newValue, decode, format })
                 if (success) {
-                    const tab = useTabStore()
-                    tab.upsertValueEntries({ server: connName, db, key, type: 'set', entries: { [value]: newValue } })
-                    return { success: true }
+                    const { added } = data
+                    // const tab = useTabStore()
+                    // tab.upsertValueEntries({ server, db, key, type: 'set', entries: { [value]: newValue } })
+                    return { success: true, added }
                 } else {
                     return { success, msg }
                 }

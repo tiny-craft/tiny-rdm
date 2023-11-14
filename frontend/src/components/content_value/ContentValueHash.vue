@@ -373,7 +373,6 @@ defineExpose({
         <div id="content-table" class="value-wrapper value-item-part flex-box-h flex-item-expand">
             <!-- table -->
             <n-data-table
-                :key="(row) => row.no"
                 ref="tableRef"
                 :bordered="false"
                 :bottom-bordered="false"

@@ -111,6 +111,9 @@ export async function setupDiscreteApi() {
             max: 5,
             placement: 'bottom-right',
             keepAliveOnHover: true,
+            containerStyle: {
+                marginBottom: '38px',
+            },
         },
     })
 

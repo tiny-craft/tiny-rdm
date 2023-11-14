@@ -30,17 +30,6 @@ type KeyDetailParam struct {
 	Full         bool   `json:"full"`
 }
 
-type ListEntryItem struct {
-	Value        any    `json:"v"`
-	DisplayValue string `json:"dv,omitempty"`
-}
-
-type HashEntryItem struct {
-	Key          string `json:"k"`
-	Value        any    `json:"v"`
-	DisplayValue string `json:"dv,omitempty"`
-}
-
 type KeyDetail struct {
 	Value  any    `json:"value"`
 	Length int64  `json:"length,omitempty"`
@@ -77,6 +66,16 @@ type SetHashParam struct {
 	Field    string `json:"field,omitempty"`
 	NewField string `json:"newField,omitempty"`
 	Value    any    `json:"value"`
+	Format   string `json:"format,omitempty"`
+	Decode   string `json:"decode,omitempty"`
+}
+
+type SetSetParam struct {
+	Server   string `json:"server"`
+	DB       int    `json:"db"`
+	Key      any    `json:"key"`
+	Value    any    `json:"value"`
+	NewValue any    `json:"newValue"`
 	Format   string `json:"format,omitempty"`
 	Decode   string `json:"decode,omitempty"`
 }
