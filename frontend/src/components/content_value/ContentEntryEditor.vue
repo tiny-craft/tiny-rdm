@@ -9,12 +9,12 @@ import FormatSelector from '@/components/content_value/FormatSelector.vue'
 
 const props = defineProps({
     field: {
-        type: String,
+        type: [String, Number],
     },
     value: {
         type: String,
     },
-    keyLabel: {
+    fieldLabel: {
         type: String,
     },
     valueLabel: {
@@ -25,6 +25,9 @@ const props = defineProps({
     },
     format: {
         type: String,
+    },
+    fieldReadonly: {
+        type: Boolean,
     },
 })
 
@@ -58,7 +61,10 @@ const displayValue = computed(() => {
     if (loading.value) {
         return ''
     }
-    return viewAs.value || decodeRedisKey(props.value)
+    if (viewAs.value == null) {
+        return decodeRedisKey(props.value)
+    }
+    return viewAs.value
 })
 
 /**
@@ -79,7 +85,7 @@ const onFormatChanged = async (decode = '', format = '') => {
             decode,
             format,
         })
-        viewAs.field = props.field
+        viewAs.field = props.field + ''
         viewAs.value = value
         viewAs.decode = decode || retDecode
         viewAs.format = format || retFormat
@@ -110,8 +116,12 @@ const onSave = () => {
             <div class="editor-content flex-box-v" style="height: 100%">
                 <!-- field -->
                 <div class="editor-content-item flex-box-v">
-                    <div class="editor-content-item-label">{{ props.keyLabel }}</div>
-                    <n-input v-model:value="viewAs.field" class="editor-content-item-input" type="text" />
+                    <div class="editor-content-item-label">{{ props.fieldLabel }}</div>
+                    <n-input
+                        v-model:value="viewAs.field"
+                        :readonly="props.fieldReadonly"
+                        class="editor-content-item-input"
+                        type="text" />
                 </div>
 
                 <!-- value -->

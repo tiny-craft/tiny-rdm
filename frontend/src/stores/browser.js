@@ -1191,28 +1191,30 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * update value of list item by index
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {number} index
-         * @param {string} value
+         * @param {string|number[]} value
+         * @param {string} decode
+         * @param {string} format
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
-        async updateListItem(connName, db, key, index, value) {
+        async updateListItem({ server, db, key, index, value, decode, format }) {
             try {
-                const { data, success, msg } = await SetListItem(connName, db, key, index, value)
+                const { data, success, msg } = await SetListItem({ server, db, key, index, value, decode, format })
                 if (success) {
                     const { updated = {} } = data
-                    if (!isEmpty(updated)) {
-                        const tab = useTabStore()
-                        tab.upsertValueEntries({
-                            server: connName,
-                            db,
-                            key,
-                            type: 'list',
-                            entries: updated,
-                        })
-                    }
+                    // if (!isEmpty(updated)) {
+                    //     const tab = useTabStore()
+                    //     tab.upsertValueEntries({
+                    //         server,
+                    //         db,
+                    //         key,
+                    //         type: 'list',
+                    //         entries: updated,
+                    //     })
+                    // }
                     return { success, updated }
                 } else {
                     return { success, msg }
@@ -1224,21 +1226,21 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * remove list item
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {number} index
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: string[]}>}
          */
-        async removeListItem(connName, db, key, index) {
+        async removeListItem(server, db, key, index) {
             try {
-                const { data, success, msg } = await SetListItem(connName, db, key, index, '')
+                const { data, success, msg } = await SetListItem({ server, db, key, index })
                 if (success) {
                     const { removed = [] } = data
                     if (!isEmpty(removed)) {
                         const tab = useTabStore()
                         tab.removeValueEntries({
-                            server: connName,
+                            server,
                             db,
                             key,
                             type: 'list',

@@ -16,7 +16,8 @@
     "all": "Tudo",
     "key": "Chave",
     "value": "Valor",
-    "field": "Campo"
+    "field": "Campo",
+    "index": "Posição"
   },
   "preferences": {
     "name": "Preferências",

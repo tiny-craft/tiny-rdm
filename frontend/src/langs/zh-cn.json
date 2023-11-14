@@ -16,7 +16,8 @@
     "all": "全部",
     "key": "键",
     "value": "值",
-    "field": "字段"
+    "field": "字段",
+    "index": "位置"
   },
   "preferences": {
     "name": "偏好设置",

@@ -633,23 +633,38 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		//data.Value, data.Decode, data.Format = strutil.ConvertTo(str, param.Decode, param.Format)
 
 	case "list":
-		loadListHandle := func() ([]string, bool, error) {
-			var items []string
+		loadListHandle := func() ([]types.ListEntryItem, bool, error) {
+			var loadVal []string
 			var cursor uint64
 			if param.Full {
 				// load all
 				cursor = 0
-				items, err = client.LRange(ctx, key, 0, -1).Result()
+				loadVal, err = client.LRange(ctx, key, 0, -1).Result()
 			} else {
 				cursor, _ = getEntryCursor()
 				scanSize := int64(Preferences().GetScanSize())
-				items, err = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
+				loadVal, err = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
 				cursor = cursor + uint64(scanSize)
-				if len(items) < int(scanSize) {
+				if len(loadVal) < int(scanSize) {
 					cursor = 0
 				}
 			}
 			setEntryCursor(cursor)
+
+			items := make([]types.ListEntryItem, len(loadVal))
+			doConvert := len(param.Decode) > 0 && len(param.Format) > 0
+			for i, val := range loadVal {
+				items[i] = types.ListEntryItem{
+					Value:        val,
+					DisplayValue: "",
+				}
+				items[i].Value = val
+				if doConvert {
+					if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+						items[i].DisplayValue = dv
+					}
+				}
+			}
 			if err != nil {
 				return items, false, err
 			}
@@ -657,6 +672,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 		data.Value, data.End, err = loadListHandle()
+		data.Decode, data.Format = param.Decode, param.Format
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
 
 	case "hash":
 		loadHashHandle := func() ([]types.HashEntryItem, bool, error) {
@@ -665,7 +685,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			items := make([]types.HashEntryItem, 0, scanSize)
 			var loadedVal []string
 			var cursor uint64
-			var doConvert = len(param.Decode) > 0 && len(param.Format) > 0
+			doConvert := len(param.Decode) > 0 && len(param.Format) > 0
 			if param.Full {
 				// load all
 				cursor = 0
@@ -674,18 +694,16 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					if err != nil {
 						return nil, false, err
 					}
-					var v string
 					for i := 0; i < len(loadedVal); i += 2 {
-						if doConvert {
-							v, _, _ = strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format)
-						} else {
-							v = loadedVal[i+1]
-						}
 						items = append(items, types.HashEntryItem{
-							Key:          loadedVal[i],
-							Value:        strutil.EncodeRedisKey(loadedVal[i+1]),
-							DisplayValue: v,
+							Key:   loadedVal[i],
+							Value: strutil.EncodeRedisKey(loadedVal[i+1]),
 						})
+						if doConvert {
+							if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
+								items[i/2].DisplayValue = dv
+							}
+						}
 					}
 					if cursor == 0 {
 						break
@@ -697,18 +715,16 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				if err != nil {
 					return nil, false, err
 				}
-				var v string
 				for i := 0; i < len(loadedVal); i += 2 {
-					if doConvert {
-						v, _, _ = strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format)
-					} else {
-						v = loadedVal[i+1]
-					}
 					items = append(items, types.HashEntryItem{
-						Key:          loadedVal[i],
-						Value:        strutil.EncodeRedisKey(loadedVal[i+1]),
-						DisplayValue: v,
+						Key:   loadedVal[i],
+						Value: strutil.EncodeRedisKey(loadedVal[i+1]),
 					})
+					if doConvert {
+						if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
+							items[i/2].DisplayValue = dv
+						}
+					}
 				}
 			}
 			setEntryCursor(cursor)
@@ -751,6 +767,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 		data.Value, data.End, err = loadSetHandle()
+		data.Decode, data.Format = param.Decode, param.Format
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -801,6 +818,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 		data.Value, data.End, err = loadZSetHandle()
+		data.Decode, data.Format = param.Decode, param.Format
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -849,6 +867,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 		data.Value, data.End, err = loadStreamHandle()
+		data.Decode, data.Format = param.Decode, param.Format
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -912,7 +931,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		} else {
 			var saveStr string
 			if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
-				resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, param.Format, err.Error())
+				resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 				return
 			}
 			_, err = client.Set(ctx, key, saveStr, 0).Result()
@@ -1023,7 +1042,7 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 	str := strutil.DecodeRedisKey(param.Value)
 	var saveStr string
 	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
-		resp.Msg = fmt.Sprintf(`save to "%s" type fail: %s`, param.Format, err.Error())
+		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
 	var removedField []string
@@ -1148,20 +1167,21 @@ func (b *browserService) AddListItem(connName string, db int, k any, action int,
 }
 
 // SetListItem update or remove list item by index
-func (b *browserService) SetListItem(connName string, db int, k any, index int64, value string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
+	key := strutil.DecodeRedisKey(param.Key)
+	str := strutil.DecodeRedisKey(param.Value)
 	var removed []int64
 	updated := map[int64]string{}
-	if len(value) <= 0 {
+	if len(str) <= 0 {
 		// remove from list
-		err = client.LSet(ctx, key, index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
+		err = client.LSet(ctx, key, param.Index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -1172,15 +1192,20 @@ func (b *browserService) SetListItem(connName string, db int, k any, index int64
 			resp.Msg = err.Error()
 			return
 		}
-		removed = append(removed, index)
+		removed = append(removed, param.Index)
 	} else {
 		// replace index value
-		err = client.LSet(ctx, key, index, value).Err()
+		var saveStr string
+		if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+			resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
+			return
+		}
+		err = client.LSet(ctx, key, param.Index, saveStr).Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
 		}
-		updated[index] = value
+		updated[param.Index] = saveStr
 	}
 
 	resp.Success = true

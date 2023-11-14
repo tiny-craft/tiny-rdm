@@ -99,10 +99,10 @@ const fieldColumn = reactive({
         tooltip: true,
     },
     filterOptionValue: null,
-    filter(value, row) {
+    filter: (value, row) => {
         return !!~row.k.indexOf(value.toString())
     },
-    render(row) {
+    render: (row) => {
         return decodeRedisKey(row.k)
     },
 })
@@ -116,15 +116,15 @@ const valueColumn = reactive({
         tooltip: true,
     },
     filterOptionValue: null,
-    filter(value, row) {
-        return !!~row.value.indexOf(value.toString())
+    filter: (value, row) => {
+        return !!~row.v.indexOf(value.toString())
     },
-    render(row) {
-        return row.dv
+    render: (row) => {
+        return row.dv || row.v
     },
 })
 
-const startEdit = async ({ no, key, value }) => {
+const startEdit = async (no, key, value) => {
     currentEditRow.value = value
     currentEditRow.no = no
     currentEditRow.key = key
@@ -186,7 +186,7 @@ const actionColumn = {
         return h(EditableTableColumn, {
             editing: false,
             bindKey: row.k,
-            onEdit: () => startEdit({ no: index + 1, key: row.k, value: row.v }),
+            onEdit: () => startEdit(index + 1, row.k, row.v),
             onDelete: async () => {
                 try {
                     const { success, msg } = await browserStore.removeHashField(
@@ -217,7 +217,7 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
-                render(row, index) {
+                render: (row, index) => {
                     return index + 1
                 },
             },
@@ -233,7 +233,7 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
-                render(row, index) {
+                render: (row, index) => {
                     if (index + 1 === currentEditRow.no) {
                         // editing row, show edit state
                         return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
@@ -252,7 +252,7 @@ const rowProps = (row, index) => {
         onClick: () => {
             // in edit mode, switch edit row by click
             if (inEdit.value) {
-                startEdit({ no: index + 1, key: row.k, value: row.v })
+                startEdit(index + 1, row.k, row.v)
             }
         },
     }
@@ -270,12 +270,12 @@ const onAddRow = () => {
 const filterValue = ref('')
 const onFilterInput = (val) => {
     switch (filterType.value) {
-        case filterOption.value[0].value:
+        case filterOption[0].value:
             // filter field
             valueColumn.filterOptionValue = null
             fieldColumn.filterOptionValue = val
             break
-        case filterOption.value[1].value:
+        case filterOption[1].value:
             // filter value
             fieldColumn.filterOptionValue = null
             valueColumn.filterOptionValue = val
@@ -294,10 +294,10 @@ const clearFilter = () => {
 
 const onUpdateFilter = (filters, sourceColumn) => {
     switch (filterType.value) {
-        case filterOption.value[0].value:
+        case filterOption[0].value:
             fieldColumn.filterOptionValue = filters[sourceColumn.key]
             break
-        case filterOption.value[1].value:
+        case filterOption[1].value:
             valueColumn.filterOptionValue = filters[sourceColumn.key]
             break
     }
@@ -395,8 +395,8 @@ defineExpose({
                 v-show="inEdit"
                 :decode="currentEditRow.decode"
                 :field="currentEditRow.key"
+                :field-label="$t('common.field')"
                 :format="currentEditRow.format"
-                :key-label="$t('common.field')"
                 :value="currentEditRow.value"
                 :value-label="$t('common.value')"
                 class="flex-item-expand"

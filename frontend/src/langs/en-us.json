@@ -16,7 +16,8 @@
     "all": "All",
     "key": "Key",
     "value": "Value",
-    "field": "Field"
+    "field": "Field",
+    "index": "Position"
   },
   "preferences": {
     "name": "Preferences",
