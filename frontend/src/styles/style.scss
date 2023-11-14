@@ -51,8 +51,12 @@ body {
   flex-grow: 1;
 }
 
-.icon-btn {
+.clickable {
   cursor: pointer;
+}
+
+.icon-btn {
+  @extend .clickable;
   line-height: 100%;
 }
 
@@ -104,7 +108,7 @@ body {
     align-items: center;
     gap: 0;
     padding: 3px 10px 3px 10px;
-    min-height: 30px;
+    height: 30px;
   }
 }
 

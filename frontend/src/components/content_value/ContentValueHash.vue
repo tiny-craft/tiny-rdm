@@ -88,6 +88,11 @@ const currentEditRow = reactive({
 const inEdit = computed(() => {
     return currentEditRow.no > 0
 })
+const fullEdit = ref(false)
+const inFullEdit = computed(() => {
+    return inEdit.value && fullEdit.value
+})
+
 const tableRef = ref(null)
 const fieldColumn = reactive({
     key: 'key',
@@ -99,6 +104,7 @@ const fieldColumn = reactive({
         tooltip: true,
     },
     filterOptionValue: null,
+    className: inEdit ? 'clickable' : '',
     filter: (value, row) => {
         return !!~row.k.indexOf(value.toString())
     },
@@ -116,6 +122,7 @@ const valueColumn = reactive({
         tooltip: true,
     },
     filterOptionValue: null,
+    className: inEdit ? 'clickable' : '',
     filter: (value, row) => {
         return !!~row.v.indexOf(value.toString())
     },
@@ -162,8 +169,6 @@ const saveEdit = async (field, value, decode, format) => {
         }
     } catch (e) {
         $message.error(e.message)
-    } finally {
-        resetEdit()
     }
 }
 
@@ -318,6 +323,7 @@ defineExpose({
 <template>
     <div class="content-wrapper flex-box-v">
         <content-toolbar
+            v-show="!inFullEdit"
             :db="props.db"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
@@ -329,7 +335,7 @@ defineExpose({
             @delete="emit('delete')"
             @reload="emit('reload')"
             @rename="emit('rename')" />
-        <div class="tb2 value-item-part flex-box-h">
+        <div v-show="!inFullEdit" class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>
                     <n-select
@@ -374,6 +380,7 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 ref="tableRef"
+                v-show="!inFullEdit"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
@@ -392,6 +399,7 @@ defineExpose({
             <!-- edit pane -->
             <content-entry-editor
                 v-show="inEdit"
+                v-model:fullscreen="fullEdit"
                 :decode="currentEditRow.decode"
                 :field="currentEditRow.key"
                 :field-label="$t('common.field')"
@@ -400,7 +408,7 @@ defineExpose({
                 :value-label="$t('common.value')"
                 class="flex-item-expand"
                 style="width: 100%"
-                @cancel="resetEdit"
+                @close="resetEdit"
                 @save="saveEdit" />
         </div>
         <div class="value-footer flex-box-h">

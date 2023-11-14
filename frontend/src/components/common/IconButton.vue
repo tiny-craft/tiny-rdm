@@ -24,6 +24,7 @@ const props = defineProps({
     loading: Boolean,
     border: Boolean,
     disabled: Boolean,
+    buttonStyle: [String, Object],
 })
 
 const hasTooltip = computed(() => {
@@ -39,13 +40,16 @@ const hasTooltip = computed(() => {
                 :disabled="disabled"
                 :focusable="false"
                 :loading="loading"
+                :style="props.buttonStyle"
                 :text="!border"
                 :type="type"
                 @click.prevent="emit('click')">
                 <template #icon>
-                    <n-icon :color="props.color || 'currentColor'" :size="props.size">
-                        <component :is="props.icon" :stroke-width="props.strokeWidth" />
-                    </n-icon>
+                    <slot>
+                        <n-icon :color="props.color || 'currentColor'" :size="props.size">
+                            <component :is="props.icon" :stroke-width="props.strokeWidth" />
+                        </n-icon>
+                    </slot>
                 </template>
             </n-button>
         </template>
@@ -61,9 +65,11 @@ const hasTooltip = computed(() => {
         :type="type"
         @click.prevent="emit('click')">
         <template #icon>
-            <n-icon :color="props.color || 'currentColor'" :size="props.size">
-                <component :is="props.icon" :stroke-width="props.strokeWidth" />
-            </n-icon>
+            <slot>
+                <n-icon :color="props.color || 'currentColor'" :size="props.size">
+                    <component :is="props.icon" :stroke-width="props.strokeWidth" />
+                </n-icon>
+            </slot>
         </template>
     </n-button>
 </template>

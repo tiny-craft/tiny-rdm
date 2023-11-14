@@ -104,7 +104,7 @@ export async function setupDiscreteApi() {
     const { message, dialog, notification } = createDiscreteApi(['message', 'notification', 'dialog'], {
         configProviderProps,
         messageProviderProps: {
-            placement: 'bottom-right',
+            placement: 'bottom',
             keepAliveOnHover: true,
         },
         notificationProviderProps: {

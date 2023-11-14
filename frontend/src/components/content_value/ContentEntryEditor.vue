@@ -1,11 +1,16 @@
 <script setup>
-import { computed, defineEmits, defineProps, reactive, ref, watch } from 'vue'
+import { computed, defineEmits, defineProps, nextTick, reactive, ref, watch } from 'vue'
 import { useThemeVars } from 'naive-ui'
 import Save from '@/components/icons/Save.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import useBrowserStore from 'stores/browser.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
+import IconButton from '@/components/common/IconButton.vue'
+import FullScreen from '@/components/icons/FullScreen.vue'
+import WindowClose from '@/components/icons/WindowClose.vue'
+import Pin from '@/components/icons/Pin.vue'
+import OffScreen from '@/components/icons/OffScreen.vue'
 
 const props = defineProps({
     field: {
@@ -29,15 +34,22 @@ const props = defineProps({
     fieldReadonly: {
         type: Boolean,
     },
+    fullscreen: {
+        type: Boolean,
+    },
 })
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
-const emit = defineEmits(['update:field', 'update:value', 'update:decode', 'update:format', 'save', 'cancel'])
-const model = reactive({
-    field: '',
-    value: '',
-})
+const emit = defineEmits([
+    'update:field',
+    'update:value',
+    'update:decode',
+    'update:format',
+    'update:fullscreen',
+    'save',
+    'close',
+])
 
 watch(
     () => props.value,
@@ -51,6 +63,7 @@ watch(
 )
 
 const loading = ref(false)
+const pin = ref(false)
 const viewAs = reactive({
     field: '',
     value: '',
@@ -66,6 +79,19 @@ const displayValue = computed(() => {
     }
     return viewAs.value
 })
+
+const btnStyle = computed(() => ({
+    padding: '3px',
+    border: 'solid 1px #0000',
+    borderRadius: '3px',
+}))
+
+const pinBtnStyle = computed(() => ({
+    padding: '3px',
+    border: `solid 1px ${themeVars.value.borderColor}`,
+    borderRadius: '3px',
+    backgroundColor: themeVars.value.borderColor,
+}))
 
 /**
  *
@@ -99,20 +125,26 @@ const onUpdateValue = (value) => {
     viewAs.value = value
 }
 
+const onToggleFullscreen = () => {
+    emit('update:fullscreen', !!!props.fullscreen)
+}
+
+const onClose = () => {
+    pin.value = false
+    emit('close')
+}
+
 const onSave = () => {
     emit('save', viewAs.field, viewAs.value, viewAs.decode, viewAs.format)
+    if (!pin.value) {
+        nextTick().then(onClose)
+    }
 }
 </script>
 
 <template>
     <div class="entry-editor flex-box-v">
-        <n-card
-            :title="$t('interface.edit_row')"
-            autofocus
-            closable
-            size="small"
-            style="height: 100%"
-            @close="emit('cancel')">
+        <n-card :title="$t('interface.edit_row')" autofocus size="small" style="height: 100%">
             <div class="editor-content flex-box-v" style="height: 100%">
                 <!-- field -->
                 <div class="editor-content-item flex-box-v">
@@ -136,14 +168,41 @@ const onSave = () => {
                     <format-selector
                         :decode="viewAs.decode"
                         :format="viewAs.format"
+                        style="margin-top: 5px"
                         @format-changed="(d, f) => onFormatChanged(d, f)" />
                 </div>
             </div>
+            <template #header-extra>
+                <n-space :size="5">
+                    <icon-button
+                        :button-style="pin ? pinBtnStyle : btnStyle"
+                        :size="19"
+                        :t-tooltip="pin ? 'interface.unpin_edit' : 'interface.pin_edit'"
+                        stroke-width="4"
+                        @click="pin = !pin">
+                        <Pin :inverse="pin" stroke-width="4" />
+                    </icon-button>
+                    <icon-button
+                        :button-style="btnStyle"
+                        :icon="props.fullscreen ? OffScreen : FullScreen"
+                        :size="18"
+                        stroke-width="5"
+                        t-tooltip="interface.fullscreen"
+                        @click="onToggleFullscreen" />
+                    <icon-button
+                        :button-style="btnStyle"
+                        :icon="WindowClose"
+                        :size="18"
+                        stroke-width="5"
+                        t-tooltip="menu.close"
+                        @click="onClose" />
+                </n-space>
+            </template>
             <template #action>
                 <n-space :wrap="false" :wrap-item="false" justify="end">
-                    <n-button ghost type="primary" @click="onSave">
+                    <n-button ghost @click="onSave">
                         <template #icon>
-                            <n-icon :component="Save"></n-icon>
+                            <n-icon :component="Save" />
                         </template>
                         {{ $t('common.update') }}
                     </n-button>
@@ -181,7 +240,7 @@ const onSave = () => {
     background-color: unset;
 }
 
-:deep(.n-card--bordered) {
-    border-radius: 0;
-}
+//:deep(.n-card--bordered) {
+//    border-radius: 0;
+//}
 </style>

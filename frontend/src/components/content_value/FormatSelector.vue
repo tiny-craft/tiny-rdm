@@ -36,7 +36,7 @@ const onFormatChanged = (selDecode, selFormat) => {
 </script>
 
 <template>
-    <n-space :size="0" :wrap="false" :wrap-item="false" align="center" justify="start" style="margin-top: 5px">
+    <n-space :size="0" :wrap="false" :wrap-item="false" align="center" justify="start">
         <dropdown-selector
             :default="formatTypes.RAW"
             :disabled="props.disabled"
