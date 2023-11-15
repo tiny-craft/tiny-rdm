@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { isEmpty, size } from 'lodash'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
@@ -79,26 +79,35 @@ const inFullEdit = computed(() => {
     return inEdit.value && fullEdit.value
 })
 
-const valueColumn = reactive({
+const displayCode = computed(() => {
+    return props.format === formatTypes.JSON
+})
+const valueFilterOption = ref(null)
+const valueColumn = computed(() => ({
     key: 'value',
     title: i18n.t('common.value'),
-    align: 'center',
+    align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
-    ellipsis: {
-        tooltip: true,
-    },
-    filterOptionValue: null,
-    className: inEdit ? 'clickable' : '',
+    ellipsis: displayCode.value
+        ? false
+        : {
+              tooltip: true,
+          },
+    filterOptionValue: valueFilterOption.value,
+    className: inEdit.value ? 'clickable' : '',
     filter: (value, row) => {
+        if (row.dv) {
+            return !!~row.dv.indexOf(value.toString())
+        }
         return !!~row.v.indexOf(value.toString())
     },
     render: (row) => {
-        // if (!isEmpty(row.dv)) {
-        //     return h(NCode, { language: 'json', wordWrap: true, code: row.dv })
-        // }
+        if (displayCode.value) {
+            return h(NCode, { language: 'json', wordWrap: true, code: row.dv || row.v })
+        }
         return row.dv || row.v
     },
-})
+}))
 
 const startEdit = async (no, value) => {
     currentEditRow.no = no
@@ -201,7 +210,7 @@ const columns = computed(() => {
                     return index + 1
                 },
             },
-            valueColumn,
+            valueColumn.value,
             actionColumn,
         ]
     } else {
@@ -221,7 +230,7 @@ const columns = computed(() => {
                     }
                 },
             },
-            valueColumn,
+            valueColumn.value,
         ]
     }
 })
@@ -248,15 +257,15 @@ const onAddValue = (value) => {
 
 const filterValue = ref('')
 const onFilterInput = (val) => {
-    valueColumn.filterOptionValue = val
+    valueFilterOption.value = val
 }
 
 const clearFilter = () => {
-    valueColumn.filterOptionValue = null
+    valueFilterOption.value = null
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
-    valueColumn.filterOptionValue = filters[sourceColumn.key]
+    valueFilterOption.value = filters[sourceColumn.key]
 }
 
 const onFormatChanged = (selDecode, selFormat) => {
@@ -323,6 +332,7 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 v-show="!inFullEdit"
+                :row-key="(row) => row.no"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"

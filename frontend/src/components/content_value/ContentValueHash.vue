@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -94,7 +94,8 @@ const inFullEdit = computed(() => {
 })
 
 const tableRef = ref(null)
-const fieldColumn = reactive({
+const fieldFilterOption = ref(null)
+const fieldColumn = computed(() => ({
     key: 'key',
     title: i18n.t('common.field'),
     align: 'center',
@@ -103,33 +104,46 @@ const fieldColumn = reactive({
     ellipsis: {
         tooltip: true,
     },
-    filterOptionValue: null,
-    className: inEdit ? 'clickable' : '',
+    filterOptionValue: fieldFilterOption.value,
+    className: inEdit.value ? 'clickable' : '',
     filter: (value, row) => {
         return !!~row.k.indexOf(value.toString())
     },
     render: (row) => {
         return decodeRedisKey(row.k)
     },
+}))
+
+const displayCode = computed(() => {
+    return props.format === formatTypes.JSON
 })
-const valueColumn = reactive({
+const valueFilterOption = ref(null)
+const valueColumn = computed(() => ({
     key: 'value',
     title: i18n.t('common.value'),
-    align: 'center',
+    align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
     resizable: true,
-    ellipsis: {
-        tooltip: true,
-    },
-    filterOptionValue: null,
-    className: inEdit ? 'clickable' : '',
+    ellipsis: displayCode.value
+        ? false
+        : {
+              tooltip: true,
+          },
+    filterOptionValue: valueFilterOption.value,
+    className: inEdit.value ? 'clickable' : '',
     filter: (value, row) => {
+        if (row.dv) {
+            return !!~row.dv.indexOf(value.toString())
+        }
         return !!~row.v.indexOf(value.toString())
     },
     render: (row) => {
+        if (displayCode.value) {
+            return h(NCode, { language: 'json', wordWrap: true, code: row.dv || row.v })
+        }
         return row.dv || row.v
     },
-})
+}))
 
 const startEdit = async (no, key, value) => {
     currentEditRow.no = no
@@ -227,8 +241,8 @@ const columns = computed(() => {
                     return index + 1
                 },
             },
-            fieldColumn,
-            valueColumn,
+            fieldColumn.value,
+            valueColumn.value,
             actionColumn,
         ]
     } else {
@@ -248,7 +262,7 @@ const columns = computed(() => {
                     }
                 },
             },
-            fieldColumn,
+            fieldColumn.value,
         ]
     }
 })
@@ -278,13 +292,13 @@ const onFilterInput = (val) => {
     switch (filterType.value) {
         case filterOption[0].value:
             // filter field
-            valueColumn.filterOptionValue = null
-            fieldColumn.filterOptionValue = val
+            valueFilterOption.value = null
+            fieldFilterOption.value = val
             break
         case filterOption[1].value:
             // filter value
-            fieldColumn.filterOptionValue = null
-            valueColumn.filterOptionValue = val
+            fieldFilterOption.value = null
+            valueFilterOption.value = val
             break
     }
 }
@@ -294,17 +308,17 @@ const onChangeFilterType = (type) => {
 }
 
 const clearFilter = () => {
-    fieldColumn.filterOptionValue = null
-    valueColumn.filterOptionValue = null
+    fieldFilterOption.value = null
+    valueFilterOption.value = null
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
     switch (filterType.value) {
         case filterOption[0].value:
-            fieldColumn.filterOptionValue = filters[sourceColumn.key]
+            fieldFilterOption.value = filters[sourceColumn.key]
             break
         case filterOption[1].value:
-            valueColumn.filterOptionValue = filters[sourceColumn.key]
+            valueFilterOption.value = filters[sourceColumn.key]
             break
     }
 }
@@ -370,6 +384,7 @@ defineExpose({
                     t-tooltip="interface.load_all_entries"
                     @click="emit('loadall')" />
             </n-button-group>
+            {{ valueColumn.align }}
             <n-button :focusable="false" plain @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />
@@ -382,6 +397,7 @@ defineExpose({
             <n-data-table
                 ref="tableRef"
                 v-show="!inFullEdit"
+                :row-key="(row) => row.k"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"

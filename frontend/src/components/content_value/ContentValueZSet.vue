@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import { head, isEmpty, keys, size } from 'lodash'
@@ -92,13 +92,14 @@ const inFullEdit = computed(() => {
     return inEdit.value && fullEdit.value
 })
 
-const scoreColumn = reactive({
+const scoreFilterOption = ref(null)
+const scoreColumn = computed(() => ({
     key: 'score',
     title: i18n.t('interface.score'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
-    filterOptionValue: null,
+    filterOptionValue: scoreFilterOption.value,
     filter(value, row) {
         const score = parseFloat(row.s)
         if (isNaN(score)) {
@@ -134,26 +135,39 @@ const scoreColumn = reactive({
     render: (row) => {
         return row.s
     },
+}))
+
+const displayCode = computed(() => {
+    return props.format === formatTypes.JSON
 })
-const valueColumn = reactive({
+const valueFilterOption = ref(null)
+const valueColumn = computed(() => ({
     key: 'value',
     title: i18n.t('common.value'),
-    align: 'center',
+    align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
     resizable: true,
-    ellipsis: {
-        tooltip: true,
-    },
-    filterOptionValue: null,
-    className: inEdit ? 'clickable' : '',
+    ellipsis: displayCode.value
+        ? false
+        : {
+              tooltip: true,
+          },
+    filterOptionValue: valueFilterOption.value,
+    className: inEdit.value ? 'clickable' : '',
     filter(value, row) {
+        if (row.dv) {
+            return !!~row.dv.indexOf(value.toString())
+        }
         return !!~row.v.indexOf(value.toString())
     },
     // sorter: (row1, row2) => row1.value - row2.value,
     render: (row) => {
+        if (displayCode.value) {
+            return h(NCode, { language: 'json', wordWrap: true, code: row.dv || row.v })
+        }
         return row.dv || row.v
     },
-})
+}))
 
 const startEdit = async (no, score, value) => {
     currentEditRow.no = no
@@ -252,8 +266,8 @@ const columns = computed(() => {
                     return index + 1
                 },
             },
-            valueColumn,
-            scoreColumn,
+            valueColumn.value,
+            scoreColumn.value,
             actionColumn,
         ]
     } else {
@@ -273,7 +287,7 @@ const columns = computed(() => {
                     }
                 },
             },
-            valueColumn,
+            valueColumn.value,
         ]
     }
 })
@@ -292,13 +306,13 @@ const onFilterInput = (val) => {
     switch (filterType.value) {
         case filterOption[0].value:
             // filter value
-            scoreColumn.filterOptionValue = null
-            valueColumn.filterOptionValue = val
+            scoreFilterOption.value = null
+            valueFilterOption.value = val
             break
         case filterOption[1].value:
             // filter score
-            valueColumn.filterOptionValue = null
-            scoreColumn.filterOptionValue = val
+            valueFilterOption.value = null
+            scoreFilterOption.value = val
             break
     }
 }
@@ -308,19 +322,19 @@ const onChangeFilterType = (type) => {
 }
 
 const clearFilter = () => {
-    valueColumn.filterOptionValue = null
-    scoreColumn.filterOptionValue = null
+    valueFilterOption.value = null
+    scoreFilterOption.value = null
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
     switch (filterType.value) {
         case filterOption[0].value:
             // filter value
-            valueColumn.filterOptionValue = filters[sourceColumn.key]
+            valueFilterOption.value = filters[sourceColumn.key]
             break
         case filterOption[1].value:
             // filter score
-            scoreColumn.filterOptionValue = filters[sourceColumn.key]
+            scoreFilterOption.value = filters[sourceColumn.key]
             break
     }
 }
@@ -402,6 +416,7 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 v-show="!inFullEdit"
+                :row-key="(row) => row.v"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"

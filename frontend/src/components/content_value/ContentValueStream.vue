@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, reactive, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
@@ -73,23 +73,24 @@ const filterType = ref(1)
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.STREAM
-const idColumn = reactive({
+const idFilterOption = ref(null)
+const idColumn = computed(() => ({
     key: 'id',
     title: 'ID',
     align: 'center',
     titleAlign: 'center',
     resizable: true,
-})
-const valueColumn = reactive({
+    filterOptionValue: idFilterOption.value,
+}))
+
+const valueFilterOption = ref(null)
+const valueColumn = computed(() => ({
     key: 'value',
     title: i18n.t('common.value'),
     align: 'left',
     titleAlign: 'center',
     resizable: true,
-    // ellipsis: {
-    //     tooltip: true,
-    // },
-    filterOptionValue: null,
+    filterOptionValue: valueFilterOption.value,
     filter: (value, row) => {
         const v = value.toString()
         if (filterType.value === 1) {
@@ -104,7 +105,7 @@ const valueColumn = reactive({
     render: (row) => {
         return h(NCode, { language: 'json', wordWrap: true, code: row.dv })
     },
-})
+}))
 const actionColumn = {
     key: 'action',
     title: i18n.t('interface.action'),
@@ -136,7 +137,7 @@ const actionColumn = {
         })
     },
 }
-const columns = computed(() => [idColumn, valueColumn, actionColumn])
+const columns = computed(() => [idColumn.value, valueColumn.value, actionColumn])
 
 const entries = computed(() => {
     const len = size(props.value)
@@ -149,7 +150,7 @@ const onAddRow = () => {
 
 const filterValue = ref('')
 const onFilterInput = (val) => {
-    valueColumn.filterOptionValue = val
+    valueFilterOption.value = val
 }
 
 const onChangeFilterType = (type) => {
@@ -157,17 +158,17 @@ const onChangeFilterType = (type) => {
 }
 
 const clearFilter = () => {
-    idColumn.filterOptionValue = null
-    valueColumn.filterOptionValue = null
+    idFilterOption.value = null
+    valueFilterOption.value = null
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
     switch (filterType.value) {
         case filterOption[0].value:
-            idColumn.filterOptionValue = filters[sourceColumn.key]
+            idFilterOption.value = filters[sourceColumn.key]
             break
         case filterOption[1].value:
-            valueColumn.filterOptionValue = filters[sourceColumn.key]
+            valueFilterOption.value = filters[sourceColumn.key]
             break
     }
 }
@@ -236,7 +237,7 @@ defineExpose({
         </div>
         <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
             <n-data-table
-                :key="(row) => row.id"
+                :row-key="(row) => row.id"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
