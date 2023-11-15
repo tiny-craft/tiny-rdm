@@ -29,7 +29,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value'])
 
-const iconSize = computed(() => Math.floor(props.width * 0.4))
+const iconSize = computed(() => Math.floor(props.width * 0.45))
 const renderIcon = (icon) => {
     return () => h(NIcon, null, { default: () => h(icon, { strokeWidth: 3 }) })
 }
@@ -41,18 +41,18 @@ const menuOptions = computed(() => {
         {
             label: i18n.t('ribbon.browser'),
             key: 'browser',
-            icon: renderIcon(Database),
+            icon: Database,
             show: browserStore.anyConnectionOpened,
         },
         {
             label: i18n.t('ribbon.server'),
             key: 'server',
-            icon: renderIcon(Server),
+            icon: Server,
         },
         {
             label: i18n.t('ribbon.log'),
             key: 'log',
-            icon: renderIcon(Record),
+            icon: Record,
         },
     ]
 })
@@ -115,18 +115,30 @@ const exThemeVars = computed(() => {
 
 <template>
     <div
-        id="app-nav-menu"
+        id="app-ribbon"
         :style="{
             width: props.width + 'px',
+            minWidth: props.width + 'px',
         }"
         class="flex-box-v">
-        <n-menu
-            :collapsed="true"
-            :collapsed-icon-size="iconSize"
-            :collapsed-width="props.width"
-            :options="menuOptions"
-            :value="props.value"
-            @update:value="(val) => emit('update:value', val)" />
+        <div class="ribbon-wrapper flex-box-v">
+            <div
+                v-for="(m, i) in menuOptions"
+                v-show="m.show !== false"
+                :key="i"
+                :class="{ 'ribbon-item-active': props.value === m.key }"
+                class="ribbon-item clickable"
+                @click="emit('update:value', m.key)">
+                <n-tooltip :delay="2" :show-arrow="false" placement="right">
+                    <template #trigger>
+                        <n-icon :size="iconSize">
+                            <component :is="m.icon" :stroke-width="3.5"></component>
+                        </n-icon>
+                    </template>
+                    {{ m.label }}
+                </n-tooltip>
+            </div>
+        </div>
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">
             <n-dropdown
@@ -142,11 +154,69 @@ const exThemeVars = computed(() => {
 </template>
 
 <style lang="scss">
-#app-nav-menu {
+#app-ribbon {
     //height: 100vh;
     border-right: v-bind('exThemeVars.splitColor') solid 1px;
-    background-color: v-bind('exThemeVars.sidebarColor');
+    background-color: v-bind('exThemeVars.ribbonColor');
     box-sizing: border-box;
+    color: v-bind('themeVars.textColor2');
+
+    .ribbon-wrapper {
+        gap: 2px;
+        margin-top: 5px;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        padding-right: 3px;
+
+        .ribbon-item {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 1;
+            color: v-bind('themeVars.textColor3');
+            //border-left: 5px solid #000;
+            border-radius: v-bind('themeVars.borderRadius');
+            padding: 8px 0;
+            position: relative;
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+                color: v-bind('themeVars.primaryColor');
+
+                &:before {
+                    position: absolute;
+                    width: 3px;
+                    left: 0;
+                    top: 24%;
+                    bottom: 24%;
+                    border-radius: 9999px;
+                    content: '';
+                    background-color: v-bind('themeVars.primaryColor');
+                }
+            }
+        }
+
+        .ribbon-item-active {
+            //background-color: v-bind('exThemeVars.ribbonActiveColor');
+            color: v-bind('themeVars.primaryColor');
+
+            &:hover {
+                color: v-bind('themeVars.primaryColor') !important;
+            }
+
+            &:before {
+                position: absolute;
+                width: 3px;
+                left: 0;
+                top: 24%;
+                bottom: 24%;
+                border-radius: 9999px;
+                content: '';
+                background-color: v-bind('themeVars.primaryColor');
+            }
+        }
+    }
 
     .nav-menu-item {
         align-items: center;

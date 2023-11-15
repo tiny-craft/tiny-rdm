@@ -4,7 +4,7 @@ import BrowserPane from './components/sidebar/BrowserPane.vue'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { debounce, get } from 'lodash'
 import { useThemeVars } from 'naive-ui'
-import NavMenu from './components/sidebar/NavMenu.vue'
+import Ribbon from './components/sidebar/Ribbon.vue'
 import ConnectionPane from './components/sidebar/ConnectionPane.vue'
 import ContentServerPane from './components/content/ContentServerPane.vue'
 import useTabStore from './stores/tab.js'
@@ -25,7 +25,7 @@ const props = defineProps({
 })
 
 const data = reactive({
-    navMenuWidth: 60,
+    navMenuWidth: 50,
     toolbarHeight: 38,
 })
 
@@ -163,7 +163,7 @@ onMounted(async () => {
                 :style="prefStore.generalFont"
                 class="flex-box-h flex-item-expand"
                 style="--wails-draggable: none">
-                <nav-menu v-model:value="tabStore.nav" :width="data.navMenuWidth" />
+                <ribbon v-model:value="tabStore.nav" :width="data.navMenuWidth" />
                 <!-- browser page -->
                 <div v-show="tabStore.nav === 'browser'" class="content-area flex-box-h flex-item-expand">
                     <resizeable-wrapper

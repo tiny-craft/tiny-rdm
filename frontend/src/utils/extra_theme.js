@@ -11,7 +11,9 @@
  */
 export const extraLightTheme = {
     titleColor: '#F2F2F2',
-    sidebarColor: '#E9E9E9',
+    ribbonColor: '#F9F9F9',
+    ribbonActiveColor: '#E3E3E3',
+    sidebarColor: '#F2F2F2',
     splitColor: '#DADADA',
 }
 
@@ -20,7 +22,9 @@ export const extraLightTheme = {
  * @type ExtraTheme
  */
 export const extraDarkTheme = {
-    titleColor: '#363636',
+    titleColor: '#262626',
+    ribbonColor: '#2C2C2C',
+    ribbonActiveColor: '#363636',
     sidebarColor: '#262626',
     splitColor: '#474747',
 }

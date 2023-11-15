@@ -33,6 +33,9 @@ export const themeOverrides = {
         tabGapLargeCard: '2px',
         tabFontWeightActive: 450,
     },
+    Card: {
+        colorEmbedded: '#FAFAFA',
+    },
     Form: {
         labelFontSizeTopSmall: '12px',
         labelFontSizeTopMedium: '13px',
@@ -77,7 +80,7 @@ const _darkThemeOverrides = {
         nodeTextColor: '#CECED0',
     },
     Card: {
-        colorEmbedded: '#18181C',
+        colorEmbedded: '#212121',
     },
     Dropdown: {
         color: '#272727',

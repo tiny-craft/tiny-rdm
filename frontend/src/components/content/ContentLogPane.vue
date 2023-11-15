@@ -2,7 +2,7 @@
 import { computed, h, nextTick, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Refresh from '@/components/icons/Refresh.vue'
-import { map, size, uniqBy } from 'lodash'
+import { map, size, split, uniqBy } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Delete from '@/components/icons/Delete.vue'
 import dayjs from 'dayjs'
@@ -107,7 +107,7 @@ defineExpose({
                         width: 180,
                         align: 'center',
                         titleAlign: 'center',
-                        render({ timestamp }, index) {
+                        render: ({ timestamp }, index) => {
                             return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
                         },
                     },
@@ -115,7 +115,7 @@ defineExpose({
                         title: $t('log.server'),
                         key: 'server',
                         filterOptionValue: data.server,
-                        filter(value, row) {
+                        filter: (value, row) => {
                             return value === '' || row.server === value.toString()
                         },
                         width: 150,
@@ -129,10 +129,10 @@ defineExpose({
                         titleAlign: 'center',
                         filterOptionValue: data.keyword,
                         resizable: true,
-                        filter(value, row) {
+                        filter: (value, row) => {
                             return value === '' || !!~row.cmd.indexOf(value.toString())
                         },
-                        render({ cmd }, index) {
+                        render: ({ cmd }, index) => {
                             const cmdList = split(cmd, '\n')
                             if (size(cmdList) > 1) {
                                 return h(
@@ -150,7 +150,7 @@ defineExpose({
                         width: 100,
                         align: 'center',
                         titleAlign: 'center',
-                        render({ cost }, index) {
+                        render: ({ cost }, index) => {
                             const ms = dayjs.duration(cost).asMilliseconds()
                             if (ms < 1000) {
                                 return `${ms} ms`
