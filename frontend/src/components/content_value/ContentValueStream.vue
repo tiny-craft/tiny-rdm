@@ -83,26 +83,26 @@ const idColumn = reactive({
 const valueColumn = reactive({
     key: 'value',
     title: i18n.t('common.value'),
-    align: 'center',
+    align: 'left',
     titleAlign: 'center',
     resizable: true,
+    // ellipsis: {
+    //     tooltip: true,
+    // },
     filterOptionValue: null,
-    filter(value, row) {
+    filter: (value, row) => {
         const v = value.toString()
         if (filterType.value === 1) {
             // filter key
-            return some(keys(row.value), (key) => includes(key, v))
+            return some(keys(row.v), (key) => includes(key, v))
         } else {
             // filter value
-            return some(values(row.value), (val) => includes(val, v))
+            return some(values(row.v), (val) => includes(val, v))
         }
     },
     // sorter: (row1, row2) => row1.value - row2.value,
-    // ellipsis: {
-    //     tooltip: true
-    // },
     render: (row) => {
-        return h(NCode, { language: 'json', wordWrap: true }, { default: () => JSON.stringify(row.value) })
+        return h(NCode, { language: 'json', wordWrap: true, code: row.dv })
     },
 })
 const actionColumn = {
@@ -136,23 +136,10 @@ const actionColumn = {
         })
     },
 }
-const columns = reactive([idColumn, valueColumn, actionColumn])
-
-const tableData = computed(() => {
-    const data = []
-    if (!isEmpty(props.value)) {
-        for (const elem of props.value) {
-            data.push({
-                id: elem.id,
-                value: elem.value,
-            })
-        }
-    }
-    return data
-})
+const columns = computed(() => [idColumn, valueColumn, actionColumn])
 
 const entries = computed(() => {
-    const len = size(tableData.value)
+    const len = size(props.value)
     return `${len} / ${Math.max(len, props.length)}`
 })
 
@@ -253,7 +240,7 @@ defineExpose({
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="tableData"
+                :data="props.value"
                 :loading="props.loading"
                 :single-column="true"
                 :single-line="false"

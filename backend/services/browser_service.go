@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
@@ -647,7 +648,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				cursor = 0
 				loadVal, subErr = client.LRange(ctx, key, 0, -1).Result()
 			} else {
-				cursor, _ = getEntryCursor()
+				if param.Reset {
+					cursor = 0
+				} else {
+					cursor, _ = getEntryCursor()
+				}
 				scanSize := int64(Preferences().GetScanSize())
 				loadVal, subErr = client.LRange(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
 				cursor = cursor + uint64(scanSize)
@@ -710,7 +715,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					}
 				}
 			} else {
-				cursor, _ = getEntryCursor()
+				if param.Reset {
+					cursor = 0
+				} else {
+					cursor, _ = getEntryCursor()
+				}
 				loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
 				if subErr != nil {
 					return nil, false, subErr
@@ -768,7 +777,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					}
 				}
 			} else {
-				cursor, _ = getEntryCursor()
+				if param.Reset {
+					cursor = 0
+				} else {
+					cursor, _ = getEntryCursor()
+				}
 				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
 				items = make([]types.SetEntryItem, len(loadedKey))
 				for i, val := range loadedKey {
@@ -824,7 +837,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					}
 				}
 			} else {
-				cursor, _ = getEntryCursor()
+				if param.Reset {
+					cursor = 0
+				} else {
+					cursor, _ = getEntryCursor()
+				}
 				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
 				loadedLen := len(loadedVal)
 				items = make([]types.ZSetEntryItem, loadedLen/2)
@@ -855,7 +872,6 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 	case "stream":
 		loadStreamHandle := func() ([]types.StreamEntryItem, bool, error) {
 			var msgs []redis.XMessage
-			var items []types.StreamEntryItem
 			var last string
 			if param.Full {
 				// load all
@@ -863,7 +879,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				msgs, err = client.XRevRange(ctx, key, "+", "-").Result()
 			} else {
 				scanSize := int64(Preferences().GetScanSize())
-				_, last = getEntryCursor()
+				if param.Reset {
+					last = ""
+				} else {
+					_, last = getEntryCursor()
+				}
 				if len(last) <= 0 {
 					last = "+"
 				}
@@ -882,11 +902,15 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				}
 			}
 			setEntryXLast(last)
-			for _, msg := range msgs {
-				items = append(items, types.StreamEntryItem{
-					ID:    msg.ID,
-					Value: msg.Values,
-				})
+			items := make([]types.StreamEntryItem, len(msgs))
+			for i, msg := range msgs {
+				items[i].ID = msg.ID
+				items[i].Value = msg.Values
+				if vb, merr := json.Marshal(msg.Values); merr != nil {
+					items[i].DisplayValue = "{}"
+				} else {
+					items[i].DisplayValue, _, _ = strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+				}
 			}
 			if err != nil {
 				return items, false, err

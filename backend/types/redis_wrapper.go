@@ -23,6 +23,7 @@ type ZSetEntryItem struct {
 }
 
 type StreamEntryItem struct {
-	ID    string         `json:"id"`
-	Value map[string]any `json:"value"`
+	ID           string         `json:"id"`
+	Value        map[string]any `json:"v"`
+	DisplayValue string         `json:"dv,omitempty"`
 }
