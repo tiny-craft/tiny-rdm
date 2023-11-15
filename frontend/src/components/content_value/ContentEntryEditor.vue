@@ -95,8 +95,8 @@ const pinBtnStyle = computed(() => ({
 
 /**
  *
- * @param {string} decode
- * @param {string} format
+ * @param {decodeTypes} decode
+ * @param {formatTypes} format
  * @return {Promise<void>}
  */
 const onFormatChanged = async (decode = '', format = '') => {
@@ -164,6 +164,7 @@ const onSave = () => {
                         autofocus
                         class="flex-item-expand"
                         type="textarea"
+                        :resizable="false"
                         @update:value="onUpdateValue" />
                     <format-selector
                         :decode="viewAs.decode"

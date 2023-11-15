@@ -16,12 +16,13 @@ type SetEntryItem struct {
 	DisplayValue string `json:"dv,omitempty"`
 }
 
-type ZSetItem struct {
-	Value string  `json:"value"`
-	Score float64 `json:"score"`
+type ZSetEntryItem struct {
+	Score        float64 `json:"s"`
+	Value        string  `json:"v"`
+	DisplayValue string  `json:"dv,omitempty"`
 }
 
-type StreamItem struct {
+type StreamEntryItem struct {
 	ID    string         `json:"id"`
 	Value map[string]any `json:"value"`
 }

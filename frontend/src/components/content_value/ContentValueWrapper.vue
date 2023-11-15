@@ -66,14 +66,15 @@ const keyName = computed(() => {
 
 const loadData = async (reset, full) => {
     try {
-        const { name, db, view, decodeType, matchPattern, decode, format } = data.value
+        if (!!props.blank) {
+            return
+        }
+        const { name, db, matchPattern, decode, format } = data.value
         reset = reset === true
         await browserStore.loadKeyDetail({
             server: name,
             db: db,
             key: keyName.value,
-            viewType: view,
-            decodeType: decodeType,
             matchPattern: matchPattern,
             decode: reset ? decodeTypes.NONE : decode,
             format: reset ? formatTypes.RAW : format,

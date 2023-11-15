@@ -6,6 +6,7 @@ import {
     isEmpty,
     join,
     last,
+    map,
     remove,
     set,
     size,
@@ -1082,21 +1083,21 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * remove hash field
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {string} field
          * @returns {Promise<{[msg]: {}, success: boolean, [removed]: string[]}>}
          */
-        async removeHashField(connName, db, key, field) {
+        async removeHashField(server, db, key, field) {
             try {
-                const { data, success, msg } = await SetHashValue(connName, db, key, field, '', '')
+                const { data, success, msg } = await SetHashValue({ server, db, key, field, newField: '' })
                 if (success) {
                     const { removed = [] } = data
-                    if (!isEmpty(removed)) {
-                        const tab = useTabStore()
-                        tab.removeValueEntries({ server: connName, db, key, type: 'hash', entries: removed })
-                    }
+                    // if (!isEmpty(removed)) {
+                    //     const tab = useTabStore()
+                    //     tab.removeValueEntries({ server, db, key, type: 'hash', entries: removed })
+                    // }
                     return { success, removed }
                 } else {
                     return { success, msg }
@@ -1125,25 +1126,27 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * prepend item to head of list
-         * @param connName
-         * @param db
-         * @param key
-         * @param values
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string[]} values
          * @returns {Promise<{[msg]: string, success: boolean, [item]: []}>}
          */
-        async prependListItem(connName, db, key, values) {
+        async prependListItem({ server, db, key, values }) {
             try {
-                const { data, success, msg } = await AddListItem(connName, db, key, 0, values)
+                const { data, success, msg } = await AddListItem(server, db, key, 0, values)
                 if (success) {
                     const { left = [] } = data
                     if (!isEmpty(left)) {
+                        // TODO: convert to display value
+                        const entries = map(left, (v) => ({ v }))
                         const tab = useTabStore()
                         tab.upsertValueEntries({
-                            server: connName,
+                            server: server,
                             db,
                             key,
                             type: 'list',
-                            entries: right,
+                            entries,
                             prepend: true,
                         })
                     }
@@ -1158,25 +1161,26 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * append item to tail of list
-         * @param connName
-         * @param db
-         * @param key
-         * @param values
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string[]} values
          * @returns {Promise<{[msg]: string, success: boolean, [item]: any[]}>}
          */
-        async appendListItem(connName, db, key, values) {
+        async appendListItem({ server, db, key, values }) {
             try {
-                const { data, success, msg } = await AddListItem(connName, db, key, 1, values)
+                const { data, success, msg } = await AddListItem(server, db, key, 1, values)
                 if (success) {
                     const { right = [] } = data
                     if (!isEmpty(right)) {
+                        const entries = map(right, (v) => ({ v }))
                         const tab = useTabStore()
                         tab.upsertValueEntries({
-                            server: connName,
+                            server: server,
                             db,
                             key,
                             type: 'list',
-                            entries: right,
+                            entries,
                             prepend: false,
                         })
                     }
@@ -1196,8 +1200,8 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {number} index
          * @param {string|number[]} value
-         * @param {string} decode
-         * @param {string} format
+         * @param {decodeTypes} decode
+         * @param {formatTypes} format
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
         async updateListItem({ server, db, key, index, value, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
@@ -1237,16 +1241,16 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await SetListItem({ server, db, key, index })
                 if (success) {
                     const { removed = [] } = data
-                    if (!isEmpty(removed)) {
-                        const tab = useTabStore()
-                        tab.removeValueEntries({
-                            server,
-                            db,
-                            key,
-                            type: 'list',
-                            entries: removed,
-                        })
-                    }
+                    // if (!isEmpty(removed)) {
+                    //     const tab = useTabStore()
+                    //     tab.removeValueEntries({
+                    //         server,
+                    //         db,
+                    //         key,
+                    //         type: 'list',
+                    //         entries: removed,
+                    //     })
+                    // }
                     return { success, removed }
                 } else {
                     return { success, msg }
@@ -1311,18 +1315,18 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * remove item from set
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async removeSetItem(connName, db, key, value) {
+        async removeSetItem(server, db, key, value) {
             try {
-                const { success, msg } = await SetSetItem(connName, db, key, true, [value])
+                const { success, msg } = await SetSetItem(server, db, key, true, [value])
                 if (success) {
-                    const tab = useTabStore()
-                    tab.removeValueEntries({ server: connName, db, key, type: 'set', entries: [value] })
+                    // const tab = useTabStore()
+                    // tab.removeValueEntries({ server: connName, db, key, type: 'set', entries: [value] })
                     return { success }
                 } else {
                     return { success, msg }
@@ -1358,26 +1362,46 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * update item of sorted set
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} value
          * @param {string} newValue
          * @param {number} score
+         * @param {decodeTypes} decode
+         * @param {formatTypes} format
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}, [removed]: []}>}
          */
-        async updateZSetItem(connName, db, key, value, newValue, score) {
+        async updateZSetItem({
+            server,
+            db,
+            key,
+            value = '',
+            newValue,
+            score,
+            decode = decodeTypes.NONE,
+            format = formatTypes.RAW,
+        }) {
             try {
-                const { data, success, msg } = await UpdateZSetValue(connName, db, key, value, newValue, score)
+                const { data, success, msg } = await UpdateZSetValue({
+                    server,
+                    db,
+                    key,
+                    value,
+                    newValue,
+                    score,
+                    decode,
+                    format,
+                })
                 if (success) {
                     const { updated, removed } = data
-                    const tab = useTabStore()
-                    if (!isEmpty(updated)) {
-                        tab.upsertValueEntries({ server: connName, db, key, type: 'zset', entries: updated })
-                    }
-                    if (!isEmpty(removed)) {
-                        tab.removeValueEntries({ server: connName, db, key, type: 'zset', entries: removed })
-                    }
+                    // const tab = useTabStore()
+                    // if (!isEmpty(updated)) {
+                    //     tab.upsertValueEntries({ server, db, key, type: 'zset', entries: updated })
+                    // }
+                    // if (!isEmpty(removed)) {
+                    //     tab.removeValueEntries({ server, db, key, type: 'zset', entries: removed })
+                    // }
                     return { success, updated, removed }
                 } else {
                     return { success, msg }
@@ -1389,22 +1413,22 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * remove item from sorted set
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} value
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: []}>}
          */
-        async removeZSetItem(connName, db, key, value) {
+        async removeZSetItem(server, db, key, value) {
             try {
-                const { data, success, msg } = await UpdateZSetValue(connName, db, key, value, '', 0)
+                const { data, success, msg } = await UpdateZSetValue({ server, db, key, value, newValue: '', score: 0 })
                 if (success) {
                     const { removed } = data
-                    if (!isEmpty(removed)) {
-                        const tab = useTabStore()
-                        tab.removeValueEntries({ server: connName, db, key, type: 'zset', entries: removed })
-                    }
-                    return { success }
+                    // if (!isEmpty(removed)) {
+                    //     const tab = useTabStore()
+                    //     tab.removeValueEntries({ server: server, db, key, type: 'zset', entries: removed })
+                    // }
+                    return { success, removed }
                 } else {
                     return { success, msg }
                 }

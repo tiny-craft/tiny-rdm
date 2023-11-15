@@ -35,9 +35,9 @@ async function setupApp() {
             } catch (e) {}
         })
     }
-    app.config.warnHandler = (message) => {
-        console.warn(message)
-    }
+    // app.config.warnHandler = (message) => {
+    //     console.warn(message)
+    // }
     app.mount('#app')
 }
 

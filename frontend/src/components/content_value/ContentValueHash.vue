@@ -132,9 +132,9 @@ const valueColumn = reactive({
 })
 
 const startEdit = async (no, key, value) => {
-    currentEditRow.value = value
     currentEditRow.no = no
     currentEditRow.key = key
+    currentEditRow.value = value
 }
 
 const saveEdit = async (field, value, decode, format) => {
@@ -194,13 +194,14 @@ const actionColumn = {
             onEdit: () => startEdit(index + 1, row.k, row.v),
             onDelete: async () => {
                 try {
-                    const { success, msg } = await browserStore.removeHashField(
+                    const { removed, success, msg } = await browserStore.removeHashField(
                         props.name,
                         props.db,
                         keyName.value,
                         row.k,
                     )
                     if (success) {
+                        props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.k }))
                     } else {
                         $message.error(msg)

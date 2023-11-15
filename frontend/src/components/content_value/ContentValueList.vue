@@ -33,7 +33,11 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
-    value: Object,
+    value: {
+        // [{v: string|number[], dv: string}]
+        type: Array,
+        default: () => {},
+    },
     size: Number,
     length: Number,
     format: {
@@ -97,16 +101,16 @@ const valueColumn = reactive({
 })
 
 const startEdit = async (no, value) => {
-    currentEditRow.value = value
     currentEditRow.no = no
+    currentEditRow.value = value
 }
 
 /**
  *
  * @param {string|number} pos
  * @param {string} value
- * @param {string} decode
- * @param {string} format
+ * @param {decodeTypes} decode
+ * @param {formatTypes} format
  * @return {Promise<void>}
  */
 const saveEdit = async (pos, value, decode, format) => {
@@ -171,6 +175,7 @@ const actionColumn = {
                         index,
                     )
                     if (success) {
+                        props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: `#${index + 1}` }))
                     } else {
                         $message.error(msg)

@@ -681,12 +681,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 
 	case "hash":
 		loadHashHandle := func() ([]types.HashEntryItem, bool, error) {
-			//items := map[string]string{}
-			scanSize := int64(Preferences().GetScanSize())
-			items := make([]types.HashEntryItem, 0, scanSize)
+			var items []types.HashEntryItem
 			var loadedVal []string
 			var cursor uint64
 			var subErr error
+			scanSize := int64(Preferences().GetScanSize())
 			if param.Full {
 				// load all
 				cursor = 0
@@ -702,7 +701,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 						})
 						if doConvert {
 							if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
-								items[i/2].DisplayValue = dv
+								items[len(items)-1].DisplayValue = dv
 							}
 						}
 					}
@@ -716,11 +715,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				if subErr != nil {
 					return nil, false, subErr
 				}
-				for i := 0; i < len(loadedVal); i += 2 {
-					items = append(items, types.HashEntryItem{
-						Key:   loadedVal[i],
-						Value: strutil.EncodeRedisKey(loadedVal[i+1]),
-					})
+				loadedLen := len(loadedVal)
+				items = make([]types.HashEntryItem, loadedLen/2)
+				for i := 0; i < loadedLen; i += 2 {
+					items[i/2].Key = loadedVal[i]
+					items[i/2].Value = strutil.EncodeRedisKey(loadedVal[i+1])
 					if doConvert {
 						if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
 							items[i/2].DisplayValue = dv
@@ -744,8 +743,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var items []types.SetEntryItem
 			var cursor uint64
 			var subErr error
-			scanSize := int64(Preferences().GetScanSize())
 			var loadedKey []string
+			scanSize := int64(Preferences().GetScanSize())
 			if param.Full {
 				// load all
 				cursor = 0
@@ -754,6 +753,16 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					if subErr != nil {
 						return items, false, subErr
 					}
+					for _, val := range loadedKey {
+						items = append(items, types.SetEntryItem{
+							Value: val,
+						})
+						if doConvert {
+							if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+								items[len(items)-1].DisplayValue = dv
+							}
+						}
+					}
 					if cursor == 0 {
 						break
 					}
@@ -761,18 +770,17 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			} else {
 				cursor, _ = getEntryCursor()
 				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
-			}
-			setEntryCursor(cursor)
-
-			items = make([]types.SetEntryItem, len(loadedKey))
-			for i, val := range loadedKey {
-				items[i].Value = val
-				if doConvert {
-					if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
-						items[i].DisplayValue = dv
+				items = make([]types.SetEntryItem, len(loadedKey))
+				for i, val := range loadedKey {
+					items[i].Value = val
+					if doConvert {
+						if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+							items[i].DisplayValue = dv
+						}
 					}
 				}
 			}
+			setEntryCursor(cursor)
 			return items, cursor == 0, nil
 		}
 
@@ -784,8 +792,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "zset":
-		loadZSetHandle := func() ([]types.ZSetItem, bool, error) {
-			var items []types.ZSetItem
+		loadZSetHandle := func() ([]types.ZSetEntryItem, bool, error) {
+			var items []types.ZSetEntryItem
 			var cursor uint64
 			scanSize := int64(Preferences().GetScanSize())
 			var loadedVal []string
@@ -800,10 +808,15 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					var score float64
 					for i := 0; i < len(loadedVal); i += 2 {
 						if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
-							items = append(items, types.ZSetItem{
+							items = append(items, types.ZSetEntryItem{
 								Value: loadedVal[i],
 								Score: score,
 							})
+							if doConvert {
+								if dv, _, _ := strutil.ConvertTo(loadedVal[i], param.Decode, param.Format); dv != loadedVal[i] {
+									items[len(items)-1].DisplayValue = dv
+								}
+							}
 						}
 					}
 					if cursor == 0 {
@@ -813,13 +826,18 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			} else {
 				cursor, _ = getEntryCursor()
 				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+				loadedLen := len(loadedVal)
+				items = make([]types.ZSetEntryItem, loadedLen/2)
 				var score float64
-				for i := 0; i < len(loadedVal); i += 2 {
+				for i := 0; i < loadedLen; i += 2 {
 					if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
-						items = append(items, types.ZSetItem{
-							Value: loadedVal[i],
-							Score: score,
-						})
+						items[i/2].Score = score
+						items[i/2].Value = loadedVal[i]
+						if doConvert {
+							if dv, _, _ := strutil.ConvertTo(loadedVal[i], param.Decode, param.Format); dv != loadedVal[i] {
+								items[i/2].DisplayValue = dv
+							}
+						}
 					}
 				}
 			}
@@ -835,9 +853,9 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "stream":
-		loadStreamHandle := func() ([]types.StreamItem, bool, error) {
+		loadStreamHandle := func() ([]types.StreamEntryItem, bool, error) {
 			var msgs []redis.XMessage
-			var items []types.StreamItem
+			var items []types.StreamEntryItem
 			var last string
 			if param.Full {
 				// load all
@@ -865,7 +883,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			}
 			setEntryXLast(last)
 			for _, msg := range msgs {
-				items = append(items, types.StreamItem{
+				items = append(items, types.StreamEntryItem{
 					ID:    msg.ID,
 					Value: msg.Values,
 				})
@@ -1227,8 +1245,8 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 }
 
 // SetSetItem add members to set or remove from set
-func (b *browserService) SetSetItem(connName string, db int, k any, remove bool, members []any) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) SetSetItem(server string, db int, k any, remove bool, members []any) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1289,45 +1307,54 @@ func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSRe
 }
 
 // UpdateZSetValue update value of sorted set member
-func (b *browserService) UpdateZSetValue(connName string, db int, k any, value, newValue string, score float64) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	key := strutil.DecodeRedisKey(k)
-	updated := map[string]any{}
+	key := strutil.DecodeRedisKey(param.Key)
+	val, newVal := strutil.DecodeRedisKey(param.Value), strutil.DecodeRedisKey(param.NewValue)
+	updated := map[string]float64{}
 	var removed []string
-	if len(newValue) <= 0 {
-		// blank new value, delete value
-		_, err = client.ZRem(ctx, key, value).Result()
+	if len(newVal) <= 0 {
+		// no new value, delete value
+		_, err = client.ZRem(ctx, key, val).Result()
 		if err == nil {
-			removed = append(removed, value)
-		}
-	} else if newValue == value {
-		// update score only
-		_, err = client.ZAdd(ctx, key, redis.Z{
-			Score:  score,
-			Member: value,
-		}).Result()
-		if err == nil {
-			updated[value] = score
+			removed = append(removed, val)
 		}
 	} else {
-		// remove old value and add new one
-		_, err = client.ZRem(ctx, key, value).Result()
-		if err == nil {
-			removed = append(removed, value)
+		var saveVal string
+		if saveVal, err = strutil.SaveAs(newVal, param.Format, param.Decode); err != nil {
+			resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
+			return
 		}
 
-		_, err = client.ZAdd(ctx, key, redis.Z{
-			Score:  score,
-			Member: newValue,
-		}).Result()
-		if err == nil {
-			updated[newValue] = score
+		if saveVal == val {
+			// update score only
+			_, err = client.ZAdd(ctx, key, redis.Z{
+				Score:  param.Score,
+				Member: saveVal,
+			}).Result()
+			if err == nil {
+				updated[saveVal] = param.Score
+			}
+		} else {
+			// remove old value and add new one
+			_, err = client.ZRem(ctx, key, val).Result()
+			if err == nil {
+				removed = append(removed, val)
+			}
+
+			_, err = client.ZAdd(ctx, key, redis.Z{
+				Score:  param.Score,
+				Member: saveVal,
+			}).Result()
+			if err == nil {
+				updated[saveVal] = param.Score
+			}
 		}
 	}
 	if err != nil {

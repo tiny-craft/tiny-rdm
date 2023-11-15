@@ -206,11 +206,11 @@ func autoViewAs(str string) (value, resultFormat string) {
 }
 
 func decodeJson(str string) (string, bool) {
-	str = strings.TrimSpace(str)
-	if (strings.HasPrefix(str, "{") && strings.HasSuffix(str, "}")) ||
-		(strings.HasPrefix(str, "[") && strings.HasSuffix(str, "]")) {
+	trimedStr := strings.TrimSpace(str)
+	if (strings.HasPrefix(trimedStr, "{") && strings.HasSuffix(trimedStr, "}")) ||
+		(strings.HasPrefix(trimedStr, "[") && strings.HasSuffix(trimedStr, "]")) {
 		var out bytes.Buffer
-		if err := json.Indent(&out, []byte(str), "", "  "); err == nil {
+		if err := json.Indent(&out, []byte(trimedStr), "", "  "); err == nil {
 			return out.String(), true
 		}
 	}
@@ -282,9 +282,9 @@ func decodeBrotli(str string) (string, bool) {
 	return str, false
 }
 
-func SaveAs(str, viewType, decodeType string) (value string, err error) {
+func SaveAs(str, format, decode string) (value string, err error) {
 	value = str
-	switch viewType {
+	switch format {
 	case types.FORMAT_JSON:
 		if jsonStr, ok := encodeJson(str); ok {
 			value = jsonStr
@@ -310,7 +310,7 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 		}
 	}
 
-	switch decodeType {
+	switch decode {
 	case types.DECODE_NONE:
 		return
 
@@ -350,18 +350,15 @@ func SaveAs(str, viewType, decodeType string) (value string, err error) {
 		}
 		return
 	}
-	return str, errors.New("fail to save with unknown error")
+	return str, nil
 }
 
 func encodeJson(str string) (string, bool) {
-	var data any
-	if err := json.Unmarshal([]byte(str), &data); err == nil {
-		var jsonByte []byte
-		if jsonByte, err = json.Marshal(data); err == nil {
-			return string(jsonByte), true
-		}
+	var dst bytes.Buffer
+	if err := json.Compact(&dst, []byte(str)); err != nil {
+		return str, false
 	}
-	return str, false
+	return dst.String(), true
 }
 
 func encodeBase64(str string) (string, bool) {

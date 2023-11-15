@@ -3,10 +3,10 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, NInputNumber, useThemeVars } from 'naive-ui'
+import { NButton, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
-import { isEmpty, size } from 'lodash'
+import { head, isEmpty, keys, size } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
@@ -14,6 +14,9 @@ import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
+import FormatSelector from '@/components/content_value/FormatSelector.vue'
+import Edit from '@/components/icons/Edit.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -30,12 +33,15 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
-    value: Object,
+    value: {
+        type: Array,
+        default: () => [],
+    },
     size: Number,
     length: Number,
-    viewAs: {
+    format: {
         type: String,
-        default: formatTypes.PLAIN_TEXT,
+        default: formatTypes.RAW,
     },
     decode: {
         type: String,
@@ -70,11 +76,22 @@ const filterType = ref(1)
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.ZSET
-const currentEditRow = ref({
+const currentEditRow = reactive({
     no: 0,
     score: 0,
     value: null,
+    format: formatTypes.RAW,
+    decode: decodeTypes.NONE,
 })
+
+const inEdit = computed(() => {
+    return currentEditRow.no > 0
+})
+const fullEdit = ref(false)
+const inFullEdit = computed(() => {
+    return inEdit.value && fullEdit.value
+})
+
 const scoreColumn = reactive({
     key: 'score',
     title: i18n.t('interface.score'),
@@ -83,7 +100,7 @@ const scoreColumn = reactive({
     resizable: true,
     filterOptionValue: null,
     filter(value, row) {
-        const score = parseFloat(row.score)
+        const score = parseFloat(row.s)
         if (isNaN(score)) {
             return true
         }
@@ -110,23 +127,12 @@ const scoreColumn = reactive({
                 }
             }
         } else {
-            return !!~row.value.indexOf(value.toString())
+            return !!~row.v.indexOf(value.toString())
         }
-
         return true
     },
     render: (row) => {
-        const isEdit = currentEditRow.value.no === row.no
-        if (isEdit) {
-            return h(NInputNumber, {
-                value: currentEditRow.value.score,
-                'onUpdate:value': (val) => {
-                    currentEditRow.value.score = val
-                },
-            })
-        } else {
-            return row.score
-        }
+        return row.s
     },
 })
 const valueColumn = reactive({
@@ -139,33 +145,64 @@ const valueColumn = reactive({
         tooltip: true,
     },
     filterOptionValue: null,
+    className: inEdit ? 'clickable' : '',
     filter(value, row) {
-        return !!~row.value.indexOf(value.toString())
+        return !!~row.v.indexOf(value.toString())
     },
     // sorter: (row1, row2) => row1.value - row2.value,
-    // ellipsis: {
-    //     tooltip: true
-    // },
     render: (row) => {
-        const isEdit = currentEditRow.value.no === row.no
-        if (isEdit) {
-            return h(NInput, {
-                value: currentEditRow.value.value,
-                type: 'textarea',
-                autosize: { minRow: 2, maxRows: 5 },
-                style: 'text-align: left;',
-                'onUpdate:value': (val) => {
-                    currentEditRow.value.value = val
-                },
-            })
-        } else {
-            return h(NCode, { language: 'plaintext', wordWrap: true }, { default: () => row.value })
-        }
+        return row.dv || row.v
     },
 })
 
-const cancelEdit = () => {
-    currentEditRow.value.no = 0
+const startEdit = async (no, score, value) => {
+    currentEditRow.no = no
+    currentEditRow.score = score
+    currentEditRow.value = value
+}
+
+const saveEdit = async (field, value, decode, format) => {
+    try {
+        const score = parseFloat(field)
+        const row = props.value[currentEditRow.no - 1]
+        if (row == null) {
+            throw new Error('row not exists')
+        }
+
+        const { updated, success, msg } = await browserStore.updateZSetItem({
+            server: props.name,
+            db: props.db,
+            key: keyName.value,
+            value: row.v,
+            newValue: value,
+            score,
+            decode,
+            format,
+        })
+        if (success) {
+            row.v = head(keys(updated))
+            row.s = updated[row.v]
+            const { value: displayVal } = await browserStore.convertValue({
+                value: row.v,
+                decode: props.decode,
+                format: props.format,
+            })
+            row.dv = displayVal
+            $message.success(i18n.t('dialogue.save_value_succ'))
+        } else {
+            $message.error(msg)
+        }
+    } catch (e) {
+        $message.error(e.message)
+    }
+}
+
+const resetEdit = () => {
+    currentEditRow.no = 0
+    currentEditRow.score = 0
+    currentEditRow.value = null
+    currentEditRow.format = formatTypes.RAW
+    currentEditRow.decode = decodeTypes.NONE
 }
 
 const actionColumn = {
@@ -175,25 +212,22 @@ const actionColumn = {
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
-    render: (row) => {
+    render: (row, index) => {
         return h(EditableTableColumn, {
-            editing: currentEditRow.value.no === row.no,
-            bindKey: row.value,
-            onEdit: () => {
-                currentEditRow.value.no = row.no
-                currentEditRow.value.value = row.value
-                currentEditRow.value.score = row.score
-            },
+            editing: false,
+            bindKey: row.v,
+            onEdit: () => startEdit(index + 1, row.s, row.v),
             onDelete: async () => {
                 try {
                     const { success, msg } = await browserStore.removeZSetItem(
                         props.name,
                         props.db,
                         keyName.value,
-                        row.value,
+                        row.v,
                     )
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.value }))
+                        props.value.splice(index, 1)
+                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
                     } else {
                         $message.error(msg)
                     }
@@ -201,66 +235,51 @@ const actionColumn = {
                     $message.error(e.message)
                 }
             },
-            onSave: async () => {
-                try {
-                    const newValue = currentEditRow.value.value
-                    if (isEmpty(newValue)) {
-                        $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('common.value') }))
-                        return
-                    }
-                    const { success, msg } = await browserStore.updateZSetItem(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.value,
-                        newValue,
-                        currentEditRow.value.score,
-                    )
-                    if (success) {
-                        $message.success(i18n.t('dialogue.save_value_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
-                } catch (e) {
-                    $message.error(e.message)
-                } finally {
-                    currentEditRow.value.no = 0
-                }
-            },
-            onCancel: cancelEdit,
         })
     },
 }
-const columns = reactive([
-    {
-        key: 'no',
-        title: '#',
-        width: 80,
-        align: 'center',
-        titleAlign: 'center',
-    },
-    valueColumn,
-    scoreColumn,
-    actionColumn,
-])
 
-const tableData = computed(() => {
-    const data = []
-    if (!isEmpty(props.value)) {
-        let index = 0
-        for (const elem of props.value) {
-            data.push({
-                no: ++index,
-                value: elem.value,
-                score: elem.score,
-            })
-        }
+const columns = computed(() => {
+    if (!inEdit.value) {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+                render: (row, index) => {
+                    return index + 1
+                },
+            },
+            valueColumn,
+            scoreColumn,
+            actionColumn,
+        ]
+    } else {
+        return [
+            {
+                key: 'no',
+                title: '#',
+                width: 80,
+                align: 'center',
+                titleAlign: 'center',
+                render: (row, index) => {
+                    if (index + 1 === currentEditRow.no) {
+                        // editing row, show edit state
+                        return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
+                    } else {
+                        return index + 1
+                    }
+                },
+            },
+            valueColumn,
+        ]
     }
-    return data
 })
 
 const entries = computed(() => {
-    const len = size(tableData.value)
+    const len = size(props.value)
     return `${len} / ${Math.max(len, props.length)}`
 })
 
@@ -306,10 +325,14 @@ const onUpdateFilter = (filters, sourceColumn) => {
     }
 }
 
+const onFormatChanged = (selDecode, selFormat) => {
+    emit('reload', selDecode, selFormat)
+}
+
 defineExpose({
     reset: () => {
         clearFilter()
-        cancelEdit()
+        resetEdit()
     },
 })
 </script>
@@ -317,6 +340,7 @@ defineExpose({
 <template>
     <div class="content-wrapper flex-box-v">
         <content-toolbar
+            v-show="!inFullEdit"
             :db="props.db"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
@@ -328,7 +352,7 @@ defineExpose({
             @delete="emit('delete')"
             @reload="emit('reload')"
             @rename="emit('rename')" />
-        <div class="tb2 value-item-part flex-box-h">
+        <div v-show="!inFullEdit" class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>
                     <n-select
@@ -374,13 +398,14 @@ defineExpose({
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
-        <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
+        <div class="value-wrapper value-item-part flex-box-h flex-item-expand">
+            <!-- table -->
             <n-data-table
-                :key="(row) => row.no"
+                v-show="!inFullEdit"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="tableData"
+                :data="props.value"
                 :loading="props.loading"
                 :single-column="true"
                 :single-line="false"
@@ -390,12 +415,33 @@ defineExpose({
                 striped
                 virtual-scroll
                 @update:filters="onUpdateFilter" />
+
+            <!-- edit pane -->
+            <content-entry-editor
+                v-show="inEdit"
+                v-model:fullscreen="fullEdit"
+                :decode="currentEditRow.decode"
+                :field="currentEditRow.score"
+                :field-label="$t('interface.score')"
+                :format="currentEditRow.format"
+                :value="currentEditRow.value"
+                :value-label="$t('common.value')"
+                class="flex-item-expand"
+                style="width: 100%"
+                @close="resetEdit"
+                @save="saveEdit" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
+            <format-selector
+                v-show="!inEdit"
+                :decode="props.decode"
+                :disabled="inEdit"
+                :format="props.format"
+                @format-changed="onFormatChanged" />
         </div>
     </div>
 </template>

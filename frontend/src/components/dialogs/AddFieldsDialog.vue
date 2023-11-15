@@ -95,9 +95,9 @@ const onAdd = async () => {
                 {
                     let data
                     if (newForm.opType === 1) {
-                        data = await browserStore.prependListItem(server, db, keyName, value)
+                        data = await browserStore.prependListItem({ server, db, key: keyName, values: value })
                     } else {
-                        data = await browserStore.appendListItem(server, db, keyName, value)
+                        data = await browserStore.appendListItem({ server, db, key: keyName, values: value })
                     }
                     const { success, msg } = data
                     if (success) {
