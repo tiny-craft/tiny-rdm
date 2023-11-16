@@ -384,7 +384,6 @@ defineExpose({
                     t-tooltip="interface.load_all_entries"
                     @click="emit('loadall')" />
             </n-button-group>
-            {{ valueColumn.align }}
             <n-button :focusable="false" plain @click="onAddRow">
                 <template #icon>
                     <n-icon :component="AddLink" size="18" />

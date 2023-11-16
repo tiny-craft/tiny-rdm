@@ -6,7 +6,6 @@ import {
     isEmpty,
     join,
     last,
-    map,
     remove,
     set,
     size,
@@ -1058,21 +1057,26 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * insert or update hash field item
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {number }action 0:ignore duplicated fields 1:overwrite duplicated fields
          * @param {string[]} fieldItems field1, value1, filed2, value2...
-         * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
+         * @returns {Promise<{[msg]: string, success: boolean, [updated]: [], [added]: []}>}
          */
-        async addHashField(connName, db, key, action, fieldItems) {
+        async addHashField(server, db, key, action, fieldItems) {
             try {
-                const { data, success, msg } = await AddHashField(connName, db, key, action, fieldItems)
+                const { data, success, msg } = await AddHashField(server, db, key, action, fieldItems)
                 if (success) {
-                    const { updated = {} } = data
+                    const { updated = [], added = [] } = data
                     const tab = useTabStore()
-                    tab.upsertValueEntries({ server: connName, db, key, type: 'hash', entries: updated })
-                    return { success, updated }
+                    if (!isEmpty(updated)) {
+                        tab.replaceValueEntries({ server, db, key, type: 'hash', entries: updated })
+                    }
+                    if (!isEmpty(added)) {
+                        tab.insertValueEntries({ server, db, key, type: 'hash', entries: added })
+                    }
+                    return { success, updated, added }
                 } else {
                     return { success: false, msg }
                 }
@@ -1138,15 +1142,13 @@ const useBrowserStore = defineStore('browser', {
                 if (success) {
                     const { left = [] } = data
                     if (!isEmpty(left)) {
-                        // TODO: convert to display value
-                        const entries = map(left, (v) => ({ v }))
                         const tab = useTabStore()
-                        tab.upsertValueEntries({
+                        tab.insertValueEntries({
                             server: server,
                             db,
                             key,
                             type: 'list',
-                            entries,
+                            entries: left,
                             prepend: true,
                         })
                     }
@@ -1172,15 +1174,15 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await AddListItem(server, db, key, 1, values)
                 if (success) {
                     const { right = [] } = data
+                    // FIXME: do not append items if not all items loaded
                     if (!isEmpty(right)) {
-                        const entries = map(right, (v) => ({ v }))
                         const tab = useTabStore()
-                        tab.upsertValueEntries({
+                        tab.insertValueEntries({
                             server: server,
                             db,
                             key,
                             type: 'list',
-                            entries,
+                            entries: right,
                             prepend: false,
                         })
                     }
@@ -1262,21 +1264,24 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * add item to set
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number} key
          * @param {string|string[]} value
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addSetItem(connName, db, key, value) {
+        async addSetItem(server, db, key, value) {
             try {
                 if ((!value) instanceof Array) {
                     value = [value]
                 }
-                const { data, success, msg } = await SetSetItem(connName, db, key, false, value)
+                const { data, success, msg } = await SetSetItem(server, db, key, false, value)
                 if (success) {
-                    const tab = useTabStore()
-                    tab.upsertValueEntries({ server: connName, db, key, type: 'set', entries: value })
+                    const { added } = data
+                    if (!isEmpty(added)) {
+                        const tab = useTabStore()
+                        tab.insertValueEntries({ server, db, key, type: 'set', entries: added })
+                    }
                     return { success }
                 } else {
                     return { success, msg }
@@ -1338,19 +1343,25 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * add item to sorted set
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {number} action
          * @param {Object.<string, number>} vs value: score
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addZSetItem(connName, db, key, action, vs) {
+        async addZSetItem(server, db, key, action, vs) {
             try {
-                const { success, msg } = await AddZSetValue(connName, db, key, action, vs)
-                const tab = useTabStore()
-                tab.upsertValueEntries({ server: connName, db, key, type: 'zset', entries: vs })
+                const { data, success, msg } = await AddZSetValue(server, db, key, action, vs)
                 if (success) {
+                    const { added, updated } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(added)) {
+                        tab.insertValueEntries({ server, db, key, type: 'zset', entries: added })
+                    }
+                    if (!isEmpty(updated)) {
+                        tab.replaceValueEntries({ server, db, key, type: 'zset', entries: updated })
+                    }
                     return { success }
                 } else {
                     return { success, msg }
@@ -1439,26 +1450,28 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * insert new stream field item
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} id
          * @param {string[]} values field1, value1, filed2, value2...
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addStreamValue(connName, db, key, id, values) {
+        async addStreamValue(server, db, key, id, values) {
             try {
-                const { data = {}, success, msg } = await AddStreamValue(connName, db, key, id, values)
+                const { data = {}, success, msg } = await AddStreamValue(server, db, key, id, values)
                 if (success) {
-                    const { updateID } = data
-                    const tab = useTabStore()
-                    tab.upsertValueEntries({
-                        server: connName,
-                        db,
-                        key,
-                        type: 'stream',
-                        entries: [{ id: updateID, value: values }],
-                    })
+                    const { added = [] } = data
+                    if (!isEmpty(added)) {
+                        const tab = useTabStore()
+                        tab.insertValueEntries({
+                            server,
+                            db,
+                            key,
+                            type: 'stream',
+                            entries: added,
+                        })
+                    }
                     return { success }
                 } else {
                     return { success: false, msg }
@@ -1483,8 +1496,8 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { data = {}, success, msg } = await RemoveStreamValues(connName, db, key, ids)
                 if (success) {
-                    const tab = useTabStore()
-                    tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
+                    // const tab = useTabStore()
+                    // tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
                     return { success }
                 } else {
                     return { success, msg }

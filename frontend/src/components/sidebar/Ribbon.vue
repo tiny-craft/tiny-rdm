@@ -132,7 +132,7 @@ const exThemeVars = computed(() => {
                 <n-tooltip :delay="2" :show-arrow="false" placement="right">
                     <template #trigger>
                         <n-icon :size="iconSize">
-                            <component :is="m.icon" :stroke-width="3.5"></component>
+                            <component :is="m.icon" :stroke-width="3.5" />
                         </n-icon>
                     </template>
                     {{ m.label }}

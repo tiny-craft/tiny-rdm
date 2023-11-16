@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,7 +17,6 @@ import (
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
-	maputil "tinyrdm/backend/utils/map"
 	redis2 "tinyrdm/backend/utils/redis"
 	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
@@ -1147,28 +1147,40 @@ func (b *browserService) AddHashField(connName string, db int, k any, action int
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	updated := map[string]any{}
+	var updated []types.HashEntryItem
+	var added []types.HashEntryItem
 	switch action {
 	case 1:
 		// ignore duplicated fields
 		for i := 0; i < len(fieldItems); i += 2 {
-			_, err = client.HSetNX(ctx, key, fieldItems[i].(string), fieldItems[i+1]).Result()
-			if err == nil {
-				updated[fieldItems[i].(string)] = fieldItems[i+1]
+			field, value := strutil.DecodeRedisKey(fieldItems[i]), strutil.DecodeRedisKey(fieldItems[i+1])
+			if succ, _ := client.HSetNX(ctx, key, field, value).Result(); succ {
+				added = append(added, types.HashEntryItem{
+					Key:          field,
+					Value:        value,
+					DisplayValue: "", // TODO: convert to display value
+				})
 			}
 		}
 	default:
 		// overwrite duplicated fields
 		total := len(fieldItems)
 		if total > 1 {
-			_, err = client.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-				for i := 0; i < total; i += 2 {
-					client.HSet(ctx, key, fieldItems[i], fieldItems[i+1])
-				}
-				return nil
-			})
 			for i := 0; i < total; i += 2 {
-				updated[fieldItems[i].(string)] = fieldItems[i+1]
+				field, value := strutil.DecodeRedisKey(fieldItems[i]), strutil.DecodeRedisKey(fieldItems[i+1])
+				if affect, _ := client.HSet(ctx, key, field, value).Result(); affect > 0 {
+					added = append(added, types.HashEntryItem{
+						Key:          field,
+						Value:        value,
+						DisplayValue: "", // TODO: convert to display value
+					})
+				} else {
+					updated = append(updated, types.HashEntryItem{
+						Key:          field,
+						Value:        value,
+						DisplayValue: "", // TODO: convert to display value
+					})
+				}
 			}
 		}
 	}
@@ -1178,8 +1190,12 @@ func (b *browserService) AddHashField(connName string, db int, k any, action int
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"updated": updated,
+	resp.Data = struct {
+		Added   []types.HashEntryItem `json:"added,omitempty"`
+		Updated []types.HashEntryItem `json:"updated,omitempty"`
+	}{
+		Added:   added,
+		Updated: updated,
 	}
 	return
 }
@@ -1194,16 +1210,27 @@ func (b *browserService) AddListItem(connName string, db int, k any, action int,
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	var leftPush, rightPush []any
+	var leftPush, rightPush []types.ListEntryItem
 	switch action {
 	case 0:
 		// push to head
+		slices.Reverse(items)
 		_, err = client.LPush(ctx, key, items...).Result()
-		leftPush = append(leftPush, items...)
+		for i := len(items) - 1; i >= 0; i-- {
+			leftPush = append(leftPush, types.ListEntryItem{
+				Value:        items[i],
+				DisplayValue: "", // TODO: convert to display value
+			})
+		}
 	default:
 		// append to tail
 		_, err = client.RPush(ctx, key, items...).Result()
-		rightPush = append(rightPush, items...)
+		for _, it := range items {
+			rightPush = append(rightPush, types.ListEntryItem{
+				Value:        it,
+				DisplayValue: "", // TODO: convert to display value
+			})
+		}
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1211,9 +1238,12 @@ func (b *browserService) AddListItem(connName string, db int, k any, action int,
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"left":  leftPush,
-		"right": rightPush,
+	resp.Data = struct {
+		Left  []types.ListEntryItem `json:"left,omitempty"`
+		Right []types.ListEntryItem `json:"right,omitempty"`
+	}{
+		Left:  leftPush,
+		Right: rightPush,
 	}
 	return
 }
@@ -1278,11 +1308,26 @@ func (b *browserService) SetSetItem(server string, db int, k any, remove bool, m
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
+	var added, removed []types.SetEntryItem
 	var affected int64
 	if remove {
-		affected, err = client.SRem(ctx, key, members...).Result()
+		for _, member := range members {
+			if affected, _ = client.SRem(ctx, key, member).Result(); affected > 0 {
+				removed = append(removed, types.SetEntryItem{
+					Value:        member,
+					DisplayValue: "", // TODO: convert to display value
+				})
+			}
+		}
 	} else {
-		affected, err = client.SAdd(ctx, key, members...).Result()
+		for _, member := range members {
+			if affected, _ = client.SAdd(ctx, key, member).Result(); affected > 0 {
+				added = append(added, types.SetEntryItem{
+					Value:        member,
+					DisplayValue: "", // TODO: convert to display value
+				})
+			}
+		}
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1290,8 +1335,14 @@ func (b *browserService) SetSetItem(server string, db int, k any, remove bool, m
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"affected": affected,
+	resp.Data = struct {
+		Added    []types.SetEntryItem `json:"added,omitempty"`
+		Removed  []types.SetEntryItem `json:"removed,omitempty"`
+		Affected int64                `json:"affected"`
+	}{
+		Added:    added,
+		Removed:  removed,
+		Affected: affected,
 	}
 	return
 }
@@ -1404,20 +1455,37 @@ func (b *browserService) AddZSetValue(connName string, db int, k any, action int
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	members := maputil.ToSlice(valueScore, func(k string) redis.Z {
-		return redis.Z{
-			Score:  valueScore[k],
-			Member: k,
-		}
-	})
 
+	var added, updated []types.ZSetEntryItem
 	switch action {
 	case 1:
 		// ignore duplicated fields
-		_, err = client.ZAddNX(ctx, key, members...).Result()
+		for m, s := range valueScore {
+			if affect, _ := client.ZAddNX(ctx, key, redis.Z{Score: s, Member: m}).Result(); affect > 0 {
+				added = append(added, types.ZSetEntryItem{
+					Score:        s,
+					Value:        m,
+					DisplayValue: "", // TODO: convert to display value
+				})
+			}
+		}
 	default:
 		// overwrite duplicated fields
-		_, err = client.ZAdd(ctx, key, members...).Result()
+		for m, s := range valueScore {
+			if affect, _ := client.ZAdd(ctx, key, redis.Z{Score: s, Member: m}).Result(); affect > 0 {
+				added = append(added, types.ZSetEntryItem{
+					Score:        s,
+					Value:        m,
+					DisplayValue: "", // TODO: convert to display value
+				})
+			} else {
+				updated = append(updated, types.ZSetEntryItem{
+					Score:        s,
+					Value:        m,
+					DisplayValue: "", // TODO: convert to display value
+				})
+			}
+		}
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1425,6 +1493,13 @@ func (b *browserService) AddZSetValue(connName string, db int, k any, action int
 	}
 
 	resp.Success = true
+	resp.Data = struct {
+		Added   []types.ZSetEntryItem `json:"added,omitempty"`
+		Updated []types.ZSetEntryItem `json:"updated,omitempty"`
+	}{
+		Added:   added,
+		Updated: updated,
+	}
 	return
 }
 
@@ -1449,9 +1524,24 @@ func (b *browserService) AddStreamValue(connName string, db int, k any, ID strin
 		return
 	}
 
+	updateValues := make(map[string]any, len(fieldItems)/2)
+	for i := 0; i < len(fieldItems)/2; i += 2 {
+		updateValues[fieldItems[i].(string)] = fieldItems[i+1]
+	}
+	vb, _ := json.Marshal(updateValues)
+	displayValue, _, _ := strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+
 	resp.Success = true
-	resp.Data = map[string]any{
-		"updateID": updateID,
+	resp.Data = struct {
+		Added []types.StreamEntryItem `json:"added,omitempty"`
+	}{
+		Added: []types.StreamEntryItem{
+			{
+				ID:           updateID,
+				Value:        updateValues,
+				DisplayValue: displayValue, // TODO: convert to display value
+			},
+		},
 	}
 	return
 }

@@ -106,6 +106,9 @@ export async function setupDiscreteApi() {
         messageProviderProps: {
             placement: 'bottom',
             keepAliveOnHover: true,
+            containerStyle: {
+                marginBottom: '38px',
+            },
         },
         notificationProviderProps: {
             max: 5,

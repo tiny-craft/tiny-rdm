@@ -57,9 +57,6 @@ export const themeOverrides = {
         buttonColorActive: '#D13B37',
         buttonTextColorActive: '#FFF',
     },
-    Message: {
-        margin: '0 0 38px 0',
-    },
     DataTable: {
         thPaddingSmall: '6px 8px',
         tdPaddingSmall: '6px 8px',
