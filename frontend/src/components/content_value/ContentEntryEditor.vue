@@ -151,6 +151,7 @@ const onSave = () => {
                     <div class="editor-content-item-label">{{ props.fieldLabel }}</div>
                     <n-input
                         v-model:value="viewAs.field"
+                        :placeholder="props.field + ''"
                         :readonly="props.fieldReadonly"
                         class="editor-content-item-input"
                         type="text" />
@@ -160,6 +161,7 @@ const onSave = () => {
                 <div class="editor-content-item flex-box-v flex-item-expand">
                     <div class="editor-content-item-label">{{ props.valueLabel }}</div>
                     <n-input
+                        :placeholder="props.value"
                         :resizable="false"
                         :value="displayValue"
                         autofocus

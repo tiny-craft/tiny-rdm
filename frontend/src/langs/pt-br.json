@@ -17,6 +17,7 @@
     "key": "Chave",
     "value": "Valor",
     "field": "Campo",
+    "score": "Pontuação",
     "index": "Posição"
   },
   "preferences": {
@@ -98,7 +99,6 @@
     "empty_server_list": "Nenhum servidor Redis",
     "action": "Ação",
     "type": "Tipo",
-    "score": "Pontuação",
     "cli_welcome": "Bem-vindo ao Console Redis Tiny RDM",
     "sub_tab": {
       "status": "Status",

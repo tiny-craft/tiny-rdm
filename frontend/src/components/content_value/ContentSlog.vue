@@ -1,5 +1,5 @@
 <script setup>
-import { h, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import { debounce, isEmpty, map, size, split } from 'lodash'
 import { useI18n } from 'vue-i18n'
@@ -32,6 +32,85 @@ const data = reactive({
 })
 
 const tableRef = ref(null)
+
+const columns = computed(() => [
+    {
+        title: i18n.t('slog.exec_time'),
+        key: 'timestamp',
+        sortOrder: data.sortOrder,
+        sorter: 'default',
+        width: 180,
+        align: 'center',
+        titleAlign: 'center',
+        render: ({ timestamp }, index) => {
+            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
+        },
+    },
+    {
+        title: i18n.t('slog.client'),
+        key: 'client',
+        filterOptionValue: data.client,
+        resizable: true,
+        filter: (value, row) => {
+            return value === '' || row.client === value.toString() || row.addr === value.toString()
+        },
+        width: 200,
+        align: 'center',
+        titleAlign: 'center',
+        ellipsis: {
+            tooltip: true,
+        },
+        render: ({ client, addr }, index) => {
+            let content = ''
+            if (!isEmpty(client)) {
+                content += client
+            }
+            if (!isEmpty(addr)) {
+                if (!isEmpty(content)) {
+                    content += ' - '
+                }
+                content += addr
+            }
+            return content
+        },
+    },
+    {
+        title: i18n.t('slog.cmd'),
+        key: 'cmd',
+        titleAlign: 'center',
+        filterOptionValue: data.keyword,
+        resizable: true,
+        filter: (value, row) => {
+            return value === '' || !!~row.cmd.indexOf(value.toString())
+        },
+        render: ({ cmd }, index) => {
+            const cmdList = split(cmd, '\n')
+            if (size(cmdList) > 1) {
+                return h(
+                    'div',
+                    null,
+                    map(cmdList, (c) => h('div', null, c)),
+                )
+            }
+            return cmd
+        },
+    },
+    {
+        title: i18n.t('slog.cost_time'),
+        key: 'cost',
+        width: 100,
+        align: 'center',
+        titleAlign: 'center',
+        render: ({ cost }, index) => {
+            const ms = dayjs.duration(cost).asMilliseconds()
+            if (ms < 1000) {
+                return `${ms} ms`
+            } else {
+                return `${Math.floor(ms / 1000)} s`
+            }
+        },
+    },
+])
 
 const _loadSlowLog = () => {
     data.loading = true
@@ -103,86 +182,12 @@ const onListLimitChanged = (limit) => {
         <div class="content-value fill-height flex-box-h">
             <n-data-table
                 ref="tableRef"
-                :columns="[
-                    {
-                        title: $t('slog.exec_time'),
-                        key: 'timestamp',
-                        sortOrder: data.sortOrder,
-                        sorter: 'default',
-                        width: 180,
-                        align: 'center',
-                        titleAlign: 'center',
-                        render({ timestamp }, index) {
-                            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
-                        },
-                    },
-                    {
-                        title: $t('slog.client'),
-                        key: 'client',
-                        filterOptionValue: data.client,
-                        resizable: true,
-                        filter(value, row) {
-                            return value === '' || row.client === value.toString() || row.addr === value.toString()
-                        },
-                        width: 200,
-                        align: 'center',
-                        titleAlign: 'center',
-                        ellipsis: true,
-                        render({ client, addr }, index) {
-                            let content = ''
-                            if (!isEmpty(client)) {
-                                content += client
-                            }
-                            if (!isEmpty(addr)) {
-                                if (!isEmpty(content)) {
-                                    content += ' - '
-                                }
-                                content += addr
-                            }
-                            return content
-                        },
-                    },
-                    {
-                        title: $t('slog.cmd'),
-                        key: 'cmd',
-                        titleAlign: 'center',
-                        filterOptionValue: data.keyword,
-                        resizable: true,
-                        width: 100,
-                        filter(value, row) {
-                            return value === '' || !!~row.cmd.indexOf(value.toString())
-                        },
-                        render({ cmd }, index) {
-                            const cmdList = split(cmd, '\n')
-                            if (size(cmdList) > 1) {
-                                return h(
-                                    'div',
-                                    null,
-                                    map(cmdList, (c) => h('div', null, c)),
-                                )
-                            }
-                            return cmd
-                        },
-                    },
-                    {
-                        title: $t('slog.cost_time'),
-                        key: 'cost',
-                        width: 100,
-                        align: 'center',
-                        titleAlign: 'center',
-                        render({ cost }, index) {
-                            const ms = dayjs.duration(cost).asMilliseconds()
-                            if (ms < 1000) {
-                                return `${ms} ms`
-                            } else {
-                                return `${Math.floor(ms / 1000)} s`
-                            }
-                        },
-                    },
-                ]"
+                :columns="columns"
                 :data="data.list"
+                :loading="data.loading"
                 class="flex-item-expand"
                 flex-height
+                virtual-scroll
                 @update:sorter="({ order }) => (data.sortOrder = order)" />
         </div>
     </n-card>
@@ -190,9 +195,4 @@ const onListLimitChanged = (limit) => {
 
 <style lang="scss" scoped>
 @import '@/styles/content';
-
-.content-container {
-    padding: 5px;
-    box-sizing: border-box;
-}
 </style>

@@ -17,6 +17,7 @@
     "key": "键",
     "value": "值",
     "field": "字段",
+    "score": "分值",
     "index": "位置"
   },
   "preferences": {
@@ -104,7 +105,6 @@
     "empty_server_list": "还没添加Redis服务器",
     "action": "操作",
     "type": "类型",
-    "score": "分值",
     "cli_welcome": "欢迎使用Tiny RDM的Redis命令行控制台",
     "sub_tab": {
       "status": "状态",

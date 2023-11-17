@@ -158,6 +158,10 @@ const saveEdit = async (field, value, decode, format) => {
             throw new Error('row not exists')
         }
 
+        if (isEmpty(field)) {
+            field = currentEditRow.key
+        }
+
         const { success, msg } = await browserStore.setHash({
             server: props.name,
             db: props.db,

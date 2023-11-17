@@ -58,14 +58,17 @@ const onUpdate = () => {
             <n-radio-button v-for="(op, i) in updateOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>
     </n-form-item>
-    <n-form-item :label="$t('dialogue.field.element')" required>
+    <n-form-item
+        :label="$t('dialogue.field.element') + ' (' + $t('common.value') + ':' + $t('common.score') + ')'"
+        required>
         <n-dynamic-input v-model:value="zset" @create="onCreate" @update:value="onUpdate">
             <template #default="{ value }">
                 <n-input
                     v-model:value="value.value"
-                    :placeholder="$t('dialogue.field.enter_elem')"
+                    :placeholder="$t('dialogue.field.enter_value')"
                     type="text"
                     @update:value="onUpdate" />
+                <n-text>:</n-text>
                 <n-input-number
                     v-model:value="value.score"
                     :placeholder="$t('dialogue.field.enter_score')"

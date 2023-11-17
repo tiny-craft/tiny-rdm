@@ -50,7 +50,9 @@ const onUpdate = (val) => {
             <n-radio-button v-for="(op, i) in updateOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>
     </n-form-item>
-    <n-form-item :label="$t('dialogue.field.element')" required>
+    <n-form-item
+        :label="$t('dialogue.field.element') + ' (' + $t('common.field') + ':' + $t('common.value') + ')'"
+        required>
         <n-dynamic-input
             v-model:value="kvList"
             :key-placeholder="$t('dialogue.field.enter_field')"

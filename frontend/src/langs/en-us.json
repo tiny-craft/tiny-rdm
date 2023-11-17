@@ -17,6 +17,7 @@
     "key": "Key",
     "value": "Value",
     "field": "Field",
+    "score": "Score",
     "index": "Position"
   },
   "preferences": {
@@ -104,7 +105,6 @@
     "empty_server_list": "No redis server",
     "action": "Action",
     "type": "Type",
-    "score": "Score",
     "cli_welcome": "Welcome to Tiny RDM Redis Console",
     "sub_tab": {
       "status": "Status",

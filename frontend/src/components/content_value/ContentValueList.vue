@@ -130,6 +130,10 @@ const saveEdit = async (pos, value, decode, format) => {
             throw new Error('row not exists')
         }
 
+        if (isEmpty(value)) {
+            value = currentEditRow.value
+        }
+
         const { success, msg } = await browserStore.updateListItem({
             server: props.name,
             db: props.db,

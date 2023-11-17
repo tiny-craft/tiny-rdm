@@ -68,7 +68,7 @@ const filterOption = [
     },
     {
         value: 2,
-        label: i18n.t('interface.score'),
+        label: i18n.t('common.score'),
     },
 ]
 const filterType = ref(1)
@@ -95,7 +95,7 @@ const inFullEdit = computed(() => {
 const scoreFilterOption = ref(null)
 const scoreColumn = computed(() => ({
     key: 'score',
-    title: i18n.t('interface.score'),
+    title: i18n.t('common.score'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
@@ -181,6 +181,10 @@ const saveEdit = async (field, value, decode, format) => {
         const row = props.value[currentEditRow.no - 1]
         if (row == null) {
             throw new Error('row not exists')
+        }
+
+        if (isEmpty(value)) {
+            value = currentEditRow.value
         }
 
         const { success, msg } = await browserStore.updateZSetItem({
@@ -429,7 +433,7 @@ defineExpose({
                 v-model:fullscreen="fullEdit"
                 :decode="currentEditRow.decode"
                 :field="currentEditRow.score"
-                :field-label="$t('interface.score')"
+                :field-label="$t('common.score')"
                 :format="currentEditRow.format"
                 :value="currentEditRow.value"
                 :value-label="$t('common.value')"

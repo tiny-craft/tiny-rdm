@@ -34,39 +34,101 @@ const filterServerOption = computed(() => {
 
 const tableRef = ref(null)
 
-const loadHistory = () => {
-    data.loading = true
-    browserStore
-        .getCmdHistory()
-        .then((list) => {
-            data.history = list || []
-        })
-        .finally(() => {
-            data.loading = false
-            tableRef.value?.scrollTo({ top: 999999 })
-        })
+const columns = computed(() => [
+    {
+        title: i18n.t('log.exec_time'),
+        key: 'timestamp',
+        defaultSortOrder: 'ascend',
+        sorter: 'default',
+        width: 180,
+        align: 'center',
+        titleAlign: 'center',
+        render: ({ timestamp }, index) => {
+            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
+        },
+    },
+    {
+        title: i18n.t('log.server'),
+        key: 'server',
+        filterOptionValue: data.server,
+        filter: (value, row) => {
+            return value === '' || row.server === value.toString()
+        },
+        width: 150,
+        align: 'center',
+        titleAlign: 'center',
+        ellipsis: {
+            tooltip: true,
+        },
+    },
+    {
+        title: i18n.t('log.cmd'),
+        key: 'cmd',
+        titleAlign: 'center',
+        filterOptionValue: data.keyword,
+        resizable: true,
+        filter: (value, row) => {
+            return value === '' || !!~row.cmd.indexOf(value.toString())
+        },
+        render: ({ cmd }, index) => {
+            const cmdList = split(cmd, '\n')
+            if (size(cmdList) > 1) {
+                return h(
+                    'div',
+                    null,
+                    map(cmdList, (c) => h('div', null, c)),
+                )
+            }
+            return cmd
+        },
+    },
+    {
+        title: i18n.t('log.cost_time'),
+        key: 'cost',
+        width: 100,
+        align: 'center',
+        titleAlign: 'center',
+        render: ({ cost }, index) => {
+            const ms = dayjs.duration(cost).asMilliseconds()
+            if (ms < 1000) {
+                return `${ms} ms`
+            } else {
+                return `${Math.floor(ms / 1000)} s`
+            }
+        },
+    },
+])
+
+const loadHistory = async () => {
+    try {
+        await nextTick()
+        data.loading = true
+        const list = await browserStore.getCmdHistory()
+        data.history = list || []
+    } finally {
+        data.loading = false
+        tableRef.value?.scrollTo({ top: 999999 })
+    }
 }
 
 const cleanHistory = async () => {
-    $dialog.warning(i18n.t('log.confirm_clean_log'), () => {
-        data.loading = true
-        browserStore
-            .cleanCmdHistory()
-            .then((success) => {
-                if (success) {
-                    data.history = []
-                    tableRef.value?.scrollTo({ top: 0 })
-                    $message.success(i18n.t('common.success'))
-                }
-            })
-            .finally(() => {
-                data.loading = false
-            })
+    $dialog.warning(i18n.t('log.confirm_clean_log'), async () => {
+        try {
+            data.loading = true
+            const success = await browserStore.cleanCmdHistory()
+            if (success) {
+                data.history = []
+                tableRef.value?.scrollTo({ top: 0 })
+                $message.success(i18n.t('common.success'))
+            }
+        } finally {
+            data.loading = false
+        }
     })
 }
 
 defineExpose({
-    refresh: () => nextTick().then(loadHistory),
+    refresh: loadHistory,
 })
 </script>
 
@@ -98,71 +160,12 @@ defineExpose({
         <div class="content-value fill-height flex-box-h">
             <n-data-table
                 ref="tableRef"
-                :columns="[
-                    {
-                        title: $t('log.exec_time'),
-                        key: 'timestamp',
-                        defaultSortOrder: 'ascend',
-                        sorter: 'default',
-                        width: 180,
-                        align: 'center',
-                        titleAlign: 'center',
-                        render: ({ timestamp }, index) => {
-                            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
-                        },
-                    },
-                    {
-                        title: $t('log.server'),
-                        key: 'server',
-                        filterOptionValue: data.server,
-                        filter: (value, row) => {
-                            return value === '' || row.server === value.toString()
-                        },
-                        width: 150,
-                        align: 'center',
-                        titleAlign: 'center',
-                        ellipsis: true,
-                    },
-                    {
-                        title: $t('log.cmd'),
-                        key: 'cmd',
-                        titleAlign: 'center',
-                        filterOptionValue: data.keyword,
-                        resizable: true,
-                        filter: (value, row) => {
-                            return value === '' || !!~row.cmd.indexOf(value.toString())
-                        },
-                        render: ({ cmd }, index) => {
-                            const cmdList = split(cmd, '\n')
-                            if (size(cmdList) > 1) {
-                                return h(
-                                    'div',
-                                    null,
-                                    map(cmdList, (c) => h('div', null, c)),
-                                )
-                            }
-                            return cmd
-                        },
-                    },
-                    {
-                        title: $t('log.cost_time'),
-                        key: 'cost',
-                        width: 100,
-                        align: 'center',
-                        titleAlign: 'center',
-                        render: ({ cost }, index) => {
-                            const ms = dayjs.duration(cost).asMilliseconds()
-                            if (ms < 1000) {
-                                return `${ms} ms`
-                            } else {
-                                return `${Math.floor(ms / 1000)} s`
-                            }
-                        },
-                    },
-                ]"
+                :columns="columns"
                 :data="data.history"
+                :loading="data.loading"
                 class="flex-item-expand"
-                flex-height />
+                flex-height
+                virtual-scroll />
         </div>
     </n-card>
 </template>

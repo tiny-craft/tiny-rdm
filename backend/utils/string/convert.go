@@ -109,7 +109,7 @@ func autoDecode(str string) (value, resultDecode string) {
 		// pure digit content may incorrect regard as some encoded type, skip decode
 		if match, _ := regexp.MatchString(`^\d+$`, str); !match {
 			var ok bool
-			if len(str)%4 == 0 && !isSameChar(str) {
+			if len(str)%4 == 0 && len(str) >= 12 && !isSameChar(str) {
 				if value, ok = decodeBase64(str); ok {
 					resultDecode = types.DECODE_BASE64
 					return
