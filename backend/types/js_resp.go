@@ -60,14 +60,16 @@ type SetListParam struct {
 }
 
 type SetHashParam struct {
-	Server   string `json:"server"`
-	DB       int    `json:"db"`
-	Key      any    `json:"key"`
-	Field    string `json:"field,omitempty"`
-	NewField string `json:"newField,omitempty"`
-	Value    any    `json:"value"`
-	Format   string `json:"format,omitempty"`
-	Decode   string `json:"decode,omitempty"`
+	Server    string `json:"server"`
+	DB        int    `json:"db"`
+	Key       any    `json:"key"`
+	Field     string `json:"field,omitempty"`
+	NewField  string `json:"newField,omitempty"`
+	Value     any    `json:"value"`
+	Format    string `json:"format,omitempty"`
+	Decode    string `json:"decode,omitempty"`
+	RetFormat string `json:"retFormat,omitempty"`
+	RetDecode string `json:"retDecode,omitempty"`
 }
 
 type SetSetParam struct {

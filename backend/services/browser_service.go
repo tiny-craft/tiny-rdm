@@ -1081,7 +1081,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 	return
 }
 
-// SetHashValue set hash field
+// SetHashValue update hash field
 func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSResp) {
 	item, err := b.getRedisClient(param.Server, param.DB)
 	if err != nil {
@@ -1092,36 +1092,64 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
 	str := strutil.DecodeRedisKey(param.Value)
-	var saveStr string
+	var saveStr, displayStr string
 	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
 		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
-	var removedField []string
-	updatedField := map[string]any{}
-	replacedField := map[string]any{}
-	if len(param.Field) <= 0 {
-		// old filed is empty, add new field
-		_, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
-		updatedField[param.NewField] = saveStr
-	} else if len(param.NewField) <= 0 {
+	displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+	var updated, added, removed []types.HashEntryItem
+	var replaced []types.HashReplaceItem
+	var affect int64
+	if len(param.NewField) <= 0 {
 		// new field is empty, delete old field
 		_, err = client.HDel(ctx, key, param.Field).Result()
-		removedField = append(removedField, param.Field)
-	} else if param.Field == param.NewField {
-		// update field value
-		_, err = client.HSet(ctx, key, param.Field, saveStr).Result()
-		updatedField[param.NewField] = saveStr
+		removed = append(removed, types.HashEntryItem{
+			Key: param.Field,
+		})
+	} else if len(param.Field) <= 0 || param.Field == param.NewField {
+		affect, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
+		if affect <= 0 {
+			// update field value
+			updated = append(updated, types.HashEntryItem{
+				Key:          param.NewField,
+				Value:        saveStr,
+				DisplayValue: displayStr,
+			})
+		} else {
+			// add new field
+			added = append(added, types.HashEntryItem{
+				Key:          param.NewField,
+				Value:        saveStr,
+				DisplayValue: displayStr,
+			})
+		}
 	} else {
 		// remove old field and add new field
 		if _, err = client.HDel(ctx, key, param.Field).Result(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
-		_, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
-		removedField = append(removedField, param.Field)
-		updatedField[param.NewField] = saveStr
-		replacedField[param.Field] = param.NewField
+		affect, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
+		if affect <= 0 {
+			// no new filed added, just replace exists item
+			removed = append(removed, types.HashEntryItem{
+				Key: param.Field,
+			})
+			updated = append(updated, types.HashEntryItem{
+				Key:          param.NewField,
+				Value:        saveStr,
+				DisplayValue: displayStr,
+			})
+		} else {
+			// add new field
+			replaced = append(replaced, types.HashReplaceItem{
+				Key:          param.Field,
+				NewKey:       param.NewField,
+				Value:        saveStr,
+				DisplayValue: displayStr,
+			})
+		}
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1129,10 +1157,16 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"removed":  removedField,
-		"updated":  updatedField,
-		"replaced": replacedField,
+	resp.Data = struct {
+		Added    []types.HashEntryItem   `json:"added,omitempty"`
+		Removed  []types.HashEntryItem   `json:"removed,omitempty"`
+		Updated  []types.HashEntryItem   `json:"updated,omitempty"`
+		Replaced []types.HashReplaceItem `json:"replaced,omitempty"`
+	}{
+		Added:    added,
+		Removed:  removed,
+		Updated:  updated,
+		Replaced: replaced,
 	}
 	return
 }
@@ -1314,8 +1348,7 @@ func (b *browserService) SetSetItem(server string, db int, k any, remove bool, m
 		for _, member := range members {
 			if affected, _ = client.SRem(ctx, key, member).Result(); affected > 0 {
 				removed = append(removed, types.SetEntryItem{
-					Value:        member,
-					DisplayValue: "", // TODO: convert to display value
+					Value: member,
 				})
 			}
 		}

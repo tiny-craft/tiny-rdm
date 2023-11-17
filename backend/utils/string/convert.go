@@ -109,9 +109,11 @@ func autoDecode(str string) (value, resultDecode string) {
 		// pure digit content may incorrect regard as some encoded type, skip decode
 		if match, _ := regexp.MatchString(`^\d+$`, str); !match {
 			var ok bool
-			if value, ok = decodeBase64(str); ok {
-				resultDecode = types.DECODE_BASE64
-				return
+			if len(str)%4 == 0 && !isSameChar(str) {
+				if value, ok = decodeBase64(str); ok {
+					resultDecode = types.DECODE_BASE64
+					return
+				}
 			}
 
 			if value, ok = decodeGZip(str); ok {

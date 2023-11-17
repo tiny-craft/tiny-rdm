@@ -158,7 +158,7 @@ const saveEdit = async (field, value, decode, format) => {
             throw new Error('row not exists')
         }
 
-        const { updated, success, msg } = await browserStore.setHash({
+        const { success, msg } = await browserStore.setHash({
             server: props.name,
             db: props.db,
             key: keyName.value,
@@ -167,16 +167,11 @@ const saveEdit = async (field, value, decode, format) => {
             value,
             decode,
             format,
+            retDecode: props.decode,
+            retFormat: props.format,
+            index: [currentEditRow.no - 1],
         })
         if (success) {
-            row.k = field
-            row.v = updated[row.k] || ''
-            const { value: displayVal } = await browserStore.convertValue({
-                value: row.v,
-                decode: props.decode,
-                format: props.format,
-            })
-            row.dv = displayVal
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)

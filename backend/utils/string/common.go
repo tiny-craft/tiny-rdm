@@ -5,6 +5,7 @@ import (
 )
 
 func containsBinary(str string) bool {
+	//buf := []byte(str)
 	//size := 0
 	//for start := 0; start < len(buf); start += size {
 	//	var r rune
@@ -14,9 +15,25 @@ func containsBinary(str string) bool {
 	//}
 	rs := []rune(str)
 	for _, r := range rs {
-		if !unicode.IsPrint(r) && r != '\n' {
+		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
 			return true
 		}
 	}
 	return false
+}
+
+func isSameChar(str string) bool {
+	if len(str) <= 0 {
+		return false
+	}
+
+	rs := []rune(str)
+	first := rs[0]
+	for _, r := range rs {
+		if r != first {
+			return false
+		}
+	}
+
+	return true
 }

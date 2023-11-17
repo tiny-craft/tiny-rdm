@@ -1,6 +1,6 @@
 import usePreferencesStore from 'stores/preferences.js'
 import { createDiscreteApi, darkTheme } from 'naive-ui'
-import { themeOverrides } from '@/utils/theme.js'
+import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { computed } from 'vue'
 
@@ -109,6 +109,7 @@ export async function setupDiscreteApi() {
             containerStyle: {
                 marginBottom: '38px',
             },
+            themeOverrides: prefStore.isDark ? darkThemeOverrides.Message : themeOverrides.Message,
         },
         notificationProviderProps: {
             max: 5,

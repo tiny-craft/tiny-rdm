@@ -1,4 +1,4 @@
-import { assign, find, findIndex, get, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
+import { assign, find, findIndex, get, includes, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -23,6 +23,62 @@ const useTabStore = defineStore('tab', {
      * @param {string} [format]
      * @param {boolean} [end]
      * @param {boolean} [loading]
+     */
+
+    /**
+     * @typedef {Object} ListEntryItem
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} ListReplaceItem
+     * @property {number} index
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} HashEntryItem
+     * @property {string} k field name
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} HashReplaceItem
+     * @property {string|number[]} k field name
+     * @property {string|number[]} nk new field name
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} SetEntryItem
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} ZSetEntryItem
+     * @property {number} s score
+     * @property {string|number[]} v value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} ZSetReplaceItem
+     * @property {number} s score
+     * @property {string|number[]} v value
+     * @property {string|number[]} nv new value
+     * @property {string} [dv] display value
+     */
+
+    /**
+     * @typedef {Object} StreamEntryItem
+     * @property {string} id
+     * @property {Object.<string, *>} v value
+     * @property {string} [dv] display value
      */
 
     /**
@@ -178,150 +234,12 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * update or insert value entries
-         * @param {string} server
-         * @param {number} db
-         * @param {string} key
-         * @param {string} type
-         * @param {string[]|Object.<string, number>|Object.<number, string>|{k:string, v:string}[]} entries
-         * @param {boolean} [prepend] for list only
-         * @param {boolean} [reset]
-         * @param {boolean} [nocheck] ignore conflict checking for hash/set/zset
-         */
-        upsertValueEntries({ server, db, key, type, entries, prepend, reset, nocheck }) {
-            const tab = find(this.tabList, { name: server, db, key })
-            if (tab == null) {
-                return
-            }
-
-            switch (type.toLowerCase()) {
-                case 'list': // string[] | Object.<number, string>
-                    if (entries instanceof Array) {
-                        // append or prepend items
-                        if (reset === true) {
-                            tab.value = entries
-                        } else {
-                            tab.value = tab.value || []
-                            if (prepend === true) {
-                                tab.value = [...entries, ...tab.value]
-                            } else {
-                                tab.value.push(...entries)
-                            }
-                            tab.length += size(entries)
-                        }
-                    } else {
-                        // replace by index
-                        tab.value = tab.value || []
-                        for (const idx in entries) {
-                            set(tab.value, idx, entries[idx])
-                        }
-                    }
-                    break
-
-                case 'hash': // Object.<string, string>
-                    if (reset === true) {
-                        tab.value = {}
-                        tab.length = 0
-                    } else {
-                        tab.value = tab.value || {}
-                    }
-                    if (entries instanceof Array) {
-                        // append new item
-                        if (reset === true) {
-                            tab.value = entries
-                        } else {
-                            tab.value = tab.value || []
-                            tab.value.push(...entries)
-                        }
-                        tab.length += size(entries)
-                    } else {
-                        // replace item {key: value}
-                        for (const ent in entries) {
-                            let found = false
-                            for (const elem of tab.value) {
-                                if (elem.k === ent) {
-                                    elem.v = entries[elem.k]
-                                    elem.dv = ent.dv
-                                    found = true
-                                    break
-                                }
-                            }
-                            if (!found && nocheck !== true) {
-                                tab.length += 1
-                                tab.value.push(ent)
-                            }
-                        }
-                    }
-                    break
-
-                case 'set': // string[] | Object.{string, string}
-                    if (reset === true) {
-                        tab.value = entries
-                    } else {
-                        tab.value = tab.value || []
-                        if (entries instanceof Array) {
-                            // add items
-                            for (const elem of entries) {
-                                if (nocheck !== true && indexOf(tab.value, elem) === -1) {
-                                    tab.value.push(elem)
-                                    tab.length += 1
-                                }
-                            }
-                        } else {
-                            // replace items
-                            for (const k in entries) {
-                                const idx = indexOf(tab.value, k)
-                                if (idx !== -1) {
-                                    tab.value[idx] = entries[k]
-                                } else {
-                                    tab.value.push(entries[k])
-                                    tab.length += 1
-                                }
-                            }
-                        }
-                    }
-                    break
-
-                case 'zset': // {value: string, score: number}
-                    if (reset === true) {
-                        tab.value = Object.entries(entries).map(([value, score]) => ({ value, score }))
-                    } else {
-                        tab.value = tab.value || []
-                        for (const val in entries) {
-                            if (nocheck !== true) {
-                                const ent = find(tab.value, (e) => e.value === val)
-                                if (ent != null) {
-                                    ent.score = entries[val]
-                                } else {
-                                    tab.value.push({ value: val, score: entries[val] })
-                                    tab.length += 1
-                                }
-                            } else {
-                                tab.value.push({ value: val, score: entries[val] })
-                                tab.length += 1
-                            }
-                        }
-                    }
-                    break
-
-                case 'stream': // [{id: string, value: []any}]
-                    if (reset === true) {
-                        tab.value = entries
-                    } else {
-                        tab.value = tab.value || []
-                        tab.value = [...entries, ...tab.value]
-                    }
-                    break
-            }
-        },
-
-        /**
          * insert entries
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} type
-         * @param {any[]} entries
+         * @param {ListEntryItem[]|HashEntryItem[]|SetEntryItem[]|ZSetEntryItem[]|StreamEntryItem[]} entries
          * @param {boolean} [prepend] for list only
          */
         insertValueEntries({ server, db, key, type, entries, prepend }) {
@@ -363,28 +281,15 @@ const useTabStore = defineStore('tab', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} type
-         * @param {any[]} entries
+         * @param {ListEntryItem[]|HashEntryItem[]|SetEntryItem[]|ZSetEntryItem[]|StreamEntryItem[]} entries
          */
-        replaceValueEntries({ server, db, key, type, entries }) {
+        updateValueEntries({ server, db, key, type, entries }) {
             const tab = find(this.tabList, { name: server, db, key })
             if (tab == null) {
                 return
             }
 
             switch (type.toLowerCase()) {
-                case 'list': // {index:number, v:string, dv:[string]}[]
-                    tab.value = tab.value || []
-                    for (const entry of entries) {
-                        if (size(tab.value) < entry.index) {
-                            tab.value[entry.index] = entry
-                        } else {
-                            // out of range, append
-                            tab.value.push(entry)
-                            tab.length += 1
-                        }
-                    }
-                    break
-
                 case 'hash': // {k:string, v:string, dv:string}[]
                     tab.value = tab.value || []
                     for (const entry of entries) {
@@ -423,6 +328,102 @@ const useTabStore = defineStore('tab', {
                             tab.length += 1
                         }
                     }
+                    break
+            }
+        },
+
+        /**
+         * replace entry item key or field in value
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} key
+         * @param {string} type
+         * @param {ListReplaceItem[]|HashReplaceItem[]|ZSetReplaceItem[]} entries
+         * @param {number[]} [index] indexes for replacement, can improve search efficiency if configured
+         */
+        replaceValueEntries({ server, db, key, type, entries, index }) {
+            const tab = find(this.tabList, { name: server, db, key })
+            if (tab == null) {
+                return
+            }
+
+            switch (type.toLowerCase()) {
+                case 'list': // {index:number, v:string, dv:[string]}[]
+                    tab.value = tab.value || []
+                    for (const entry of entries) {
+                        if (size(tab.value) < entry.index) {
+                            tab.value[entry.index] = entry
+                        } else {
+                            // out of range, append
+                            tab.value.push(entry)
+                            tab.length += 1
+                        }
+                    }
+                    break
+
+                case 'hash':
+                    tab.value = tab.value || []
+                    for (const idx of index) {
+                        const entry = get(tab.value, idx)
+                        if (entry != null) {
+                            /** @type HashReplaceItem[] **/
+                            const replaceEntry = remove(entries, (e) => e.k === entry.k)
+                            if (!isEmpty(replaceEntry)) {
+                                entry.k = replaceEntry[0].nk
+                                entry.v = replaceEntry[0].v
+                                entry.dv = replaceEntry[0].dv
+                            }
+                        }
+                    }
+
+                    // the left entries do not included in index list, try to retrieve the whole list
+                    for (const entry of entries) {
+                        let updated = false
+                        for (const val of tab.value) {
+                            if (val.k === entry.k) {
+                                val.k = entry.nk
+                                val.v = entry.v
+                                val.dv = entry.dv
+                                updated = true
+                                break
+                            }
+                        }
+                        if (!updated) {
+                            // no match element, append
+                            tab.value.push({
+                                k: entry.nk,
+                                v: entry.v,
+                                dv: entry.dv,
+                            })
+                            tab.length += 1
+                        }
+                    }
+                    break
+
+                case 'zset':
+                    tab.value = tab.value || []
+                    for (const entry of entries) {
+                        let updated = false
+                        for (const val of tab.value) {
+                            if (val.v === entry.v) {
+                                val.s = entry.s
+                                val.v = entry.nv
+                                val.dv = entry.dv
+                                updated = true
+                                break
+                            }
+                        }
+                        if (!updated) {
+                            // no match element, append
+                            tab.value.push({
+                                s: entry.s,
+                                v: entry.nv,
+                                dv: entry.dv,
+                            })
+                            tab.length += 1
+                        }
+                    }
+                    break
             }
         },
 
@@ -460,12 +461,8 @@ const useTabStore = defineStore('tab', {
 
                 case 'hash': // string[]
                     tab.value = tab.value || {}
-                    for (const k of entries) {
-                        if (tab.value.hasOwnProperty(k)) {
-                            delete tab.value[k]
-                            tab.length -= 1
-                        }
-                    }
+                    const removedElems = remove(tab.value, (e) => includes(entries, e.k))
+                    tab.length -= size(removedElems)
                     break
 
                 case 'set': // []string

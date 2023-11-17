@@ -6,6 +6,7 @@ import {
     isEmpty,
     join,
     last,
+    map,
     remove,
     set,
     size,
@@ -1010,7 +1011,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} [value]
          * @param {string} [decode]
          * @param {string} [format]
+         * @param {string} [retDecode]
+         * @param {string} [retFormat]
          * @param {boolean} [refresh]
+         * @param {number} [index] index for retrieve affect entries quickly
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
         async setHash({
@@ -1022,7 +1026,9 @@ const useBrowserStore = defineStore('browser', {
             value = '',
             decode = decodeTypes.NONE,
             format = formatTypes.RAW,
-            refresh,
+            retDecode,
+            retFormat,
+            index,
         }) {
             try {
                 const { data, success, msg } = await SetHashValue({
@@ -1036,15 +1042,30 @@ const useBrowserStore = defineStore('browser', {
                     format,
                 })
                 if (success) {
-                    const { updated = {}, removed = [], replaced = {} } = data
-                    if (refresh === true) {
-                        const tab = useTabStore()
-                        if (!isEmpty(removed)) {
-                            tab.removeValueEntries({ server, db, key, type: 'hash', entries: removed })
-                        }
-                        if (!isEmpty(updated)) {
-                            tab.upsertValueEntries({ server, db, key, type: 'hash', entries: updated })
-                        }
+                    /**
+                     * @type {{updated: HashEntryItem[], removed: HashEntryItem[], updated: HashEntryItem[], replaced: HashReplaceItem[]}}
+                     */
+                    const { updated = [], removed = [], added = [], replaced = [] } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removedKeys = map(removed, (e) => e.k)
+                        tab.removeValueEntries({ server, db, key, type: 'hash', entries: removedKeys })
+                    }
+                    if (!isEmpty(updated)) {
+                        tab.updateValueEntries({ server, db, key, type: 'hash', entries: updated })
+                    }
+                    if (!isEmpty(added)) {
+                        tab.insertValueEntries({ server, db, key, type: 'hash', entries: added })
+                    }
+                    if (!isEmpty(replaced)) {
+                        tab.replaceValueEntries({
+                            server,
+                            db,
+                            key,
+                            type: 'hash',
+                            entries: replaced,
+                            index: [index],
+                        })
                     }
                     return { success, updated }
                 } else {
@@ -1071,7 +1092,7 @@ const useBrowserStore = defineStore('browser', {
                     const { updated = [], added = [] } = data
                     const tab = useTabStore()
                     if (!isEmpty(updated)) {
-                        tab.replaceValueEntries({ server, db, key, type: 'hash', entries: updated })
+                        tab.updateValueEntries({ server, db, key, type: 'hash', entries: updated })
                     }
                     if (!isEmpty(added)) {
                         tab.insertValueEntries({ server, db, key, type: 'hash', entries: added })
@@ -1360,7 +1381,7 @@ const useBrowserStore = defineStore('browser', {
                         tab.insertValueEntries({ server, db, key, type: 'zset', entries: added })
                     }
                     if (!isEmpty(updated)) {
-                        tab.replaceValueEntries({ server, db, key, type: 'zset', entries: updated })
+                        tab.updateValueEntries({ server, db, key, type: 'zset', entries: updated })
                     }
                     return { success }
                 } else {
