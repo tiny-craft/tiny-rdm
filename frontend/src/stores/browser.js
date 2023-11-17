@@ -1601,8 +1601,8 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { data = {}, success, msg } = await RemoveStreamValues(connName, db, key, ids)
                 if (success) {
-                    // const tab = useTabStore()
-                    // tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
+                    const tab = useTabStore()
+                    tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
                     return { success }
                 } else {
                     return { success, msg }

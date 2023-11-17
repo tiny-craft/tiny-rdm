@@ -1673,8 +1673,10 @@ func (b *browserService) RemoveStreamValues(connName string, db int, k any, IDs 
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"affected": affected,
+	resp.Data = struct {
+		Affected int64 `json:"affected"`
+	}{
+		Affected: affected,
 	}
 	return
 }

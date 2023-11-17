@@ -1,4 +1,4 @@
-import { assign, find, findIndex, get, includes, isEmpty, pullAt, remove, set, size } from 'lodash'
+import { assign, find, findIndex, get, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 
 const useTabStore = defineStore('tab', {
@@ -478,23 +478,42 @@ const useTabStore = defineStore('tab', {
 
                 case 'hash': // string[]
                     tab.value = tab.value || {}
-                    const removedElems = remove(tab.value, ({ k }) => includes(entries, k))
-                    tab.length -= size(removedElems)
+                    for (const k of entries) {
+                        for (let i = 0; i < tab.value.length; i++) {
+                            if (tab.value[i].k === k) {
+                                tab.value.splice(i, 1)
+                                tab.length -= 1
+                                break
+                            }
+                        }
+                    }
                     break
 
-                case 'set': // []string
-                    tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
-                    break
-
+                case 'set': // string[]
                 case 'zset': // string[]
                     tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
+                    for (const v of entries) {
+                        for (let i = 0; i < tab.value.length; i++) {
+                            if (tab.value[i].v === v) {
+                                tab.value.splice(i, 1)
+                                tab.length -= 1
+                                break
+                            }
+                        }
+                    }
                     break
 
                 case 'stream': // string[]
                     tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
+                    for (const id of entries) {
+                        for (let i = 0; i < tab.value.length; i++) {
+                            if (tab.value[i].id === id) {
+                                tab.value.splice(i, 1)
+                                tab.length -= 1
+                                break
+                            }
+                        }
+                    }
                     break
             }
         },
