@@ -389,14 +389,14 @@ defineExpose({
         <div id="content-table" class="value-wrapper value-item-part flex-box-h flex-item-expand">
             <!-- table -->
             <n-data-table
-                ref="tableRef"
                 v-show="!inFullEdit"
-                :row-key="(row) => row.k"
+                ref="tableRef"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="props.value"
                 :loading="props.loading"
+                :row-key="(row) => row.k"
                 :row-props="rowProps"
                 :single-column="true"
                 :single-line="false"

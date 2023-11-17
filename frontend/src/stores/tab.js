@@ -403,8 +403,22 @@ const useTabStore = defineStore('tab', {
                     }
                     break
 
-                case 'zset':
+                case 'zset': // ZSetReplaceItem[]
                     tab.value = tab.value || []
+                    for (const idx of index) {
+                        const entry = get(tab.value, idx)
+                        if (entry != null) {
+                            /** @type ZSetReplaceItem[] **/
+                            const replaceEntry = remove(entries, ({ v }) => v === entry.k)
+                            if (!isEmpty(replaceEntry)) {
+                                entry.s = replaceEntry[0].s
+                                entry.v = replaceEntry[0].nv
+                                entry.dv = replaceEntry[0].dv
+                            }
+                        }
+                    }
+
+                    // the left entries do not included in index list, try to retrieve the whole list
                     for (const entry of entries) {
                         let updated = false
                         for (const val of tab.value) {
@@ -464,23 +478,23 @@ const useTabStore = defineStore('tab', {
 
                 case 'hash': // string[]
                     tab.value = tab.value || {}
-                    const removedElems = remove(tab.value, (e) => includes(entries, e.k))
+                    const removedElems = remove(tab.value, ({ k }) => includes(entries, k))
                     tab.length -= size(removedElems)
                     break
 
                 case 'set': // []string
                     tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v) >= 0))
+                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
                     break
 
                 case 'zset': // string[]
                     tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v.value) >= 0))
+                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
                     break
 
                 case 'stream': // string[]
                     tab.value = tab.value || []
-                    tab.length -= size(remove(tab.value, (v) => entries.indexOf(v.id) >= 0))
+                    tab.length -= size(remove(tab.value, ({ v }) => includes(entries, v)))
                     break
             }
         },

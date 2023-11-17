@@ -237,12 +237,12 @@ defineExpose({
         </div>
         <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
             <n-data-table
-                :row-key="(row) => row.id"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="props.value"
                 :loading="props.loading"
+                :row-key="(row) => row.id"
                 :single-column="true"
                 :single-line="false"
                 class="flex-item-expand"

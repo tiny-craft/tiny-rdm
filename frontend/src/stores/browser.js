@@ -1040,6 +1040,8 @@ const useBrowserStore = defineStore('browser', {
                     value,
                     decode,
                     format,
+                    retDecode,
+                    retFormat,
                 })
                 if (success) {
                     /**
@@ -1048,7 +1050,7 @@ const useBrowserStore = defineStore('browser', {
                     const { updated = [], removed = [], added = [], replaced = [] } = data
                     const tab = useTabStore()
                     if (!isEmpty(removed)) {
-                        const removedKeys = map(removed, (e) => e.k)
+                        const removedKeys = map(removed, 'k')
                         tab.removeValueEntries({ server, db, key, type: 'hash', entries: removedKeys })
                     }
                     if (!isEmpty(updated)) {
@@ -1353,20 +1355,48 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {string|number[]} value
          * @param {string|number[]} newValue
-         * @param {string} [decode]
-         * @param {string} [format]
-         * @returns {Promise<{[msg]: string, success: boolean, [added]: string|number[]}>}
+         * @param {decodeTypes} [decode]
+         * @param {formatTypes} [format]
+         * @param {decodeTypes} [retDecode]
+         * @param {formatTypes} [retFormat]
+         * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async updateSetItem({ server, db, key, value, newValue, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
+        async updateSetItem({
+            server,
+            db,
+            key,
+            value,
+            newValue,
+            decode = decodeTypes.NONE,
+            format = formatTypes.RAW,
+            retDecode,
+            retFormat,
+        }) {
             try {
-                const { data, success, msg } = await UpdateSetItem({ server, db, key, value, newValue, decode, format })
+                const { data, success, msg } = await UpdateSetItem({
+                    server,
+                    db,
+                    key,
+                    value,
+                    newValue,
+                    decode,
+                    format,
+                    retDecode,
+                    retFormat,
+                })
                 if (success) {
-                    const { added } = data
-                    // const tab = useTabStore()
-                    // tab.upsertValueEntries({ server, db, key, type: 'set', entries: { [value]: newValue } })
-                    return { success: true, added }
+                    const { added, removed } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removedValues = map(removed, 'v')
+                        tab.removeValueEntries({ server, db, key, type: 'set', entries: removedValues })
+                    }
+                    if (!isEmpty(added)) {
+                        tab.insertValueEntries({ server, db, key, type: 'set', entries: added })
+                    }
+                    return { success }
                 } else {
-                    return { success, msg }
+                    return { success: false, msg }
                 }
             } catch (e) {
                 return { success: false, msg: e.message }
@@ -1383,10 +1413,14 @@ const useBrowserStore = defineStore('browser', {
          */
         async removeSetItem(server, db, key, value) {
             try {
-                const { success, msg } = await SetSetItem(server, db, key, true, [value])
+                const { data, success, msg } = await SetSetItem(server, db, key, true, [value])
                 if (success) {
-                    // const tab = useTabStore()
-                    // tab.removeValueEntries({ server: connName, db, key, type: 'set', entries: [value] })
+                    const { removed } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removedValues = map(removed, 'v')
+                        tab.removeValueEntries({ server, db, key, type: 'set', entries: removedValues })
+                    }
                     return { success }
                 } else {
                     return { success, msg }
@@ -1436,7 +1470,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} score
          * @param {decodeTypes} decode
          * @param {formatTypes} format
-         * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}, [removed]: []}>}
+         * @param {decodeTypes} [retDecode]
+         * @param {formatTypes} [retFormat]
+         * @param {number} [index] index for retrieve affect entries quickly
+         * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async updateZSetItem({
             server,
@@ -1447,6 +1484,9 @@ const useBrowserStore = defineStore('browser', {
             score,
             decode = decodeTypes.NONE,
             format = formatTypes.RAW,
+            retDecode,
+            retFormat,
+            index,
         }) {
             try {
                 const { data, success, msg } = await UpdateZSetValue({
@@ -1458,16 +1498,25 @@ const useBrowserStore = defineStore('browser', {
                     score,
                     decode,
                     format,
+                    retDecode,
+                    retFormat,
                 })
                 if (success) {
-                    const { updated, removed } = data
-                    // const tab = useTabStore()
-                    // if (!isEmpty(updated)) {
-                    //     tab.upsertValueEntries({ server, db, key, type: 'zset', entries: updated })
-                    // }
-                    // if (!isEmpty(removed)) {
-                    //     tab.removeValueEntries({ server, db, key, type: 'zset', entries: removed })
-                    // }
+                    const { updated = [], added = [], removed = [], replaced = [] } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removedValues = map(removed, 'v')
+                        tab.removeValueEntries({ server, db, key, type: 'zset', entries: removedValues })
+                    }
+                    if (!isEmpty(updated)) {
+                        tab.updateValueEntries({ server, db, key, type: 'zset', entries: updated })
+                    }
+                    if (!isEmpty(added)) {
+                        tab.insertValueEntries({ server, db, key, type: 'zset', entries: added })
+                    }
+                    if (!isEmpty(replaced)) {
+                        tab.replaceValueEntries({ server, db, key, type: 'zset', entries: replaced, index: [index] })
+                    }
                     return { success, updated, removed }
                 } else {
                     return { success, msg }
@@ -1490,10 +1539,11 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await UpdateZSetValue({ server, db, key, value, newValue: '', score: 0 })
                 if (success) {
                     const { removed } = data
-                    // if (!isEmpty(removed)) {
-                    //     const tab = useTabStore()
-                    //     tab.removeValueEntries({ server: server, db, key, type: 'zset', entries: removed })
-                    // }
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removeValues = map(removed, 'v')
+                        tab.removeValueEntries({ server, db, key, type: 'zset', entries: removeValues })
+                    }
                     return { success, removed }
                 } else {
                     return { success, msg }

@@ -1132,9 +1132,10 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 			resp.Msg = err.Error()
 			return
 		}
+
 		affect, err = client.HSet(ctx, key, param.NewField, saveStr).Result()
 		if affect <= 0 {
-			// no new filed added, just replace exists item
+			// no new filed added, just update exists item
 			removed = append(removed, types.HashEntryItem{
 				Key: param.Field,
 			})
@@ -1404,9 +1405,15 @@ func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSRe
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
+	var added, removed []types.SetEntryItem
+	var affect int64
 	// remove old value
 	str := strutil.DecodeRedisKey(param.Value)
-	_, _ = client.SRem(ctx, key, str).Result()
+	if affect, _ = client.SRem(ctx, key, str).Result(); affect > 0 {
+		removed = append(removed, types.SetEntryItem{
+			Value: str,
+		})
+	}
 
 	// insert new value
 	str = strutil.DecodeRedisKey(param.NewValue)
@@ -1415,15 +1422,29 @@ func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSRe
 		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
-	_, err = client.SAdd(ctx, key, saveStr).Result()
+	if affect, _ = client.SAdd(ctx, key, saveStr).Result(); affect > 0 {
+		// add new item
+		var displayStr string
+		if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
+			displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+		}
+		added = append(added, types.SetEntryItem{
+			Value:        saveStr,
+			DisplayValue: displayStr,
+		})
+	}
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"added": saveStr,
+	resp.Data = struct {
+		Added   []types.SetEntryItem `json:"added,omitempty"`
+		Removed []types.SetEntryItem `json:"removed,omitempty"`
+	}{
+		Added:   added,
+		Removed: removed,
 	}
 	return
 }
@@ -1439,13 +1460,16 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
 	val, newVal := strutil.DecodeRedisKey(param.Value), strutil.DecodeRedisKey(param.NewValue)
-	updated := map[string]float64{}
-	var removed []string
+	var added, updated, removed []types.ZSetEntryItem
+	var replaced []types.ZSetReplaceItem
+	var affect int64
 	if len(newVal) <= 0 {
 		// no new value, delete value
-		_, err = client.ZRem(ctx, key, val).Result()
-		if err == nil {
-			removed = append(removed, val)
+		if affect, err = client.ZRem(ctx, key, val).Result(); affect > 0 {
+			//removed = append(removed, val)
+			removed = append(removed, types.ZSetEntryItem{
+				Value: val,
+			})
 		}
 	} else {
 		var saveVal string
@@ -1455,27 +1479,57 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 		}
 
 		if saveVal == val {
-			// update score only
-			_, err = client.ZAdd(ctx, key, redis.Z{
+			affect, err = client.ZAdd(ctx, key, redis.Z{
 				Score:  param.Score,
 				Member: saveVal,
 			}).Result()
-			if err == nil {
-				updated[saveVal] = param.Score
+			displayValue, _, _ := strutil.ConvertTo(val, param.RetDecode, param.RetFormat)
+			if affect > 0 {
+				// add new item
+				added = append(added, types.ZSetEntryItem{
+					Score:        param.Score,
+					Value:        val,
+					DisplayValue: displayValue,
+				})
+			} else {
+				// update score only
+				updated = append(updated, types.ZSetEntryItem{
+					Score:        param.Score,
+					Value:        val,
+					DisplayValue: displayValue,
+				})
 			}
 		} else {
 			// remove old value and add new one
 			_, err = client.ZRem(ctx, key, val).Result()
-			if err == nil {
-				removed = append(removed, val)
+			if err != nil {
+				resp.Msg = err.Error()
+				return
 			}
 
-			_, err = client.ZAdd(ctx, key, redis.Z{
+			affect, err = client.ZAdd(ctx, key, redis.Z{
 				Score:  param.Score,
 				Member: saveVal,
 			}).Result()
-			if err == nil {
-				updated[saveVal] = param.Score
+			displayValue, _, _ := strutil.ConvertTo(saveVal, param.RetDecode, param.RetFormat)
+			if affect <= 0 {
+				// no new value added, just update exists item
+				removed = append(removed, types.ZSetEntryItem{
+					Value: val,
+				})
+				updated = append(updated, types.ZSetEntryItem{
+					Score:        param.Score,
+					Value:        saveVal,
+					DisplayValue: displayValue,
+				})
+			} else {
+				// add new field
+				replaced = append(replaced, types.ZSetReplaceItem{
+					Score:        param.Score,
+					Value:        val,
+					NewValue:     saveVal,
+					DisplayValue: displayValue,
+				})
 			}
 		}
 	}
@@ -1485,9 +1539,16 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"updated": updated,
-		"removed": removed,
+	resp.Data = struct {
+		Added    []types.ZSetEntryItem   `json:"added,omitempty"`
+		Updated  []types.ZSetEntryItem   `json:"updated,omitempty"`
+		Replaced []types.ZSetReplaceItem `json:"replaced,omitempty"`
+		Removed  []types.ZSetEntryItem   `json:"removed,omitempty"`
+	}{
+		Added:    added,
+		Updated:  updated,
+		Replaced: replaced,
+		Removed:  removed,
 	}
 	return
 }

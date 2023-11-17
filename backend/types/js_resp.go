@@ -75,22 +75,26 @@ type SetHashParam struct {
 }
 
 type SetSetParam struct {
-	Server   string `json:"server"`
-	DB       int    `json:"db"`
-	Key      any    `json:"key"`
-	Value    any    `json:"value"`
-	NewValue any    `json:"newValue"`
-	Format   string `json:"format,omitempty"`
-	Decode   string `json:"decode,omitempty"`
+	Server    string `json:"server"`
+	DB        int    `json:"db"`
+	Key       any    `json:"key"`
+	Value     any    `json:"value"`
+	NewValue  any    `json:"newValue"`
+	Format    string `json:"format,omitempty"`
+	Decode    string `json:"decode,omitempty"`
+	RetFormat string `json:"retFormat,omitempty"`
+	RetDecode string `json:"retDecode,omitempty"`
 }
 
 type SetZSetParam struct {
-	Server   string  `json:"server"`
-	DB       int     `json:"db"`
-	Key      any     `json:"key"`
-	Value    any     `json:"value"`
-	NewValue any     `json:"newValue"`
-	Score    float64 `json:"score"`
-	Format   string  `json:"format,omitempty"`
-	Decode   string  `json:"decode,omitempty"`
+	Server    string  `json:"server"`
+	DB        int     `json:"db"`
+	Key       any     `json:"key"`
+	Value     any     `json:"value"`
+	NewValue  any     `json:"newValue"`
+	Score     float64 `json:"score"`
+	Format    string  `json:"format,omitempty"`
+	Decode    string  `json:"decode,omitempty"`
+	RetFormat string  `json:"retFormat,omitempty"`
+	RetDecode string  `json:"retDecode,omitempty"`
 }

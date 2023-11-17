@@ -160,11 +160,11 @@ const onSave = () => {
                 <div class="editor-content-item flex-box-v flex-item-expand">
                     <div class="editor-content-item-label">{{ props.valueLabel }}</div>
                     <n-input
+                        :resizable="false"
                         :value="displayValue"
                         autofocus
                         class="flex-item-expand"
                         type="textarea"
-                        :resizable="false"
                         @update:value="onUpdateValue" />
                     <format-selector
                         :decode="viewAs.decode"

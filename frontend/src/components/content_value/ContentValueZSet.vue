@@ -6,7 +6,7 @@ import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
-import { head, isEmpty, keys, size } from 'lodash'
+import { isEmpty, size } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
@@ -183,7 +183,7 @@ const saveEdit = async (field, value, decode, format) => {
             throw new Error('row not exists')
         }
 
-        const { updated, success, msg } = await browserStore.updateZSetItem({
+        const { success, msg } = await browserStore.updateZSetItem({
             server: props.name,
             db: props.db,
             key: keyName.value,
@@ -194,14 +194,6 @@ const saveEdit = async (field, value, decode, format) => {
             format,
         })
         if (success) {
-            row.v = head(keys(updated))
-            row.s = updated[row.v]
-            const { value: displayVal } = await browserStore.convertValue({
-                value: row.v,
-                decode: props.decode,
-                format: props.format,
-            })
-            row.dv = displayVal
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -240,7 +232,7 @@ const actionColumn = {
                         row.v,
                     )
                     if (success) {
-                        props.value.splice(index, 1)
+                        // props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
                     } else {
                         $message.error(msg)
@@ -416,12 +408,12 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 v-show="!inFullEdit"
-                :row-key="(row) => row.v"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="props.value"
                 :loading="props.loading"
+                :row-key="(row) => row.v"
                 :single-column="true"
                 :single-line="false"
                 class="flex-item-expand"

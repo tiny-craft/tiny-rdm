@@ -129,7 +129,7 @@ const saveEdit = async (pos, value, decode, format) => {
             throw new Error('row not exists')
         }
 
-        const { added, success, msg } = await browserStore.updateSetItem({
+        const { success, msg } = await browserStore.updateSetItem({
             server: props.name,
             db: props.db,
             key: keyName.value,
@@ -137,15 +137,10 @@ const saveEdit = async (pos, value, decode, format) => {
             newValue: value,
             decode,
             format,
+            retDecode: props.decode,
+            retFormat: props.format,
         })
         if (success) {
-            row.v = added
-            const { value: displayVal } = await browserStore.convertValue({
-                value: row.v,
-                decode: props.decode,
-                format: props.format,
-            })
-            row.dv = displayVal
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -183,7 +178,7 @@ const actionColumn = {
                         row.v,
                     )
                     if (success) {
-                        props.value.splice(index, 1)
+                        // props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
                     } else {
                         $message.error(msg)
@@ -331,12 +326,12 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 v-show="!inFullEdit"
-                :row-key="(row) => row.v"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="props.value"
                 :loading="props.loading"
+                :row-key="(row) => row.v"
                 :row-props="rowProps"
                 :single-column="true"
                 :single-line="false"
