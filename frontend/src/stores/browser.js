@@ -1009,10 +1009,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} field
          * @param {string} [newField]
          * @param {string} [value]
-         * @param {string} [decode]
-         * @param {string} [format]
-         * @param {string} [retDecode]
-         * @param {string} [retFormat]
+         * @param {decodeTypes} [decode]
+         * @param {formatTypes} [format]
+         * @param {decodeTypes} [retDecode]
+         * @param {formatTypes} [retFormat]
          * @param {boolean} [refresh]
          * @param {number} [index] index for retrieve affect entries quickly
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
@@ -1225,24 +1225,57 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} value
          * @param {decodeTypes} decode
          * @param {formatTypes} format
-         * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
+         * @param {decodeTypes} [retDecode]
+         * @param {formatTypes} [retFormat]
+         * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async updateListItem({ server, db, key, index, value, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
+        async updateListItem({
+            server,
+            db,
+            key,
+            index,
+            value,
+            decode = decodeTypes.NONE,
+            format = formatTypes.RAW,
+            retDecode,
+            retFormat,
+        }) {
             try {
-                const { data, success, msg } = await SetListItem({ server, db, key, index, value, decode, format })
+                const { data, success, msg } = await SetListItem({
+                    server,
+                    db,
+                    key,
+                    index,
+                    value,
+                    decode,
+                    format,
+                    retDecode,
+                    retFormat,
+                })
                 if (success) {
-                    const { updated = {} } = data
-                    // if (!isEmpty(updated)) {
-                    //     const tab = useTabStore()
-                    //     tab.upsertValueEntries({
-                    //         server,
-                    //         db,
-                    //         key,
-                    //         type: 'list',
-                    //         entries: updated,
-                    //     })
-                    // }
-                    return { success, updated }
+                    /** @type {{replaced: ListReplaceItem[]}} **/
+                    const { replaced = [], removed = [] } = data
+                    const tab = useTabStore()
+                    if (!isEmpty(replaced)) {
+                        tab.replaceValueEntries({
+                            server,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: replaced,
+                        })
+                    }
+                    if (!isEmpty(removed)) {
+                        const removedIndex = map(removed, 'index')
+                        tab.removeValueEntries({
+                            server,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: removedIndex,
+                        })
+                    }
+                    return { success }
                 } else {
                     return { success, msg }
                 }
@@ -1264,16 +1297,17 @@ const useBrowserStore = defineStore('browser', {
                 const { data, success, msg } = await SetListItem({ server, db, key, index })
                 if (success) {
                     const { removed = [] } = data
-                    // if (!isEmpty(removed)) {
-                    //     const tab = useTabStore()
-                    //     tab.removeValueEntries({
-                    //         server,
-                    //         db,
-                    //         key,
-                    //         type: 'list',
-                    //         entries: removed,
-                    //     })
-                    // }
+                    const tab = useTabStore()
+                    if (!isEmpty(removed)) {
+                        const removedIndexes = map(removed, 'index')
+                        tab.removeValueEntries({
+                            server,
+                            db,
+                            key,
+                            type: 'list',
+                            entries: removedIndexes,
+                        })
+                    }
                     return { success, removed }
                 } else {
                     return { success, msg }

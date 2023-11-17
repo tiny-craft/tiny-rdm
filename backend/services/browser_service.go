@@ -1097,7 +1097,9 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
-	displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+	if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
+		displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+	}
 	var updated, added, removed []types.HashEntryItem
 	var replaced []types.HashReplaceItem
 	var affect int64
@@ -1293,8 +1295,7 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
 	str := strutil.DecodeRedisKey(param.Value)
-	var removed []int64
-	updated := map[int64]string{}
+	var replaced, removed []types.ListReplaceItem
 	if len(str) <= 0 {
 		// remove from list
 		err = client.LSet(ctx, key, param.Index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
@@ -1308,7 +1309,9 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 			resp.Msg = err.Error()
 			return
 		}
-		removed = append(removed, param.Index)
+		removed = append(removed, types.ListReplaceItem{
+			Index: param.Index,
+		})
 	} else {
 		// replace index value
 		var saveStr string
@@ -1321,13 +1324,24 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 			resp.Msg = err.Error()
 			return
 		}
-		updated[param.Index] = saveStr
+		var displayStr string
+		if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
+			displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+		}
+		replaced = append(replaced, types.ListReplaceItem{
+			Index:        param.Index,
+			Value:        saveStr,
+			DisplayValue: displayStr,
+		})
 	}
 
 	resp.Success = true
-	resp.Data = map[string]any{
-		"removed": removed,
-		"updated": updated,
+	resp.Data = struct {
+		Removed  []types.ListReplaceItem `json:"removed,omitempty"`
+		Replaced []types.ListReplaceItem `json:"replaced,omitempty"`
+	}{
+		Removed:  removed,
+		Replaced: replaced,
 	}
 	return
 }

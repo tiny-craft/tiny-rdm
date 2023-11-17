@@ -50,13 +50,15 @@ type SetKeyParam struct {
 }
 
 type SetListParam struct {
-	Server string `json:"server"`
-	DB     int    `json:"db"`
-	Key    any    `json:"key"`
-	Index  int64  `json:"index"`
-	Value  any    `json:"value"`
-	Format string `json:"format,omitempty"`
-	Decode string `json:"decode,omitempty"`
+	Server    string `json:"server"`
+	DB        int    `json:"db"`
+	Key       any    `json:"key"`
+	Index     int64  `json:"index"`
+	Value     any    `json:"value"`
+	Format    string `json:"format,omitempty"`
+	Decode    string `json:"decode,omitempty"`
+	RetFormat string `json:"retFormat,omitempty"`
+	RetDecode string `json:"retDecode,omitempty"`
 }
 
 type SetHashParam struct {

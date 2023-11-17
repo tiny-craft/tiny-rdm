@@ -7,7 +7,7 @@ type ListEntryItem struct {
 
 type ListReplaceItem struct {
 	Index        int64  `json:"index"`
-	Value        any    `json:"v"`
+	Value        any    `json:"v,omitempty"`
 	DisplayValue string `json:"dv,omitempty"`
 }
 

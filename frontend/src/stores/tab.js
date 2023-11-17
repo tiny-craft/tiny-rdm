@@ -276,7 +276,7 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * replace entries
+         * update entries' value
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
@@ -333,7 +333,7 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * replace entry item key or field in value
+         * replace entry item key or field in value(modify the index key)
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
@@ -348,11 +348,14 @@ const useTabStore = defineStore('tab', {
             }
 
             switch (type.toLowerCase()) {
-                case 'list': // {index:number, v:string, dv:[string]}[]
+                case 'list': // ListReplaceItem[]
                     tab.value = tab.value || []
                     for (const entry of entries) {
-                        if (size(tab.value) < entry.index) {
-                            tab.value[entry.index] = entry
+                        if (size(tab.value) > entry.index) {
+                            tab.value[entry.index] = {
+                                v: entry.v,
+                                dv: entry.dv,
+                            }
                         } else {
                             // out of range, append
                             tab.value.push(entry)
@@ -361,7 +364,7 @@ const useTabStore = defineStore('tab', {
                     }
                     break
 
-                case 'hash':
+                case 'hash': // HashReplaceItem[]
                     tab.value = tab.value || []
                     for (const idx of index) {
                         const entry = get(tab.value, idx)
@@ -445,7 +448,7 @@ const useTabStore = defineStore('tab', {
                 case 'list': // string[] | number[]
                     tab.value = tab.value || []
                     if (typeof entries[0] === 'number') {
-                        // remove by index、
+                        // remove by index, sort by desc first
                         entries.sort((a, b) => b - a)
                         const removed = pullAt(tab.value, ...entries)
                         tab.length -= size(removed)

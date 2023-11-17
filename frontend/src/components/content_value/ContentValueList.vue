@@ -130,7 +130,7 @@ const saveEdit = async (pos, value, decode, format) => {
             throw new Error('row not exists')
         }
 
-        const { updated, success, msg } = await browserStore.updateListItem({
+        const { success, msg } = await browserStore.updateListItem({
             server: props.name,
             db: props.db,
             key: keyName.value,
@@ -140,13 +140,6 @@ const saveEdit = async (pos, value, decode, format) => {
             format,
         })
         if (success) {
-            row.v = updated[index] || ''
-            const { value: displayVal } = await browserStore.convertValue({
-                value: row.v,
-                decode: props.decode,
-                format: props.format,
-            })
-            row.dv = displayVal
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -332,12 +325,12 @@ defineExpose({
             <!-- table -->
             <n-data-table
                 v-show="!inFullEdit"
-                :row-key="(row) => row.no"
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
                 :data="props.value"
                 :loading="props.loading"
+                :row-key="(row) => row.no"
                 :row-props="rowProps"
                 :single-column="true"
                 :single-line="false"
