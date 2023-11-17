@@ -89,9 +89,6 @@ const inEdit = computed(() => {
     return currentEditRow.no > 0
 })
 const fullEdit = ref(false)
-const inFullEdit = computed(() => {
-    return inEdit.value && fullEdit.value
-})
 
 const tableRef = ref(null)
 const fieldFilterOption = ref(null)
@@ -337,7 +334,6 @@ defineExpose({
 <template>
     <div class="content-wrapper flex-box-v">
         <content-toolbar
-            v-show="!inFullEdit"
             :db="props.db"
             :key-code="props.keyCode"
             :key-path="props.keyPath"
@@ -349,7 +345,7 @@ defineExpose({
             @delete="emit('delete')"
             @reload="emit('reload')"
             @rename="emit('rename')" />
-        <div v-show="!inFullEdit" class="tb2 value-item-part flex-box-h">
+        <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <n-input-group>
                     <n-select
@@ -393,7 +389,6 @@ defineExpose({
         <div id="content-table" class="value-wrapper value-item-part flex-box-h flex-item-expand">
             <!-- table -->
             <n-data-table
-                v-show="!inFullEdit"
                 ref="tableRef"
                 :bordered="false"
                 :bottom-bordered="false"
@@ -412,19 +407,24 @@ defineExpose({
                 @update:filters="onUpdateFilter" />
 
             <!-- edit pane -->
-            <content-entry-editor
+            <div
                 v-show="inEdit"
-                v-model:fullscreen="fullEdit"
-                :decode="currentEditRow.decode"
-                :field="currentEditRow.key"
-                :field-label="$t('common.field')"
-                :format="currentEditRow.format"
-                :value="currentEditRow.value"
-                :value-label="$t('common.value')"
-                class="flex-item-expand"
-                style="width: 100%"
-                @close="resetEdit"
-                @save="saveEdit" />
+                :style="{ position: fullEdit ? 'static' : 'relative' }"
+                class="entry-editor-container flex-item-expand"
+                style="width: 100%">
+                <content-entry-editor
+                    v-model:fullscreen="fullEdit"
+                    :decode="currentEditRow.decode"
+                    :field="currentEditRow.key"
+                    :field-label="$t('common.field')"
+                    :format="currentEditRow.format"
+                    :value="currentEditRow.value"
+                    :value-label="$t('common.value')"
+                    class="flex-item-expand"
+                    style="width: 100%"
+                    @close="resetEdit"
+                    @save="saveEdit" />
+            </div>
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>

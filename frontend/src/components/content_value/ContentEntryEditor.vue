@@ -218,11 +218,18 @@ const onSave = () => {
 <style lang="scss" scoped>
 .entry-editor {
     padding-left: 2px;
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
 
     .editor-content {
         &-item {
             &:not(:last-child) {
-                margin-bottom: 18px;
+                margin-bottom: 16px;
             }
 
             &-label {
