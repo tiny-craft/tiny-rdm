@@ -64,7 +64,14 @@ const keyName = computed(() => {
     return !isEmpty(data.value.keyCode) ? data.value.keyCode : data.value.keyPath
 })
 
-const loadData = async (reset, full) => {
+/**
+ *
+ * @param {boolean} reset
+ * @param {boolean} [full]
+ * @param {string} [selMatch]
+ * @return {Promise<void>}
+ */
+const loadData = async (reset, full, selMatch) => {
     try {
         if (!!props.blank) {
             return
@@ -75,7 +82,7 @@ const loadData = async (reset, full) => {
             server: name,
             db: db,
             key: keyName.value,
-            matchPattern: matchPattern,
+            matchPattern: selMatch === undefined ? matchPattern : selMatch,
             decode: reset ? decodeTypes.NONE : decode,
             format: reset ? formatTypes.RAW : format,
             reset,
@@ -133,6 +140,10 @@ const onLoadAll = () => {
     loadData(false, true)
 }
 
+const onMatch = (match) => {
+    loadData(true, false, match || '')
+}
+
 const contentRef = ref(null)
 const initContent = async () => {
     // onReload()
@@ -141,7 +152,7 @@ const initContent = async () => {
         if (contentRef.value?.reset != null) {
             contentRef.value?.reset()
         }
-        await loadData(true, false)
+        await loadData(true, false, '')
         if (contentRef.value?.beforeShow != null) {
             await contentRef.value?.beforeShow()
         }
@@ -185,6 +196,7 @@ watch(() => data.value?.keyPath, initContent)
         @delete="onDelete"
         @loadall="onLoadAll"
         @loadmore="onLoadMore"
+        @match="onMatch"
         @reload="onReload"
         @rename="onRename" />
     <!--    </keep-alive>-->

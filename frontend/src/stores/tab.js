@@ -21,6 +21,7 @@ const useTabStore = defineStore('tab', {
      * @property {int} [ttl] ttl of current key
      * @param {string} [decode]
      * @param {string} [format]
+     * @param {string} [matchPattern]
      * @param {boolean} [end]
      * @param {boolean} [loading]
      */
@@ -159,9 +160,10 @@ const useTabStore = defineStore('tab', {
          * @param {string} [keyCode]
          * @param {number} [size]
          * @param {number} [length]
+         * @param {string} [matchPattern]
          * @param {*} [value]
          */
-        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length }) {
+        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, matchPattern = '' }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -176,6 +178,7 @@ const useTabStore = defineStore('tab', {
                     keyCode,
                     size,
                     length,
+                    matchPattern,
                     value: undefined,
                 })
                 tabIndex = this.tabList.length - 1
@@ -193,6 +196,7 @@ const useTabStore = defineStore('tab', {
                 tab.keyCode = keyCode
                 tab.size = size
                 tab.length = length
+                tab.matchPattern = matchPattern
                 tab.value = undefined
             }
             this._setActivatedIndex(tabIndex, true, subTab)
@@ -207,29 +211,31 @@ const useTabStore = defineStore('tab', {
          * @param {*} value
          * @param {string} [format]
          * @param {string] [decode]
+         * @param {string} [matchPattern]
          * @param {boolean} reset
          * @param {boolean} [end] keep end status if not set
          */
-        updateValue({ server, db, key, value, format, decode, reset, end }) {
-            const tab = find(this.tabList, { name: server, db, key })
-            if (tab == null) {
+        updateValue({ server, db, key, value, format, decode, matchPattern, reset, end }) {
+            const tabData = find(this.tabList, { name: server, db, key })
+            if (tabData == null) {
                 return
             }
 
-            tab.format = format || tab.format
-            tab.decode = decode || tab.decode
+            tabData.format = format || tabData.format
+            tabData.decode = decode || tabData.decode
+            tabData.matchPattern = matchPattern || ''
             if (typeof end === 'boolean') {
-                tab.end = end
+                tabData.end = end
             }
             if (!reset && typeof value === 'object') {
                 if (value instanceof Array) {
-                    tab.value = tab.value || []
-                    tab.value.push(...value)
+                    tabData.value = tabData.value || []
+                    tabData.value.push(...value)
                 } else {
-                    tab.value = assign(value, tab.value || {})
+                    tabData.value = assign(value, tabData.value || {})
                 }
             } else {
-                tab.value = value
+                tabData.value = value
             }
         },
 

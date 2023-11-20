@@ -35,6 +35,8 @@ type KeyDetail struct {
 	Length int64  `json:"length,omitempty"`
 	Format string `json:"format,omitempty"`
 	Decode string `json:"decode,omitempty"`
+	Match  string `json:"match,omitempty"`
+	Reset  bool   `json:"reset"`
 	End    bool   `json:"end"`
 }
 

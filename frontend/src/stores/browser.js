@@ -429,14 +429,15 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {string} [decode]
          * @param {string} [format]
+         * @param {string} [matchPattern]
          * @return {Promise<void>}
          */
-        async reloadKey({ server, db, key, decode, format }) {
+        async reloadKey({ server, db, key, decode, format, matchPattern }) {
             const tab = useTabStore()
             try {
                 tab.updateLoading({ server, db, loading: true })
                 await this.loadKeySummary({ server, db, key })
-                await this.loadKeyDetail({ server, db, key, decode, format, reset: true })
+                await this.loadKeyDetail({ server, db, key, decode, format, matchPattern, reset: true })
             } finally {
                 tab.updateLoading({ server, db, loading: false })
             }
@@ -470,7 +471,7 @@ const useBrowserStore = defineStore('browser', {
                     lite: true,
                 })
                 if (success) {
-                    const { value, decode: retDecode, format: retFormat, end } = data
+                    const { value, decode: retDecode, format: retFormat, match: retMatch, reset: retReset, end } = data
                     tab.updateValue({
                         server,
                         db,
@@ -478,7 +479,8 @@ const useBrowserStore = defineStore('browser', {
                         value,
                         decode: retDecode,
                         format: retFormat,
-                        reset: reset || full === true,
+                        reset: retReset,
+                        matchPattern: retMatch || '',
                         end,
                     })
                 } else {
