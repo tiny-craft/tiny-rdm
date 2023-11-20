@@ -692,6 +692,12 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "hash":
+		if !strings.HasPrefix(matchPattern, "*") {
+			matchPattern = "*" + matchPattern
+		}
+		if !strings.HasSuffix(matchPattern, "*") {
+			matchPattern = matchPattern + "*"
+		}
 		loadHashHandle := func() ([]types.HashEntryItem, bool, bool, error) {
 			var items []types.HashEntryItem
 			var loadedVal []string
@@ -699,11 +705,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var reset bool
 			var subErr error
 			scanSize := int64(Preferences().GetScanSize())
-			if param.Full {
+			if param.Full || matchPattern != "*" {
 				// load all
 				cursor, reset = 0, true
 				for {
-					loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, "*", scanSize).Result()
+					loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if subErr != nil {
 						return nil, reset, false, subErr
 					}

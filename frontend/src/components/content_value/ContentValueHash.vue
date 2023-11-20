@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -18,6 +18,7 @@ import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vu
 import Edit from '@/components/icons/Edit.vue'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
+import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -52,7 +53,7 @@ const props = defineProps({
     loading: Boolean,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete', 'match'])
 
 /**
  *
@@ -61,18 +62,6 @@ const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
-
-const filterOption = [
-    {
-        value: 1,
-        label: i18n.t('common.field'),
-    },
-    {
-        value: 2,
-        label: i18n.t('common.value'),
-    },
-]
-const filterType = ref(1)
 
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
@@ -114,7 +103,7 @@ const fieldColumn = computed(() => ({
 const displayCode = computed(() => {
     return props.format === formatTypes.JSON
 })
-const valueFilterOption = ref(null)
+// const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
     title: i18n.t('common.value'),
@@ -126,14 +115,14 @@ const valueColumn = computed(() => ({
         : {
               tooltip: true,
           },
-    filterOptionValue: valueFilterOption.value,
+    // filterOptionValue: valueFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
-    filter: (value, row) => {
-        if (row.dv) {
-            return !!~row.dv.indexOf(value.toString())
-        }
-        return !!~row.v.indexOf(value.toString())
-    },
+    // filter: (value, row) => {
+    //     if (row.dv) {
+    //         return !!~row.dv.indexOf(value.toString())
+    //     }
+    //     return !!~row.v.indexOf(value.toString())
+    // },
     render: (row) => {
         if (displayCode.value) {
             return h(NCode, { language: 'json', wordWrap: true, code: row.dv || row.v })
@@ -283,50 +272,28 @@ const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.HASH)
 }
 
-const filterValue = ref('')
 const onFilterInput = (val) => {
-    switch (filterType.value) {
-        case filterOption[0].value:
-            // filter field
-            valueFilterOption.value = null
-            fieldFilterOption.value = val
-            break
-        case filterOption[1].value:
-            // filter value
-            fieldFilterOption.value = null
-            valueFilterOption.value = val
-            break
-    }
+    fieldFilterOption.value = val
 }
 
-const onChangeFilterType = (type) => {
-    onFilterInput(filterValue.value)
-}
-
-const clearFilter = () => {
-    fieldFilterOption.value = null
-    valueFilterOption.value = null
+const onMatchInput = (matchVal, filterVal) => {
+    fieldFilterOption.value = filterVal
+    emit('match', matchVal)
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
-    switch (filterType.value) {
-        case filterOption[0].value:
-            fieldFilterOption.value = filters[sourceColumn.key]
-            break
-        case filterOption[1].value:
-            valueFilterOption.value = filters[sourceColumn.key]
-            break
-    }
+    fieldFilterOption.value = filters[sourceColumn.key]
 }
 
 const onFormatChanged = (selDecode, selFormat) => {
     emit('reload', selDecode, selFormat)
 }
 
+const searchInputRef = ref(null)
 defineExpose({
     reset: () => {
-        clearFilter()
         resetEdit()
+        searchInputRef.value?.reset()
     },
 })
 </script>
@@ -347,20 +314,10 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
-                <n-input-group>
-                    <n-select
-                        v-model:value="filterType"
-                        :consistent-menu-width="false"
-                        :options="filterOption"
-                        style="width: 120px"
-                        @update:value="onChangeFilterType" />
-                    <n-input
-                        v-model:value="filterValue"
-                        :placeholder="$t('interface.search')"
-                        clearable
-                        @clear="clearFilter"
-                        @update:value="onFilterInput" />
-                </n-input-group>
+                <content-search-input
+                    ref="searchInputRef"
+                    @filter-changed="onFilterInput"
+                    @match-changed="onMatchInput" />
             </div>
             <div class="flex-item-expand"></div>
             <n-button-group>

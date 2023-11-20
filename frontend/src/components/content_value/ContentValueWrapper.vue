@@ -176,7 +176,7 @@ watch(() => data.value?.keyPath, initContent)
         </template>
     </n-empty>
     <!-- FIXME: keep alive may cause virtual list null value error. -->
-    <!--    <keep-alive v-else>-->
+    <!-- <keep-alive v-else> -->
     <component
         :is="valueComponents[data.type]"
         v-else

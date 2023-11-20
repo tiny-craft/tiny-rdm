@@ -3,8 +3,6 @@ import { computed, reactive } from 'vue'
 import { isEmpty, trim } from 'lodash'
 import { NButton, NInput } from 'naive-ui'
 
-const props = defineProps({})
-
 const emit = defineEmits(['filterChanged', 'matchChanged'])
 
 /**
