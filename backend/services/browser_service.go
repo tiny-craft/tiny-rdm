@@ -251,6 +251,8 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 			err = fmt.Errorf("create conenction error: %s", err.Error())
 			return
 		}
+
+		_ = client.Do(b.ctx, "CLIENT", "SETNAME", url.QueryEscape(selConn.Name)).Err()
 		// add hook to each node in cluster mode
 		var cluster *redis.ClusterClient
 		if cluster, ok = client.(*redis.ClusterClient); ok {
