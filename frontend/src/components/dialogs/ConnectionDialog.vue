@@ -120,8 +120,10 @@ const onLoadSentinelMasters = async () => {
 
 const tab = ref('general')
 const testing = ref(false)
-const showTestResult = ref(false)
-const testResult = ref('')
+const testResult = ref(null)
+const showTestResult = computed(() => {
+    return !testing.value && testResult.value != null
+})
 const predefineColors = ref(['', '#F75B52', '#F7A234', '#F7CE33', '#4ECF60', '#348CF7', '#B270D3'])
 const generalFormRef = ref(null)
 const advanceFormRef = ref(null)
@@ -194,8 +196,7 @@ const resetForm = () => {
     generalForm.value = connectionStore.newDefaultConnection()
     generalFormRef.value?.restoreValidation()
     testing.value = false
-    showTestResult.value = false
-    testResult.value = ''
+    testResult.value = null
     tab.value = 'general'
     loadingSentinelMaster.value = false
 }
@@ -226,7 +227,6 @@ const onTestConnection = async () => {
         result = e.message
     } finally {
         testing.value = false
-        showTestResult.value = true
     }
 
     if (!isEmpty(result)) {
@@ -566,7 +566,7 @@ const onClose = () => {
             <!-- test result alert-->
             <n-alert
                 v-if="showTestResult"
-                :on-close="() => (showTestResult = false)"
+                :on-close="() => (testResult = '')"
                 :title="isEmpty(testResult) ? '' : $t('dialogue.connection.test_fail')"
                 :type="isEmpty(testResult) ? 'success' : 'error'"
                 closable>
