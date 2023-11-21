@@ -6,7 +6,7 @@ import (
 	sliceutil "tinyrdm/backend/utils/slice"
 )
 
-func AnyToString(value interface{}) (s string) {
+func AnyToString(value interface{}, prefix string, layer int) (s string) {
 	if value == nil {
 		return
 	}
@@ -49,7 +49,11 @@ func AnyToString(value interface{}) (s string) {
 		it := value.(uint64)
 		s = strconv.FormatUint(it, 10)
 	case string:
-		s = value.(string)
+		if layer > 0 {
+			s = "\"" + value.(string) + "\""
+		} else {
+			s = value.(string)
+		}
 	case bool:
 		val, _ := value.(bool)
 		if val {
@@ -58,24 +62,44 @@ func AnyToString(value interface{}) (s string) {
 			s = "False"
 		}
 	case []byte:
-		s = string(value.([]byte))
+		s = prefix + string(value.([]byte))
 	case []string:
 		ss := value.([]string)
 		anyStr := sliceutil.Map(ss, func(i int) string {
-			str := AnyToString(ss[i])
-			return strconv.Itoa(i+1) + ") \"" + str + "\""
+			str := AnyToString(ss[i], prefix, layer+1)
+			return prefix + strconv.Itoa(i+1) + ") " + str
 		})
-		s = sliceutil.JoinString(anyStr, "\r\n")
+		s = prefix + sliceutil.JoinString(anyStr, "\r\n")
 	case []any:
 		as := value.([]any)
 		anyItems := sliceutil.Map(as, func(i int) string {
-			str := AnyToString(as[i])
-			return strconv.Itoa(i+1) + ") \"" + str + "\""
+			str := AnyToString(as[i], prefix, layer+1)
+			return prefix + strconv.Itoa(i+1) + ") " + str
 		})
 		s = sliceutil.JoinString(anyItems, "\r\n")
+	case map[any]any:
+		am := value.(map[any]any)
+		var items []string
+		index := 0
+		for k, v := range am {
+			kk := prefix + strconv.Itoa(index+1) + ") " + AnyToString(k, prefix, layer+1)
+			vv := prefix + strconv.Itoa(index+2) + ") " + AnyToString(v, "\t", layer+1)
+			if layer > 0 {
+				indent := layer
+				if index == 0 {
+					indent -= 1
+				}
+				for i := 0; i < indent; i++ {
+					vv = "  " + vv
+				}
+			}
+			index += 2
+			items = append(items, kk, vv)
+		}
+		s = sliceutil.JoinString(items, "\r\n")
 	default:
 		b, _ := json.Marshal(value)
-		s = string(b)
+		s = prefix + string(b)
 	}
 
 	return

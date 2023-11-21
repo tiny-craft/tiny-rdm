@@ -54,7 +54,7 @@ func (c *cliService) runCommand(server, data string) {
 					}
 				}
 
-				c.echo(server, strutil.AnyToString(result), true)
+				c.echo(server, strutil.AnyToString(result, "", 0), true)
 			} else {
 				c.echoError(server, err.Error())
 			}
