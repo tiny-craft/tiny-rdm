@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive } from 'vue'
-import { isEmpty, trim } from 'lodash'
+import { debounce, isEmpty, trim } from 'lodash'
 import { NButton, NInput } from 'naive-ui'
 
 const emit = defineEmits(['filterChanged', 'matchChanged'])
@@ -31,9 +31,10 @@ const onFullSearch = () => {
     }
 }
 
-const onInput = () => {
+const _onInput = () => {
     emit('filterChanged', inputData.filter)
 }
+const onInput = debounce(_onInput, 500, { leading: true, trailing: true })
 
 const onClearFilter = () => {
     inputData.filter = ''
@@ -70,7 +71,7 @@ defineExpose({
                             {{ inputData.match }}
                         </n-tag>
                     </template>
-                    {{ $t('interface.full_search') }}
+                    {{ $t('interface.full_search_result', { pattern: inputData.match }) }}
                 </n-tooltip>
             </template>
         </n-input>

@@ -762,6 +762,12 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "set":
+		if !strings.HasPrefix(matchPattern, "*") {
+			matchPattern = "*" + matchPattern
+		}
+		if !strings.HasSuffix(matchPattern, "*") {
+			matchPattern = matchPattern + "*"
+		}
 		loadSetHandle := func() ([]types.SetEntryItem, bool, bool, error) {
 			var items []types.SetEntryItem
 			var cursor uint64
@@ -769,11 +775,11 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var subErr error
 			var loadedKey []string
 			scanSize := int64(Preferences().GetScanSize())
-			if param.Full {
+			if param.Full || matchPattern != "*" {
 				// load all
 				cursor, reset = 0, true
 				for {
-					loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+					loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if subErr != nil {
 						return items, reset, false, subErr
 					}
@@ -797,7 +803,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				} else {
 					cursor, _, reset = getEntryCursor()
 				}
-				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, matchPattern, scanSize).Result()
 				items = make([]types.SetEntryItem, len(loadedKey))
 				for i, val := range loadedKey {
 					items[i].Value = val
@@ -820,17 +826,23 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 
 	case "zset":
+		if !strings.HasPrefix(matchPattern, "*") {
+			matchPattern = "*" + matchPattern
+		}
+		if !strings.HasSuffix(matchPattern, "*") {
+			matchPattern = matchPattern + "*"
+		}
 		loadZSetHandle := func() ([]types.ZSetEntryItem, bool, bool, error) {
 			var items []types.ZSetEntryItem
 			var reset bool
 			var cursor uint64
 			scanSize := int64(Preferences().GetScanSize())
 			var loadedVal []string
-			if param.Full {
+			if param.Full || matchPattern != "*" {
 				// load all
 				cursor, reset = 0, true
 				for {
-					loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+					loadedVal, cursor, err = client.ZScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if err != nil {
 						return items, reset, false, err
 					}
@@ -858,7 +870,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				} else {
 					cursor, _, reset = getEntryCursor()
 				}
-				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, param.MatchPattern, scanSize).Result()
+				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, matchPattern, scanSize).Result()
 				loadedLen := len(loadedVal)
 				items = make([]types.ZSetEntryItem, loadedLen/2)
 				var score float64

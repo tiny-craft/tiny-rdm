@@ -100,13 +100,14 @@ const loadData = async (reset, full, selMatch) => {
  */
 const onReload = async (selDecode, selFormat) => {
     try {
-        const { name, db, keyCode, keyPath, decode, format } = data.value
+        const { name, db, keyCode, keyPath, decode, format, matchPattern } = data.value
         await browserStore.reloadKey({
             server: name,
             db,
             key: keyCode || keyPath,
             decode: selDecode || decode,
             format: selFormat || format,
+            matchPattern,
         })
     } finally {
     }

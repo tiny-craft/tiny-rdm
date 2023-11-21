@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import { isEmpty, size } from 'lodash'
@@ -17,6 +17,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import Edit from '@/components/icons/Edit.vue'
+import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -51,7 +52,7 @@ const props = defineProps({
     loading: Boolean,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete', 'match'])
 
 /**
  *
@@ -60,18 +61,6 @@ const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
-
-const filterOption = [
-    {
-        value: 1,
-        label: i18n.t('common.value'),
-    },
-    {
-        value: 2,
-        label: i18n.t('common.score'),
-    },
-]
-const filterType = ref(1)
 
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
@@ -89,46 +78,46 @@ const inEdit = computed(() => {
 })
 const fullEdit = ref(false)
 
-const scoreFilterOption = ref(null)
+// const scoreFilterOption = ref(null)
 const scoreColumn = computed(() => ({
     key: 'score',
     title: i18n.t('common.score'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
-    filterOptionValue: scoreFilterOption.value,
-    filter(value, row) {
-        const score = parseFloat(row.s)
-        if (isNaN(score)) {
-            return true
-        }
-
-        const regex = /^(>=|<=|>|<|=|!=)?(\d+(\.\d*)?)?$/
-        const matches = value.match(regex)
-        if (matches) {
-            const operator = matches[1] || ''
-            const filterScore = parseFloat(matches[2] || '')
-            if (!isNaN(filterScore)) {
-                switch (operator) {
-                    case '>=':
-                        return score >= filterScore
-                    case '<=':
-                        return score <= filterScore
-                    case '>':
-                        return score > filterScore
-                    case '<':
-                        return score < filterScore
-                    case '=':
-                        return score === filterScore
-                    case '!=':
-                        return score !== filterScore
-                }
-            }
-        } else {
-            return !!~row.v.indexOf(value.toString())
-        }
-        return true
-    },
+    // filterOptionValue: scoreFilterOption.value,
+    // filter(value, row) {
+    //     const score = parseFloat(row.s)
+    //     if (isNaN(score)) {
+    //         return true
+    //     }
+    //
+    //     const regex = /^(>=|<=|>|<|=|!=)?(\d+(\.\d*)?)?$/
+    //     const matches = value.match(regex)
+    //     if (matches) {
+    //         const operator = matches[1] || ''
+    //         const filterScore = parseFloat(matches[2] || '')
+    //         if (!isNaN(filterScore)) {
+    //             switch (operator) {
+    //                 case '>=':
+    //                     return score >= filterScore
+    //                 case '<=':
+    //                     return score <= filterScore
+    //                 case '>':
+    //                     return score > filterScore
+    //                 case '<':
+    //                     return score < filterScore
+    //                 case '=':
+    //                     return score === filterScore
+    //                 case '!=':
+    //                     return score !== filterScore
+    //             }
+    //         }
+    //     } else {
+    //         return !!~row.v.indexOf(value.toString())
+    //     }
+    //     return true
+    // },
     render: (row) => {
         return row.s
     },
@@ -294,52 +283,28 @@ const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.ZSET)
 }
 
-const filterValue = ref('')
 const onFilterInput = (val) => {
-    switch (filterType.value) {
-        case filterOption[0].value:
-            // filter value
-            scoreFilterOption.value = null
-            valueFilterOption.value = val
-            break
-        case filterOption[1].value:
-            // filter score
-            valueFilterOption.value = null
-            scoreFilterOption.value = val
-            break
-    }
+    valueFilterOption.value = val
 }
 
-const onChangeFilterType = (type) => {
-    onFilterInput(filterValue.value)
-}
-
-const clearFilter = () => {
-    valueFilterOption.value = null
-    scoreFilterOption.value = null
+const onMatchInput = (matchVal, filterVal) => {
+    valueFilterOption.value = filterVal
+    emit('match', matchVal)
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
-    switch (filterType.value) {
-        case filterOption[0].value:
-            // filter value
-            valueFilterOption.value = filters[sourceColumn.key]
-            break
-        case filterOption[1].value:
-            // filter score
-            scoreFilterOption.value = filters[sourceColumn.key]
-            break
-    }
+    valueFilterOption.value = filters[sourceColumn.key]
 }
 
 const onFormatChanged = (selDecode, selFormat) => {
     emit('reload', selDecode, selFormat)
 }
 
+const searchInputRef = ref(null)
 defineExpose({
     reset: () => {
-        clearFilter()
         resetEdit()
+        searchInputRef.value?.reset()
     },
 })
 </script>
@@ -360,25 +325,10 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
-                <n-input-group>
-                    <n-select
-                        v-model:value="filterType"
-                        :consistent-menu-width="false"
-                        :options="filterOption"
-                        style="width: 120px"
-                        @update:value="onChangeFilterType" />
-                    <n-tooltip :delay="500" :disabled="filterType !== 2">
-                        <template #trigger>
-                            <n-input
-                                v-model:value="filterValue"
-                                :placeholder="$t('interface.search')"
-                                clearable
-                                @clear="clearFilter"
-                                @update:value="onFilterInput" />
-                        </template>
-                        <div class="text-block">{{ $t('interface.score_filter_tip') }}</div>
-                    </n-tooltip>
-                </n-input-group>
+                <content-search-input
+                    ref="searchInputRef"
+                    @filter-changed="onFilterInput"
+                    @match-changed="onMatchInput" />
             </div>
             <div class="flex-item-expand"></div>
             <n-button-group>

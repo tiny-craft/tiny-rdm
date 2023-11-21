@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, useThemeVars } from 'naive-ui'
 import { isEmpty, size } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
@@ -17,6 +17,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import Edit from '@/components/icons/Edit.vue'
 import ContentEntryEditor from '@/components/content_value/ContentEntryEditor.vue'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
+import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -51,7 +52,7 @@ const props = defineProps({
     loading: Boolean,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete', 'match'])
 
 /**
  *
@@ -246,13 +247,13 @@ const onAddValue = (value) => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.SET)
 }
 
-const filterValue = ref('')
 const onFilterInput = (val) => {
     valueFilterOption.value = val
 }
 
-const clearFilter = () => {
-    valueFilterOption.value = null
+const onMatchInput = (matchVal, filterVal) => {
+    valueFilterOption.value = filterVal
+    emit('match', matchVal)
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
@@ -263,10 +264,11 @@ const onFormatChanged = (selDecode, selFormat) => {
     emit('reload', selDecode, selFormat)
 }
 
+const searchInputRef = ref(null)
 defineExpose({
     reset: () => {
-        clearFilter()
         resetEdit()
+        searchInputRef.value?.reset()
     },
 })
 </script>
@@ -287,12 +289,10 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
-                <n-input
-                    v-model:value="filterValue"
-                    :placeholder="$t('interface.search')"
-                    clearable
-                    @clear="clearFilter"
-                    @update:value="onFilterInput" />
+                <content-search-input
+                    ref="searchInputRef"
+                    @filter-changed="onFilterInput"
+                    @match-changed="onMatchInput" />
             </div>
             <div class="flex-item-expand"></div>
             <n-button-group>
