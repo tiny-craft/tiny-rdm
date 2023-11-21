@@ -351,16 +351,18 @@ const replaceTermInput = (content = '') => {
 
 /**
  * process receive output content
- * @param {{content, prompt}} data
+ * @param {{content: string[], prompt: string}} data
  */
 const receiveTermOutput = (data) => {
     if (termInst == null) {
         return
     }
 
-    const { content, prompt } = data || {}
+    const { content = [], prompt } = data || {}
     if (!isEmpty(content)) {
-        termInst.write('\r\n' + content)
+        for (const line of content) {
+            termInst.write('\r\n' + line)
+        }
     }
     if (!isEmpty(prompt)) {
         promptPrefix.value = prompt

@@ -21,8 +21,8 @@ type cliService struct {
 }
 
 type cliOutput struct {
-	Content string `json:"content"`          // output content
-	Prompt  string `json:"prompt,omitempty"` // new line prompt, empty if not ready to input
+	Content []string `json:"content"`          // output content
+	Prompt  string   `json:"prompt,omitempty"` // new line prompt, empty if not ready to input
 }
 
 var cli *cliService
@@ -67,7 +67,7 @@ func (c *cliService) runCommand(server, data string) {
 
 func (c *cliService) echo(server, data string, newLineReady bool) {
 	output := cliOutput{
-		Content: data,
+		Content: strings.Split(data, "\n"),
 	}
 	if newLineReady {
 		output.Prompt = fmt.Sprintf("%s:db%d> ", server, c.selectedDB[server])
