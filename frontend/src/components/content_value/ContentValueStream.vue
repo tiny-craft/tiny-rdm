@@ -3,17 +3,18 @@ import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, NInput, useThemeVars } from 'naive-ui'
+import { NButton, NCode, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
-import { includes, isEmpty, keys, size, some, values } from 'lodash'
+import { includes, isEmpty, size } from 'lodash'
 import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -48,7 +49,7 @@ const props = defineProps({
     loading: Boolean,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete', 'match'])
 
 /**
  *
@@ -57,30 +58,17 @@ const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete'])
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
-
-const filterOption = [
-    {
-        value: 1,
-        label: i18n.t('common.field'),
-    },
-    {
-        value: 2,
-        label: i18n.t('common.value'),
-    },
-]
 const filterType = ref(1)
 
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
 const keyType = redisTypes.STREAM
-const idFilterOption = ref(null)
 const idColumn = computed(() => ({
     key: 'id',
     title: 'ID',
     align: 'center',
     titleAlign: 'center',
     resizable: true,
-    filterOptionValue: idFilterOption.value,
 }))
 
 const valueFilterOption = ref(null)
@@ -93,13 +81,15 @@ const valueColumn = computed(() => ({
     filterOptionValue: valueFilterOption.value,
     filter: (value, row) => {
         const v = value.toString()
-        if (filterType.value === 1) {
-            // filter key
-            return some(keys(row.v), (key) => includes(key, v))
-        } else {
-            // filter value
-            return some(values(row.v), (val) => includes(val, v))
+        if (row.dv) {
+            return includes(row.dv, v)
         }
+        for (const k in row.v) {
+            if (includes(k, v) || includes(row.v[k], v)) {
+                return true
+            }
+        }
+        return false
     },
     // sorter: (row1, row2) => row1.value - row2.value,
     render: (row) => {
@@ -148,34 +138,23 @@ const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.STREAM)
 }
 
-const filterValue = ref('')
 const onFilterInput = (val) => {
     valueFilterOption.value = val
 }
 
-const onChangeFilterType = (type) => {
-    onFilterInput(filterValue.value)
-}
-
-const clearFilter = () => {
-    idFilterOption.value = null
-    valueFilterOption.value = null
+const onMatchInput = (matchVal, filterVal) => {
+    valueFilterOption.value = filterVal
+    emit('match', matchVal)
 }
 
 const onUpdateFilter = (filters, sourceColumn) => {
-    switch (filterType.value) {
-        case filterOption[0].value:
-            idFilterOption.value = filters[sourceColumn.key]
-            break
-        case filterOption[1].value:
-            valueFilterOption.value = filters[sourceColumn.key]
-            break
-    }
+    valueFilterOption.value = filters[sourceColumn.key]
 }
 
+const searchInputRef = ref(null)
 defineExpose({
     reset: () => {
-        clearFilter()
+        searchInputRef.value?.reset()
     },
 })
 </script>
@@ -196,20 +175,24 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
-                <n-input-group>
-                    <n-select
-                        v-model:value="filterType"
-                        :consistent-menu-width="false"
-                        :options="filterOption"
-                        style="width: 120px"
-                        @update:value="onChangeFilterType" />
-                    <n-input
-                        v-model:value="filterValue"
-                        :placeholder="$t('interface.search')"
-                        clearable
-                        @clear="clearFilter"
-                        @update:value="onFilterInput" />
-                </n-input-group>
+                <!--                <n-input-group>-->
+                <!--                    <n-select-->
+                <!--                        v-model:value="filterType"-->
+                <!--                        :consistent-menu-width="false"-->
+                <!--                        :options="filterOption"-->
+                <!--                        style="width: 120px"-->
+                <!--                        @update:value="onChangeFilterType" />-->
+                <!--                    <n-input-->
+                <!--                        v-model:value="filterValue"-->
+                <!--                        :placeholder="$t('interface.search')"-->
+                <!--                        clearable-->
+                <!--                        @clear="clearFilter"-->
+                <!--                        @update:value="onFilterInput" />-->
+                <!--                </n-input-group>-->
+                <content-search-input
+                    ref="searchInputRef"
+                    @filter-changed="onFilterInput"
+                    @match-changed="onMatchInput" />
             </div>
             <div class="flex-item-expand"></div>
             <n-button-group>

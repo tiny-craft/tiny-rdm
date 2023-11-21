@@ -645,7 +645,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var reset bool
 			var subErr error
 			doFilter := matchPattern != "*"
-			if param.Full || matchPattern != "*" {
+			if param.Full || doFilter {
 				// load all
 				cursor, reset = 0, true
 				loadVal, subErr = client.LRange(ctx, key, 0, -1).Result()
@@ -902,7 +902,8 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var msgs []redis.XMessage
 			var last string
 			var reset bool
-			if param.Full {
+			doFilter := matchPattern != "*"
+			if param.Full || doFilter {
 				// load all
 				last, reset = "", true
 				msgs, err = client.XRevRange(ctx, key, "+", "-").Result()
@@ -931,15 +932,21 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				}
 			}
 			setEntryXLast(last)
-			items := make([]types.StreamEntryItem, len(msgs))
-			for i, msg := range msgs {
-				items[i].ID = msg.ID
-				items[i].Value = msg.Values
-				if vb, merr := json.Marshal(msg.Values); merr != nil {
-					items[i].DisplayValue = "{}"
-				} else {
-					items[i].DisplayValue, _, _ = strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+			items := make([]types.StreamEntryItem, 0, len(msgs))
+			for _, msg := range msgs {
+				it := types.StreamEntryItem{
+					ID:    msg.ID,
+					Value: msg.Values,
 				}
+				if vb, merr := json.Marshal(msg.Values); merr != nil {
+					it.DisplayValue = "{}"
+				} else {
+					it.DisplayValue, _, _ = strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+				}
+				if doFilter && !strings.Contains(it.DisplayValue, param.MatchPattern) {
+					continue
+				}
+				items = append(items, it)
 			}
 			if err != nil {
 				return items, reset, false, err
