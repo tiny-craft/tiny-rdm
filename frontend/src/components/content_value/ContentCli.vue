@@ -203,7 +203,7 @@ const moveInputCursor = (step) => {
     } else {
         // update cursor position only
         const currentLine = getCurrentInput()
-        inputCursor = Math.min(Math.max(0, inputCursor), currentLine.length)
+        inputCursor = Math.max(0, currentLine.length)
         updateCursor = true
     }
 
