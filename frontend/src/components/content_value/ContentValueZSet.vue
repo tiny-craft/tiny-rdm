@@ -85,6 +85,7 @@ const scoreColumn = computed(() => ({
     align: 'center',
     titleAlign: 'center',
     resizable: true,
+    sorter: (row1, row2) => row1.s - row2.s,
     // filterOptionValue: scoreFilterOption.value,
     // filter(value, row) {
     //     const score = parseFloat(row.s)

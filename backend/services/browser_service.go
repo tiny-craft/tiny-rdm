@@ -839,9 +839,10 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			var reset bool
 			var cursor uint64
 			scanSize := int64(Preferences().GetScanSize())
-			var loadedVal []string
-			if param.Full || matchPattern != "*" {
+			doFilter := matchPattern != "*"
+			if param.Full || doFilter {
 				// load all
+				var loadedVal []string
 				cursor, reset = 0, true
 				for {
 					loadedVal, cursor, err = client.ZScan(ctx, key, cursor, matchPattern, scanSize).Result()
@@ -872,18 +873,26 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				} else {
 					cursor, _, reset = getEntryCursor()
 				}
-				loadedVal, cursor, err = client.ZScan(ctx, key, cursor, matchPattern, scanSize).Result()
-				loadedLen := len(loadedVal)
-				items = make([]types.ZSetEntryItem, loadedLen/2)
-				var score float64
-				for i := 0; i < loadedLen; i += 2 {
-					if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
-						items[i/2].Score = score
-						items[i/2].Value = loadedVal[i]
-						if doConvert {
-							if dv, _, _ := strutil.ConvertTo(loadedVal[i], param.Decode, param.Format); dv != loadedVal[i] {
-								items[i/2].DisplayValue = dv
-							}
+				var loadedVal []redis.Z
+				loadedVal, err = client.ZRangeWithScores(ctx, key, int64(cursor), int64(cursor)+scanSize-1).Result()
+				cursor = cursor + uint64(scanSize)
+				if len(loadedVal) < int(scanSize) {
+					cursor = 0
+				}
+
+				items = make([]types.ZSetEntryItem, 0, len(loadedVal))
+				for _, z := range loadedVal {
+					val := strutil.AnyToString(z.Score, "", 0)
+					if doFilter && !strings.Contains(val, param.MatchPattern) {
+						continue
+					}
+					items = append(items, types.ZSetEntryItem{
+						Score: z.Score,
+						Value: val,
+					})
+					if doConvert {
+						if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+							items[len(items)-1].DisplayValue = dv
 						}
 					}
 				}
