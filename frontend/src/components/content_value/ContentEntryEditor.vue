@@ -63,7 +63,7 @@ watch(
 )
 
 const loading = ref(false)
-const pin = ref(false)
+const isPin = ref(false)
 const viewAs = reactive({
     field: '',
     value: '',
@@ -130,13 +130,13 @@ const onToggleFullscreen = () => {
 }
 
 const onClose = () => {
-    pin.value = false
+    isPin.value = false
     emit('close')
 }
 
 const onSave = () => {
     emit('save', viewAs.field, viewAs.value, viewAs.decode, viewAs.format)
-    if (!pin.value) {
+    if (!isPin.value) {
         nextTick().then(onClose)
     }
 }
@@ -178,13 +178,12 @@ const onSave = () => {
             <template #header-extra>
                 <n-space :size="5">
                     <icon-button
-                        :button-style="pin ? pinBtnStyle : btnStyle"
+                        :button-style="isPin ? pinBtnStyle : btnStyle"
+                        :icon="Pin"
                         :size="19"
-                        :t-tooltip="pin ? 'interface.unpin_edit' : 'interface.pin_edit'"
+                        :t-tooltip="isPin ? 'interface.unpin_edit' : 'interface.pin_edit'"
                         stroke-width="4"
-                        @click="pin = !pin">
-                        <Pin :inverse="pin" stroke-width="4" />
-                    </icon-button>
+                        @click="isPin = !isPin" />
                     <icon-button
                         :button-style="btnStyle"
                         :icon="props.fullscreen ? OffScreen : FullScreen"
