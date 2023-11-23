@@ -45,13 +45,14 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "Tiny RDM",
-		Width:     windowWidth,
-		Height:    windowHeight,
-		MinWidth:  consts.MIN_WINDOW_WIDTH,
-		MinHeight: consts.MIN_WINDOW_HEIGHT,
-		Frameless: runtime.GOOS != "darwin",
-		Menu:      appMenu,
+		Title:                    "Tiny RDM",
+		Width:                    windowWidth,
+		Height:                   windowHeight,
+		MinWidth:                 consts.MIN_WINDOW_WIDTH,
+		MinHeight:                consts.MIN_WINDOW_HEIGHT,
+		Frameless:                runtime.GOOS != "darwin",
+		Menu:                     appMenu,
+		EnableDefaultContextMenu: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
