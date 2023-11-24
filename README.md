@@ -9,6 +9,8 @@
 [![GitHub release](https://img.shields.io/github/release/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/releases)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+[![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
+[![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
 <strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong>
 </div>
@@ -32,13 +34,15 @@
 * Operation command execution logs.
 * Provides command-line operations.
 * Provides slow logs.
+* Segmented loading and querying for List/Hash/Set/Sorted Set.
+* Decode/decompression display for value of List/Hash/Set/Sorted Set
 
 ## Roadmap
-- [ ] Pagination and querying for List/Hash/Set/Sorted Set
-- [ ] Decode/decompression display for value of List/Hash/Set/Sorted Set
 - [ ] Real-time commands monitoring
 - [ ] Pub/Sub operations
 - [ ] Embedding Monaco Editor
+- [ ] Import/export connection profile
+- [ ] Import/export data
 
 ## Installation
 

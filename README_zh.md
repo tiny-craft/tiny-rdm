@@ -9,6 +9,8 @@
 [![GitHub release](https://img.shields.io/github/release/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/releases)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+[![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
+[![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
 <strong>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux</strong>
 </div>
@@ -32,13 +34,15 @@
 * 操作命令执行日志展示
 * 提供命令行操作
 * 提供慢日志展示
+* List/Hash/Set/Sorted Set的分段加载和查询
+* List/Hash/Set/Sorted Set值的转码显示
 
 ## 未来版本规划
-- [ ] List/Hash/Set/Sorted Set的分页展示和查询
-- [ ] List/Hash/Set/Sorted Set值的转码显示
 - [ ] 命令实时监控
 - [ ] 发布/订阅支持
 - [ ] 引入Monaco Editor
+- [ ] 连接配置导入/导出
+- [ ] 数据导入/导出
 
 ## 安装
 
