@@ -111,7 +111,7 @@ func (s *systemService) loopWindowEvent() {
 
 			if !fullscreen && !minimised {
 				// save window size
-				Preferences().SaveWindowSize(width, height)
+				Preferences().SaveWindowSize(width, height, maximised)
 			}
 		}
 	}

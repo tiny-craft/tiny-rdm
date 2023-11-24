@@ -29,9 +29,10 @@ func NewPreferences() Preferences {
 }
 
 type PreferencesBehavior struct {
-	AsideWidth   int `json:"asideWidth" yaml:"aside_width"`
-	WindowWidth  int `json:"windowWidth" yaml:"window_width"`
-	WindowHeight int `json:"windowHeight" yaml:"window_height"`
+	AsideWidth      int  `json:"asideWidth" yaml:"aside_width"`
+	WindowWidth     int  `json:"windowWidth" yaml:"window_width"`
+	WindowHeight    int  `json:"windowHeight" yaml:"window_height"`
+	WindowMaximised bool `json:"windowMaximised" yaml:"window_maximised"`
 }
 
 type PreferencesGeneral struct {

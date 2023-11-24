@@ -112,18 +112,24 @@ func (p *preferencesService) GetAppVersion() (resp types.JSResp) {
 	return
 }
 
-func (p *preferencesService) SaveWindowSize(width, height int) {
-	if width >= consts.MIN_WINDOW_WIDTH && height >= consts.MIN_WINDOW_HEIGHT {
+func (p *preferencesService) SaveWindowSize(width, height int, maximised bool) {
+	if maximised {
+		// do not update window size if maximised state
 		p.UpdatePreferences(map[string]any{
-			"behavior.windowWidth":  width,
-			"behavior.windowHeight": height,
+			"behavior.windowMaximised": true,
+		})
+	} else if width >= consts.MIN_WINDOW_WIDTH && height >= consts.MIN_WINDOW_HEIGHT {
+		p.UpdatePreferences(map[string]any{
+			"behavior.windowWidth":     width,
+			"behavior.windowHeight":    height,
+			"behavior.windowMaximised": false,
 		})
 	}
 }
 
-func (p *preferencesService) GetWindowSize() (width, height int) {
+func (p *preferencesService) GetWindowSize() (width, height int, maximised bool) {
 	data := p.pref.GetPreferences()
-	width, height = data.Behavior.WindowWidth, data.Behavior.WindowHeight
+	width, height, maximised = data.Behavior.WindowWidth, data.Behavior.WindowHeight, data.Behavior.WindowMaximised
 	if width <= 0 {
 		width = consts.DEFAULT_WINDOW_WIDTH
 	}

@@ -33,7 +33,11 @@ func main() {
 	cliSvc := services.Cli()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
-	windowWidth, windowHeight := prefSvc.GetWindowSize()
+	windowWidth, windowHeight, maximised := prefSvc.GetWindowSize()
+	windowStartState := options.Normal
+	if maximised {
+		windowStartState = options.Maximised
+	}
 
 	// menu
 	appMenu := menu.NewMenu()
@@ -50,6 +54,7 @@ func main() {
 		Height:                   windowHeight,
 		MinWidth:                 consts.MIN_WINDOW_WIDTH,
 		MinHeight:                consts.MIN_WINDOW_HEIGHT,
+		WindowStartState:         windowStartState,
 		Frameless:                runtime.GOOS != "darwin",
 		Menu:                     appMenu,
 		EnableDefaultContextMenu: true,
