@@ -979,13 +979,15 @@ const useBrowserStore = defineStore('browser', {
                     decode,
                 })
                 if (success) {
-                    const { value } = data
+                    // const { value } = data
                     // update tree view data
                     const { newKey = 0 } = this._addKeyNodes(server, db, [key], true)
                     if (newKey > 0) {
                         this._tidyNode(server, db, key)
                         this._updateDBMaxKeys(server, db, newKey)
                     }
+                    const tab = useTabStore()
+                    tab.updateValue({ server, db, key, value })
                     return {
                         success,
                         nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${key}`,

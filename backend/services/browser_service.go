@@ -1122,9 +1122,9 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		return
 	}
 	resp.Success = true
-	resp.Data = map[string]any{
-		"value": param.Value,
-	}
+	//resp.Data = map[string]any{
+	//	"value": param.Value,
+	//}
 	return
 }
 

@@ -212,7 +212,7 @@ const useTabStore = defineStore('tab', {
          * @param {string} [format]
          * @param {string] [decode]
          * @param {string} [matchPattern]
-         * @param {boolean} reset
+         * @param {boolean} [reset]
          * @param {boolean} [end] keep end status if not set
          */
         updateValue({ server, db, key, value, format, decode, matchPattern, reset, end }) {
@@ -227,7 +227,7 @@ const useTabStore = defineStore('tab', {
             if (typeof end === 'boolean') {
                 tabData.end = end
             }
-            if (!reset && typeof value === 'object') {
+            if (!!!reset && typeof value === 'object') {
                 if (value instanceof Array) {
                     tabData.value = tabData.value || []
                     tabData.value.push(...value)

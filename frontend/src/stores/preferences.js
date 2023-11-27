@@ -113,7 +113,7 @@ const usePreferencesStore = defineStore('preferences', {
 
         /**
          * current font selection
-         * @returns {{fontSize: string}}
+         * @returns {{fontSize: string, fontFamily?: string}}
          */
         generalFont() {
             const fontStyle = {
@@ -125,6 +125,24 @@ const usePreferencesStore = defineStore('preferences', {
                     fontStyle['fontFamily'] = `${font.name}`
                 }
             }
+            return fontStyle
+        },
+
+        /**
+         * current editor font
+         * @return {{fontSize: string, fontFamily?: string}}
+         */
+        editorFont() {
+            const fontStyle = {
+                fontSize: (this.editor.fontSize || 14) + 'px',
+            }
+            if (!isEmpty(this.editor.font) && this.editor.font !== 'none') {
+                const font = find(this.fontList, { name: this.editor.font })
+                if (font != null) {
+                    fontStyle['fontFamily'] = `${font.name}`
+                }
+            }
+            fontStyle['fontFamily'] = fontStyle['fontFamily'] || 'monaco'
             return fontStyle
         },
 

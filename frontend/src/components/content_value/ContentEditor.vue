@@ -1,0 +1,158 @@
+<script setup>
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import * as monaco from 'monaco-editor'
+import usePreferencesStore from 'stores/preferences.js'
+import { useThemeVars } from 'naive-ui'
+
+const props = defineProps({
+    content: {
+        type: String,
+    },
+    language: {
+        type: String,
+        default: 'json',
+    },
+    readonly: {
+        type: String,
+    },
+    loading: {
+        type: Boolean,
+    },
+    showLineNum: {
+        type: Boolean,
+        default: true,
+    },
+    border: {
+        type: Boolean,
+        default: false,
+    },
+})
+
+const emit = defineEmits(['reset', 'input'])
+
+const themeVars = useThemeVars()
+/** @type {HTMLElement|null} */
+const editorRef = ref(null)
+/** @type monaco.editor.IStandaloneCodeEditor */
+let editorNode = null
+
+const destroyEditor = () => {
+    if (editorNode != null && editorNode.dispose != null) {
+        const model = editorNode.getModel()
+        if (model != null) {
+            model.dispose()
+        }
+        editorNode.dispose()
+        editorNode = null
+    }
+}
+
+const readonlyValue = computed(() => {
+    return props.readonly || props.loading
+})
+
+const pref = usePreferencesStore()
+onMounted(async () => {
+    if (editorRef.value != null) {
+        const { fontSize, fontFamily = undefined } = pref.generalFont
+        editorNode = monaco.editor.create(editorRef.value, {
+            // value: props.content,
+            language: props.language,
+            lineNumbers: props.showLineNum ? 'on' : 'off',
+            readOnly: readonlyValue.value,
+            colorDecorators: true,
+            accessibilitySupport: 'off',
+            wordWrap: 'on',
+            tabSize: 2,
+            fontFamily,
+            fontSize,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            scrollbar: {
+                useShadows: false,
+                verticalScrollbarSize: '10px',
+            },
+            // formatOnType: true,
+            contextmenu: false,
+            lineNumbersMinChars: 2,
+            lineDecorationsWidth: 0,
+            minimap: {
+                enabled: false,
+            },
+            selectionHighlight: false,
+            renderLineHighlight: 'gutter',
+        })
+
+        // editorNode.onDidChangeModelLanguageConfiguration(() => {
+        //     editorNode?.getAction('editor.action.formatDocument')?.run()
+        // })
+
+        if (editorNode.onDidChangeModelContent) {
+            editorNode.onDidChangeModelContent(() => {
+                emit('input', editorNode.getValue())
+            })
+        }
+    }
+})
+
+watch(
+    () => props.content,
+    async (content) => {
+        if (editorNode != null) {
+            editorNode.setValue(content)
+            await nextTick(() => emit('reset', content))
+        }
+    },
+)
+
+watch(
+    () => readonlyValue.value,
+    (readOnly) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                readOnly,
+            })
+        }
+    },
+)
+
+watch(
+    () => props.language,
+    (language) => {
+        if (editorNode != null) {
+            const model = editorNode.getModel()
+            if (model != null) {
+                monaco.editor.setModelLanguage(model, language)
+            }
+        }
+    },
+)
+
+watch(
+    () => pref.isDark,
+    (dark) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                theme: dark ? 'vs-dark' : 'vs',
+            })
+        }
+    },
+)
+
+onUnmounted(() => {
+    destroyEditor()
+})
+</script>
+
+<template>
+    <div ref="editorRef" :class="{ 'editor-border': props.border === true }" />
+</template>
+
+<style lang="scss" scoped>
+.editor-border {
+    border: 1px solid v-bind('themeVars.borderColor');
+    border-radius: v-bind('themeVars.borderRadius');
+    padding: 3px;
+    box-sizing: border-box;
+}
+</style>

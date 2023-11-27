@@ -6,15 +6,14 @@ import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
 import { useThemeVars } from 'naive-ui'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
-import Close from '@/components/icons/Close.vue'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
-import EditFile from '@/components/icons/EditFile.vue'
 import bytes from 'bytes'
 import useBrowserStore from 'stores/browser.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
+import ContentEditor from '@/components/content_value/ContentEditor.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -63,6 +62,11 @@ const viewAs = reactive({
     decode: decodeTypes.NONE,
 })
 
+const editingContent = ref('')
+
+const enableSave = computed(() => {
+    return editingContent.value !== viewAs.value && !props.loading
+})
 const displayValue = computed(() => {
     if (props.loading) {
         return ''
@@ -89,7 +93,7 @@ const onFormatChanged = async (decode = '', format = '') => {
         decode,
         format,
     })
-    viewAs.value = value
+    editingContent.value = viewAs.value = value
     viewAs.decode = decode || retDecode
     viewAs.format = format || retFormat
 }
@@ -109,23 +113,17 @@ const onCopyValue = () => {
         })
 }
 
-const editValue = ref('')
-const inEdit = ref(false)
-const onEditValue = () => {
-    editValue.value = displayValue.value
-    inEdit.value = true
-}
-
-const onCancelEdit = () => {
-    inEdit.value = false
-}
-
 /**
  * Save value
  */
 const browserStore = useBrowserStore()
 const saving = ref(false)
-const onSaveValue = async () => {
+
+const onInput = (content) => {
+    editingContent.value = content
+}
+
+const onSave = async () => {
     saving.value = true
     try {
         const { success, msg } = await browserStore.setKey({
@@ -133,13 +131,13 @@ const onSaveValue = async () => {
             db: props.db,
             key: keyName.value,
             keyType: toLower(keyType),
-            value: editValue.value,
+            value: editingContent.value,
             ttl: -1,
             format: viewAs.format,
             decode: viewAs.decode,
         })
         if (success) {
-            await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
+            // await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
@@ -147,7 +145,6 @@ const onSaveValue = async () => {
     } catch (e) {
         $message.error(e.message)
     } finally {
-        inEdit.value = false
         saving.value = false
     }
 }
@@ -155,7 +152,7 @@ const onSaveValue = async () => {
 defineExpose({
     reset: () => {
         viewAs.value = ''
-        inEdit.value = false
+        editingContent.value = ''
     },
     beforeShow: () => onFormatChanged(),
 })
@@ -177,55 +174,46 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-item-expand"></div>
-            <n-button-group v-if="!inEdit">
-                <n-button :focusable="false" @click="onCopyValue">
+            <n-button-group>
+                <n-button :disabled="saving" :focusable="false" @click="onCopyValue">
                     <template #icon>
                         <n-icon :component="Copy" size="18" />
                     </template>
                     {{ $t('interface.copy_value') }}
                 </n-button>
-                <n-button :focusable="false" plain @click="onEditValue">
-                    <template #icon>
-                        <n-icon :component="EditFile" size="18" />
-                    </template>
-                    {{ $t('interface.edit_value') }}
-                </n-button>
-            </n-button-group>
-            <n-button-group v-else>
-                <n-button :focusable="false" :loading="saving" plain @click="onSaveValue">
+                <n-button
+                    :disabled="!enableSave"
+                    :loading="saving"
+                    :secondary="enableSave"
+                    :type="enableSave ? 'primary' : ''"
+                    @click="onSave">
                     <template #icon>
                         <n-icon :component="Save" size="18" />
                     </template>
-                    {{ $t('interface.save_update') }}
-                </n-button>
-                <n-button :focusable="false" :loading="saving" plain @click="onCancelEdit">
-                    <template #icon>
-                        <n-icon :component="Close" size="18" />
-                    </template>
-                    {{ $t('common.cancel') }}
+                    {{ $t('common.save') }}
                 </n-button>
             </n-button-group>
         </div>
         <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
-            <n-scrollbar v-if="!inEdit" class="flex-item-expand">
-                <n-code :code="displayValue" :language="viewLanguage" style="cursor: text" word-wrap />
-            </n-scrollbar>
-            <n-input
-                v-else
-                v-model:value="editValue"
-                :disabled="saving"
-                :resizable="false"
+            <n-spin :show="props.loading" />
+            <content-editor
+                v-show="!props.loading"
+                :content="displayValue"
+                :language="viewLanguage"
+                :loading="props.loading"
                 class="flex-item-expand"
-                type="textarea" />
+                style="height: 100%"
+                @input="onInput"
+                @reset="onInput" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>
             <n-divider v-if="!isNaN(props.length)" vertical />
             <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
-            <div class="flex-item-expand"></div>
+            <div class="flex-item-expand" />
             <format-selector
                 :decode="viewAs.decode"
-                :disabled="inEdit"
+                :disabled="enableSave"
                 :format="viewAs.format"
                 @format-changed="onFormatChanged" />
         </div>
@@ -234,7 +222,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .value-wrapper {
-    overflow: hidden;
+    //overflow: hidden;
     border-top: v-bind('themeVars.borderColor') 1px solid;
     padding: 5px;
 }
