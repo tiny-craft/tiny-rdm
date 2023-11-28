@@ -2,7 +2,7 @@
 import { computed, h, reactive, ref, watch } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
-import { isEmpty, keys, map } from 'lodash'
+import { get, isEmpty, keys, map } from 'lodash'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
 import NewHashValue from '@/components/new_value/NewHashValue.vue'
 import NewListValue from '@/components/new_value/NewListValue.vue'
@@ -103,13 +103,20 @@ const renderTypeLabel = (option) => {
 const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const onAdd = async () => {
-    await newFormRef.value?.validate().catch((err) => {
-        $message.error(err.message)
+    await newFormRef.value?.validate((errs) => {
+        const err = get(errs, '0.0.message')
+        if (err != null) {
+            $message.error(err)
+        }
     })
-    if (subFormRef.value?.validate && !subFormRef.value?.validate()) {
-        $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('dialogue.field.element') }))
-        return false
-    }
+    await subFormRef.value?.validate((errs) => {
+        const err = get(errs, '0.0.message')
+        if (err != null) {
+            $message.error(err)
+        } else {
+            $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('dialogue.field.element') }))
+        }
+    })
     try {
         const { server, db, key, type, ttl } = newForm
         let { value } = newForm
@@ -132,7 +139,10 @@ const onAdd = async () => {
             $message.error(msg)
         }
         dialogStore.closeNewKeyDialog()
-    } catch (e) {}
+    } catch (e) {
+        return false
+    }
+    return true
 }
 
 const onClose = () => {

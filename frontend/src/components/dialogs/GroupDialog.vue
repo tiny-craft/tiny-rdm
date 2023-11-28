@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
-import { isEmpty } from 'lodash'
+import { every, get, includes, isEmpty } from 'lodash'
 
 /**
  * Dialog for create or rename group
@@ -12,6 +12,24 @@ import { isEmpty } from 'lodash'
 const editGroup = ref('')
 const groupForm = reactive({
     name: '',
+})
+const groupFormRef = ref(null)
+
+const formRules = computed(() => {
+    const requiredMsg = i18n.t('dialogue.field_required')
+    const illegalChars = ['/', '\\']
+    return {
+        name: [
+            { required: true, message: requiredMsg, trigger: 'input' },
+            {
+                validator: (rule, value) => {
+                    return every(illegalChars, (c) => !includes(value, c))
+                },
+                message: i18n.t('dialogue.illegal_characters'),
+                trigger: 'input',
+            },
+        ],
+    }
 })
 
 const isRenameMode = computed(() => !isEmpty(editGroup.value))
@@ -30,6 +48,13 @@ watch(
 const i18n = useI18n()
 const onConfirm = async () => {
     try {
+        await groupFormRef.value?.validate((errs) => {
+            const err = get(errs, '0.0.message')
+            if (err != null) {
+                $message.error(err)
+            }
+        })
+
         const { name } = groupForm
         if (isRenameMode.value) {
             const { success, msg } = await connectionStore.renameGroup(editGroup.value, name)
@@ -47,9 +72,11 @@ const onConfirm = async () => {
             }
         }
     } catch (e) {
-        $message.error(e.message)
+        const msg = get(e, 'message')
+        if (!isEmpty(msg)) {
+            $message.error(msg)
+        }
     }
-    onClose()
 }
 
 const onClose = () => {
@@ -77,8 +104,14 @@ const onClose = () => {
         transform-origin="center"
         @positive-click="onConfirm"
         @negative-click="onClose">
-        <n-form :model="groupForm" :show-label="false" :show-require-mark="false" label-placement="top">
-            <n-form-item :label="$t('dialogue.group.name')" required>
+        <n-form
+            ref="groupFormRef"
+            :model="groupForm"
+            :rules="formRules"
+            :show-label="false"
+            :show-require-mark="false"
+            label-placement="top">
+            <n-form-item :label="$t('dialogue.group.name')" path="name" required>
                 <n-input v-model:value="groupForm.name" placeholder="" />
             </n-form-item>
         </n-form>
