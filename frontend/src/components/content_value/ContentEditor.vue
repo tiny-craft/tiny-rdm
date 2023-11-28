@@ -57,6 +57,7 @@ onMounted(async () => {
         const { fontSize, fontFamily = undefined } = pref.generalFont
         editorNode = monaco.editor.create(editorRef.value, {
             // value: props.content,
+            theme: pref.isDark ? 'rdm-dark' : 'rdm-light',
             language: props.language,
             lineNumbers: props.showLineNum ? 'on' : 'off',
             readOnly: readonlyValue.value,
@@ -133,7 +134,7 @@ watch(
     (dark) => {
         if (editorNode != null) {
             editorNode.updateOptions({
-                theme: dark ? 'vs-dark' : 'vs',
+                theme: dark ? 'rdm-dark' : 'rdm-light',
             })
         }
     },

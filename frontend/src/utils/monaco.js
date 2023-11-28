@@ -1,9 +1,10 @@
+import * as monaco from 'monaco-editor'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 
-export const setupMonacoWorker = () => {
+export const setupMonaco = () => {
     window.MonacoEnvironment = {
         getWorker: (_, label) => {
             switch (label) {
@@ -20,4 +21,23 @@ export const setupMonacoWorker = () => {
             }
         },
     }
+
+    // setup light theme
+    monaco.editor.defineTheme('rdm-light', {
+        base: 'vs',
+        inherit: true,
+        rules: [],
+        colors: {
+            'editorLineNumber.foreground': '#BABBBD',
+            'editorLineNumber.activeForeground': '#777D83',
+        },
+    })
+
+    // setup dark theme
+    monaco.editor.defineTheme('rdm-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {},
+    })
 }

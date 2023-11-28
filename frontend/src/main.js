@@ -9,7 +9,7 @@ import { i18n } from '@/utils/i18n.js'
 import { setupDiscreteApi } from '@/utils/discrete.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { loadEnvironment } from '@/utils/platform.js'
-import { setupMonacoWorker } from '@/utils/monaco_worker.js'
+import { setupMonaco } from '@/utils/monaco.js'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -20,7 +20,7 @@ async function setupApp() {
     app.use(createPinia())
 
     await loadEnvironment()
-    setupMonacoWorker()
+    setupMonaco()
     const prefStore = usePreferencesStore()
     await prefStore.loadPreferences()
     await setupDiscreteApi()
