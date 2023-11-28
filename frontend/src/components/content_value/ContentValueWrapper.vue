@@ -12,6 +12,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { isEmpty } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import { useI18n } from 'vue-i18n'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -24,6 +25,7 @@ const props = defineProps({
         default: {},
     },
 })
+const i18n = useI18n()
 
 /**
  *
@@ -123,11 +125,11 @@ const onRename = () => {
 }
 
 const onDelete = () => {
-    $dialog.warning(i18n.t('dialogue.remove_tip', { name: props.keyPath }), () => {
+    $dialog.warning(i18n.t('dialogue.remove_tip', { name: data.value.keyPath }), () => {
         const { name, db } = data.value
         browserStore.deleteKey(name, db, keyName.value).then((success) => {
             if (success) {
-                $message.success(i18n.t('dialogue.delete_key_succ', { key: props.keyPath }))
+                $message.success(i18n.t('dialogue.delete_key_succ', { key: data.value.keyPath }))
             }
         })
     })
