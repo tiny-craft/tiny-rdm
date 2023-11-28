@@ -11,6 +11,7 @@ import FullScreen from '@/components/icons/FullScreen.vue'
 import WindowClose from '@/components/icons/WindowClose.vue'
 import Pin from '@/components/icons/Pin.vue'
 import OffScreen from '@/components/icons/OffScreen.vue'
+import ContentEditor from '@/components/content_value/ContentEditor.vue'
 
 const props = defineProps({
     field: {
@@ -79,6 +80,19 @@ const displayValue = computed(() => {
     }
     return viewAs.value
 })
+const editingContent = ref('')
+const enableSave = computed(() => {
+    return editingContent.value !== viewAs.value
+})
+
+const viewLanguage = computed(() => {
+    switch (viewAs.format) {
+        case formatTypes.JSON:
+            return 'json'
+        default:
+            return 'plaintext'
+    }
+})
 
 const btnStyle = computed(() => ({
     padding: '3px',
@@ -112,7 +126,7 @@ const onFormatChanged = async (decode = '', format = '') => {
             format,
         })
         viewAs.field = props.field + ''
-        viewAs.value = value
+        editingContent.value = viewAs.value = value
         viewAs.decode = decode || retDecode
         viewAs.format = format || retFormat
     } finally {
@@ -125,6 +139,10 @@ const onUpdateValue = (value) => {
     viewAs.value = value
 }
 
+const onInput = (content) => {
+    editingContent.value = content
+}
+
 const onToggleFullscreen = () => {
     emit('update:fullscreen', !!!props.fullscreen)
 }
@@ -135,7 +153,7 @@ const onClose = () => {
 }
 
 const onSave = () => {
-    emit('save', viewAs.field, viewAs.value, viewAs.decode, viewAs.format)
+    emit('save', viewAs.field, editingContent.value, viewAs.decode, viewAs.format)
     if (!isPin.value) {
         nextTick().then(onClose)
     }
@@ -160,14 +178,14 @@ const onSave = () => {
                 <!-- value -->
                 <div class="editor-content-item flex-box-v flex-item-expand">
                     <div class="editor-content-item-label">{{ props.valueLabel }}</div>
-                    <n-input
-                        :placeholder="props.value"
-                        :resizable="false"
-                        :value="displayValue"
-                        autofocus
+                    <content-editor
+                        :border="true"
+                        :content="displayValue"
+                        :language="viewLanguage"
                         class="flex-item-expand"
-                        type="textarea"
-                        @update:value="onUpdateValue" />
+                        style="height: 100%"
+                        @input="onInput"
+                        @reset="onInput" />
                     <format-selector
                         :decode="viewAs.decode"
                         :format="viewAs.format"
@@ -202,7 +220,7 @@ const onSave = () => {
             </template>
             <template #action>
                 <n-space :wrap="false" :wrap-item="false" justify="end">
-                    <n-button ghost @click="onSave">
+                    <n-button :disabled="!enableSave" :secondary="enableSave" type="primary" @click="onSave">
                         <template #icon>
                             <n-icon :component="Save" />
                         </template>

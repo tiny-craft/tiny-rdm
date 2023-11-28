@@ -162,6 +162,7 @@ const saveEdit = async (field, value, decode, format) => {
             index: [currentEditRow.no - 1],
         })
         if (success) {
+            currentEditRow.value = value
             $message.success(i18n.t('dialogue.save_value_succ'))
         } else {
             $message.error(msg)
