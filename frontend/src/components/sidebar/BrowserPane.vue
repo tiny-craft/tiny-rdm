@@ -1,5 +1,5 @@
 <script setup>
-import { NIcon, useThemeVars } from 'naive-ui'
+import { useThemeVars } from 'naive-ui'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
@@ -11,6 +11,8 @@ import { useI18n } from 'vue-i18n'
 import { types } from '@/consts/support_redis_type.js'
 import Search from '@/components/icons/Search.vue'
 import Unlink from '@/components/icons/Unlink.vue'
+import Filter from '@/components/icons/Filter.vue'
+import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
@@ -60,24 +62,9 @@ const filterTypeOptions = computed(() => {
 <template>
     <div class="nav-pane-container flex-box-v">
         <browser-tree ref="browserTreeRef" :server="currentName" />
-
-        <div v-if="filterForm.showFilter" class="nav-pane-bottom flex-box-h">
-            <n-input-group>
-                <n-select
-                    v-model:value="filterForm.type"
-                    :consistent-menu-width="false"
-                    :options="filterTypeOptions"
-                    style="width: 120px" />
-                <n-input clearable placeholder="" />
-                <n-button :focusable="false" ghost>
-                    <template #icon>
-                        <n-icon :component="Search" />
-                    </template>
-                </n-button>
-            </n-input-group>
-        </div>
+        s
         <!-- bottom function bar -->
-        <div class="nav-pane-bottom flex-box-h">
+        <div class="nav-pane-bottom flex-box-v">
             <!--            <switch-button-->
             <!--                v-model:value="viewType"-->
             <!--                :icons="[TreeView, ListView]"-->
@@ -86,19 +73,83 @@ const filterTypeOptions = computed(() => {
             <!--                unselect-stroke-width="3"-->
             <!--                @update:value="onSwitchView" />-->
             <!--            <icon-button :icon="Status" size="20" stroke-width="4" t-tooltip="interface.status" @click="onInfo" />-->
-            <icon-button :icon="Refresh" size="20" stroke-width="4" t-tooltip="interface.reload" @click="onRefresh" />
-            <div class="flex-item-expand" />
-            <icon-button
-                :icon="Unlink"
-                size="20"
-                stroke-width="4"
-                t-tooltip="interface.disconnect"
-                @click="onDisconnect" />
+            <div
+                v-show="filterForm.showFilter"
+                class="flex-box-h nav-pane-func"
+                style="padding-left: 3px; padding-right: 3px">
+                <!--                <n-input-group v-show="filterForm.showFilter">-->
+                <!--                    <n-select-->
+                <!--                        v-model:value="filterForm.type"-->
+                <!--                        :consistent-menu-width="false"-->
+                <!--                        :options="filterTypeOptions"-->
+                <!--                        style="width: 120px" />-->
+                <!--                    <n-input clearable placeholder="">-->
+                <!--                        <template #prefix></template>-->
+                <!--                    </n-input>-->
+                <!--                    <n-button :focusable="false" ghost>-->
+                <!--                        <template #icon>-->
+                <!--                            <n-icon :component="Search" />-->
+                <!--                        </template>-->
+                <!--                    </n-button>-->
+                <!--                </n-input-group>-->
+                <content-search-input :full-search-icon="Search">
+                    <template #prepend>
+                        <n-select
+                            v-model:value="filterForm.type"
+                            :consistent-menu-width="false"
+                            :options="filterTypeOptions"
+                            style="width: 120px" />
+                    </template>
+                </content-search-input>
+            </div>
+            <div class="flex-box-h nav-pane-func">
+                <icon-button
+                    :button-class="{
+                        'filter-on': filterForm.showFilter,
+                        'filter-off': !filterForm.showFilter,
+                        'toggle-btn': true,
+                        'nav-pane-func-btn': true,
+                    }"
+                    :icon="Filter"
+                    size="20"
+                    stroke-width="4"
+                    t-tooltip="interface.filter_key"
+                    @click="filterForm.showFilter = !filterForm.showFilter" />
+                <icon-button
+                    :button-class="['nav-pane-func-btn']"
+                    :icon="Refresh"
+                    size="20"
+                    stroke-width="4"
+                    t-tooltip="interface.reload"
+                    @click="onRefresh" />
+                <div class="flex-item-expand" />
+                <icon-button
+                    :button-class="['nav-pane-func-btn']"
+                    :icon="Unlink"
+                    size="20"
+                    stroke-width="4"
+                    t-tooltip="interface.disconnect"
+                    @click="onDisconnect" />
+            </div>
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
+:deep(.toggle-btn) {
+    border-style: solid;
+    border-width: 1px;
+}
+
+:deep(.filter-on) {
+    border-color: v-bind('themeVars.borderColor');
+    background-color: v-bind('themeVars.borderColor');
+}
+
+:deep(.filter-off) {
+    border-color: #0000;
+}
+
 .nav-pane-bottom {
     color: v-bind('themeVars.iconColor');
     border-top: v-bind('themeVars.borderColor') 1px solid;

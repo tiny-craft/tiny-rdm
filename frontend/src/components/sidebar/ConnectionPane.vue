@@ -18,14 +18,16 @@ const filterPattern = ref('')
         <connection-tree :filter-pattern="filterPattern" />
 
         <!-- bottom function bar -->
-        <div class="nav-pane-bottom flex-box-h">
+        <div class="nav-pane-bottom nav-pane-func flex-box-h">
             <icon-button
+                :button-class="['nav-pane-func-btn']"
                 :icon="AddLink"
                 size="20"
                 stroke-width="4"
                 t-tooltip="interface.new_conn"
                 @click="dialogStore.openNewDialog()" />
             <icon-button
+                :button-class="['nav-pane-func-btn']"
                 :icon="AddGroup"
                 size="20"
                 stroke-width="4"

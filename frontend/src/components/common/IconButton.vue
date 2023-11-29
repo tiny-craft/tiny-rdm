@@ -25,6 +25,7 @@ const props = defineProps({
     border: Boolean,
     disabled: Boolean,
     buttonStyle: [String, Object],
+    buttonClass: [String, Object],
 })
 
 const hasTooltip = computed(() => {
@@ -36,6 +37,7 @@ const hasTooltip = computed(() => {
     <n-tooltip v-if="hasTooltip" :show-arrow="false">
         <template #trigger>
             <n-button
+                :class="props.buttonClass"
                 :color="props.color"
                 :disabled="disabled"
                 :focusable="false"
@@ -57,10 +59,12 @@ const hasTooltip = computed(() => {
     </n-tooltip>
     <n-button
         v-else
+        :class="props.buttonClass"
         :color="props.color"
         :disabled="disabled"
         :focusable="false"
         :loading="loading"
+        :style="props.buttonStyle"
         :text="!border"
         :type="type"
         @click.prevent="emit('click')">

@@ -94,26 +94,13 @@ const viewLanguage = computed(() => {
     }
 })
 
-const btnStyle = computed(() => ({
-    padding: '3px',
-    border: 'solid 1px #0000',
-    borderRadius: '3px',
-}))
-
-const pinBtnStyle = computed(() => ({
-    padding: '3px',
-    border: `solid 1px ${themeVars.value.borderColor}`,
-    borderRadius: '3px',
-    backgroundColor: themeVars.value.borderColor,
-}))
-
 /**
  *
- * @param {decodeTypes} decode
- * @param {formatTypes} format
+ * @param {decodeTypes|null} decode
+ * @param {formatTypes|null} format
  * @return {Promise<void>}
  */
-const onFormatChanged = async (decode = '', format = '') => {
+const onFormatChanged = async (decode = null, format = null) => {
     try {
         loading.value = true
         const {
@@ -196,21 +183,21 @@ const onSave = () => {
             <template #header-extra>
                 <n-space :size="5">
                     <icon-button
-                        :button-style="isPin ? pinBtnStyle : btnStyle"
+                        :button-class="{ 'pinable-btn': true, 'unpin-btn': !isPin, 'pin-btn': isPin }"
                         :icon="Pin"
                         :size="19"
                         :t-tooltip="isPin ? 'interface.unpin_edit' : 'interface.pin_edit'"
                         stroke-width="4"
                         @click="isPin = !isPin" />
                     <icon-button
-                        :button-style="btnStyle"
+                        :button-class="['pinable-btn', 'unpin-btn']"
                         :icon="props.fullscreen ? OffScreen : FullScreen"
                         :size="18"
                         stroke-width="5"
                         t-tooltip="interface.fullscreen"
                         @click="onToggleFullscreen" />
                     <icon-button
-                        :button-style="btnStyle"
+                        :button-class="['pinable-btn', 'unpin-btn']"
                         :icon="WindowClose"
                         :size="18"
                         stroke-width="5"
@@ -265,6 +252,22 @@ const onSave = () => {
 :deep(.n-card__action) {
     padding: 5px 10px;
     background-color: unset;
+}
+
+:deep(.pinable-btn) {
+    padding: 3px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 3px;
+}
+
+:deep(.unpin-btn) {
+    border-color: #0000;
+}
+
+:deep(.pin-btn) {
+    border-color: v-bind('themeVars.borderColor');
+    background-color: v-bind('themeVars.borderColor');
 }
 
 //:deep(.n-card--bordered) {

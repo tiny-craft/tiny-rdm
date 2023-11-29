@@ -130,12 +130,17 @@ body {
 .nav-pane-container {
   overflow: hidden;
 
-  .nav-pane-bottom {
+  .nav-pane-func {
     align-items: center;
-    gap: 8px;
-    padding: 3px 10px 3px 10px;
+    gap: 3px;
+    padding: 3px 8px;
     min-height: 30px;
-    //border-top: v-bind('themeVars.borderColor') 1px solid;
+
+    .nav-pane-func-btn {
+      padding: 3px;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
   }
 }
 

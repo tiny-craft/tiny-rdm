@@ -2,6 +2,14 @@
 import { computed, reactive } from 'vue'
 import { debounce, isEmpty, trim } from 'lodash'
 import { NButton, NInput } from 'naive-ui'
+import IconButton from '@/components/common/IconButton.vue'
+
+const props = defineProps({
+    fullSearchIcon: {
+        type: [String, Object],
+        default: null,
+    },
+})
 
 const emit = defineEmits(['filterChanged', 'matchChanged'])
 
@@ -58,6 +66,7 @@ defineExpose({
 
 <template>
     <n-input-group>
+        <slot name="prepend" />
         <n-input
             v-model:value="inputData.filter"
             :placeholder="$t('interface.filter')"
@@ -75,9 +84,17 @@ defineExpose({
                 </n-tooltip>
             </template>
         </n-input>
-        <n-button :disabled="hasMatch && !hasFilter" :focusable="false" @click="onFullSearch">
+        <icon-button
+            v-if="props.fullSearchIcon"
+            :disabled="hasMatch && !hasFilter"
+            :icon="props.fullSearchIcon"
+            border
+            t-tooltip="interface.full_search"
+            @click="onFullSearch" />
+        <n-button v-else :disabled="hasMatch && !hasFilter" :focusable="false" @click="onFullSearch">
             {{ $t('interface.full_search') }}
         </n-button>
+        <slot name="append" />
     </n-input-group>
 </template>
 
