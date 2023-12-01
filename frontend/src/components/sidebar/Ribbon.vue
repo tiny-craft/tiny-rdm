@@ -13,8 +13,10 @@ import usePreferencesStore from 'stores/preferences.js'
 import Record from '@/components/icons/Record.vue'
 import { extraTheme } from '@/utils/extra_theme.js'
 import useBrowserStore from 'stores/browser.js'
+import { useRender } from '@/utils/render.js'
 
 const themeVars = useThemeVars()
+const render = useRender()
 
 const props = defineProps({
     value: {
@@ -30,9 +32,6 @@ const props = defineProps({
 const emit = defineEmits(['update:value'])
 
 const iconSize = computed(() => Math.floor(props.width * 0.45))
-const renderIcon = (icon) => {
-    return () => h(NIcon, null, { default: () => h(icon, { strokeWidth: 3 }) })
-}
 
 const browserStore = useBrowserStore()
 const i18n = useI18n()
@@ -62,12 +61,12 @@ const preferencesOptions = computed(() => {
         {
             label: i18n.t('menu.preferences'),
             key: 'preferences',
-            icon: renderIcon(Config),
+            icon: render.renderIcon(Config, { strokeWidth: 3 }),
         },
         // {
         //     label: i18n.t('menu.help'),
         //     key: 'help',
-        //     icon: renderIcon(Help),
+        //     icon: render.renderIcon(Help, { strokeWidth: 3 }),
         // },
         {
             label: i18n.t('menu.check_update'),
@@ -122,22 +121,20 @@ const exThemeVars = computed(() => {
         }"
         class="flex-box-v">
         <div class="ribbon-wrapper flex-box-v">
-            <div
-                v-for="(m, i) in menuOptions"
-                v-show="m.show !== false"
-                :key="i"
-                :class="{ 'ribbon-item-active': props.value === m.key }"
-                class="ribbon-item clickable"
-                @click="emit('update:value', m.key)">
-                <n-tooltip :delay="2" :show-arrow="false" placement="right">
-                    <template #trigger>
+            <n-tooltip v-for="(m, i) in menuOptions" :key="i" :delay="2" :show-arrow="false" placement="right">
+                <template #trigger>
+                    <div
+                        v-show="m.show !== false"
+                        :class="{ 'ribbon-item-active': props.value === m.key }"
+                        class="ribbon-item clickable"
+                        @click="emit('update:value', m.key)">
                         <n-icon :size="iconSize">
                             <component :is="m.icon" :stroke-width="3.5" />
                         </n-icon>
-                    </template>
-                    {{ m.label }}
-                </n-tooltip>
-            </div>
+                    </div>
+                </template>
+                {{ m.label }}
+            </n-tooltip>
         </div>
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">

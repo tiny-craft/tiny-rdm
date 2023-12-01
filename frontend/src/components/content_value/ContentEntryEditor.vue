@@ -266,8 +266,8 @@ const onSave = () => {
 }
 
 :deep(.pin-btn) {
-    border-color: v-bind('themeVars.borderColor');
-    background-color: v-bind('themeVars.borderColor');
+    border-color: v-bind('themeVars.iconColorDisabled');
+    background-color: v-bind('themeVars.iconColorDisabled');
 }
 
 //:deep(.n-card--bordered) {

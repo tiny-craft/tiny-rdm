@@ -101,6 +101,7 @@ const handleMouseOver = () => {
         top: 0;
         bottom: 0;
         transition: background-color 0.3s ease-in;
+        z-index: 1;
     }
 
     .resize-divider-hide {
