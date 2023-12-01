@@ -26,6 +26,7 @@ const props = defineProps({
     disabled: Boolean,
     buttonStyle: [String, Object],
     buttonClass: [String, Object],
+    small: Boolean,
 })
 
 const hasTooltip = computed(() => {
@@ -42,6 +43,7 @@ const hasTooltip = computed(() => {
                 :disabled="disabled"
                 :focusable="false"
                 :loading="loading"
+                :size="small ? 'small' : ''"
                 :style="props.buttonStyle"
                 :text="!border"
                 :type="type"
@@ -64,6 +66,7 @@ const hasTooltip = computed(() => {
         :disabled="disabled"
         :focusable="false"
         :loading="loading"
+        :size="small ? 'small' : ''"
         :style="props.buttonStyle"
         :text="!border"
         :type="type"

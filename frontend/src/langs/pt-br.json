@@ -246,8 +246,7 @@
     },
     "filter": {
       "set_key_filter": "Definir Filtro de Chave",
-      "filter_pattern": "Padrão",
-      "filter_pattern_tip": "prefixo_*: Corresponde a nomes de chaves que começam com \"prefixo_\".\n*_sufixo: Corresponde a nomes de chaves que terminam com \"_sufixo\".\n*padrão*: Corresponde a nomes de chaves que contêm \"padrão\".\nprefixo_??: Corresponde a nomes de chaves que começam com \"prefixo_\" seguido por dois caracteres.\n*abc*: Corresponde a nomes de chaves que contêm \"abc\" em qualquer posição."
+      "filter_pattern": "Padrão"
     },
     "ttl": {
       "title": "Definir TTL da Chave"

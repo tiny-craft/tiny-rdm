@@ -40,11 +40,7 @@ watch(
 )
 
 const browserStore = useBrowserStore()
-const onConfirm = () => {
-    const { server, db, type, pattern } = filterForm
-    browserStore.setKeyFilter(server, db, pattern, type)
-    browserStore.reopenDatabase(server, db)
-}
+const onConfirm = () => {}
 
 const onClose = () => {
     dialogStore.closeKeyFilterDialog()

@@ -20,9 +20,11 @@ import { hexGammaCorrection, parseHexColor, toHexColor } from '@/utils/rgb.js'
 import IconButton from '@/components/common/IconButton.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import useBrowserStore from 'stores/browser.js'
+import { useRender } from '@/utils/render.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
+const render = useRender()
 const connectingServer = ref('')
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
@@ -59,12 +61,12 @@ const menuOptions = {
         {
             key: 'group_rename',
             label: i18n.t('interface.rename_conn_group'),
-            icon: renderIcon(Edit),
+            icon: render.renderIcon(Edit),
         },
         {
             key: 'group_delete',
             label: i18n.t('interface.remove_conn_group'),
-            icon: renderIcon(Delete),
+            icon: render.renderIcon(Delete),
         },
     ],
     [ConnectionType.Server]: ({ name }) => {
@@ -74,17 +76,17 @@ const menuOptions = {
                 {
                     key: 'server_close',
                     label: i18n.t('interface.disconnect'),
-                    icon: renderIcon(Unlink),
+                    icon: render.renderIcon(Unlink),
                 },
                 {
                     key: 'server_edit',
                     label: i18n.t('interface.edit_conn'),
-                    icon: renderIcon(Config),
+                    icon: render.renderIcon(Config),
                 },
                 {
                     key: 'server_dup',
                     label: i18n.t('interface.dup_conn'),
-                    icon: renderIcon(CopyLink),
+                    icon: render.renderIcon(CopyLink),
                 },
                 {
                     type: 'divider',
@@ -93,7 +95,7 @@ const menuOptions = {
                 {
                     key: 'server_remove',
                     label: i18n.t('interface.remove_conn'),
-                    icon: renderIcon(Delete),
+                    icon: render.renderIcon(Delete),
                 },
             ]
         } else {
@@ -101,17 +103,17 @@ const menuOptions = {
                 {
                     key: 'server_open',
                     label: i18n.t('interface.open_connection'),
-                    icon: renderIcon(Connect),
+                    icon: render.renderIcon(Connect),
                 },
                 {
                     key: 'server_edit',
                     label: i18n.t('interface.edit_conn'),
-                    icon: renderIcon(Config),
+                    icon: render.renderIcon(Config),
                 },
                 {
                     key: 'server_dup',
                     label: i18n.t('interface.dup_conn'),
-                    icon: renderIcon(CopyLink),
+                    icon: render.renderIcon(CopyLink),
                 },
                 {
                     type: 'divider',
@@ -120,7 +122,7 @@ const menuOptions = {
                 {
                     key: 'server_remove',
                     label: i18n.t('interface.remove_conn'),
-                    icon: renderIcon(Delete),
+                    icon: render.renderIcon(Delete),
                 },
             ]
         }

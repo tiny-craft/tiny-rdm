@@ -109,14 +109,16 @@ const onAdd = async () => {
             $message.error(err)
         }
     })
-    await subFormRef.value?.validate((errs) => {
-        const err = get(errs, '0.0.message')
-        if (err != null) {
-            $message.error(err)
-        } else {
-            $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('dialogue.field.element') }))
-        }
-    })
+    if (subFormRef.value?.validate) {
+        await subFormRef.value?.validate((errs) => {
+            const err = get(errs, '0.0.message')
+            if (err != null) {
+                $message.error(err)
+            } else {
+                $message.error(i18n.t('dialogue.spec_field_required', { key: i18n.t('dialogue.field.element') }))
+            }
+        })
+    }
     try {
         const { server, db, key, type, ttl } = newForm
         let { value } = newForm

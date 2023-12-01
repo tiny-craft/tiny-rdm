@@ -255,7 +255,7 @@
     "filter": {
       "set_key_filter": "Set Key Filter",
       "filter_pattern": "Pattern",
-      "filter_pattern_tip": "prefix_*: Matches key names starting with \"prefix_\".\n*_suffix: Matches key names ending with \"_suffix\".\n*pattern*: Matches key names containing \"pattern\".\nprefix_??: Matches key names starting with \"prefix_\" followed by any two characters.\n*abc*: Matches key names containing \"abc\" at any position."
+      "filter_pattern_tip": "* : Matches zero or more characters. For example, 'key*' matches all keys starting with 'key'.\n? : Matches a single character. For example, 'key?' matches 'key1', 'key2'.\n[] : Matches a single character within the specified range. For example, 'key[1-3]' matches keys like 'key1', 'key2', 'key3'.\n\\ : Escape character. To match *, ?, [, or ], use the backslash '\\' for escaping."
     },
     "ttl": {
       "title": "Set Key TTL"

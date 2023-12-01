@@ -1,7 +1,7 @@
 <script setup>
-import { computed, h, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, h, nextTick, reactive, ref } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { NIcon, NSpace, NTag, useThemeVars } from 'naive-ui'
+import { NIcon, NSpace, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
@@ -12,30 +12,29 @@ import CopyLink from '@/components/icons/CopyLink.vue'
 import Add from '@/components/icons/Add.vue'
 import Layer from '@/components/icons/Layer.vue'
 import Delete from '@/components/icons/Delete.vue'
-import Connect from '@/components/icons/Connect.vue'
 import useDialogStore from 'stores/dialog.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
-import Unlink from '@/components/icons/Unlink.vue'
 import Filter from '@/components/icons/Filter.vue'
-import Close from '@/components/icons/Close.vue'
-import { typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
 import { parseHexColor } from '@/utils/rgb.js'
 import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import useBrowserStore from 'stores/browser.js'
+import { useRender } from '@/utils/render.js'
 
 const props = defineProps({
     server: String,
     keyView: String,
+    loading: Boolean,
+    pattern: String,
+    fullLoaded: Boolean,
 })
 
 const themeVars = useThemeVars()
+const render = useRender()
 const i18n = useI18n()
-const loading = ref(false)
-const loadingConnections = ref(false)
 const expandedKeys = ref([props.server])
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
@@ -55,8 +54,9 @@ const selectedKeys = computed(() => {
 })
 
 const data = computed(() => {
-    const dbs = get(browserStore.databases, props.server, [])
-    return dbs
+    // const dbs = get(browserStore.databases, props.server, [])
+    // return dbs
+    return browserStore.getKeyList(props.server)
 })
 
 const backgroundColor = computed(() => {
@@ -74,90 +74,44 @@ const contextMenuParam = reactive({
     y: 0,
     options: null,
 })
-const renderIcon = (icon) => {
-    return () => {
-        return h(NIcon, null, {
-            default: () => h(icon),
-        })
-    }
-}
+
 const menuOptions = {
-    [ConnectionType.Server]: () => {
-        return [
-            {
-                key: 'server_reload',
-                label: i18n.t('interface.reload'),
-                icon: renderIcon(Refresh),
-            },
-            {
-                key: 'server_close',
-                label: i18n.t('interface.disconnect'),
-                icon: renderIcon(Unlink),
-            },
-        ]
-    },
     [ConnectionType.RedisDB]: ({ opened }) => {
         if (opened) {
             return [
                 {
-                    key: 'db_reload',
-                    label: i18n.t('interface.reload'),
-                    icon: renderIcon(Refresh),
-                },
-                {
-                    key: 'db_newkey',
-                    label: i18n.t('interface.new_key'),
-                    icon: renderIcon(Add),
-                },
-                {
                     key: 'db_filter',
                     label: i18n.t('interface.filter_key'),
-                    icon: renderIcon(Filter),
+                    icon: render.renderIcon(Filter),
                 },
                 {
                     type: 'divider',
                     key: 'd1',
                 },
                 {
-                    key: 'db_flush',
-                    label: i18n.t('interface.flush_db'),
-                    icon: renderIcon(Delete),
-                },
-                {
                     type: 'divider',
                     key: 'd2',
                 },
-                {
-                    key: 'db_close',
-                    label: i18n.t('interface.close_db'),
-                    icon: renderIcon(Close),
-                },
             ]
         } else {
-            return [
-                {
-                    key: 'db_open',
-                    label: i18n.t('interface.open_db'),
-                    icon: renderIcon(Connect),
-                },
-            ]
+            return []
         }
     },
     [ConnectionType.RedisKey]: () => [
         // {
         //     key: 'key_reload',
         //     label: i18n.t('interface.reload'),
-        //     icon: renderIcon(Refresh),
+        //     icon: render.renderIcon(Refresh),
         // },
         {
             key: 'key_newkey',
             label: i18n.t('interface.new_key'),
-            icon: renderIcon(Add),
+            icon: render.renderIcon(Add),
         },
         {
             key: 'key_copy',
             label: i18n.t('interface.copy_path'),
-            icon: renderIcon(CopyLink),
+            icon: render.renderIcon(CopyLink),
         },
         {
             type: 'divider',
@@ -166,19 +120,19 @@ const menuOptions = {
         {
             key: 'key_remove',
             label: i18n.t('interface.batch_delete_key'),
-            icon: renderIcon(Delete),
+            icon: render.renderIcon(Delete),
         },
     ],
     [ConnectionType.RedisValue]: () => [
         {
             key: 'value_reload',
             label: i18n.t('interface.reload'),
-            icon: renderIcon(Refresh),
+            icon: render.renderIcon(Refresh),
         },
         {
             key: 'value_copy',
             label: i18n.t('interface.copy_key'),
-            icon: renderIcon(CopyLink),
+            icon: render.renderIcon(CopyLink),
         },
         {
             type: 'divider',
@@ -187,7 +141,7 @@ const menuOptions = {
         {
             key: 'value_remove',
             label: i18n.t('interface.remove_key'),
-            icon: renderIcon(Delete),
+            icon: render.renderIcon(Delete),
         },
     ],
 }
@@ -195,15 +149,6 @@ const menuOptions = {
 const renderContextLabel = (option) => {
     return h('div', { class: 'context-menu-item' }, option.label)
 }
-
-onMounted(async () => {
-    try {
-        // TODO: Show loading list status
-        loadingConnections.value = true
-    } finally {
-        loadingConnections.value = false
-    }
-})
 
 const expandKey = (key) => {
     const idx = indexOf(expandedKeys.value, key)
@@ -236,40 +181,11 @@ const handleSelectContextMenu = (key) => {
     const redisKey = rkc || rk
     const redisKeyName = !!rkc ? label : redisKey
     switch (key) {
-        case 'server_info':
-            tabStore.setSelectedKeys(props.server)
-            onUpdateSelectedKeys()
-            break
-        case 'server_reload':
-            expandedKeys.value = [props.server]
-            tabStore.setSelectedKeys(props.server)
-            browserStore.openConnection(props.server, true).then(() => {
-                $message.success(i18n.t('dialogue.reload_succ'))
-            })
-            break
-        case 'server_close':
-            browserStore.closeConnection(props.server)
-            break
-        case 'db_open':
-            nextTick().then(() => expandKey(nodeKey))
-            break
-        case 'db_reload':
-            resetExpandKey(props.server, db)
-            browserStore.reopenDatabase(props.server, db)
-            break
-        case 'db_close':
-            resetExpandKey(props.server, db, true)
-            browserStore.closeDatabase(props.server, db)
-            break
-        case 'db_flush':
-            dialogStore.openFlushDBDialog(props.server, db)
-            break
-        case 'db_newkey':
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
         case 'db_filter':
-            const { match: pattern, type } = browserStore.getKeyFilter(props.server, db)
+            const { match: pattern, type } = browserStore.getKeyFilter(props.server)
             dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
         case 'key_reload':
@@ -311,23 +227,6 @@ const handleSelectContextMenu = (key) => {
                     $message.error(e.message)
                 })
             break
-        case 'db_loadmore':
-            if (node != null && !!!node.loading && !!!node.fullLoaded) {
-                node.loading = true
-                browserStore
-                    .loadMoreKeys(props.server, db)
-                    .then((end) => {
-                        // fully loaded
-                        node.fullLoaded = end === true
-                    })
-                    .catch((e) => {
-                        $message.error(e.message)
-                    })
-                    .finally(() => {
-                        delete node.loading
-                    })
-            }
-            break
         case 'db_loadall':
             if (node != null && !!!node.loading) {
                 node.loading = true
@@ -347,10 +246,6 @@ const handleSelectContextMenu = (key) => {
             console.warn('TODO: handle context menu:' + key)
     }
 }
-
-defineExpose({
-    handleSelectContextMenu,
-})
 
 const onUpdateExpanded = (value, option, meta) => {
     expandedKeys.value = value
@@ -445,61 +340,6 @@ const renderPrefix = ({ option }) => {
 // render tree item label
 const renderLabel = ({ option }) => {
     switch (option.type) {
-        case ConnectionType.Server:
-            return h('b', {}, { default: () => option.label })
-        case ConnectionType.RedisDB:
-            const { name: server, db, opened = false } = option
-            let { match: matchPattern, type: typeFilter } = browserStore.getKeyFilter(server, db)
-            const items = []
-            if (opened) {
-                items.push(`${option.label} (${option.keys || 0}/${Math.max(option.maxKeys || 0, option.keys || 0)})`)
-            } else {
-                items.push(`${option.label} (${Math.max(option.maxKeys || 0, option.keys || 0)})`)
-            }
-            // show filter tag after label
-            // type filter tag
-            if (!isEmpty(typeFilter)) {
-                items.push(
-                    h(
-                        NTag,
-                        {
-                            size: 'small',
-                            closable: true,
-                            bordered: false,
-                            color: {
-                                color: typesBgColor[typeFilter],
-                                textColor: typesColor[typeFilter],
-                            },
-                            onClose: () => {
-                                // remove type filter
-                                browserStore.setKeyFilter(server, db, matchPattern)
-                                browserStore.reopenDatabase(server, db)
-                            },
-                        },
-                        { default: () => typeFilter },
-                    ),
-                )
-            }
-            // match pattern tag
-            if (!isEmpty(matchPattern) && matchPattern !== '*') {
-                items.push(
-                    h(
-                        NTag,
-                        {
-                            bordered: false,
-                            closable: true,
-                            size: 'small',
-                            onClose: () => {
-                                // remove key match pattern
-                                browserStore.setKeyFilter(server, db, '*', typeFilter)
-                                browserStore.reopenDatabase(server, db)
-                            },
-                        },
-                        { default: () => matchPattern },
-                    ),
-                )
-            }
-            return renderIconMenu(items)
         case ConnectionType.RedisKey:
             return `${option.label} (${option.keys || 0})`
         // case ConnectionType.RedisValue:
@@ -529,24 +369,6 @@ const calcDBMenu = (opened, loading, end) => {
     if (opened) {
         btns.push(
             h(IconButton, {
-                tTooltip: 'interface.filter_key',
-                icon: Filter,
-                disabled: loading === true,
-                onClick: () => handleSelectContextMenu('db_filter'),
-            }),
-            h(IconButton, {
-                tTooltip: 'interface.reload',
-                icon: Refresh,
-                disabled: loading === true,
-                onClick: () => handleSelectContextMenu('db_reload'),
-            }),
-            h(IconButton, {
-                tTooltip: 'interface.new_key',
-                icon: Add,
-                disabled: loading === true,
-                onClick: () => handleSelectContextMenu('db_newkey'),
-            }),
-            h(IconButton, {
                 tTooltip: 'interface.load_more',
                 icon: LoadList,
                 disabled: end === true,
@@ -562,38 +384,24 @@ const calcDBMenu = (opened, loading, end) => {
                 color: loading === true ? themeVars.value.primaryColor : '',
                 onClick: () => handleSelectContextMenu('db_loadall'),
             }),
-            h(IconButton, {
-                tTooltip: 'interface.flush_db',
-                icon: Delete,
-                disabled: loading === true,
-                onClick: () => handleSelectContextMenu('db_flush'),
-            }),
             // h(IconButton, {
             //     tTooltip: 'interface.more_action',
             //     icon: More,
             //     onClick: () => handleSelectContextMenu('more_action'),
             // }),
         )
-    } else {
-        btns.push(
-            h(IconButton, {
-                tTooltip: 'interface.open_db',
-                icon: Connect,
-                onClick: () => handleSelectContextMenu('db_open'),
-            }),
-        )
     }
     return btns
 }
 
-const calcLayerMenu = (loading, end) => {
+const calcLayerMenu = (loading) => {
     return [
         // reload layer enable only full loaded
         h(IconButton, {
-            tTooltip: end === true ? 'interface.reload' : 'interface.reload',
+            tTooltip: props.fullLoaded ? 'interface.reload' : 'interface.reload',
             icon: Refresh,
             loading: loading === true,
-            disabled: end !== true,
+            disabled: !props.fullLoaded,
             onClick: () => handleSelectContextMenu('key_reload'),
         }),
         h(IconButton, {
@@ -626,8 +434,7 @@ const renderSuffix = ({ option }) => {
             case ConnectionType.RedisDB:
                 return renderIconMenu(calcDBMenu(option.opened, option.loading, option.fullLoaded))
             case ConnectionType.RedisKey:
-                const fullLoaded = browserStore.isFullLoaded(props.server, option.db)
-                return renderIconMenu(calcLayerMenu(option.loading, fullLoaded))
+                return renderIconMenu(calcLayerMenu(option.loading))
             case ConnectionType.RedisValue:
                 return renderIconMenu(calcValueMenu())
         }
@@ -638,7 +445,7 @@ const renderSuffix = ({ option }) => {
 const nodeProps = ({ option }) => {
     return {
         onDblclick: () => {
-            if (loading.value) {
+            if (props.loading) {
                 console.warn('TODO: alert to ignore double click when loading')
                 return
             }
@@ -665,37 +472,29 @@ const nodeProps = ({ option }) => {
     }
 }
 
-const onLoadTree = async (node) => {
-    switch (node.type) {
-        case ConnectionType.RedisDB:
-            loading.value = true
-            try {
-                await browserStore.openDatabase(props.server, node.db)
-            } catch (e) {
-                $message.error(e.message)
-                node.isLeaf = undefined
-            } finally {
-                loading.value = false
-            }
-            break
-        // case ConnectionType.RedisKey:
-        //     console.warn('load redis key', node.redisKey)
-        //     node.keys = sumBy(node.children, 'keys')
-        //     break
-        // case ConnectionType.RedisValue:
-        //     node.keys = 1
-        //     break
-    }
-}
-
 const handleOutsideContextMenu = () => {
     contextMenuParam.show = false
 }
+
+// the NTree node may get incorrect height after change data
+// add key property to force refresh the component and then everything back to normal
+const treeKey = ref(0)
+defineExpose({
+    handleSelectContextMenu,
+    resetExpandKey,
+    refreshTree: () => {
+        treeKey.value = Date.now()
+    },
+})
 </script>
 
 <template>
-    <div :style="{ backgroundColor }" class="browser-tree-wrapper">
+    <div :style="{ backgroundColor }" class="flex-box-v browser-tree-wrapper">
+        <n-spin v-if="props.loading" class="fill-height" />
+        <n-empty v-else-if="!props.loading && isEmpty(data)" class="empty-content" />
         <n-tree
+            v-show="!props.loading && !isEmpty(data)"
+            :key="treeKey"
             :animated="false"
             :block-line="true"
             :block-node="true"
@@ -703,14 +502,16 @@ const handleOutsideContextMenu = () => {
             :data="data"
             :expand-on-click="false"
             :expanded-keys="expandedKeys"
+            :filter="(pattern, node) => includes(node.redisKey, pattern)"
             :node-props="nodeProps"
+            :pattern="props.pattern"
             :render-label="renderLabel"
             :render-prefix="renderPrefix"
             :render-suffix="renderSuffix"
             :selected-keys="selectedKeys"
+            :show-irrelevant-nodes="false"
             class="fill-height"
             virtual-scroll
-            @load="onLoadTree"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded" />
         <n-dropdown
@@ -727,6 +528,8 @@ const handleOutsideContextMenu = () => {
 </template>
 
 <style lang="scss" scoped>
+@import '@/styles/content';
+
 .browser-tree-wrapper {
     height: 100%;
     overflow: hidden;

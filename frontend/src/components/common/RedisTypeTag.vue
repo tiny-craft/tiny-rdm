@@ -12,7 +12,6 @@ const props = defineProps({
         default: 'STRING',
     },
     binaryKey: Boolean,
-    bordered: Boolean,
     size: String,
 })
 
@@ -27,9 +26,8 @@ const backgroundColor = computed(() => {
 
 <template>
     <n-tag
-        :bordered="props.bordered"
         :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
-        :color="{ color: backgroundColor, borderColor: fontColor, textColor: fontColor }"
+        :color="{ color: backgroundColor, textColor: fontColor }"
         :size="props.size"
         strong>
         {{ props.type }}

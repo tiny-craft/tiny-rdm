@@ -390,7 +390,20 @@ func (b *browserService) ServerInfo(name string) (resp types.JSResp) {
 // @param path contain connection name and db name
 func (b *browserService) OpenDatabase(connName string, db int, match string, keyType string) (resp types.JSResp) {
 	b.setClientCursor(connName, db, 0)
-	return b.LoadNextKeys(connName, db, match, keyType)
+
+	item, err := b.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	client, ctx := item.client, item.ctx
+	maxKeys := b.loadDBSize(ctx, client)
+
+	resp.Success = true
+	resp.Data = map[string]any{
+		"maxKeys": maxKeys,
+	}
+	return
 }
 
 // scan keys
@@ -433,6 +446,7 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 		// cluster mode
 		var mutex sync.Mutex
 		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			// FIXME: BUG? can not fully load in cluster mode? maybe remove the shared "cursor"
 			return scan(ctx, cli, func(k []any) {
 				mutex.Lock()
 				keys = append(keys, k...)

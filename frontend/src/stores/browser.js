@@ -50,9 +50,9 @@ import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
 import { BrowserTabType } from '@/consts/browser_tab_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { types } from '@/consts/support_redis_type.js'
 import useConnectionStore from 'stores/connections.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import { isRedisGlob } from '@/utils/glob_pattern.js'
 
 const useBrowserStore = defineStore('browser', {
     /**
@@ -70,8 +70,18 @@ const useBrowserStore = defineStore('browser', {
      * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
      * @property {boolean} [expanded] - current node is expanded
      * @property {DatabaseItem[]} [children]
-     * @property {boolean} [loading] - indicated that is loading children now
-     * @property {boolean} [fullLoaded] - indicated that all children already loaded
+     */
+
+    /**
+     * @typedef {Object} FilterItem
+     * @property {string} pattern key pattern filter
+     * @property {string} type type filter
+     */
+
+    /**
+     * @typedef {Object} LoadingState
+     * @property {string} loading indicated that is loading children now
+     * @property {string} fullLoaded indicated that all children already loaded
      */
 
     /**
@@ -85,8 +95,7 @@ const useBrowserStore = defineStore('browser', {
     /**
      * @typedef {Object} BrowserState
      * @property {Object} serverStats
-     * @property {Object.<string, string>} keyFilter key is 'server#db', 'server#-1' stores default filter pattern
-     * @property {Object.<string, string>} typeFilter key is 'server#db'
+     * @property {Object.<string, FilterItem>} filter
      * @property {Object.<string, KeyViewType>} viewType
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
@@ -98,16 +107,20 @@ const useBrowserStore = defineStore('browser', {
      */
     state: () => ({
         serverStats: {}, // current server status info
-        keyFilter: {}, // all key filters in opened connections group by 'server+db'
-        typeFilter: {}, // all key type filters in opened connections group by 'server+db'
+        filter: {}, // all filters in opened connections map by server and FilterItem
+        loadingState: {}, // all loading state in opened connections map by server and LoadingState
         viewType: {}, // view type selection for all opened connections group by 'server'
         databases: {}, // all databases in opened connections group by 'server name'
         nodeMap: {}, // all nodes in opened connections group by 'server#db' and 'type/key'
         keySet: {}, // all keys set in opened connections group by 'server#db
+        openedDB: {}, // opened database map by server and database index
     }),
     getters: {
         anyConnectionOpened() {
             return !isEmpty(this.databases)
+        },
+        selectedDatabases() {
+            return this.openedDB || {}
         },
     },
     actions: {
@@ -139,13 +152,22 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * get database by server name and index
-         * @param {string} connName
+         * get database info list
+         * @param server
+         * @return {DatabaseItem[]}
+         */
+        getDBList(server) {
+            return this.databases[server] || []
+        },
+
+        /**
+         * get database by server name and database index
+         * @param {string} server
          * @param {number} db
          * @return {DatabaseItem|null}
          */
-        getDatabase(connName, db) {
-            const dbs = this.databases[connName]
+        getDatabase(server, db) {
+            const dbs = this.databases[server]
             if (dbs != null) {
                 const selDB = find(dbs, (item) => item.db === db)
                 if (selDB != null) {
@@ -156,17 +178,24 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * get full loaded status of database
-         * @param connName
-         * @param db
-         * @return {boolean}
+         * get current selection database by server
+         * @param server
+         * @return {number}
          */
-        isFullLoaded(connName, db) {
-            const selDB = this.getDatabase(connName, db)
-            if (selDB != null) {
-                return selDB.fullLoaded === true
-            }
-            return false
+        getSelectedDB(server) {
+            return this.selectedDatabases[server] || 0
+        },
+
+        /**
+         * get key list in current database
+         * @param server
+         * @return {DatabaseItem[]}
+         */
+        getKeyList(server) {
+            const db = this.getSelectedDB(server)
+            const dbNodes = this.databases[server]
+            const node = find(dbNodes, (n) => n.db === db)
+            return node.children
         },
 
         /**
@@ -248,6 +277,7 @@ const useBrowserStore = defineStore('browser', {
             }
             this.databases[name] = dbs
             this.viewType[name] = view
+            this.openedDB[name] = get(dbs, '0.db', 0)
         },
 
         /**
@@ -265,12 +295,11 @@ const useBrowserStore = defineStore('browser', {
             const dbs = this.databases[name]
             if (!isEmpty(dbs)) {
                 for (const db of dbs) {
-                    this.removeKeyFilter(name, db.db)
                     this._getNodeMap(name, db.db).clear()
                     this._getKeySet(name, db.db).clear()
                 }
             }
-            this.removeKeyFilter(name, -1)
+            delete this.filter[name]
             delete this.databases[name]
             delete this.serverStats[name]
 
@@ -281,32 +310,32 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * open database and load all keys
-         * @param connName
+         * @param server
          * @param db
          * @returns {Promise<void>}
          */
-        async openDatabase(connName, db) {
-            const { match: filterPattern, type: filterType } = this.getKeyFilter(connName, db)
-            const { data, success, msg } = await OpenDatabase(connName, db, filterPattern, filterType)
+        async openDatabase(server, db) {
+            const { match: filterPattern, type: filterType } = this.getKeyFilter(server)
+            const { data, success, msg } = await OpenDatabase(server, db, filterPattern, filterType)
             if (!success) {
                 throw new Error(msg)
             }
             const { keys = [], end = false, maxKeys = 0 } = data
-            const selDB = this.getDatabase(connName, db)
+            const selDB = this.getDatabase(server, db)
             if (selDB == null) {
                 return
             }
 
             selDB.opened = true
-            selDB.fullLoaded = end
             selDB.maxKeys = maxKeys
+            set(this.loadingState, 'fullLoaded', end)
             if (isEmpty(keys)) {
                 selDB.children = []
             } else {
                 // append db node to current connection's children
-                this._addKeyNodes(connName, db, keys)
+                this._addKeyNodes(server, db, keys)
             }
-            this._tidyNode(connName, db)
+            this._tidyNode(server, db)
         },
 
         /**
@@ -325,24 +354,27 @@ const useBrowserStore = defineStore('browser', {
 
             this._getNodeMap(connName, db).clear()
             this._getKeySet(connName, db).clear()
+            delete this.filter[connName]
         },
 
         /**
          * close database
-         * @param connName
+         * @param server
          * @param db
          */
-        closeDatabase(connName, db) {
-            const selDB = this.getDatabase(connName, db)
+        closeDatabase(server, db) {
+            const selDB = this.getDatabase(server, db)
             if (selDB == null) {
                 return
             }
             delete selDB.children
             selDB.isLeaf = false
             selDB.opened = false
+            selDB.keys = 0
 
-            this._getNodeMap(connName, db).clear()
-            this._getKeySet(connName, db).clear()
+            this._getNodeMap(server, db).clear()
+            this._getKeySet(server, db).clear()
+            delete this.filter[server]
         },
 
         /**
@@ -547,7 +579,7 @@ const useBrowserStore = defineStore('browser', {
             let match = prefix
             if (isEmpty(match)) {
                 match = '*'
-            } else {
+            } else if (!isRedisGlob(match)) {
                 const separator = this._getSeparator(connName)
                 if (!endsWith(prefix, separator + '*')) {
                     match = prefix + separator + '*'
@@ -563,7 +595,7 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<boolean>}
          */
         async loadMoreKeys(connName, db) {
-            const { match, type: keyType } = this.getKeyFilter(connName, db)
+            const { match, type: keyType } = this.getKeyFilter(connName)
             const { keys, maxKeys, end } = await this._loadKeys(connName, db, match, keyType, false)
             this._setDBMaxKeys(connName, db, maxKeys)
             // remove current keys below prefix
@@ -1936,41 +1968,32 @@ const useBrowserStore = defineStore('browser', {
         /**
          * get key filter pattern and filter type
          * @param {string} server
-         * @param {number} db
          * @returns {{match: string, type: string}}
          */
-        getKeyFilter(server, db) {
-            let match, type
-            const key = `${server}#${db}`
-            if (!this.keyFilter.hasOwnProperty(key)) {
-                // get default key filter from connection profile
+        getKeyFilter(server) {
+            let { pattern = '', type = '' } = this.filter[server] || {}
+            if (isEmpty(pattern)) {
+                // no custom match pattern, use default
                 const conn = useConnectionStore()
-                match = conn.getDefaultKeyFilter(server)
-            } else {
-                match = this.keyFilter[key] || '*'
+                pattern = conn.getDefaultKeyFilter(server)
             }
-            type = this.typeFilter[`${server}#${db}`] || ''
             return {
-                match,
+                match: pattern,
                 type: toUpper(type),
             }
         },
 
         /**
-         * set key filter
+         *
          * @param {string} server
-         * @param {number} db
-         * @param {string} pattern
          * @param {string} [type]
+         * @param {string} [pattern]
          */
-        setKeyFilter(server, db, pattern, type) {
-            this.keyFilter[`${server}#${db}`] = pattern || '*'
-            this.typeFilter[`${server}#${db}`] = types[toUpper(type)] || ''
-        },
-
-        removeKeyFilter(server, db) {
-            this.keyFilter[`${server}#${db}`] = '*'
-            delete this.typeFilter[`${server}#${db}`]
+        setKeyFilter(server, { type, pattern }) {
+            const filter = this.filter[server] || {}
+            filter.type = type === null ? filter.type : type
+            filter.pattern = type === null ? filter.pattern : pattern
+            this.filter[server] = filter
         },
     },
 })

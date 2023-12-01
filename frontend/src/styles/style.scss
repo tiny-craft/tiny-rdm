@@ -25,6 +25,14 @@ body {
   overflow: hidden;
 }
 
+@mixin bottom-shadow($transparent) {
+  box-shadow: 0 5px 5px -5px rgba(0, 0, 0, $transparent);
+}
+
+@mixin top-shadow($transparent) {
+  box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, $transparent);
+}
+
 #app {
   height: 100vh;
 }
@@ -61,13 +69,9 @@ body {
 }
 
 .ellipsis {
-  white-space: nowrap; /* 禁止文本换行 */
-  overflow: hidden; /* 隐藏超出容器的文本 */
-  text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
-}
-
-.unit-item {
-  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fill-height {
@@ -106,6 +110,7 @@ body {
   }
 
   .value-footer {
+    @include top-shadow(0.1);
     align-items: center;
     gap: 0;
     padding: 3px 10px 3px 10px;
@@ -132,6 +137,7 @@ body {
 
   .nav-pane-func {
     align-items: center;
+    justify-content: flex-end;
     gap: 3px;
     padding: 3px 8px;
     min-height: 30px;
