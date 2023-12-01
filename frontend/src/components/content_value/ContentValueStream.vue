@@ -145,6 +145,11 @@ const entries = computed(() => {
     return `${len} / ${Math.max(len, props.length)}`
 })
 
+const loadProgress = computed(() => {
+    const len = size(props.value)
+    return (len * 100) / Math.max(len, props.length)
+})
+
 const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.STREAM)
 }
@@ -215,6 +220,16 @@ defineExpose({
                 {{ $t('interface.add_row') }}
             </n-button>
         </div>
+        <!-- loaded progress -->
+        <n-progress
+            :border-radius="0"
+            :color="props.end ? '#0000' : themeVars.primaryColor"
+            :height="2"
+            :percentage="loadProgress"
+            :processing="props.loading"
+            :show-indicator="false"
+            status="success"
+            type="line" />
         <div class="value-wrapper value-item-part flex-box-v flex-item-expand">
             <n-data-table
                 :bordered="false"

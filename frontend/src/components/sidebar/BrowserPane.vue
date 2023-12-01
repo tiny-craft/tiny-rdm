@@ -59,7 +59,7 @@ const loadProgress = computed(() => {
     if (db.maxKeys <= 0) {
         return 100
     }
-    return (db.keys * 100) / db.maxKeys
+    return (db.keys * 100) / Math.max(db.keys, db.maxKeys)
 })
 
 const onReload = async () => {
