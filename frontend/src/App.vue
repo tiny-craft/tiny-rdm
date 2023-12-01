@@ -4,9 +4,6 @@ import NewKeyDialog from './components/dialogs/NewKeyDialog.vue'
 import PreferencesDialog from './components/dialogs/PreferencesDialog.vue'
 import RenameKeyDialog from './components/dialogs/RenameKeyDialog.vue'
 import SetTtlDialog from './components/dialogs/SetTtlDialog.vue'
-import hljs from 'highlight.js/lib/core'
-import json from 'highlight.js/lib/languages/json'
-import plaintext from 'highlight.js/lib/languages/plaintext'
 import AddFieldsDialog from './components/dialogs/AddFieldsDialog.vue'
 import AppContent from './AppContent.vue'
 import GroupDialog from './components/dialogs/GroupDialog.vue'
@@ -21,9 +18,6 @@ import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime
 import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
-
-hljs.registerLanguage('json', json)
-hljs.registerLanguage('plaintext', plaintext)
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -57,7 +51,6 @@ watch(
 
 <template>
     <n-config-provider
-        :hljs="hljs"
         :inline-theme-disabled="true"
         :locale="prefStore.themeLocale"
         :theme="prefStore.isDark ? darkTheme : undefined"

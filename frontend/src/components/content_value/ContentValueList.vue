@@ -3,7 +3,7 @@ import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
-import { NButton, NCode, NIcon, useThemeVars } from 'naive-ui'
+import { NButton, NIcon, useThemeVars } from 'naive-ui'
 import { isEmpty, size } from 'lodash'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
@@ -102,7 +102,7 @@ const valueColumn = computed(() => ({
     },
     render: (row) => {
         if (displayCode.value) {
-            return h(NCode, { language: 'json', wordWrap: true, code: row.dv || row.v })
+            return h('pre', {}, row.dv || row.v)
         }
         return row.dv || row.v
     },
