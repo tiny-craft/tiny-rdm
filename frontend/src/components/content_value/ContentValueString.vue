@@ -77,25 +77,31 @@ const displayValue = computed(() => {
 watch(
     () => props.value,
     (val, oldVal) => {
-        if (val !== undefined && oldVal !== undefined) {
+        if (val !== undefined) {
             onFormatChanged(viewAs.decode, viewAs.format)
         }
     },
 )
 
+const converting = ref(false)
 const onFormatChanged = async (decode = '', format = '') => {
-    const {
-        value,
-        decode: retDecode,
-        format: retFormat,
-    } = await browserStore.convertValue({
-        value: props.value,
-        decode,
-        format,
-    })
-    editingContent.value = viewAs.value = value
-    viewAs.decode = decode || retDecode
-    viewAs.format = format || retFormat
+    try {
+        converting.value = true
+        const {
+            value,
+            decode: retDecode,
+            format: retFormat,
+        } = await browserStore.convertValue({
+            value: props.value,
+            decode,
+            format,
+        })
+        editingContent.value = viewAs.value = value
+        viewAs.decode = decode || retDecode
+        viewAs.format = format || retFormat
+    } finally {
+        converting.value = false
+    }
 }
 
 /**
@@ -152,9 +158,10 @@ const onSave = async () => {
 defineExpose({
     reset: () => {
         viewAs.value = ''
+        viewAs.decode = ''
+        viewAs.format = ''
         editingContent.value = ''
     },
-    beforeShow: () => onFormatChanged(),
 })
 </script>
 
@@ -195,9 +202,9 @@ defineExpose({
             </n-button-group>
         </div>
         <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
-            <n-spin :show="props.loading" />
+            <n-spin :show="props.loading || converting" />
             <content-editor
-                v-show="!props.loading"
+                v-show="!(props.loading || converting)"
                 :content="displayValue"
                 :language="viewLanguage"
                 :loading="props.loading"

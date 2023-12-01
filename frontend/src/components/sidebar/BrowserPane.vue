@@ -269,7 +269,7 @@ onMounted(() => onReload())
                     size="20"
                     t-tooltip="interface.load_all"
                     @click="onLoadAll" />
-                <div class="flex-item-expand" />
+                <div class="flex-item-expand" style="min-width: 10px" />
                 <icon-button
                     :button-class="['nav-pane-func-btn']"
                     :icon="Delete"

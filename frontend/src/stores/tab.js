@@ -235,7 +235,7 @@ const useTabStore = defineStore('tab', {
                     tabData.value = assign(value, tabData.value || {})
                 }
             } else {
-                tabData.value = value || []
+                tabData.value = value
             }
         },
 

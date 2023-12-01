@@ -156,9 +156,6 @@ const initContent = async () => {
             contentRef.value?.reset()
         }
         await loadData(true, false, '')
-        if (contentRef.value?.beforeShow != null) {
-            await contentRef.value?.beforeShow()
-        }
     } finally {
         initializing.value = false
     }
