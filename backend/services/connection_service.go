@@ -358,3 +358,20 @@ func (c *connectionService) DeleteGroup(name string, includeConn bool) (resp typ
 	resp.Success = true
 	return
 }
+
+// SaveLastDB save last selected database index
+func (c *connectionService) SaveLastDB(name string, db int) (resp types.JSResp) {
+	param := c.conns.GetConnection(name)
+	if param == nil {
+		resp.Msg = "no connection named \"" + name + "\""
+		return
+	}
+
+	param.LastDB = db
+	if err := c.conns.UpdateConnection(name, param.ConnectionConfig); err != nil {
+		resp.Msg = "save connection fail:" + err.Error()
+		return
+	}
+	resp.Success = true
+	return
+}

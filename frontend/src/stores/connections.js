@@ -8,6 +8,7 @@ import {
     ListConnection,
     RenameGroup,
     SaveConnection,
+    SaveLastDB,
     SaveSortedConnection,
 } from 'wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '@/consts/connection_type.js'
@@ -330,6 +331,20 @@ const useConnectionStore = defineStore('connections', {
                 return { success: false, msg }
             }
             await this.initConnections(true)
+            return { success: true }
+        },
+
+        /**
+         * save last selected database
+         * @param {string} name
+         * @param {number} db
+         * @return {Promise<{success: boolean, [msg]: string}>}
+         */
+        async saveLastDB(name, db) {
+            const { success, msg } = await SaveLastDB(name, db)
+            if (!success) {
+                return { success: false, msg }
+            }
             return { success: true }
         },
 

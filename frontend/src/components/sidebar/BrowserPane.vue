@@ -3,7 +3,7 @@ import { useThemeVars } from 'naive-ui'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
-import { computed, onMounted, reactive, ref, unref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue'
 import { get, map } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -19,6 +19,7 @@ import { useRender } from '@/utils/render.js'
 import RedisTypeSelector from '@/components/common/RedisTypeSelector.vue'
 import { types } from '@/consts/support_redis_type.js'
 import Plus from '@/components/icons/Plus.vue'
+import useConnectionStore from 'stores/connections.js'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
@@ -26,6 +27,7 @@ const dialogStore = useDialogStore()
 // const prefStore = usePreferencesStore()
 const tabStore = useTabStore()
 const browserStore = useBrowserStore()
+const connectionStore = useConnectionStore()
 const render = useRender()
 const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
 const browserTreeRef = ref(null)
@@ -159,6 +161,8 @@ watch(
             browserTreeRef.value?.resetExpandKey(currentName.value, db)
             fullyLoaded.value = await browserStore.loadMoreKeys(currentName.value, db)
             browserTreeRef.value?.refreshTree()
+
+            nextTick().then(() => connectionStore.saveLastDB(currentName.value, db))
         } catch (e) {
             $message.error(e.message)
         } finally {

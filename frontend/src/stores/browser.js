@@ -255,11 +255,12 @@ const useBrowserStore = defineStore('browser', {
             // if (connNode == null) {
             //     throw new Error('no such connection')
             // }
-            const { db, view = KeyViewType.Tree } = data
+            const { db, view = KeyViewType.Tree, lastDB } = data
             if (isEmpty(db)) {
                 throw new Error('no db loaded')
             }
             const dbs = []
+            let containLastDB = false
             for (let i = 0; i < db.length; i++) {
                 this._getNodeMap(name, i).clear()
                 this._getKeySet(name, i).clear()
@@ -274,10 +275,18 @@ const useBrowserStore = defineStore('browser', {
                     isLeaf: false,
                     children: undefined,
                 })
+                if (db[i].index === lastDB) {
+                    containLastDB = true
+                }
             }
             this.databases[name] = dbs
             this.viewType[name] = view
-            this.openedDB[name] = get(dbs, '0.db', 0)
+            // get last selected db
+            if (containLastDB) {
+                this.openedDB[name] = lastDB
+            } else {
+                this.openedDB[name] = get(dbs, '0.db', 0)
+            }
         },
 
         /**

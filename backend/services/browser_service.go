@@ -198,8 +198,9 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"db":   dbs,
-		"view": selConn.KeyView,
+		"db":     dbs,
+		"view":   selConn.KeyView,
+		"lastDB": selConn.LastDB,
 	}
 	return
 }
