@@ -65,7 +65,7 @@ const onCopyKey = () => {
     ClipboardSetText(props.keyPath)
         .then((succ) => {
             if (succ) {
-                $message.success(i18n.t('dialogue.copy_succ'))
+                $message.success(i18n.t('interface.copy_succ'))
             }
         })
         .catch((e) => {

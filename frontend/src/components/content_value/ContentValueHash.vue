@@ -19,6 +19,7 @@ import Edit from '@/components/icons/Edit.vue'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -163,7 +164,7 @@ const saveEdit = async (field, value, decode, format) => {
         })
         if (success) {
             currentEditRow.value = value
-            $message.success(i18n.t('dialogue.save_value_succ'))
+            $message.success(i18n.t('interface.save_value_succ'))
         } else {
             $message.error(msg)
         }
@@ -183,7 +184,7 @@ const resetEdit = () => {
 const actionColumn = {
     key: 'action',
     title: i18n.t('interface.action'),
-    width: 100,
+    width: 120,
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
@@ -191,6 +192,16 @@ const actionColumn = {
         return h(EditableTableColumn, {
             editing: false,
             bindKey: row.k,
+            onCopy: async () => {
+                try {
+                    const succ = await ClipboardSetText(row.v)
+                    if (succ) {
+                        $message.success(i18n.t('interface.copy_succ'))
+                    }
+                } catch (e) {
+                    $message.error(e.message)
+                }
+            },
             onEdit: () => startEdit(index + 1, row.k, row.v),
             onDelete: async () => {
                 try {

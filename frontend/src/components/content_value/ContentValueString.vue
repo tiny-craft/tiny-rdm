@@ -111,7 +111,7 @@ const onCopyValue = () => {
     ClipboardSetText(displayValue.value)
         .then((succ) => {
             if (succ) {
-                $message.success(i18n.t('dialogue.copy_succ'))
+                $message.success(i18n.t('interface.copy_succ'))
             }
         })
         .catch((e) => {
@@ -144,7 +144,7 @@ const onSave = async () => {
         })
         if (success) {
             // await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
-            $message.success(i18n.t('dialogue.save_value_succ'))
+            $message.success(i18n.t('interface.save_value_succ'))
         } else {
             $message.error(msg)
         }

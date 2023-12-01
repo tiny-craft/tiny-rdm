@@ -15,6 +15,7 @@ import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -99,7 +100,7 @@ const valueColumn = computed(() => ({
 const actionColumn = {
     key: 'action',
     title: i18n.t('interface.action'),
-    width: 60,
+    width: 80,
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
@@ -107,6 +108,16 @@ const actionColumn = {
         return h(EditableTableColumn, {
             bindKey: row.id,
             readonly: true,
+            onCopy: async () => {
+                try {
+                    const succ = await ClipboardSetText(JSON.stringify(row.v))
+                    if (succ) {
+                        $message.success(i18n.t('interface.copy_succ'))
+                    }
+                } catch (e) {
+                    $message.error(e.message)
+                }
+            },
             onDelete: async () => {
                 try {
                     const { success, msg } = await browserStore.removeStreamValues(
@@ -175,20 +186,6 @@ defineExpose({
             @rename="emit('rename')" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
-                <!--                <n-input-group>-->
-                <!--                    <n-select-->
-                <!--                        v-model:value="filterType"-->
-                <!--                        :consistent-menu-width="false"-->
-                <!--                        :options="filterOption"-->
-                <!--                        style="width: 120px"-->
-                <!--                        @update:value="onChangeFilterType" />-->
-                <!--                    <n-input-->
-                <!--                        v-model:value="filterValue"-->
-                <!--                        :placeholder="$t('interface.search')"-->
-                <!--                        clearable-->
-                <!--                        @clear="clearFilter"-->
-                <!--                        @update:value="onFilterInput" />-->
-                <!--                </n-input-group>-->
                 <content-search-input
                     ref="searchInputRef"
                     @filter-changed="onFilterInput"
