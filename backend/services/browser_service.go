@@ -896,7 +896,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 
 				items = make([]types.ZSetEntryItem, 0, len(loadedVal))
 				for _, z := range loadedVal {
-					val := strutil.AnyToString(z.Score, "", 0)
+					val := strutil.AnyToString(z.Member, "", 0)
 					if doFilter && !strings.Contains(val, param.MatchPattern) {
 						continue
 					}
