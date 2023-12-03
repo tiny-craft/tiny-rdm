@@ -12,6 +12,7 @@ import WindowClose from '@/components/icons/WindowClose.vue'
 import Pin from '@/components/icons/Pin.vue'
 import OffScreen from '@/components/icons/OffScreen.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
+import usePreferencesStore from 'stores/preferences.js'
 
 const props = defineProps({
     field: {
@@ -42,6 +43,7 @@ const props = defineProps({
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
+const prefStore = usePreferencesStore()
 const emit = defineEmits([
     'update:field',
     'update:value',
@@ -169,6 +171,7 @@ const onSave = () => {
                         :border="true"
                         :content="displayValue"
                         :language="viewLanguage"
+                        :show-line-num="prefStore.showLineNum"
                         class="flex-item-expand"
                         style="height: 100%"
                         @input="onInput"

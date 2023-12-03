@@ -123,6 +123,9 @@ const onClose = () => {
                     <n-form-item :label="$t('preferences.general.font_size')">
                         <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
                     </n-form-item>
+                    <n-checkbox v-model:checked="prefStore.editor.showLineNum">
+                        {{ $t('preferences.editor.show_linenum') }}
+                    </n-checkbox>
                 </n-form>
             </n-tab-pane>
         </n-tabs>

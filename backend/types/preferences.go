@@ -23,7 +23,8 @@ func NewPreferences() Preferences {
 			CheckUpdate: true,
 		},
 		Editor: PreferencesEditor{
-			FontSize: consts.DEFAULT_FONT_SIZE,
+			FontSize:    consts.DEFAULT_FONT_SIZE,
+			ShowLineNum: true,
 		},
 	}
 }
@@ -48,6 +49,7 @@ type PreferencesGeneral struct {
 }
 
 type PreferencesEditor struct {
-	Font     string `json:"font" yaml:"font,omitempty"`
-	FontSize int    `json:"fontSize" yaml:"font_size"`
+	Font        string `json:"font" yaml:"font,omitempty"`
+	FontSize    int    `json:"fontSize" yaml:"font_size"`
+	ShowLineNum bool   `json:"showLineNum" yaml:"show_line_num,omitempty"`
 }

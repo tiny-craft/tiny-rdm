@@ -36,6 +36,7 @@ const usePreferencesStore = defineStore('preferences', {
             asideWidth: 300,
             windowWidth: 0,
             windowHeight: 0,
+            windowMaximised: false,
         },
         general: {
             theme: 'auto',
@@ -45,12 +46,13 @@ const usePreferencesStore = defineStore('preferences', {
             scanSize: 3000,
             useSysProxy: false,
             useSysProxyHttp: false,
-            checkUpdate: false,
+            checkUpdate: true,
             skipVersion: '',
         },
         editor: {
             font: '',
             fontSize: 14,
+            showLineNum: false,
         },
         lastPref: {},
         fontList: [],
@@ -181,6 +183,10 @@ const usePreferencesStore = defineStore('preferences', {
         autoCheckUpdate() {
             return get(this.general, 'checkUpdate', false)
         },
+
+        showLineNum() {
+            return get(this.editor, 'showLineNum', true)
+        },
     },
     actions: {
         _applyPreferences(data) {
@@ -198,6 +204,11 @@ const usePreferencesStore = defineStore('preferences', {
             if (success) {
                 this.lastPref = cloneDeep(data)
                 this._applyPreferences(data)
+                // default value
+                const showLineNum = get(data, 'editor.showLineNum')
+                if (showLineNum === undefined) {
+                    set(data, 'editor.showLineNum', true)
+                }
                 i18nGlobal.locale.value = this.currentLanguage
             }
         },

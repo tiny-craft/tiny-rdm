@@ -42,7 +42,8 @@
       "auto_check_update": "Automatically check for updates"
     },
     "editor": {
-      "name": "Editor"
+      "name": "Editor",
+      "show_linenum": "Show Line Numbers"
     }
   },
   "interface": {

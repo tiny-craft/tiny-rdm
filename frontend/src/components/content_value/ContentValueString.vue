@@ -14,9 +14,7 @@ import useBrowserStore from 'stores/browser.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
-
-const i18n = useI18n()
-const themeVars = useThemeVars()
+import usePreferencesStore from 'stores/preferences.js'
 
 const props = defineProps({
     name: String,
@@ -37,6 +35,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['reload', 'rename', 'delete'])
+
+const i18n = useI18n()
+const themeVars = useThemeVars()
+const prefStore = usePreferencesStore()
 
 /**
  *
@@ -208,6 +210,7 @@ defineExpose({
                 :content="displayValue"
                 :language="viewLanguage"
                 :loading="props.loading"
+                :show-line-num="prefStore.showLineNum"
                 class="flex-item-expand"
                 style="height: 100%"
                 @input="onInput"

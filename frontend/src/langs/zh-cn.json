@@ -42,7 +42,8 @@
       "auto_check_update": "自动检查更新"
     },
     "editor": {
-      "name": "编辑器"
+      "name": "编辑器",
+      "show_linenum": "显示行号"
     }
   },
   "interface": {
