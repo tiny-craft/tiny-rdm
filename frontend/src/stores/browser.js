@@ -25,6 +25,7 @@ import {
     CloseConnection,
     ConvertValue,
     DeleteKey,
+    DeleteOneKey,
     FlushDB,
     GetCmdHistory,
     GetKeyDetail,
@@ -53,6 +54,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import useConnectionStore from 'stores/connections.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { isRedisGlob } from '@/utils/glob_pattern.js'
+import { i18nGlobal } from '@/utils/i18n.js'
 
 const useBrowserStore = defineStore('browser', {
     /**
@@ -1841,43 +1843,46 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * delete keys with prefix
-         * @param {string} connName
+         * delete multiple keys
+         * @param {string} server
          * @param {number} db
-         * @param {string} prefix
-         * @param {boolean} async
-         * @returns {Promise<boolean>}
+         * @param {string[]|number[][]} keys
+         * @return {Promise<void>}
          */
-        async deleteKeyPrefix(connName, db, prefix, async) {
-            if (isEmpty(prefix)) {
-                return false
-            }
-            try {
-                if (!endsWith(prefix, '*')) {
-                    prefix += '*'
-                }
-                const { data, success, msg } = await DeleteKey(connName, db, prefix, async)
+        async deleteKeys(server, db, keys) {
+            const delMsgRef = $message.loading('', { duration: 0 })
+            let progress = 0
+            let count = size(keys)
+            let deletedCount = 0,
+                failCount = 0
+            for (const key of keys) {
+                delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
+                    key: decodeRedisKey(key),
+                    index: ++progress,
+                    count,
+                })
+                const { success } = await DeleteOneKey(server, db, key)
                 if (success) {
-                    // const { deleted: keys = [] } = data
-                    // for (const key of keys) {
-                    //     await this._deleteKeyNode(connName, db, key)
-                    // }
-                    const deleteCount = get(data, 'deleteCount', 0)
-                    const separator = this._getSeparator(connName)
-                    if (endsWith(prefix, '*')) {
-                        prefix = prefix.substring(0, prefix.length - 1)
-                    }
-                    if (endsWith(prefix, separator)) {
-                        prefix = prefix.substring(0, prefix.length - 1)
-                    }
-                    this._deleteKeyNode(connName, db, prefix, true)
-                    this._tidyNode(connName, db, prefix, true)
-                    this._updateDBMaxKeys(connName, db, -deleteCount)
-                    return true
+                    this._deleteKeyNode(server, db, key, false)
+                    deletedCount += 1
+                } else {
+                    failCount += 1
                 }
-            } finally {
             }
-            return false
+            delMsgRef.destroy()
+            // refresh model data
+            this._tidyNode(server, db, '', true)
+            this._updateDBMaxKeys(server, db, -deletedCount)
+            if (failCount <= 0) {
+                // no fail
+                $message.success(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+            } else if (failCount >= deletedCount) {
+                // all fail
+                $message.error(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+            } else {
+                // some fail
+                $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+            }
         },
 
         /**

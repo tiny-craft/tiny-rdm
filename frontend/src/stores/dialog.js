@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import useConnectionStore from './connections.js'
+import { defineStore } from "pinia";
+import useConnectionStore from "./connections.js";
 
 /**
  * connection dialog type
@@ -160,6 +160,12 @@ const useDialogStore = defineStore('dialog', {
             this.renameDialogVisible = false
         },
 
+        /**
+         *
+         * @param {string} server
+         * @param {number} db
+         * @param {string | string[]} key
+         */
         openDeleteKeyDialog(server, db, key) {
             this.deleteKeyParam.server = server
             this.deleteKeyParam.db = db

@@ -4,7 +4,7 @@ import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
 import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue'
-import { get, map } from 'lodash'
+import { find, get, map } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
@@ -20,6 +20,9 @@ import RedisTypeSelector from '@/components/common/RedisTypeSelector.vue'
 import { types } from '@/consts/support_redis_type.js'
 import Plus from '@/components/icons/Plus.vue'
 import useConnectionStore from 'stores/connections.js'
+import ListCheckbox from '@/components/icons/ListCheckbox.vue'
+import Close from '@/components/icons/Close.vue'
+import More from '@/components/icons/More.vue'
 
 const themeVars = useThemeVars()
 const i18n = useI18n()
@@ -33,6 +36,8 @@ const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
 const browserTreeRef = ref(null)
 const loading = ref(false)
 const fullyLoaded = ref(false)
+const inCheckState = ref(false)
+const checkedCount = ref(0)
 
 const selectedDB = computed(() => {
     return browserStore.selectedDatabases[currentName.value] || 0
@@ -54,12 +59,29 @@ const dbSelectOptions = computed(() => {
     })
 })
 
+const moreOptions = computed(() => {
+    return [
+        { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
+        {
+            key: 'disconnect',
+            label: i18n.t('interface.disconnect'),
+            icon: render.renderIcon(Unlink, { strokeWidth: 3.5 }),
+        },
+    ]
+})
+
 const loadProgress = computed(() => {
     const db = browserStore.getDatabase(currentName.value, selectedDB.value)
     if (db.maxKeys <= 0) {
         return 100
     }
     return (db.keys * 100) / Math.max(db.keys, db.maxKeys)
+})
+
+const checkedTip = computed(() => {
+    const dblist = browserStore.getDBList(currentName.value)
+    const db = find(dblist, { db: selectedDB.value })
+    return `${checkedCount.value} / ${db.maxKeys}`
 })
 
 const onReload = async () => {
@@ -115,6 +137,10 @@ const onLoadAll = async () => {
     }
 }
 
+const onDeleteChecked = () => {
+    browserTreeRef.value?.deleteCheckedItems()
+}
+
 const onFlush = () => {
     dialogStore.openFlushDBDialog(currentName.value, selectedDB.value)
 }
@@ -146,6 +172,17 @@ const onMatchInput = (matchVal, filterVal) => {
     onReload()
 }
 
+const onSelectOptions = (select) => {
+    switch (select) {
+        case 'flush':
+            onFlush()
+            break
+        case 'disconnect':
+            onDisconnect()
+            break
+    }
+}
+
 watch(
     () => browserStore.openedDB[currentName.value],
     async (db, prevDB) => {
@@ -158,7 +195,7 @@ watch(
             browserStore.closeDatabase(currentName.value, prevDB)
             browserStore.setKeyFilter(currentName.value, {})
             await browserStore.openDatabase(currentName.value, db)
-            browserTreeRef.value?.resetExpandKey(currentName.value, db)
+            // browserTreeRef.value?.resetExpandKey(currentName.value, db)
             fullyLoaded.value = await browserStore.loadMoreKeys(currentName.value, db)
             browserTreeRef.value?.refreshTree()
 
@@ -232,6 +269,9 @@ onMounted(() => onReload())
         <!-- tree view -->
         <browser-tree
             ref="browserTreeRef"
+            v-model:checked-count="checkedCount"
+            :check-mode="inCheckState"
+            :db="browserStore.openedDB[currentName]"
             :full-loaded="fullyLoaded"
             :loading="loading && loadProgress <= 0"
             :pattern="filterForm.filter"
@@ -245,50 +285,70 @@ onMounted(() => onReload())
             <!--                :stroke-width="3.5"-->
             <!--                unselect-stroke-width="3"-->
             <!--                @update:value="onSwitchView" />-->
-            <div class="flex-box-h nav-pane-func">
-                <n-select
-                    v-model:value="browserStore.openedDB[currentName]"
-                    :consistent-menu-width="false"
-                    :filter="(pattern, option) => option.value.toString() === pattern"
-                    :options="dbSelectOptions"
-                    filterable
-                    size="small"
-                    style="min-width: 100px; max-width: 200px"
-                    @update:value="handleSelectDB" />
-                <icon-button
-                    :button-class="['nav-pane-func-btn']"
-                    :disabled="fullyLoaded"
-                    :icon="LoadList"
-                    :loading="loading"
-                    :stroke-width="3.5"
-                    size="20"
-                    t-tooltip="interface.load_more"
-                    @click="onLoadMore" />
-                <icon-button
-                    :button-class="['nav-pane-func-btn']"
-                    :disabled="fullyLoaded"
-                    :icon="LoadAll"
-                    :loading="loading"
-                    :stroke-width="3.5"
-                    size="20"
-                    t-tooltip="interface.load_all"
-                    @click="onLoadAll" />
-                <div class="flex-item-expand" style="min-width: 10px" />
-                <icon-button
-                    :button-class="['nav-pane-func-btn']"
-                    :icon="Delete"
-                    :stroke-width="3.5"
-                    size="20"
-                    t-tooltip="interface.flush_db"
-                    @click="onFlush" />
-                <icon-button
-                    :button-class="['nav-pane-func-btn']"
-                    :icon="Unlink"
-                    :stroke-width="3.5"
-                    size="20"
-                    t-tooltip="interface.disconnect"
-                    @click="onDisconnect" />
-            </div>
+            <transition mode="out-in" name="fade">
+                <div v-if="!inCheckState" class="flex-box-h nav-pane-func">
+                    <n-select
+                        v-model:value="browserStore.openedDB[currentName]"
+                        :consistent-menu-width="false"
+                        :filter="(pattern, option) => option.value.toString() === pattern"
+                        :options="dbSelectOptions"
+                        filterable
+                        size="small"
+                        style="min-width: 100px; max-width: 200px"
+                        @update:value="handleSelectDB" />
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :disabled="fullyLoaded"
+                        :icon="LoadList"
+                        :loading="loading"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.load_more"
+                        @click="onLoadMore" />
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :disabled="fullyLoaded"
+                        :icon="LoadAll"
+                        :loading="loading"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.load_all"
+                        @click="onLoadAll" />
+                    <div class="flex-item-expand" style="min-width: 10px" />
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :icon="ListCheckbox"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.check_mode"
+                        @click="inCheckState = true" />
+                    <n-dropdown :options="moreOptions" placement="top-end" @select="onSelectOptions">
+                        <icon-button :button-class="['nav-pane-func-btn']" :icon="More" :stroke-width="3.5" size="20" />
+                    </n-dropdown>
+                </div>
+
+                <!-- check mode function bar -->
+                <div v-else class="flex-box-h nav-pane-func">
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :disabled="checkedCount <= 0"
+                        :icon="Delete"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.delete_checked"
+                        @click="onDeleteChecked" />
+                    <div class="flex-item-expand ellipsis" style="text-align: center; margin: 0 5px">
+                        <n-text>{{ checkedTip }}</n-text>
+                    </div>
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :icon="Close"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.quit_check_mode"
+                        @click="inCheckState = false" />
+                </div>
+            </transition>
         </div>
     </div>
 </template>
@@ -299,15 +359,27 @@ onMounted(() => onReload())
 :deep(.toggle-btn) {
     border-style: solid;
     border-width: 1px;
+    border-radius: 3px;
+    padding: 4px;
 }
 
-:deep(.filter-on) {
+:deep(.toggle-on) {
     border-color: v-bind('themeVars.iconColorDisabled');
     background-color: v-bind('themeVars.iconColorDisabled');
 }
 
-:deep(.filter-off) {
+:deep(.toggle-off) {
     border-color: #0000;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
 .nav-pane-top {

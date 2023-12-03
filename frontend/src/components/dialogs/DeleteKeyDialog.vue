@@ -1,9 +1,10 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
-import { isEmpty, size } from 'lodash'
+import { isEmpty, map, size } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
+import { decodeRedisKey } from '@/utils/key_convert.js'
 
 const deleteForm = reactive({
     server: '',
@@ -25,16 +26,23 @@ watch(
             deleteForm.server = server
             deleteForm.db = db
             deleteForm.key = key
-            deleteForm.showAffected = false
             deleteForm.loadingAffected = false
-            deleteForm.affectedKeys = []
-            deleteForm.async = true
+            // deleteForm.async = true
             loading.value = false
+            deleting.value = false
+            if (key instanceof Array) {
+                deleteForm.showAffected = true
+                deleteForm.affectedKeys = key
+            } else {
+                deleteForm.showAffected = false
+                deleteForm.affectedKeys = []
+            }
         }
     },
 )
 
 const loading = ref(false)
+const deleting = ref(false)
 const scanAffectedKey = async () => {
     try {
         loading.value = true
@@ -53,20 +61,21 @@ const resetAffected = () => {
     deleteForm.affectedKeys = []
 }
 
+const logLines = computed(() => {
+    return map(deleteForm.affectedKeys, (k) => decodeRedisKey(k))
+})
+
 const i18n = useI18n()
 const onConfirmDelete = async () => {
     try {
-        loading.value = true
-        const { server, db, key, async } = deleteForm
-        const success = await browserStore.deleteKeyPrefix(server, db, key, async)
-        if (success) {
-            $message.success(i18n.t('dialogue.handle_succ'))
-        }
+        deleting.value = true
+        const { server, db, key, affectedKeys } = deleteForm
+        browserStore.deleteKeys(server, db, affectedKeys).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
     } finally {
-        loading.value = false
+        deleting.value = false
     }
     dialogStore.closeDeleteKeyDialog()
 }
@@ -88,29 +97,35 @@ const onClose = () => {
         transform-origin="center">
         <n-spin :show="loading">
             <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
-                <n-form-item :label="$t('dialogue.key.server')">
-                    <n-input :value="deleteForm.server" readonly />
-                </n-form-item>
-                <n-form-item :label="$t('dialogue.key.db_index')">
-                    <n-input :value="deleteForm.db.toString()" readonly />
-                </n-form-item>
-                <n-form-item :label="$t('dialogue.key.key_expression')" required>
+                <n-grid :x-gap="10">
+                    <n-form-item-gi :label="$t('dialogue.key.server')" :span="12">
+                        <n-input :value="deleteForm.server" readonly />
+                    </n-form-item-gi>
+                    <n-form-item-gi :label="$t('dialogue.key.db_index')" :span="12">
+                        <n-input :value="deleteForm.db.toString()" readonly />
+                    </n-form-item-gi>
+                </n-grid>
+                <n-form-item
+                    v-if="!(deleteForm.key instanceof Array)"
+                    :label="$t('dialogue.key.key_expression')"
+                    required>
                     <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
                 </n-form-item>
-                <n-form-item :label="$t('dialogue.key.async_delete')" required>
-                    <n-checkbox v-model:checked="deleteForm.async">
-                        {{ $t('dialogue.key.async_delete_title') }}
-                    </n-checkbox>
-                </n-form-item>
+                <!--                <n-form-item :label="$t('dialogue.key.async_delete')" required>-->
+                <!--                    <n-checkbox v-model:checked="deleteForm.async">-->
+                <!--                        {{ $t('dialogue.key.async_delete_title') }}-->
+                <!--                    </n-checkbox>-->
+                <!--                </n-form-item>-->
                 <n-card
                     v-if="deleteForm.showAffected"
                     :title="$t('dialogue.key.affected_key') + `(${size(deleteForm.affectedKeys)})`"
+                    embedded
                     size="small">
                     <n-skeleton v-if="deleteForm.loadingAffected" :repeat="10" text />
                     <n-log
                         v-else
                         :line-height="1.5"
-                        :lines="deleteForm.affectedKeys"
+                        :lines="logLines"
                         :rows="10"
                         style="user-select: text; cursor: text" />
                 </n-card>

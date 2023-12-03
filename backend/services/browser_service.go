@@ -291,9 +291,7 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 	if db >= 0 {
 		var rdb *redis.Client
 		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
-			if err = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err(); err != nil {
-				return
-			}
+			_ = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err()
 		}
 	}
 	return
@@ -1772,8 +1770,8 @@ func (b *browserService) SetKeyTTL(connName string, db int, k any, ttl int64) (r
 }
 
 // DeleteKey remove redis key
-func (b *browserService) DeleteKey(connName string, db int, k any, async bool) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) DeleteKey(server string, db int, k any, async bool) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1859,6 +1857,34 @@ func (b *browserService) DeleteKey(connName string, db int, k any, async bool) (
 		"deleted":     deletedKeys,
 		"deleteCount": len(deletedKeys),
 	}
+	return
+}
+
+// DeleteOneKey delete one key
+func (b *browserService) DeleteOneKey(server string, db int, k any) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	key := strutil.DecodeRedisKey(k)
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			return cli.Del(ctx, key).Err()
+		})
+	} else {
+		err = client.Del(ctx, key).Err()
+	}
+
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	resp.Success = true
 	return
 }
 

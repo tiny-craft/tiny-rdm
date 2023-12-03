@@ -1,11 +1,11 @@
 <script setup>
-import { computed, h, nextTick, reactive, ref } from 'vue'
+import { computed, h, nextTick, reactive, ref, watchEffect } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { NIcon, NSpace, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
-import { find, get, includes, indexOf, isEmpty, remove, size, startsWith } from 'lodash'
+import { filter, find, get, includes, indexOf, isEmpty, map, remove, size, startsWith } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -26,20 +26,39 @@ import { useRender } from '@/utils/render.js'
 
 const props = defineProps({
     server: String,
+    db: Number,
     keyView: String,
     loading: Boolean,
     pattern: String,
     fullLoaded: Boolean,
+    checkMode: Boolean,
+    checkedCount: Number,
 })
+
+const emit = defineEmits(['update:checked-count'])
 
 const themeVars = useThemeVars()
 const render = useRender()
 const i18n = useI18n()
-const expandedKeys = ref([props.server])
+const expandedKeys = ref([])
+const checkedKeys = reactive({
+    keys: [],
+    redisKeys: [],
+})
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
+
+watchEffect(
+    () => {
+        if (!props.checkMode) {
+            resetCheckedKey()
+        }
+        emit('update:checked-count', size(checkedKeys.keys))
+    },
+    { flush: 'post' },
+)
 
 /**
  *
@@ -48,9 +67,9 @@ const dialogStore = useDialogStore()
 const selectedKeys = computed(() => {
     const tab = find(tabStore.tabList, { name: props.server })
     if (tab != null) {
-        return get(tab, 'selectedKeys', [props.server])
+        return get(tab, 'selectedKeys', [])
     }
-    return [props.server]
+    return []
 })
 
 const data = computed(() => {
@@ -170,6 +189,11 @@ const resetExpandKey = (server, db, includeDB) => {
     })
 }
 
+const resetCheckedKey = () => {
+    checkedKeys.keys = []
+    checkedKeys.redisKeys = []
+}
+
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -247,6 +271,32 @@ const handleSelectContextMenu = (key) => {
     }
 }
 
+const onUpdateSelectedKeys = (keys, options) => {
+    try {
+        if (!isEmpty(options)) {
+            // prevent load duplicate key
+            for (const node of options) {
+                if (node.type === ConnectionType.RedisValue) {
+                    const { key, db } = node
+                    const redisKey = node.redisKeyCode || node.redisKey
+                    if (!includes(selectedKeys.value, key)) {
+                        browserStore.loadKeySummary({
+                            server: props.server,
+                            db,
+                            key: redisKey,
+                        })
+                    }
+                    return
+                }
+            }
+        }
+        // default is load blank key to display server status
+        tabStore.openBlank(props.server)
+    } finally {
+        tabStore.setSelectedKeys(props.server, keys)
+    }
+}
+
 const onUpdateExpanded = (value, option, meta) => {
     expandedKeys.value = value
     if (!meta.node) {
@@ -273,30 +323,17 @@ const onUpdateExpanded = (value, option, meta) => {
     }
 }
 
-const onUpdateSelectedKeys = (keys, options) => {
-    try {
-        if (!isEmpty(options)) {
-            // prevent load duplicate key
-            for (const node of options) {
-                if (node.type === ConnectionType.RedisValue) {
-                    const { key, db } = node
-                    const redisKey = node.redisKeyCode || node.redisKey
-                    if (!includes(selectedKeys.value, key)) {
-                        browserStore.loadKeySummary({
-                            server: props.server,
-                            db,
-                            key: redisKey,
-                        })
-                    }
-                    return
-                }
-            }
-        }
-        // default is load blank key to display server status
-        tabStore.openBlank(props.server)
-    } finally {
-        tabStore.setSelectedKeys(props.server, keys)
-    }
+/**
+ *
+ * @param {string[]} keys
+ * @param {TreeOption[]} options
+ */
+const onUpdateCheckedKeys = (keys, options) => {
+    checkedKeys.keys = keys
+    checkedKeys.redisKeys = map(
+        filter(options, (o) => o.type === ConnectionType.RedisValue),
+        (o) => o.redisKeyCode || o.redisKey,
+    )
 }
 
 const renderPrefix = ({ option }) => {
@@ -449,8 +486,10 @@ const nodeProps = ({ option }) => {
                 console.warn('TODO: alert to ignore double click when loading')
                 return
             }
-            // default handle is expand current node
-            nextTick().then(() => expandKey(option.key))
+            if (!props.checkMode) {
+                // default handle is expand current node
+                nextTick().then(() => expandKey(option.key))
+            }
         },
         onContextmenu(e) {
             e.preventDefault()
@@ -484,6 +523,13 @@ defineExpose({
     resetExpandKey,
     refreshTree: () => {
         treeKey.value = Date.now()
+        expandedKeys.value = []
+        resetCheckedKey()
+    },
+    deleteCheckedItems: () => {
+        if (!isEmpty(checkedKeys.redisKeys)) {
+            dialogStore.openDeleteKeyDialog(props.server, props.db, checkedKeys.redisKeys)
+        }
     },
 })
 </script>
@@ -499,6 +545,9 @@ defineExpose({
             :block-line="true"
             :block-node="true"
             :cancelable="false"
+            :cascade="true"
+            :checkable="props.checkMode"
+            :checked-keys="checkedKeys.keys"
             :data="data"
             :expand-on-click="false"
             :expanded-keys="expandedKeys"
@@ -510,10 +559,12 @@ defineExpose({
             :render-suffix="renderSuffix"
             :selected-keys="selectedKeys"
             :show-irrelevant-nodes="false"
+            check-strategy="child"
             class="fill-height"
             virtual-scroll
             @update:selected-keys="onUpdateSelectedKeys"
-            @update:expanded-keys="onUpdateExpanded" />
+            @update:expanded-keys="onUpdateExpanded"
+            @update:checked-keys="onUpdateCheckedKeys" />
         <n-dropdown
             :options="contextMenuParam.options"
             :render-label="renderContextLabel"

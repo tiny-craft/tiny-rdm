@@ -10,6 +10,7 @@ const useTabStore = defineStore('tab', {
      * @property {string} [title] tab title
      * @property {string} [icon] tab icon
      * @property {string[]} selectedKeys
+     * @property {string[]} checkdeKeys
      * @property {string} [type] key type
      * @property {*} [value] key value
      * @property {string} [server] server name
@@ -638,7 +639,7 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * set selected keys of current display browser tree
+         * set selected keys in current display browser tree
          * @param {string} server
          * @param {string|string[]} [keys]
          */
@@ -647,7 +648,7 @@ const useTabStore = defineStore('tab', {
             if (tab != null) {
                 if (keys == null) {
                     // select nothing
-                    tab.selectedKeys = [server]
+                    tab.selectedKeys = []
                 } else if (typeof keys === 'string') {
                     tab.selectedKeys = [keys]
                 } else {
