@@ -1,11 +1,11 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from './ContentToolbar.vue'
 import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
 import { useThemeVars } from 'naive-ui'
-import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import { formatTypes } from '@/consts/value_view_type.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
@@ -60,8 +60,8 @@ const viewLanguage = computed(() => {
 
 const viewAs = reactive({
     value: '',
-    format: formatTypes.RAW,
-    decode: decodeTypes.NONE,
+    format: '',
+    decode: '',
 })
 
 const editingContent = ref('')
@@ -76,13 +76,13 @@ const displayValue = computed(() => {
     return viewAs.value || decodeRedisKey(props.value)
 })
 
-watch(
-    () => props.value,
-    (val, oldVal) => {
-        if (val !== undefined) {
+watchEffect(
+    () => {
+        if (props.value !== undefined) {
             onFormatChanged(viewAs.decode, viewAs.format)
         }
     },
+    { flush: 'post' },
 )
 
 const converting = ref(false)
