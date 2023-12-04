@@ -35,7 +35,6 @@ const props = defineProps({
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const dialogStore = useDialogStore()
-// const prefStore = usePreferencesStore()
 const tabStore = useTabStore()
 const browserStore = useBrowserStore()
 const connectionStore = useConnectionStore()
@@ -158,14 +157,12 @@ const handleSelectDB = async (db) => {
         browserStore.closeDatabase(props.server, props.db)
         browserStore.setKeyFilter(props.server, {})
         await browserStore.openDatabase(props.server, db)
+        await nextTick()
+        await connectionStore.saveLastDB(props.server, db)
+        tabStore.upsertTab({ server: props.server, db })
         // browserTreeRef.value?.resetExpandKey(props.server, db)
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         browserTreeRef.value?.refreshTree()
-
-        nextTick().then(() => {
-            connectionStore.saveLastDB(props.server, db)
-            tabStore.upsertTab({ server: props.server, db })
-        })
     } catch (e) {
         $message.error(e.message)
     } finally {
@@ -283,10 +280,10 @@ onMounted(() => onReload())
             <transition mode="out-in" name="fade">
                 <div v-if="!inCheckState" class="flex-box-h nav-pane-func">
                     <n-select
-                        :value="props.db"
                         :consistent-menu-width="false"
                         :filter="(pattern, option) => option.value.toString() === pattern"
                         :options="dbSelectOptions"
+                        :value="props.db"
                         filterable
                         size="small"
                         style="min-width: 100px; max-width: 200px"

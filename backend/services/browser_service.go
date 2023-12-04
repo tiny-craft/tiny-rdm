@@ -46,6 +46,7 @@ type connectionItem struct {
 	cursor      map[int]uint64      // current cursor of databases
 	entryCursor map[int]entryCursor // current entry cursor of databases
 	stepSize    int64
+	db          int // current database index
 }
 
 type browserService struct {
@@ -288,10 +289,14 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 		b.connMap[connName] = item
 	}
 
-	if db >= 0 {
+	if db >= 0 && item.db != db {
 		var rdb *redis.Client
 		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
-			_ = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err()
+			if err = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err(); err != nil {
+				return
+			}
+			item.db = db
+			b.connMap[connName] = item
 		}
 	}
 	return
@@ -299,21 +304,8 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 
 // load current database size
 func (b *browserService) loadDBSize(ctx context.Context, client redis.UniversalClient) int64 {
-	if cluster, isCluster := client.(*redis.ClusterClient); isCluster {
-		var keyCount atomic.Int64
-		cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
-			if size, serr := cli.DBSize(ctx).Result(); serr != nil {
-				return serr
-			} else {
-				keyCount.Add(size)
-			}
-			return nil
-		})
-		return keyCount.Load()
-	} else {
-		keyCount, _ := client.DBSize(ctx).Result()
-		return keyCount
-	}
+	keyCount, _ := client.DBSize(ctx).Result()
+	return keyCount
 }
 
 // save current scan cursor
@@ -387,10 +379,10 @@ func (b *browserService) ServerInfo(name string) (resp types.JSResp) {
 
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
-func (b *browserService) OpenDatabase(connName string, db int) (resp types.JSResp) {
-	b.setClientCursor(connName, db, 0)
+func (b *browserService) OpenDatabase(server string, db int) (resp types.JSResp) {
+	b.setClientCursor(server, db, 0)
 
-	item, err := b.getRedisClient(connName, db)
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
