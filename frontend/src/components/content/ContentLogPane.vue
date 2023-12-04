@@ -119,7 +119,7 @@ const cleanHistory = async () => {
             if (success) {
                 data.history = []
                 tableRef.value?.scrollTo({ top: 0 })
-                $message.success(i18n.t('common.success'))
+                $message.success(i18n.t('dialogue.handle_succ'))
             }
         } finally {
             data.loading = false

@@ -212,7 +212,7 @@ onMounted(() => onReload())
 <template>
     <div class="nav-pane-container flex-box-v">
         <!-- top function bar -->
-        <div class="flex-box-h nav-pane-func">
+        <div class="flex-box-h nav-pane-func" style="height: 36px">
             <content-search-input
                 :debounce-wait="1000"
                 :full-search-icon="Search"

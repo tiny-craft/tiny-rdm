@@ -301,6 +301,7 @@ const openConnection = async (name) => {
         if (!isEmpty(connectingServer.value)) {
             tabStore.upsertTab({
                 server: name,
+                db: browserStore.getSelectedDB(name),
             })
         }
     } catch (e) {
