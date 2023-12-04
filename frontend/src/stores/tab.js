@@ -119,6 +119,10 @@ const useTabStore = defineStore('tab', {
             // return current
         },
 
+        currentTabName() {
+            return get(this.tabs, [this.activatedIndex, 'name'])
+        },
+
         currentSelectedKeys() {
             const tab = this.currentTab()
             return get(tab, 'selectedKeys', [])

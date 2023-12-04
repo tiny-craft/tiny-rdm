@@ -2,7 +2,7 @@
 import ContentPane from './components/content/ContentPane.vue'
 import BrowserPane from './components/sidebar/BrowserPane.vue'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { debounce, get } from 'lodash'
+import { debounce } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import Ribbon from './components/sidebar/Ribbon.vue'
 import ConnectionPane from './components/sidebar/ConnectionPane.vue'
@@ -139,7 +139,7 @@ onMounted(async () => {
                         <div style="min-width: 68px; font-weight: 800">Tiny RDM</div>
                         <transition name="fade">
                             <n-text v-if="tabStore.nav === 'browser'" class="ellipsis" strong style="font-size: 13px">
-                                - {{ get(tabStore.currentTab, 'name') }}
+                                - {{ tabStore.currentTabName }}
                             </n-text>
                         </transition>
                     </n-space>
@@ -174,13 +174,15 @@ onMounted(async () => {
                         @update:size="handleResize">
                         <browser-pane
                             v-for="t in tabStore.tabs"
-                            v-show="get(tabStore.currentTab, 'name') === t.name"
+                            v-show="tabStore.currentTabName === t.name"
                             :key="t.name"
+                            :db="t.db"
+                            :server="t.name"
                             class="app-side flex-item-expand" />
                     </resizeable-wrapper>
                     <content-pane
                         v-for="t in tabStore.tabs"
-                        v-show="get(tabStore.currentTab, 'name') === t.name"
+                        v-show="tabStore.currentTabName === t.name"
                         :key="t.name"
                         :server="t.name"
                         class="flex-item-expand" />

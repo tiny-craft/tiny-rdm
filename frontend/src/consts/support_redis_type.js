@@ -11,6 +11,15 @@ export const types = {
     STREAM: 'STREAM',
 }
 
+export const typesShortName = {
+    STRING: 'S',
+    HASH: 'H',
+    LIST: 'L',
+    SET: 'S',
+    ZSET: 'Z',
+    STREAM: 'X',
+}
+
 /**
  * mark color for redis types
  * @enum {string}

@@ -30,6 +30,7 @@ import {
     GetCmdHistory,
     GetKeyDetail,
     GetKeySummary,
+    GetKeyType,
     GetSlowLogs,
     LoadAllKeys,
     LoadNextKeys,
@@ -72,6 +73,7 @@ const useBrowserStore = defineStore('browser', {
      * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
      * @property {boolean} [expanded] - current node is expanded
      * @property {DatabaseItem[]} [children]
+     * @property {string} [redisType] - redis type name, 'loading' indicate that is in loading progress
      */
 
     /**
@@ -339,6 +341,7 @@ const useBrowserStore = defineStore('browser', {
 
             selDB.opened = true
             selDB.maxKeys = maxKeys
+            this.openedDB[server] = db
             set(this.loadingState, 'fullLoaded', end)
             if (isEmpty(keys)) {
                 selDB.children = []
@@ -461,6 +464,29 @@ const useBrowserStore = defineStore('browser', {
                 })
             } catch (e) {
                 $message.error('')
+            } finally {
+            }
+        },
+
+        /**
+         * load key type
+         * @param {string} server
+         * @param {number} db
+         * @param {string} key
+         * @param {number[]} keyCode
+         * @return {Promise<void>}
+         */
+        async loadKeyType({ server, db, key, keyCode }) {
+            try {
+                const nodeMap = this._getNodeMap(server, db)
+                const node = nodeMap.get(`${ConnectionType.RedisValue}/${key}`)
+                if (node == null || node.redisType != null) {
+                    return
+                }
+                node.redisType = 'loading'
+                const { data } = await GetKeyType({ server, db, key: keyCode || key })
+                const { type } = data || {}
+                node.redisType = type
             } finally {
             }
         },
@@ -752,6 +778,7 @@ const useBrowserStore = defineStore('browser', {
                         keys: 0,
                         redisKey: k,
                         redisKeyCode: isBinaryKey ? key : undefined,
+                        redisKeyType: undefined,
                         type: ConnectionType.RedisValue,
                         isLeaf: true,
                     }
@@ -818,6 +845,7 @@ const useBrowserStore = defineStore('browser', {
                                 keys: 0,
                                 redisKey: handlePath,
                                 redisKeyCode: isBinaryKey ? key : undefined,
+                                redisKeyType: undefined,
                                 type: ConnectionType.RedisValue,
                                 isLeaf: true,
                             }

@@ -5,7 +5,7 @@ import { NIcon, NSpace, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
-import { filter, find, get, includes, indexOf, isEmpty, map, remove, size, startsWith } from 'lodash'
+import { filter, find, get, includes, indexOf, isEmpty, map, remove, size, startsWith, toUpper } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -23,6 +23,7 @@ import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
+import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 
 const props = defineProps({
     server: String,
@@ -364,13 +365,28 @@ const renderPrefix = ({ option }) => {
                 },
             )
         case ConnectionType.RedisValue:
-            return h(
-                NIcon,
-                { size: 20 },
-                {
-                    default: () => h(!!option.redisKeyCode ? Binary : Key),
-                },
-            )
+            if (option.redisType == null || option.redisType === 'loading') {
+                browserStore.loadKeyType({
+                    server: props.server,
+                    db: option.db,
+                    key: option.redisKey,
+                    keyCode: option.redisKeyCode,
+                })
+                // in loading
+                return h(
+                    NIcon,
+                    { size: 20 },
+                    {
+                        default: () => h(!!option.redisKeyCode ? Binary : Key),
+                    },
+                )
+            }
+            return h(RedisTypeTag, {
+                type: toUpper(option.redisType),
+                short: true,
+                size: 'small',
+                inverse: includes(selectedKeys.value, option.key),
+            })
     }
 }
 

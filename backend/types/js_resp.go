@@ -14,9 +14,9 @@ type KeySummaryParam struct {
 
 type KeySummary struct {
 	Type   string `json:"type"`
-	TTL    int64  `json:"ttl"`
-	Size   int64  `json:"size"`
-	Length int64  `json:"length"`
+	TTL    int64  `json:"ttl,omitempty"`
+	Size   int64  `json:"size,omitempty"`
+	Length int64  `json:"length,omitempty"`
 }
 
 type KeyDetailParam struct {

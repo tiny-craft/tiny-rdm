@@ -3,6 +3,7 @@ import { computed, h } from 'vue'
 import { useThemeVars } from 'naive-ui'
 import { types, typesBgColor, typesColor } from '@/consts/support_redis_type.js'
 import { get, map, toUpper } from 'lodash'
+import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 
 const props = defineProps({
     value: {
@@ -23,15 +24,24 @@ const options = computed(() => {
 
 const themeVars = useThemeVars()
 const renderIcon = (option) => {
-    if (option.key === props.value) {
-        const backgroundColor = get(typesColor, option.key, themeVars.value.textColor3)
-        return h('div', { style: { borderRadius: '999px', width: '10px', height: '10px', backgroundColor } }, '')
-    }
+    return h(RedisTypeTag, {
+        type: option.key,
+        short: true,
+        size: 'small',
+        inverse: option.key === props.value,
+    })
 }
 
 const renderLabel = (option) => {
-    const color = get(typesColor, option.key, '')
-    return h('div', { style: { color, fontWeight: '450' } }, option.label)
+    return h(
+        'div',
+        {
+            style: {
+                fontWeight: option.key === props.value ? 'bold' : 'normal',
+            },
+        },
+        option.label,
+    )
 }
 
 const fontColor = computed(() => {

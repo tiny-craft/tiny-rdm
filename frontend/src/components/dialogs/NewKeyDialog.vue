@@ -87,7 +87,7 @@ const renderTypeLabel = (option) => {
             default: () => [
                 h('div', {
                     style: {
-                        borderRadius: '50%',
+                        borderRadius: '9999px',
                         backgroundColor: typesColor[option.value],
                         width: '13px',
                         height: '13px',

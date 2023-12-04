@@ -3,8 +3,8 @@ import { useThemeVars } from 'naive-ui'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
-import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue'
-import { find, get, map } from 'lodash'
+import { computed, nextTick, onMounted, reactive, ref, unref } from 'vue'
+import { find, map } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
@@ -24,6 +24,16 @@ import ListCheckbox from '@/components/icons/ListCheckbox.vue'
 import Close from '@/components/icons/Close.vue'
 import More from '@/components/icons/More.vue'
 
+const props = defineProps({
+    server: String,
+    db: {
+        type: Number,
+        default: 0,
+    },
+})
+
+const emit = defineEmits(['update:db'])
+
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const dialogStore = useDialogStore()
@@ -32,21 +42,16 @@ const tabStore = useTabStore()
 const browserStore = useBrowserStore()
 const connectionStore = useConnectionStore()
 const render = useRender()
-const currentName = computed(() => get(tabStore.currentTab, 'name', ''))
 const browserTreeRef = ref(null)
 const loading = ref(false)
 const fullyLoaded = ref(false)
 const inCheckState = ref(false)
 const checkedCount = ref(0)
 
-const selectedDB = computed(() => {
-    return browserStore.selectedDatabases[currentName.value] || 0
-})
-
 const dbSelectOptions = computed(() => {
-    const dblist = browserStore.getDBList(currentName.value)
+    const dblist = browserStore.getDBList(props.server)
     return map(dblist, (db) => {
-        if (selectedDB.value === db.db) {
+        if (props.db === db.db) {
             return {
                 value: db.db,
                 label: `db${db.db} (${db.keys}/${db.maxKeys})`,
@@ -71,7 +76,7 @@ const moreOptions = computed(() => {
 })
 
 const loadProgress = computed(() => {
-    const db = browserStore.getDatabase(currentName.value, selectedDB.value)
+    const db = browserStore.getDatabase(props.server, props.db)
     if (db.maxKeys <= 0) {
         return 100
     }
@@ -79,29 +84,29 @@ const loadProgress = computed(() => {
 })
 
 const checkedTip = computed(() => {
-    const dblist = browserStore.getDBList(currentName.value)
-    const db = find(dblist, { db: selectedDB.value })
+    const dblist = browserStore.getDBList(props.server)
+    const db = find(dblist, { db: props.db })
     return `${checkedCount.value} / ${db.maxKeys}`
 })
 
 const onReload = async () => {
     try {
         loading.value = true
-        tabStore.setSelectedKeys(currentName.value)
-        const db = selectedDB.value
-        browserStore.closeDatabase(currentName.value, db)
-        browserTreeRef.value?.resetExpandKey(currentName.value, db)
+        tabStore.setSelectedKeys(props.server)
+        const db = props.db
+        browserStore.closeDatabase(props.server, db)
+        browserTreeRef.value?.resetExpandKey(props.server, db)
 
         let matchType = unref(filterForm.type)
         if (!types.hasOwnProperty(matchType)) {
             matchType = ''
         }
-        browserStore.setKeyFilter(currentName.value, {
+        browserStore.setKeyFilter(props.server, {
             type: matchType,
             pattern: unref(filterForm.pattern),
         })
-        await browserStore.openDatabase(currentName.value, db)
-        fullyLoaded.value = await browserStore.loadMoreKeys(currentName.value, db)
+        await browserStore.openDatabase(props.server, db)
+        fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         // $message.success(i18n.t('dialogue.reload_succ'))
     } catch (e) {
         console.warn(e)
@@ -111,13 +116,13 @@ const onReload = async () => {
 }
 
 const onAddKey = () => {
-    dialogStore.openNewKeyDialog('', currentName.value, selectedDB.value)
+    dialogStore.openNewKeyDialog('', props.server, props.db)
 }
 
 const onLoadMore = async () => {
     try {
         loading.value = true
-        fullyLoaded.value = await browserStore.loadMoreKeys(currentName.value, selectedDB.value)
+        fullyLoaded.value = await browserStore.loadMoreKeys(props.server, props.db)
     } catch (e) {
         $message.error(e.message)
     } finally {
@@ -128,7 +133,7 @@ const onLoadMore = async () => {
 const onLoadAll = async () => {
     try {
         loading.value = true
-        await browserStore.loadAllKeys(currentName.value, selectedDB.value)
+        await browserStore.loadAllKeys(props.server, props.db)
         fullyLoaded.value = true
     } catch (e) {
         $message.error(e.message)
@@ -142,15 +147,31 @@ const onDeleteChecked = () => {
 }
 
 const onFlush = () => {
-    dialogStore.openFlushDBDialog(currentName.value, selectedDB.value)
+    dialogStore.openFlushDBDialog(props.server, props.db)
 }
 
 const onDisconnect = () => {
-    browserStore.closeConnection(currentName.value)
+    browserStore.closeConnection(props.server)
 }
 
-const handleSelectDB = async (db, prevDB) => {
-    // watch 'browserStore.openedDB[currentName.value]' instead
+const handleSelectDB = async (db) => {
+    try {
+        loading.value = true
+        browserStore.closeDatabase(props.server, props.db)
+        browserStore.setKeyFilter(props.server, {})
+        await browserStore.openDatabase(props.server, db)
+        // browserTreeRef.value?.resetExpandKey(props.server, db)
+        fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
+        browserTreeRef.value?.refreshTree()
+
+        nextTick().then(() => connectionStore.saveLastDB(props.server, db))
+    } catch (e) {
+        $message.error(e.message)
+    } finally {
+        loading.value = false
+        // emit('update:db', db)
+        // tabStore.switchTab()
+    }
 }
 
 const filterForm = reactive({
@@ -183,30 +204,30 @@ const onSelectOptions = (select) => {
     }
 }
 
-watch(
-    () => browserStore.openedDB[currentName.value],
-    async (db, prevDB) => {
-        if (db === undefined) {
-            return
-        }
-
-        try {
-            loading.value = true
-            browserStore.closeDatabase(currentName.value, prevDB)
-            browserStore.setKeyFilter(currentName.value, {})
-            await browserStore.openDatabase(currentName.value, db)
-            // browserTreeRef.value?.resetExpandKey(currentName.value, db)
-            fullyLoaded.value = await browserStore.loadMoreKeys(currentName.value, db)
-            browserTreeRef.value?.refreshTree()
-
-            nextTick().then(() => connectionStore.saveLastDB(currentName.value, db))
-        } catch (e) {
-            $message.error(e.message)
-        } finally {
-            loading.value = false
-        }
-    },
-)
+// watch(
+//     () => props.db,
+//     async (db, prevDB) => {
+//         if (db === undefined) {
+//             return
+//         }
+//
+//         try {
+//             loading.value = true
+//             browserStore.closeDatabase(props.server, prevDB)
+//             browserStore.setKeyFilter(props.server, {})
+//             await browserStore.openDatabase(props.server, db)
+//             // browserTreeRef.value?.resetExpandKey(props.server, db)
+//             fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
+//             browserTreeRef.value?.refreshTree()
+//
+//             nextTick().then(() => connectionStore.saveLastDB(props.server, db))
+//         } catch (e) {
+//             $message.error(e.message)
+//         } finally {
+//             loading.value = false
+//         }
+//     },
+// )
 
 onMounted(() => onReload())
 // forbid dynamic switch key view due to performance issues
@@ -271,11 +292,11 @@ onMounted(() => onReload())
             ref="browserTreeRef"
             v-model:checked-count="checkedCount"
             :check-mode="inCheckState"
-            :db="browserStore.openedDB[currentName]"
+            :db="props.db"
             :full-loaded="fullyLoaded"
             :loading="loading && loadProgress <= 0"
             :pattern="filterForm.filter"
-            :server="currentName" />
+            :server="props.server" />
         <!-- bottom function bar -->
         <div class="nav-pane-bottom flex-box-v">
             <!--            <switch-button-->
@@ -288,7 +309,7 @@ onMounted(() => onReload())
             <transition mode="out-in" name="fade">
                 <div v-if="!inCheckState" class="flex-box-h nav-pane-func">
                     <n-select
-                        v-model:value="browserStore.openedDB[currentName]"
+                        :value="props.db"
                         :consistent-menu-width="false"
                         :filter="(pattern, option) => option.value.toString() === pattern"
                         :options="dbSelectOptions"
@@ -370,16 +391,6 @@ onMounted(() => onReload())
 
 :deep(.toggle-off) {
     border-color: #0000;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
 }
 
 .nav-pane-top {

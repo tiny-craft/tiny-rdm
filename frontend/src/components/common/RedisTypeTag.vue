@@ -1,45 +1,69 @@
 <script setup>
 import { computed } from 'vue'
-import { typesBgColor, typesColor, validType } from '@/consts/support_redis_type.js'
+import { typesBgColor, typesColor, typesShortName } from '@/consts/support_redis_type.js'
 import Binary from '@/components/icons/Binary.vue'
+import { toUpper } from 'lodash'
 
 const props = defineProps({
     type: {
         type: String,
-        validator(value) {
-            return validType(value)
-        },
         default: 'STRING',
     },
     binaryKey: Boolean,
     size: String,
+    short: Boolean,
+    round: Boolean,
+    inverse: Boolean,
 })
 
 const fontColor = computed(() => {
-    return typesColor[props.type]
+    if (props.inverse) {
+        return typesBgColor[props.type]
+    } else {
+        return typesColor[props.type]
+    }
 })
 
 const backgroundColor = computed(() => {
-    return typesBgColor[props.type]
+    if (props.inverse) {
+        return typesColor[props.type]
+    } else {
+        return typesBgColor[props.type]
+    }
+})
+
+const label = computed(() => {
+    if (props.short) {
+        return typesShortName[toUpper(props.type)] || 'N'
+    }
+    return toUpper(props.type)
 })
 </script>
 
 <template>
     <n-tag
-        :class="[props.size === 'small' ? 'redis-type-tag-small' : 'redis-type-tag']"
+        :class="{
+            'redis-type-tag-normal': !props.short && props.size !== 'small',
+            'redis-type-tag-small': !props.short && props.size === 'small',
+            'redis-type-tag-round': props.round,
+        }"
         :color="{ color: backgroundColor, textColor: fontColor }"
         :size="props.size"
+        bordered
         strong>
-        {{ props.type }}
+        <b>{{ label }}</b>
         <template #icon>
             <n-icon v-if="binaryKey" :component="Binary" size="18" />
         </template>
     </n-tag>
-    <!--  <div class="redis-type-tag flex-box-h" :style="{backgroundColor: backgroundColor}">{{ props.type }}</div>-->
 </template>
 
 <style lang="scss">
-.redis-type-tag {
+.redis-type-tag-round {
+    border-radius: 9999px;
+}
+
+.redis-type-tag-normal {
     padding: 0 12px;
 }
 

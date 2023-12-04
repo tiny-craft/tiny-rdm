@@ -516,6 +516,35 @@ func (b *browserService) LoadAllKeys(connName string, db int, match, keyType str
 	return
 }
 
+func (b *browserService) GetKeyType(param types.KeySummaryParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	key := strutil.DecodeRedisKey(param.Key)
+	var keyType string
+	keyType, err = client.Type(ctx, key).Result()
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	if keyType == "none" {
+		resp.Msg = "key not exists"
+		return
+	}
+
+	var data types.KeySummary
+	data.Type = strings.ToLower(keyType)
+
+	resp.Success = true
+	resp.Data = data
+	return
+}
+
 // GetKeySummary get key summary info
 func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.JSResp) {
 	item, err := b.getRedisClient(param.Server, param.DB)
