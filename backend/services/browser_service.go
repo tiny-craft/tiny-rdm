@@ -387,7 +387,7 @@ func (b *browserService) ServerInfo(name string) (resp types.JSResp) {
 
 // OpenDatabase open select database, and list all keys
 // @param path contain connection name and db name
-func (b *browserService) OpenDatabase(connName string, db int, match string, keyType string) (resp types.JSResp) {
+func (b *browserService) OpenDatabase(connName string, db int) (resp types.JSResp) {
 	b.setClientCursor(connName, db, 0)
 
 	item, err := b.getRedisClient(connName, db)

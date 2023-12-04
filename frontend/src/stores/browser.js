@@ -114,7 +114,7 @@ const useBrowserStore = defineStore('browser', {
         filter: {}, // all filters in opened connections map by server and FilterItem
         loadingState: {}, // all loading state in opened connections map by server and LoadingState
         viewType: {}, // view type selection for all opened connections group by 'server'
-        databases: {}, // all databases in opened connections group by 'server name'
+        databases: {}, // all database lists in opened connections group by 'server name'
         nodeMap: {}, // all nodes in opened connections group by 'server#db' and 'type/key'
         keySet: {}, // all keys set in opened connections group by 'server#db
         openedDB: {}, // opened database map by server and database index

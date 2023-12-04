@@ -32,8 +32,6 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['update:db'])
-
 const themeVars = useThemeVars()
 const i18n = useI18n()
 const dialogStore = useDialogStore()
@@ -164,13 +162,14 @@ const handleSelectDB = async (db) => {
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         browserTreeRef.value?.refreshTree()
 
-        nextTick().then(() => connectionStore.saveLastDB(props.server, db))
+        nextTick().then(() => {
+            connectionStore.saveLastDB(props.server, db)
+            tabStore.upsertTab({ server: props.server, db })
+        })
     } catch (e) {
         $message.error(e.message)
     } finally {
         loading.value = false
-        // emit('update:db', db)
-        // tabStore.switchTab()
     }
 }
 
@@ -203,31 +202,6 @@ const onSelectOptions = (select) => {
             break
     }
 }
-
-// watch(
-//     () => props.db,
-//     async (db, prevDB) => {
-//         if (db === undefined) {
-//             return
-//         }
-//
-//         try {
-//             loading.value = true
-//             browserStore.closeDatabase(props.server, prevDB)
-//             browserStore.setKeyFilter(props.server, {})
-//             await browserStore.openDatabase(props.server, db)
-//             // browserTreeRef.value?.resetExpandKey(props.server, db)
-//             fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
-//             browserTreeRef.value?.refreshTree()
-//
-//             nextTick().then(() => connectionStore.saveLastDB(props.server, db))
-//         } catch (e) {
-//             $message.error(e.message)
-//         } finally {
-//             loading.value = false
-//         }
-//     },
-// )
 
 onMounted(() => onReload())
 // forbid dynamic switch key view due to performance issues
