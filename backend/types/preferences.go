@@ -16,11 +16,12 @@ func NewPreferences() Preferences {
 			WindowHeight: consts.DEFAULT_WINDOW_HEIGHT,
 		},
 		General: PreferencesGeneral{
-			Theme:       "auto",
-			Language:    "auto",
-			FontSize:    consts.DEFAULT_FONT_SIZE,
-			ScanSize:    consts.DEFAULT_SCAN_SIZE,
-			CheckUpdate: true,
+			Theme:        "auto",
+			Language:     "auto",
+			FontSize:     consts.DEFAULT_FONT_SIZE,
+			ScanSize:     consts.DEFAULT_SCAN_SIZE,
+			KeyIconStyle: 0,
+			CheckUpdate:  true,
 		},
 		Editor: PreferencesEditor{
 			FontSize:    consts.DEFAULT_FONT_SIZE,
@@ -42,6 +43,7 @@ type PreferencesGeneral struct {
 	Font            string `json:"font" yaml:"font,omitempty"`
 	FontSize        int    `json:"fontSize" yaml:"font_size"`
 	ScanSize        int    `json:"scanSize" yaml:"scan_size"`
+	KeyIconStyle    int    `json:"keyIconStyle" yaml:"key_icon_style"`
 	UseSysProxy     bool   `json:"useSysProxy" yaml:"use_sys_proxy,omitempty"`
 	UseSysProxyHttp bool   `json:"useSysProxyHttp" yaml:"use_sys_proxy_http,omitempty"`
 	CheckUpdate     bool   `json:"checkUpdate" yaml:"check_update"`
@@ -51,5 +53,5 @@ type PreferencesGeneral struct {
 type PreferencesEditor struct {
 	Font        string `json:"font" yaml:"font,omitempty"`
 	FontSize    int    `json:"fontSize" yaml:"font_size"`
-	ShowLineNum bool   `json:"showLineNum" yaml:"show_line_num,omitempty"`
+	ShowLineNum bool   `json:"showLineNum" yaml:"show_line_num"`
 }

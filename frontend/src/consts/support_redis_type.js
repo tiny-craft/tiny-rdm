@@ -51,3 +51,14 @@ export const typesBgColor = {
 export const validType = (t) => {
     return types.hasOwnProperty(t)
 }
+
+/**
+ * icon type in browser tree
+ * @enum {string}
+ */
+export const typesIconStyle = {
+    SHORT: 0,
+    FULL: 1,
+    POINT: 2,
+    ICON: 3,
+}

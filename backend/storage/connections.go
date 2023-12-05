@@ -47,8 +47,8 @@ func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 
 func (c *ConnectionsStorage) getConnections() (ret types.Connections) {
 	b, err := c.storage.Load()
+	ret = c.defaultConnections()
 	if err != nil {
-		ret = c.defaultConnections()
 		return
 	}
 

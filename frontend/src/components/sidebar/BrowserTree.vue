@@ -24,6 +24,8 @@ import LoadAll from '@/components/icons/LoadAll.vue'
 import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
 import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
+import usePreferencesStore from 'stores/preferences.js'
+import { typesIconStyle } from '@/consts/support_redis_type.js'
 
 const props = defineProps({
     server: String,
@@ -48,6 +50,7 @@ const checkedKeys = reactive({
 })
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
+const prefStore = usePreferencesStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
 
@@ -356,6 +359,7 @@ const renderPrefix = ({ option }) => {
                     default: () => h(Database, { inverse: option.opened === true }),
                 },
             )
+
         case ConnectionType.RedisKey:
             return h(
                 NIcon,
@@ -364,7 +368,17 @@ const renderPrefix = ({ option }) => {
                     default: () => h(Layer),
                 },
             )
+
         case ConnectionType.RedisValue:
+            if (prefStore.keyIconType === typesIconStyle.ICON) {
+                return h(
+                    NIcon,
+                    { size: 20 },
+                    {
+                        default: () => h(!!option.redisKeyCode ? Binary : Key),
+                    },
+                )
+            }
             if (option.redisType == null || option.redisType === 'loading') {
                 browserStore.loadKeyType({
                     server: props.server,
@@ -381,12 +395,30 @@ const renderPrefix = ({ option }) => {
                     },
                 )
             }
-            return h(RedisTypeTag, {
-                type: toUpper(option.redisType),
-                short: true,
-                size: 'small',
-                inverse: includes(selectedKeys.value, option.key),
-            })
+            switch (prefStore.keyIconType) {
+                case typesIconStyle.FULL:
+                    return h(RedisTypeTag, {
+                        type: toUpper(option.redisType),
+                        short: false,
+                        size: 'small',
+                        inverse: includes(selectedKeys.value, option.key),
+                    })
+
+                case typesIconStyle.POINT:
+                    return h(RedisTypeTag, {
+                        type: toUpper(option.redisType),
+                        point: true,
+                    })
+
+                case typesIconStyle.SHORT:
+                default:
+                    return h(RedisTypeTag, {
+                        type: toUpper(option.redisType),
+                        short: true,
+                        size: 'small',
+                        inverse: includes(selectedKeys.value, option.key),
+                    })
+            }
     }
 }
 

@@ -12,6 +12,11 @@ const props = defineProps({
     binaryKey: Boolean,
     size: String,
     short: Boolean,
+    point: Boolean,
+    pointSize: {
+        type: Number,
+        default: 14,
+    },
     round: Boolean,
     inverse: Boolean,
 })
@@ -41,7 +46,16 @@ const label = computed(() => {
 </script>
 
 <template>
+    <div
+        v-if="props.point"
+        :style="{
+            backgroundColor: fontColor,
+            width: Math.max(props.pointSize, 5) + 'px',
+            height: Math.max(props.pointSize, 5) + 'px',
+        }"
+        class="redis-type-tag-round redis-type-tag-point"></div>
     <n-tag
+        v-else
         :class="{
             'redis-type-tag-normal': !props.short && props.size !== 'small',
             'redis-type-tag-small': !props.short && props.size === 'small',

@@ -13,6 +13,7 @@ import { i18nGlobal } from '@/utils/i18n.js'
 import { enUS, NButton, NSpace, useOsTheme, zhCN } from 'naive-ui'
 import { h, nextTick } from 'vue'
 import { compareVersion } from '@/utils/version.js'
+import { typesIconStyle } from '@/consts/support_redis_type.js'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -44,6 +45,7 @@ const usePreferencesStore = defineStore('preferences', {
             font: '',
             fontSize: 14,
             scanSize: 3000,
+            keyIconStyle: 0,
             useSysProxy: false,
             useSysProxyHttp: false,
             checkUpdate: true,
@@ -52,7 +54,7 @@ const usePreferencesStore = defineStore('preferences', {
         editor: {
             font: '',
             fontSize: 14,
-            showLineNum: false,
+            showLineNum: true,
         },
         lastPref: {},
         fontList: [],
@@ -186,6 +188,10 @@ const usePreferencesStore = defineStore('preferences', {
 
         showLineNum() {
             return get(this.editor, 'showLineNum', true)
+        },
+
+        keyIconType() {
+            return get(this.general, 'keyIconStyle', typesIconStyle.SHORT)
         },
     },
     actions: {

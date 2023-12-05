@@ -1,8 +1,10 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import useDialog from 'stores/dialog'
 import usePreferencesStore from 'stores/preferences.js'
+import { map, sortBy } from 'lodash'
+import { typesIconStyle } from '@/consts/support_redis_type.js'
 
 const prefStore = usePreferencesStore()
 
@@ -26,14 +28,19 @@ const initPreferences = async () => {
     }
 }
 
-watch(
-    () => dialogStore.preferencesDialogVisible,
-    (visible) => {
-        if (visible) {
-            initPreferences()
-        }
-    },
-)
+watchEffect(() => {
+    if (dialogStore.preferencesDialogVisible) {
+        initPreferences()
+    }
+})
+
+const keyOptions = computed(() => {
+    const opts = map(typesIconStyle, (v) => ({
+        value: v,
+        label: i18n.t('preferences.general.key_icon_style' + v),
+    }))
+    return sortBy(opts, (o) => o.value)
+})
 
 const onSavePreferences = async () => {
     const success = await prefStore.savePreferences()
@@ -95,6 +102,9 @@ const onClose = () => {
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.scan_size')" :span="12">
                             <n-input-number v-model:value="prefStore.general.scanSize" :min="1" />
+                        </n-form-item-gi>
+                        <n-form-item-gi :label="$t('preferences.general.key_icon_style')" :span="12">
+                            <n-select v-model:value="prefStore.general.keyIconStyle" :options="keyOptions" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">
                             <n-space>
