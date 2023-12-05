@@ -15,7 +15,7 @@ export const typesShortName = {
     STRING: 'S',
     HASH: 'H',
     LIST: 'L',
-    SET: 'S',
+    SET: 'E',
     ZSET: 'Z',
     STREAM: 'X',
 }

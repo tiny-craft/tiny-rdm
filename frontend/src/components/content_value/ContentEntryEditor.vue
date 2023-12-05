@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineEmits, defineProps, nextTick, reactive, ref, watch } from 'vue'
+import { computed, defineEmits, defineProps, nextTick, reactive, ref, watchEffect } from 'vue'
 import { useThemeVars } from 'naive-ui'
 import Save from '@/components/icons/Save.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
@@ -13,8 +13,12 @@ import Pin from '@/components/icons/Pin.vue'
 import OffScreen from '@/components/icons/OffScreen.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
 import usePreferencesStore from 'stores/preferences.js'
+import { toString } from 'lodash'
 
 const props = defineProps({
+    show: {
+        type: Boolean,
+    },
     field: {
         type: [String, Number],
     },
@@ -54,14 +58,16 @@ const emit = defineEmits([
     'close',
 ])
 
-watch(
-    () => props.value,
-    (val) => {
-        if (val != null) {
+watchEffect(
+    () => {
+        if (props.show && props.value != null) {
             onFormatChanged()
         } else {
             viewAs.value = ''
         }
+    },
+    {
+        flush: 'post',
     },
 )
 
@@ -84,7 +90,7 @@ const displayValue = computed(() => {
 })
 const editingContent = ref('')
 const enableSave = computed(() => {
-    return editingContent.value !== viewAs.value
+    return toString(props.field) !== viewAs.field || editingContent.value !== viewAs.value
 })
 
 const viewLanguage = computed(() => {
@@ -150,7 +156,7 @@ const onSave = () => {
 </script>
 
 <template>
-    <div class="entry-editor flex-box-v">
+    <div v-show="show" class="entry-editor flex-box-v">
         <n-card :title="$t('interface.edit_row')" autofocus size="small" style="height: 100%">
             <div class="editor-content flex-box-v" style="height: 100%">
                 <!-- field -->

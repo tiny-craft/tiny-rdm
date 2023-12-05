@@ -411,6 +411,7 @@ defineExpose({
                     :field="currentEditRow.score"
                     :field-label="$t('common.score')"
                     :format="currentEditRow.format"
+                    :show="inEdit"
                     :value="currentEditRow.value"
                     :value-label="$t('common.value')"
                     class="flex-item-expand"

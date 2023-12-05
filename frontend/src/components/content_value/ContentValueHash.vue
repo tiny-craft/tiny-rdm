@@ -402,6 +402,7 @@ defineExpose({
                     :field="currentEditRow.key"
                     :field-label="$t('common.field')"
                     :format="currentEditRow.format"
+                    :show="inEdit"
                     :value="currentEditRow.value"
                     :value-label="$t('common.value')"
                     class="flex-item-expand"

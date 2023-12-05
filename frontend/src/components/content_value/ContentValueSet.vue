@@ -376,6 +376,7 @@ defineExpose({
                     :field-label="$t('common.index')"
                     :field-readonly="true"
                     :format="currentEditRow.format"
+                    :show="inEdit"
                     :value="currentEditRow.value"
                     :value-label="$t('common.value')"
                     class="flex-item-expand"
