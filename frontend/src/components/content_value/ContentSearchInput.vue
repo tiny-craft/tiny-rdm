@@ -18,6 +18,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    useGlob: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['filterChanged', 'matchChanged'])
@@ -82,7 +86,6 @@ defineExpose({
 <template>
     <n-input-group>
         <slot name="prepend" />
-
         <n-input
             v-model:value="inputData.filter"
             :placeholder="$t('interface.filter')"
@@ -99,18 +102,24 @@ defineExpose({
                             {{ inputData.match }}
                         </n-tag>
                     </template>
-                    {{ $t('interface.full_search_result', { pattern: inputData.match }) }}
+                    {{
+                        $t('interface.full_search_result', {
+                            pattern: props.useGlob ? inputData.match : '*' + inputData.match + '*',
+                        })
+                    }}
                 </n-tooltip>
             </template>
             <template #suffix>
-                <n-tooltip trigger="hover">
-                    <template #trigger>
-                        <n-icon :component="Help" />
-                    </template>
-                    <div class="text-block" style="max-width: 600px">
-                        {{ $t('dialogue.filter.filter_pattern_tip') }}
-                    </div>
-                </n-tooltip>
+                <template v-if="props.useGlob">
+                    <n-tooltip trigger="hover">
+                        <template #trigger>
+                            <n-icon :component="Help" />
+                        </template>
+                        <div class="text-block" style="max-width: 600px">
+                            {{ $t('dialogue.filter.filter_pattern_tip') }}
+                        </div>
+                    </n-tooltip>
+                </template>
             </template>
         </n-input>
 

@@ -91,7 +91,7 @@
     "unpin_edit": "Cancel Pin",
     "search": "Search",
     "full_search": "Full Search",
-    "full_search_result": "The content has been matched as '*{pattern}*'",
+    "full_search_result": "The content has been matched as '{pattern}'",
     "filter_field": "Filter Field",
     "filter_value": "Filter Value",
     "length": "Length",

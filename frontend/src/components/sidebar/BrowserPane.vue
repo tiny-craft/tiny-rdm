@@ -217,6 +217,7 @@ onMounted(() => onReload())
                 :debounce-wait="1000"
                 :full-search-icon="Search"
                 small
+                use-glob
                 @filter-changed="onFilterInput"
                 @match-changed="onMatchInput">
                 <template #prepend>
