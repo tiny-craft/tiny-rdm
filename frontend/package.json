@@ -11,13 +11,12 @@
   "dependencies": {
     "bytes": "^3.1.2",
     "dayjs": "^1.11.10",
-    "highlight.js": "^11.9.0",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.44.0",
     "pinia": "^2.1.7",
     "sass": "^1.69.5",
     "vue": "^3.3.9",
-    "vue-i18n": "^9.7.1",
+    "vue-i18n": "^9.8.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
