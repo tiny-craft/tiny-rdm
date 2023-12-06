@@ -157,6 +157,7 @@ const exThemeVars = computed(() => {
     background-color: v-bind('exThemeVars.ribbonColor');
     box-sizing: border-box;
     color: v-bind('themeVars.textColor2');
+    --wails-draggable: drag;
 
     .ribbon-wrapper {
         gap: 2px;
@@ -165,6 +166,7 @@ const exThemeVars = computed(() => {
         align-items: center;
         box-sizing: border-box;
         padding-right: 3px;
+        --wails-draggable: none;
 
         .ribbon-item {
             width: 100%;
@@ -219,6 +221,7 @@ const exThemeVars = computed(() => {
         align-items: center;
         padding: 10px 0;
         gap: 15px;
+        --wails-draggable: none;
 
         .nav-menu-button {
             margin-bottom: 6px;
