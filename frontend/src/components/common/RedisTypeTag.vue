@@ -2,13 +2,14 @@
 import { computed } from 'vue'
 import { typesBgColor, typesColor, typesShortName } from '@/consts/support_redis_type.js'
 import Binary from '@/components/icons/Binary.vue'
-import { toUpper } from 'lodash'
+import { get, toUpper } from 'lodash'
 
 const props = defineProps({
     type: {
         type: String,
         default: 'STRING',
     },
+    defaultLabel: String,
     binaryKey: Boolean,
     size: String,
     short: Boolean,
@@ -39,7 +40,7 @@ const backgroundColor = computed(() => {
 
 const label = computed(() => {
     if (props.short) {
-        return typesShortName[toUpper(props.type)] || 'N'
+        return get(typesShortName, toUpper(props.type), props.defaultLabel || 'N')
     }
     return toUpper(props.type)
 })
@@ -53,7 +54,7 @@ const label = computed(() => {
             width: Math.max(props.pointSize, 5) + 'px',
             height: Math.max(props.pointSize, 5) + 'px',
         }"
-        class="redis-type-tag-round redis-type-tag-point"></div>
+        class="redis-type-tag-round redis-type-tag-point" />
     <n-tag
         v-else
         :class="{

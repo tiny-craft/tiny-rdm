@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h } from 'vue'
-import { useThemeVars } from 'naive-ui'
-import { types, typesBgColor, typesColor } from '@/consts/support_redis_type.js'
+import { NSpace, useThemeVars } from 'naive-ui'
+import { types, typesBgColor, typesColor, typesShortName } from '@/consts/support_redis_type.js'
 import { get, map, toUpper } from 'lodash'
 import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 
@@ -26,6 +26,7 @@ const themeVars = useThemeVars()
 const renderIcon = (option) => {
     return h(RedisTypeTag, {
         type: option.key,
+        defaultLabel: 'A',
         short: true,
         size: 'small',
         inverse: option.key === props.value,
@@ -33,15 +34,27 @@ const renderIcon = (option) => {
 }
 
 const renderLabel = (option) => {
-    return h(
-        'div',
-        {
-            style: {
-                fontWeight: option.key === props.value ? 'bold' : 'normal',
+    const children = [
+        h(
+            'div',
+            {
+                style: {
+                    fontWeight: option.key === props.value ? 'bold' : 'normal',
+                },
             },
-        },
-        option.label,
-    )
+            option.label,
+        ),
+        h(
+            'div',
+            { style: { width: '16px' } },
+            h(RedisTypeTag, {
+                type: toUpper(option.key),
+                point: true,
+                style: { display: option.key === props.value ? 'block' : 'none' },
+            }),
+        ),
+    ]
+    return h(NSpace, { align: 'center', wrapItem: false }, () => children)
 }
 
 const fontColor = computed(() => {
@@ -53,7 +66,7 @@ const backgroundColor = computed(() => {
 })
 
 const displayValue = computed(() => {
-    return get(types, toUpper(props.value), 'ALL')
+    return get(typesShortName, toUpper(props.value), 'A')
 })
 
 const handleSelect = (select) => {
