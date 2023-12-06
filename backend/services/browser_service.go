@@ -51,7 +51,7 @@ type connectionItem struct {
 
 type browserService struct {
 	ctx        context.Context
-	connMap    map[string]connectionItem
+	connMap    map[string]*connectionItem
 	cmdHistory []cmdHistoryItem
 }
 
@@ -62,7 +62,7 @@ func Browser() *browserService {
 	if browser == nil {
 		onceBrowser.Do(func() {
 			browser = &browserService{
-				connMap: map[string]connectionItem{},
+				connMap: map[string]*connectionItem{},
 			}
 		})
 	}
@@ -80,21 +80,20 @@ func (b *browserService) Stop() {
 			item.client.Close()
 		}
 	}
-	b.connMap = map[string]connectionItem{}
+	b.connMap = map[string]*connectionItem{}
 }
 
 // OpenConnection open redis server connection
 func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
-	item, err := b.getRedisClient(name, 0)
+	// get connection config
+	selConn := Connection().getConnection(name)
+	item, err := b.getRedisClient(name, selConn.LastDB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
 	client, ctx := item.client, item.ctx
-	// get connection config
-	selConn := Connection().getConnection(name)
-
 	var totaldb int
 	if selConn.DBFilterType == "" || selConn.DBFilterType == "none" {
 		// get total databases
@@ -222,7 +221,7 @@ func (b *browserService) CloseConnection(name string) (resp types.JSResp) {
 
 // get a redis client from local cache or create a new open
 // if db >= 0, will also switch to db index
-func (b *browserService) getRedisClient(connName string, db int) (item connectionItem, err error) {
+func (b *browserService) getRedisClient(connName string, db int) (item *connectionItem, err error) {
 	var ok bool
 	var client redis.UniversalClient
 	if item, ok = b.connMap[connName]; ok {
@@ -275,7 +274,7 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 			return
 		}
 		ctx, cancelFunc := context.WithCancel(b.ctx)
-		item = connectionItem{
+		item = &connectionItem{
 			client:      client,
 			ctx:         ctx,
 			cancelFunc:  cancelFunc,
@@ -289,14 +288,19 @@ func (b *browserService) getRedisClient(connName string, db int) (item connectio
 		b.connMap[connName] = item
 	}
 
-	if db >= 0 && item.db != db {
+	// BUG: go-redis might not be executing commands on the corresponding database
+	// requiring a database switch with each command
+	if db >= 0 /*&& item.db != db*/ {
 		var rdb *redis.Client
 		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
-			if err = rdb.Do(item.ctx, "select", strconv.Itoa(db)).Err(); err != nil {
+			_, err = rdb.Pipelined(item.ctx, func(pipe redis.Pipeliner) error {
+				return pipe.Select(item.ctx, db).Err()
+			})
+			if err != nil {
 				return
 			}
 			item.db = db
-			b.connMap[connName] = item
+			b.connMap[connName].db = db
 		}
 	}
 	return
@@ -358,7 +362,7 @@ func (b *browserService) parseDBItemInfo(info string) map[string]int {
 
 // ServerInfo get server info
 func (b *browserService) ServerInfo(name string) (resp types.JSResp) {
-	item, err := b.getRedisClient(name, 0)
+	item, err := b.getRedisClient(name, -1)
 	if err != nil {
 		resp.Msg = err.Error()
 		return

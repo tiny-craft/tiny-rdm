@@ -379,7 +379,7 @@ const renderPrefix = ({ option }) => {
                     },
                 )
             }
-            if (option.redisType == null || option.redisType === 'loading') {
+            if (isEmpty(option.redisType) || option.redisType === 'loading') {
                 browserStore.loadKeyType({
                     server: props.server,
                     db: option.db,

@@ -477,16 +477,22 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<void>}
          */
         async loadKeyType({ server, db, key, keyCode }) {
+            const nodeMap = this._getNodeMap(server, db)
+            const node = nodeMap.get(`${ConnectionType.RedisValue}/${key}`)
+            if (node == null || !isEmpty(node.redisType)) {
+                return
+            }
             try {
-                const nodeMap = this._getNodeMap(server, db)
-                const node = nodeMap.get(`${ConnectionType.RedisValue}/${key}`)
-                if (node == null || node.redisType != null) {
-                    return
-                }
                 node.redisType = 'loading'
-                const { data } = await GetKeyType({ server, db, key: keyCode || key })
-                const { type } = data || {}
-                node.redisType = type
+                const { data, success } = await GetKeyType({ server, db, key: keyCode || key })
+                if (success) {
+                    const { type } = data || {}
+                    node.redisType = type
+                } else {
+                    node.redisType = 'NONE'
+                }
+            } catch (e) {
+                node.redisType = 'NONE'
             } finally {
             }
         },

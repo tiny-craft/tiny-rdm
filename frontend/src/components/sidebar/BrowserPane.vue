@@ -154,8 +154,8 @@ const onDisconnect = () => {
 const handleSelectDB = async (db) => {
     try {
         loading.value = true
-        browserStore.closeDatabase(props.server, props.db)
         browserStore.setKeyFilter(props.server, {})
+        browserStore.closeDatabase(props.server, props.db)
         await browserStore.openDatabase(props.server, db)
         await nextTick()
         await connectionStore.saveLastDB(props.server, db)
@@ -163,6 +163,7 @@ const handleSelectDB = async (db) => {
         // browserTreeRef.value?.resetExpandKey(props.server, db)
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         browserTreeRef.value?.refreshTree()
+        tabStore.setSelectedKeys(props.server)
     } catch (e) {
         $message.error(e.message)
     } finally {
