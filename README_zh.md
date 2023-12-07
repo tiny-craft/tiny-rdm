@@ -36,6 +36,7 @@
 * 提供慢日志展示
 * List/Hash/Set/Sorted Set的分段加载和查询
 * List/Hash/Set/Sorted Set值的转码显示
+* 内置高级编辑器Monaco Editor
 
 ## 未来版本规划
 - [ ] 命令实时监控

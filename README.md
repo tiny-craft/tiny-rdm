@@ -35,12 +35,12 @@
 * Provides command-line operations.
 * Provides slow logs.
 * Segmented loading and querying for List/Hash/Set/Sorted Set.
-* Decode/decompression display for value of List/Hash/Set/Sorted Set
+* Decode/decompression display for value of List/Hash/Set/Sorted Set.
+* Inbuilt advanced editor - Monaco Editor.
 
 ## Roadmap
 - [ ] Real-time commands monitoring
 - [ ] Pub/Sub operations
-- [ ] Embedding Monaco Editor
 - [ ] Import/export connection profile
 - [ ] Import/export data
 
