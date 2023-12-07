@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import { typesBgColor, typesColor, typesShortName } from '@/consts/support_redis_type.js'
 import Binary from '@/components/icons/Binary.vue'
 import { get, toUpper } from 'lodash'
+import { useThemeVars } from 'naive-ui'
+import Loading from '@/components/icons/Loading.vue'
 
 const props = defineProps({
     type: {
@@ -20,21 +22,24 @@ const props = defineProps({
     },
     round: Boolean,
     inverse: Boolean,
+    loading: Boolean,
 })
+
+const themeVars = useThemeVars()
 
 const fontColor = computed(() => {
     if (props.inverse) {
-        return typesBgColor[props.type]
+        return props.loading ? themeVars.value.tagColor : typesBgColor[props.type]
     } else {
-        return typesColor[props.type]
+        return props.loading ? themeVars.value.textColorBase : typesColor[props.type]
     }
 })
 
 const backgroundColor = computed(() => {
     if (props.inverse) {
-        return typesColor[props.type]
+        return props.loading ? themeVars.value.textColorBase : typesColor[props.type]
     } else {
-        return typesBgColor[props.type]
+        return props.loading ? themeVars.value.tagColor : typesBgColor[props.type]
     }
 })
 
@@ -49,6 +54,7 @@ const label = computed(() => {
 <template>
     <div
         v-if="props.point"
+        :class="{ 'redis-type-tag-loading': props.loading }"
         :style="{
             backgroundColor: fontColor,
             width: Math.max(props.pointSize, 5) + 'px',
@@ -61,12 +67,17 @@ const label = computed(() => {
             'redis-type-tag-normal': !props.short && props.size !== 'small',
             'redis-type-tag-small': !props.short && props.size === 'small',
             'redis-type-tag-round': props.round,
+            'redis-type-tag-loading': props.loading,
         }"
         :color="{ color: backgroundColor, textColor: fontColor }"
         :size="props.size"
         bordered
         strong>
-        <b>{{ label }}</b>
+        <b v-if="!props.loading">{{ label }}</b>
+        <n-icon v-else-if="props.short" size="14">
+            <loading stroke-width="4" />
+        </n-icon>
+        <b v-else>LOADING</b>
         <template #icon>
             <n-icon v-if="binaryKey" :component="Binary" size="18" />
         </template>
@@ -84,5 +95,21 @@ const label = computed(() => {
 
 .redis-type-tag-small {
     padding: 0 5px;
+}
+
+.redis-type-tag-loading {
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.4;
+    }
 }
 </style>

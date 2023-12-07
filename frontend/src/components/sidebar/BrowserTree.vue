@@ -379,21 +379,14 @@ const renderPrefix = ({ option }) => {
                     },
                 )
             }
-            if (isEmpty(option.redisType) || option.redisType === 'loading') {
+            const loading = isEmpty(option.redisType) || option.redisType === 'loading'
+            if (loading) {
                 browserStore.loadKeyType({
                     server: props.server,
                     db: option.db,
                     key: option.redisKey,
                     keyCode: option.redisKeyCode,
                 })
-                // in loading
-                return h(
-                    NIcon,
-                    { size: 20 },
-                    {
-                        default: () => h(!!option.redisKeyCode ? Binary : Key),
-                    },
-                )
             }
             switch (prefStore.keyIconType) {
                 case typesIconStyle.FULL:
@@ -402,12 +395,14 @@ const renderPrefix = ({ option }) => {
                         short: false,
                         size: 'small',
                         inverse: includes(selectedKeys.value, option.key),
+                        loading,
                     })
 
                 case typesIconStyle.POINT:
                     return h(RedisTypeTag, {
                         type: toUpper(option.redisType),
                         point: true,
+                        loading,
                     })
 
                 case typesIconStyle.SHORT:
@@ -416,6 +411,7 @@ const renderPrefix = ({ option }) => {
                         type: toUpper(option.redisType),
                         short: true,
                         size: 'small',
+                        loading,
                         inverse: includes(selectedKeys.value, option.key),
                     })
             }
