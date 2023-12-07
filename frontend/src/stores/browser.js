@@ -3,9 +3,9 @@ import {
     endsWith,
     find,
     get,
+    initial,
     isEmpty,
     join,
-    last,
     map,
     remove,
     set,
@@ -1712,29 +1712,20 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          *
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string} key
          * @param {string} newKey
          * @private
          */
-        _renameKeyNode(connName, db, key, newKey) {
-            const nodeMap = this._getNodeMap(connName, db)
-            const nodeKey = `${ConnectionType.RedisValue}/${key}`
-            const newNodeKey = `${ConnectionType.RedisValue}/${newKey}`
-            const node = nodeMap.get(nodeKey)
-            if (node != null) {
-                // replace node map item
-                const separator = this._getSeparator(connName)
-                node.label = last(split(newKey, separator))
-                node.key = `${connName}/db${db}#${newNodeKey}`
-                node.redisKey = newKey
-                nodeMap[newNodeKey] = node
-                nodeMap.delete(nodeKey)
-                // replace key set item
-                const keySet = this._getKeySet(connName, db)
-                keySet.delete(key)
-                keySet.add(newKey)
+        _renameKeyNode(server, db, key, newKey) {
+            this._deleteKeyNode(server, db, key, false)
+            const { success } = this._addKeyNodes(server, db, [newKey])
+
+            if (success) {
+                const separator = this._getSeparator(server)
+                const layer = initial(key.split(separator)).join(separator)
+                this._tidyNode(server, db, layer)
             }
         },
 
@@ -1946,18 +1937,18 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * rename key
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string} key
          * @param {string} newKey
          * @returns {Promise<{[msg]: string, success: boolean, [nodeKey]: string}>}
          */
-        async renameKey(connName, db, key, newKey) {
-            const { success = false, msg } = await RenameKey(connName, db, key, newKey)
+        async renameKey(server, db, key, newKey) {
+            const { success = false, msg } = await RenameKey(server, db, key, newKey)
             if (success) {
                 // delete old key and add new key struct
-                this._renameKeyNode(connName, db, key, newKey)
-                return { success: true, nodeKey: `${connName}/db${db}#${ConnectionType.RedisValue}/${newKey}` }
+                this._renameKeyNode(server, db, key, newKey)
+                return { success: true, nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${newKey}` }
             } else {
                 return { success: false, msg }
             }
