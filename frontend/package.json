@@ -27,6 +27,6 @@
     "unplugin-auto-import": "^0.16.7",
     "unplugin-icons": "^0.17.4",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^5.0.2"
+    "vite": "^5.0.5"
   }
 }
