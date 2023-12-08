@@ -74,7 +74,7 @@ const onClose = () => {
             label-align="left"
             label-placement="top">
             <n-form-item :label="$t('dialogue.key.new_name')" required>
-                <n-input v-model:value="renameForm.newKey" />
+                <n-input v-model:value="renameForm.newKey" :input-props="{ spellcheck: 'false' }" />
             </n-form-item>
         </n-form>
     </n-modal>

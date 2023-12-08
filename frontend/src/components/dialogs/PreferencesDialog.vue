@@ -88,12 +88,14 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.language')" :span="24" required>
                             <n-select
                                 v-model:value="prefStore.general.language"
+                                :input-props="{ spellcheck: 'false' }"
                                 :options="prefStore.langOption"
                                 filterable />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
                             <n-select
                                 v-model:value="prefStore.general.font"
+                                :input-props="{ spellcheck: 'false' }"
                                 :options="prefStore.fontOption"
                                 filterable />
                         </n-form-item-gi>
@@ -104,7 +106,10 @@ const onClose = () => {
                             <n-input-number v-model:value="prefStore.general.scanSize" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.key_icon_style')" :span="12">
-                            <n-select v-model:value="prefStore.general.keyIconStyle" :options="keyOptions" />
+                            <n-select
+                                v-model:value="prefStore.general.keyIconStyle"
+                                :input-props="{ spellcheck: 'false' }"
+                                :options="keyOptions" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">
                             <n-space>
@@ -128,7 +133,11 @@ const onClose = () => {
             <n-tab-pane :tab="$t('preferences.editor.name')" display-directive="show" name="editor">
                 <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
                     <n-form-item :label="$t('preferences.general.font')" required>
-                        <n-select v-model:value="prefStore.editor.font" :options="prefStore.fontOption" filterable />
+                        <n-select
+                            v-model:value="prefStore.editor.font"
+                            :input-props="{ spellcheck: 'false' }"
+                            :options="prefStore.fontOption"
+                            filterable />
                     </n-form-item>
                     <n-form-item :label="$t('preferences.general.font_size')">
                         <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />

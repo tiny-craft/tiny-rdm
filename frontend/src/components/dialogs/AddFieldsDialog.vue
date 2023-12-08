@@ -202,7 +202,11 @@ const onClose = () => {
         <n-scrollbar style="max-height: 500px">
             <n-form :model="newForm" :show-require-mark="false" label-placement="top" style="padding-right: 15px">
                 <n-form-item :label="$t('common.key')" path="key" required>
-                    <n-input v-model:value="newForm.key" placeholder="" readonly />
+                    <n-input
+                        v-model:value="newForm.key"
+                        :input-props="{ spellcheck: 'false' }"
+                        placeholder=""
+                        readonly />
                 </n-form-item>
                 <component
                     :is="addValueComponent[newForm.type]"

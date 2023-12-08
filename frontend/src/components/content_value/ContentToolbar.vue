@@ -78,7 +78,7 @@ const onCopyKey = () => {
     <div class="content-toolbar flex-box-h">
         <n-input-group>
             <redis-type-tag :binary-key="binaryKey" :type="props.keyType" size="large" />
-            <n-input v-model:value="props.keyPath" readonly>
+            <n-input v-model:value="props.keyPath" :input-props="{ spellcheck: 'false' }" readonly>
                 <template #suffix>
                     <icon-button
                         :icon="Refresh"

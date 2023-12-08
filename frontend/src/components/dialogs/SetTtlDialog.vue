@@ -80,7 +80,7 @@ const onConfirm = async () => {
         transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
             <n-form-item :label="$t('common.key')">
-                <n-input :value="ttlForm.key" readonly>
+                <n-input :input-props="{ spellcheck: 'false' }" :value="ttlForm.key" readonly>
                     <template #prefix>
                         <n-icon v-if="!!ttlForm.keyCode" :component="Binary" size="20" />
                     </template>

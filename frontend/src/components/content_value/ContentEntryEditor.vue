@@ -164,6 +164,7 @@ const onSave = () => {
                     <div class="editor-content-item-label">{{ props.fieldLabel }}</div>
                     <n-input
                         v-model:value="viewAs.field"
+                        :input-props="{ spellcheck: 'false' }"
                         :placeholder="props.field + ''"
                         :readonly="props.fieldReadonly"
                         class="editor-content-item-input"

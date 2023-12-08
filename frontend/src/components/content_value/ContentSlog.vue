@@ -176,7 +176,7 @@ const onListLimitChanged = (limit) => {
                 </n-tooltip>
             </n-form-item>
             <n-form-item :label="$t('slog.filter')">
-                <n-input v-model:value="data.keyword" clearable placeholder="" />
+                <n-input v-model:value="data.keyword" :input-props="{ spellcheck: 'false' }" clearable placeholder="" />
             </n-form-item>
         </n-form>
         <div class="content-value fill-height flex-box-h">

@@ -88,6 +88,7 @@ defineExpose({
         <slot name="prepend" />
         <n-input
             v-model:value="inputData.filter"
+            :input-props="{ spellcheck: 'false' }"
             :placeholder="$t('interface.filter')"
             :size="props.small ? 'small' : ''"
             clearable

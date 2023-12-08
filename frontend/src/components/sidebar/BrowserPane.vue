@@ -284,6 +284,7 @@ onMounted(() => onReload())
                     <n-select
                         :consistent-menu-width="false"
                         :filter="(pattern, option) => option.value.toString() === pattern"
+                        :input-props="{ spellcheck: 'false' }"
                         :options="dbSelectOptions"
                         :value="props.db"
                         filterable

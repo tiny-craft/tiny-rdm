@@ -9,6 +9,7 @@ const emit = defineEmits(['update:value'])
 <template>
     <n-form-item :label="$t('common.value')">
         <n-input
+            :input-props="{ spellcheck: 'false' }"
             :rows="6"
             :value="props.value"
             placeholder=""

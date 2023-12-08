@@ -17,8 +17,7 @@ const handleUpdateValue = (val) => {
 <template>
     <div style="min-height: 22px">
         <template v-if="props.isEdit">
-            <!-- TODO: ADD FULL SCREEN EDIT SUPPORT -->
-            <n-input :value="props.value" @update:value="handleUpdateValue" />
+            <n-input :input-props="{ spellcheck: 'false' }" :value="props.value" @update:value="handleUpdateValue" />
         </template>
         <template v-else>
             {{ props.value }}

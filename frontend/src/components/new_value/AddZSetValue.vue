@@ -65,6 +65,7 @@ const onUpdate = () => {
             <template #default="{ value }">
                 <n-input
                     v-model:value="value.value"
+                    :input-props="{ spellcheck: 'false' }"
                     :placeholder="$t('dialogue.field.enter_value')"
                     type="text"
                     @update:value="onUpdate" />

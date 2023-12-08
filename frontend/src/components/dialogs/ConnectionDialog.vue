@@ -271,6 +271,7 @@ const onClose = () => {
                                 required>
                                 <n-input
                                     v-model:value="generalForm.name"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.name_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
@@ -283,6 +284,7 @@ const onClose = () => {
                             <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
                                 <n-input
                                     v-model:value="generalForm.addr"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.addr_tip')" />
                                 <n-text style="width: 40px; text-align: center">:</n-text>
                                 <n-input-number
@@ -294,6 +296,7 @@ const onClose = () => {
                             <n-form-item-gi :label="$t('dialogue.connection.pwd')" :span="12" path="password">
                                 <n-input
                                     v-model:value="generalForm.password"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.pwd_tip')"
                                     show-password-on="click"
                                     type="password" />
@@ -301,6 +304,7 @@ const onClose = () => {
                             <n-form-item-gi :label="$t('dialogue.connection.usr')" :span="12" path="username">
                                 <n-input
                                     v-model:value="generalForm.username"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.usr_tip')" />
                             </n-form-item-gi>
                         </n-grid>
@@ -322,6 +326,7 @@ const onClose = () => {
                                 path="defaultFilter">
                                 <n-input
                                     v-model:value="generalForm.defaultFilter"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.advn.filter_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
@@ -330,6 +335,7 @@ const onClose = () => {
                                 path="keySeparator">
                                 <n-input
                                     v-model:value="generalForm.keySeparator"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.advn.separator_tip')" />
                             </n-form-item-gi>
                             <n-form-item-gi
@@ -386,6 +392,7 @@ const onClose = () => {
                                     v-model:value="dbFilterList"
                                     :clearable="true"
                                     :disabled="generalForm.dbFilterType === 'none'"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :placeholder="$t('dialogue.connection.advn.dbfilter_input_tip')"
                                     :show="false"
                                     :show-arrow="false"
@@ -464,6 +471,7 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.addr')" required>
                             <n-input
                                 v-model:value="generalForm.ssh.addr"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.ssh.addr_tip')" />
                             <n-text style="width: 40px; text-align: center">:</n-text>
                             <n-input-number
@@ -483,11 +491,13 @@ const onClose = () => {
                             :label="$t('dialogue.connection.usr')">
                             <n-input
                                 v-model:value="generalForm.ssh.username"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.ssh.usr_tip')" />
                         </n-form-item>
                         <n-form-item v-if="sshLoginType === 'pwd'" :label="$t('dialogue.connection.pwd')">
                             <n-input
                                 v-model:value="generalForm.ssh.password"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.ssh.pwd_tip')"
                                 show-password-on="click"
                                 type="password" />
@@ -501,6 +511,7 @@ const onClose = () => {
                         <n-form-item v-if="sshLoginType === 'pkfile'" :label="$t('dialogue.connection.ssh.passphrase')">
                             <n-input
                                 v-model:value="generalForm.ssh.passphrase"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.ssh.passphrase_tip')"
                                 show-password-on="click"
                                 type="password" />
@@ -524,6 +535,7 @@ const onClose = () => {
                             <n-input-group>
                                 <n-select
                                     v-model:value="generalForm.sentinel.master"
+                                    :input-props="{ spellcheck: 'false' }"
                                     :options="masterNameOptions"
                                     filterable
                                     tag />
@@ -535,6 +547,7 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.sentinel.password')">
                             <n-input
                                 v-model:value="generalForm.sentinel.password"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.sentinel.pwd_tip')"
                                 show-password-on="click"
                                 type="password" />
@@ -542,6 +555,7 @@ const onClose = () => {
                         <n-form-item :label="$t('dialogue.connection.sentinel.username')">
                             <n-input
                                 v-model:value="generalForm.sentinel.username"
+                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.connection.sentinel.usr_tip')" />
                         </n-form-item>
                     </n-form>
