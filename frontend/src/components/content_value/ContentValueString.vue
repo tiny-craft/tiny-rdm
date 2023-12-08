@@ -214,7 +214,8 @@ defineExpose({
                 class="flex-item-expand"
                 style="height: 100%"
                 @input="onInput"
-                @reset="onInput" />
+                @reset="onInput"
+                @save="onSave" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>

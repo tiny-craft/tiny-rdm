@@ -181,7 +181,8 @@ const onSave = () => {
                         class="flex-item-expand"
                         style="height: 100%"
                         @input="onInput"
-                        @reset="onInput" />
+                        @reset="onInput"
+                        @save="onSave" />
                     <format-selector
                         :decode="viewAs.decode"
                         :format="viewAs.format"

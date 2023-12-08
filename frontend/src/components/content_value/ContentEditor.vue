@@ -28,7 +28,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['reset', 'input'])
+const emit = defineEmits(['reset', 'input', 'save'])
 
 const themeVars = useThemeVars()
 /** @type {HTMLElement|null} */
@@ -65,6 +65,7 @@ onMounted(async () => {
             accessibilitySupport: 'off',
             wordWrap: 'on',
             tabSize: 2,
+            folding: true,
             fontFamily,
             fontSize,
             scrollBeyondLastLine: false,
@@ -82,6 +83,11 @@ onMounted(async () => {
             },
             selectionHighlight: false,
             renderLineHighlight: 'gutter',
+        })
+
+        // add shortcut for save
+        editorNode.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (event) => {
+            emit('save')
         })
 
         // editorNode.onDidChangeModelLanguageConfiguration(() => {
