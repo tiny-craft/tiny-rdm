@@ -157,8 +157,8 @@ const onSave = () => {
 
 <template>
     <div v-show="show" class="entry-editor flex-box-v">
-        <n-card :title="$t('interface.edit_row')" autofocus size="small" style="height: 100%">
-            <div class="editor-content flex-box-v" style="height: 100%">
+        <n-card :title="$t('interface.edit_row')" autofocus class="flex-item-expand" size="small">
+            <div class="editor-content flex-box-v flex-item-expand">
                 <!-- field -->
                 <div class="editor-content-item flex-box-v">
                     <div class="editor-content-item-label">{{ props.fieldLabel }}</div>
@@ -180,7 +180,6 @@ const onSave = () => {
                         :language="viewLanguage"
                         :show-line-num="prefStore.showLineNum"
                         class="flex-item-expand"
-                        style="height: 100%"
                         @input="onInput"
                         @reset="onInput"
                         @save="onSave" />
@@ -248,7 +247,7 @@ const onSave = () => {
             }
 
             &-label {
-                line-height: 1.25;
+                height: 18px;
                 color: v-bind('themeVars.textColor3');
                 font-size: 13px;
                 padding: 5px 0;
@@ -258,6 +257,12 @@ const onSave = () => {
             }
         }
     }
+}
+
+:deep(.n-card__content) {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 :deep(.n-card__action) {

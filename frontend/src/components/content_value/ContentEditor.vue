@@ -152,7 +152,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div ref="editorRef" :class="{ 'editor-border': props.border === true }" />
+    <div :class="{ 'editor-border': props.border === true }" style="position: relative">
+        <div ref="editorRef" class="editor-inst" />
+    </div>
 </template>
 
 <style lang="scss" scoped>
@@ -161,5 +163,13 @@ onUnmounted(() => {
     border-radius: v-bind('themeVars.borderRadius');
     padding: 3px;
     box-sizing: border-box;
+}
+
+.editor-inst {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
 }
 </style>
