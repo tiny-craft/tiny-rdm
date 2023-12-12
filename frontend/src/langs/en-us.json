@@ -48,7 +48,8 @@
     },
     "editor": {
       "name": "Editor",
-      "show_linenum": "Show Line Numbers"
+      "show_linenum": "Show Line Numbers",
+      "show_folding": "Enable Code Folding"
     }
   },
   "interface": {

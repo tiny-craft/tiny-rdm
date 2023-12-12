@@ -179,6 +179,7 @@ const onSave = () => {
                         :content="displayValue"
                         :language="viewLanguage"
                         :show-line-num="prefStore.showLineNum"
+                        :show-folding="prefStore.showFolding"
                         class="flex-item-expand"
                         @input="onInput"
                         @reset="onInput"

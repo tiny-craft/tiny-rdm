@@ -26,6 +26,7 @@ func NewPreferences() Preferences {
 		Editor: PreferencesEditor{
 			FontSize:    consts.DEFAULT_FONT_SIZE,
 			ShowLineNum: true,
+			ShowFolding: true,
 		},
 	}
 }
@@ -54,4 +55,5 @@ type PreferencesEditor struct {
 	Font        string `json:"font" yaml:"font,omitempty"`
 	FontSize    int    `json:"fontSize" yaml:"font_size"`
 	ShowLineNum bool   `json:"showLineNum" yaml:"show_line_num"`
+	ShowFolding bool   `json:"showFolding" yaml:"show_folding"`
 }

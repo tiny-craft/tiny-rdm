@@ -132,19 +132,28 @@ const onClose = () => {
 
             <n-tab-pane :tab="$t('preferences.editor.name')" display-directive="show" name="editor">
                 <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
-                    <n-form-item :label="$t('preferences.general.font')" required>
-                        <n-select
-                            v-model:value="prefStore.editor.font"
-                            :input-props="{ spellcheck: 'false' }"
-                            :options="prefStore.fontOption"
-                            filterable />
-                    </n-form-item>
-                    <n-form-item :label="$t('preferences.general.font_size')">
-                        <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
-                    </n-form-item>
-                    <n-checkbox v-model:checked="prefStore.editor.showLineNum">
-                        {{ $t('preferences.editor.show_linenum') }}
-                    </n-checkbox>
+                    <n-grid :x-gap="10">
+                        <n-form-item-gi :label="$t('preferences.general.font')" :span="24" required>
+                            <n-select
+                                v-model:value="prefStore.editor.font"
+                                :input-props="{ spellcheck: 'false' }"
+                                :options="prefStore.fontOption"
+                                filterable />
+                        </n-form-item-gi>
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :show-feedback="false" :span="24">
+                            <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
+                        </n-form-item-gi>
+                        <n-form-item-gi :show-feedback="false" :span="24">
+                            <n-checkbox v-model:checked="prefStore.editor.showLineNum">
+                                {{ $t('preferences.editor.show_linenum') }}
+                            </n-checkbox>
+                        </n-form-item-gi>
+                        <n-form-item-gi :show-feedback="false" :span="24">
+                            <n-checkbox v-model:checked="prefStore.editor.showFolding">
+                                {{ $t('preferences.editor.show_folding') }}
+                            </n-checkbox>
+                        </n-form-item-gi>
+                    </n-grid>
                 </n-form>
             </n-tab-pane>
         </n-tabs>

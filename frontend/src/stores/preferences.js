@@ -55,6 +55,7 @@ const usePreferencesStore = defineStore('preferences', {
             font: '',
             fontSize: 14,
             showLineNum: true,
+            showFolding: true,
         },
         lastPref: {},
         fontList: [],
@@ -190,6 +191,10 @@ const usePreferencesStore = defineStore('preferences', {
             return get(this.editor, 'showLineNum', true)
         },
 
+        showFolding() {
+            return get(this.editor, 'showFolding', true)
+        },
+
         keyIconType() {
             return get(this.general, 'keyIconStyle', typesIconStyle.SHORT)
         },
@@ -214,6 +219,10 @@ const usePreferencesStore = defineStore('preferences', {
                 const showLineNum = get(data, 'editor.showLineNum')
                 if (showLineNum === undefined) {
                     set(data, 'editor.showLineNum', true)
+                }
+                const showFolding = get(data, 'editor.showFolding')
+                if (showFolding === undefined) {
+                    set(data, 'editor.showFolding', true)
                 }
                 i18nGlobal.locale.value = this.currentLanguage
             }

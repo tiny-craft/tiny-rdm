@@ -22,6 +22,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    showFolding: {
+        type: Boolean,
+        default: true,
+    },
     border: {
         type: Boolean,
         default: false,
@@ -65,7 +69,7 @@ onMounted(async () => {
             accessibilitySupport: 'off',
             wordWrap: 'on',
             tabSize: 2,
-            folding: true,
+            folding: props.showFolding !== false,
             fontFamily,
             fontSize,
             scrollBeyondLastLine: false,

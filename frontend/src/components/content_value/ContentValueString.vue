@@ -211,6 +211,7 @@ defineExpose({
                 :language="viewLanguage"
                 :loading="props.loading"
                 :show-line-num="prefStore.showLineNum"
+                :show-folding="prefStore.showFolding"
                 class="flex-item-expand"
                 style="height: 100%"
                 @input="onInput"
