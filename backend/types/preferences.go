@@ -36,6 +36,8 @@ type PreferencesBehavior struct {
 	WindowWidth     int  `json:"windowWidth" yaml:"window_width"`
 	WindowHeight    int  `json:"windowHeight" yaml:"window_height"`
 	WindowMaximised bool `json:"windowMaximised" yaml:"window_maximised"`
+	WindowPosX      int  `json:"windowPosX" yaml:"window_pos_x"`
+	WindowPosY      int  `json:"windowPosY" yaml:"window_pos_y"`
 }
 
 type PreferencesGeneral struct {

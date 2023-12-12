@@ -1,8 +1,10 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/adrg/sysfont"
+	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"net/http"
 	"sort"
 	"strings"
@@ -137,6 +139,38 @@ func (p *preferencesService) GetWindowSize() (width, height int, maximised bool)
 		height = consts.DEFAULT_WINDOW_HEIGHT
 	}
 	return
+}
+
+func (p *preferencesService) GetWindowPosition(ctx context.Context) (x, y int) {
+	data := p.pref.GetPreferences()
+	x, y = data.Behavior.WindowPosX, data.Behavior.WindowPosY
+	width, height := data.Behavior.WindowWidth, data.Behavior.WindowHeight
+	var screenWidth, screenHeight int
+	if screens, err := runtime2.ScreenGetAll(ctx); err == nil {
+		for _, screen := range screens {
+			if screen.IsCurrent {
+				screenWidth, screenHeight = screen.Size.Width, screen.Size.Height
+				break
+			}
+		}
+	}
+	if screenWidth <= 0 || screenHeight <= 0 {
+		screenWidth, screenHeight = consts.DEFAULT_WINDOW_WIDTH, consts.DEFAULT_WINDOW_HEIGHT
+	}
+	if x <= 0 || x+width > screenWidth || y <= 0 || y+height > screenHeight {
+		// out of screen, reset to center
+		x, y = (screenWidth-width)/2, (screenHeight-height)/2
+	}
+	return
+}
+
+func (p *preferencesService) SaveWindowPosition(x, y int) {
+	if x > 0 || y > 0 {
+		p.UpdatePreferences(map[string]any{
+			"behavior.windowPosX": x,
+			"behavior.windowPosY": y,
+		})
+	}
 }
 
 func (p *preferencesService) GetScanSize() int {

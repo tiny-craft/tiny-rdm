@@ -74,6 +74,8 @@ func main() {
 		},
 		OnDomReady: func(ctx context.Context) {
 			runtime2.WindowShow(ctx)
+			x, y := prefSvc.GetWindowPosition(ctx)
+			runtime2.WindowSetPosition(ctx, x, y)
 		},
 		OnShutdown: func(ctx context.Context) {
 			browserSvc.Stop()
