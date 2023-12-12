@@ -151,7 +151,7 @@ const useTabStore = defineStore('tab', {
         },
 
         openBlank(server) {
-            this.upsertTab({ server, db: 0 })
+            this.upsertTab({ server })
         },
 
         /**
@@ -194,7 +194,7 @@ const useTabStore = defineStore('tab', {
                 // tab.title = db !== undefined ? `${server}/db${db}` : `${server}`
                 tab.title = server
                 tab.server = server
-                tab.db = db
+                tab.db = db == null ? tab.db : db
                 tab.type = type
                 tab.ttl = ttl
                 tab.key = key

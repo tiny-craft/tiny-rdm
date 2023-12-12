@@ -152,6 +152,10 @@ const onDisconnect = () => {
 }
 
 const handleSelectDB = async (db) => {
+    if (db === props.db) {
+        return
+    }
+
     try {
         loading.value = true
         browserStore.setKeyFilter(props.server, {})

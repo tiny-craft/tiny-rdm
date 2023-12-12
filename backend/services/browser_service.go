@@ -87,7 +87,18 @@ func (b *browserService) Stop() {
 func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 	// get connection config
 	selConn := Connection().getConnection(name)
-	item, err := b.getRedisClient(name, selConn.LastDB)
+	// correct last database index
+	lastDB := selConn.LastDB
+	if selConn.DBFilterType == "show" && !sliceutil.Contains(selConn.DBFilterList, lastDB) {
+		lastDB = selConn.DBFilterList[0]
+	} else if selConn.DBFilterType == "hide" && sliceutil.Contains(selConn.DBFilterList, lastDB) {
+		lastDB = selConn.DBFilterList[0]
+	}
+	if lastDB != selConn.LastDB {
+		Connection().SaveLastDB(name, lastDB)
+	}
+
+	item, err := b.getRedisClient(name, lastDB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return

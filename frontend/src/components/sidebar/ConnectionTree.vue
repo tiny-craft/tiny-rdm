@@ -49,13 +49,6 @@ const contextMenuParam = reactive({
     currentNode: null,
 })
 
-const renderIcon = (icon) => {
-    return () => {
-        return h(NIcon, null, {
-            default: () => h(icon),
-        })
-    }
-}
 const menuOptions = {
     [ConnectionType.Group]: ({ opened }) => [
         {
