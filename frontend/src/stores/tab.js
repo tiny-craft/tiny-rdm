@@ -10,7 +10,7 @@ const useTabStore = defineStore('tab', {
      * @property {string} [title] tab title
      * @property {string} [icon] tab icon
      * @property {string[]} selectedKeys
-     * @property {string[]} checkdeKeys
+     * @property {CheckedKey[]} checkedKeys
      * @property {string} [type] key type
      * @property {*} [value] key value
      * @property {string} [server] server name
@@ -25,6 +25,12 @@ const useTabStore = defineStore('tab', {
      * @param {string} [matchPattern]
      * @param {boolean} [end]
      * @param {boolean} [loading]
+     */
+
+    /**
+     * @typedef {Object} CheckedKey
+     * @property {string[]} key
+     * @property {string[]} redisKey
      */
 
     /**
@@ -124,8 +130,13 @@ const useTabStore = defineStore('tab', {
         },
 
         currentSelectedKeys() {
-            const tab = this.currentTab()
+            const tab = this.currentTab
             return get(tab, 'selectedKeys', [])
+        },
+
+        currentCheckedKeys() {
+            const tab = this.currentTab
+            return get(tab, 'checkedKeys', [])
         },
     },
     actions: {
@@ -657,6 +668,36 @@ const useTabStore = defineStore('tab', {
                     tab.selectedKeys = [keys]
                 } else {
                     tab.selectedKeys = keys
+                }
+            }
+        },
+
+        /**
+         * get checked keys
+         * @param server
+         * @returns {CheckedKey[]}
+         */
+        getCheckedKeys(server) {
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                return tab.checkedKeys || []
+            }
+            return []
+        },
+
+        /**
+         * set checked keys in current display browser tree
+         * @param {string} server
+         * @param {CheckedKey[]} [keys]
+         */
+        setCheckedKeys(server, keys) {
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                if (isEmpty(keys)) {
+                    // select nothing
+                    tab.checkedKeys = []
+                } else {
+                    tab.checkedKeys = keys
                 }
             }
         },

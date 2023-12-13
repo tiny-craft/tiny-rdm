@@ -35,19 +35,12 @@ const props = defineProps({
     pattern: String,
     fullLoaded: Boolean,
     checkMode: Boolean,
-    checkedCount: Number,
 })
-
-const emit = defineEmits(['update:checked-count'])
 
 const themeVars = useThemeVars()
 const render = useRender()
 const i18n = useI18n()
 const expandedKeys = ref([])
-const checkedKeys = reactive({
-    keys: [],
-    redisKeys: [],
-})
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
 const prefStore = usePreferencesStore()
@@ -57,9 +50,8 @@ const dialogStore = useDialogStore()
 watchEffect(
     () => {
         if (!props.checkMode) {
-            resetCheckedKey()
+            tabStore.setCheckedKeys(props.server)
         }
-        emit('update:checked-count', size(checkedKeys.keys))
     },
     { flush: 'post' },
 )
@@ -72,6 +64,19 @@ const selectedKeys = computed(() => {
     const tab = find(tabStore.tabList, { name: props.server })
     if (tab != null) {
         return get(tab, 'selectedKeys', [])
+    }
+    return []
+})
+
+/**
+ *
+ * @type {ComputedRef<string[]>}
+ */
+const checkedKeys = computed(() => {
+    const tab = find(tabStore.tabList, { name: props.server })
+    if (tab != null) {
+        const checkedKeys = get(tab, 'checkedKeys', [])
+        return map(checkedKeys, 'key')
     }
     return []
 })
@@ -191,11 +196,6 @@ const resetExpandKey = (server, db, includeDB) => {
             return startsWith(k, prefix)
         }
     })
-}
-
-const resetCheckedKey = () => {
-    checkedKeys.keys = []
-    checkedKeys.redisKeys = []
 }
 
 const handleSelectContextMenu = (key) => {
@@ -333,11 +333,11 @@ const onUpdateExpanded = (value, option, meta) => {
  * @param {TreeOption[]} options
  */
 const onUpdateCheckedKeys = (keys, options) => {
-    checkedKeys.keys = keys
-    checkedKeys.redisKeys = map(
+    const checkedKeys = map(
         filter(options, (o) => o.type === ConnectionType.RedisValue),
-        (o) => o.redisKeyCode || o.redisKey,
+        (o) => ({ key: o.key, redisKey: o.redisKeyCode || o.redisKey }),
     )
+    tabStore.setCheckedKeys(props.server, checkedKeys)
 }
 
 const renderPrefix = ({ option }) => {
@@ -510,7 +510,10 @@ const calcValueMenu = () => {
 
 // render menu function icon
 const renderSuffix = ({ option }) => {
-    if ((option.type === ConnectionType.RedisDB && option.opened) || includes(selectedKeys.value, option.key)) {
+    if (
+        (option.type === ConnectionType.RedisDB && option.opened) ||
+        (includes(selectedKeys.value, option.key) && !props.checkMode)
+    ) {
         switch (option.type) {
             case ConnectionType.RedisDB:
                 return renderIconMenu(calcDBMenu(option.opened, option.loading, option.fullLoaded))
@@ -568,11 +571,13 @@ defineExpose({
     refreshTree: () => {
         treeKey.value = Date.now()
         expandedKeys.value = []
-        resetCheckedKey()
+        tabStore.setCheckedKeys(props.server)
     },
     deleteCheckedItems: () => {
-        if (!isEmpty(checkedKeys.redisKeys)) {
-            dialogStore.openDeleteKeyDialog(props.server, props.db, checkedKeys.redisKeys)
+        const checkedKeys = tabStore.currentCheckedKeys
+        const redisKeys = map(checkedKeys, 'redisKey')
+        if (!isEmpty(redisKeys)) {
+            dialogStore.openDeleteKeyDialog(props.server, props.db, redisKeys)
         }
     },
 })
@@ -591,7 +596,7 @@ defineExpose({
             :cancelable="false"
             :cascade="true"
             :checkable="props.checkMode"
-            :checked-keys="checkedKeys.keys"
+            :checked-keys="checkedKeys"
             :data="data"
             :expand-on-click="false"
             :expanded-keys="expandedKeys"

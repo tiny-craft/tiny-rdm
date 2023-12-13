@@ -1875,26 +1875,32 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<void>}
          */
         async deleteKeys(server, db, keys) {
-            const delMsgRef = $message.loading('', { duration: 0 })
+            const delMsgRef = $message.loading('', { duration: 0, closable: true })
             let progress = 0
             let count = size(keys)
-            let deletedCount = 0,
-                failCount = 0
-            for (const key of keys) {
-                delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
-                    key: decodeRedisKey(key),
-                    index: ++progress,
-                    count,
-                })
-                const { success } = await DeleteOneKey(server, db, key)
-                if (success) {
-                    this._deleteKeyNode(server, db, key, false)
-                    deletedCount += 1
-                } else {
-                    failCount += 1
+            let deletedCount = 0
+            let failCount = 0
+            try {
+                for (const key of keys) {
+                    delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
+                        key: decodeRedisKey(key),
+                        index: ++progress,
+                        count,
+                    })
+                    const { success } = await DeleteOneKey(server, db, key)
+                    if (success) {
+                        this._deleteKeyNode(server, db, key, false)
+                        deletedCount += 1
+                    } else {
+                        failCount += 1
+                    }
                 }
+            } finally {
+                delMsgRef.destroy()
+                // clear checked keys
+                const tab = useTabStore()
+                tab.setCheckedKeys(server)
             }
-            delMsgRef.destroy()
             // refresh model data
             this._tidyNode(server, db, '', true)
             this._updateDBMaxKeys(server, db, -deletedCount)

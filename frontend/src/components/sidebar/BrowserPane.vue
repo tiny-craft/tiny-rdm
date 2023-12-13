@@ -4,7 +4,7 @@ import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
 import { computed, nextTick, onMounted, reactive, ref, unref } from 'vue'
-import { find, map } from 'lodash'
+import { find, map, size } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
@@ -43,7 +43,6 @@ const browserTreeRef = ref(null)
 const loading = ref(false)
 const fullyLoaded = ref(false)
 const inCheckState = ref(false)
-const checkedCount = ref(0)
 
 const dbSelectOptions = computed(() => {
     const dblist = browserStore.getDBList(props.server)
@@ -80,10 +79,14 @@ const loadProgress = computed(() => {
     return (db.keys * 100) / Math.max(db.keys, db.maxKeys)
 })
 
+const checkedCount = computed(() => {
+    return size(tabStore.getCheckedKeys(props.server))
+})
+
 const checkedTip = computed(() => {
     const dblist = browserStore.getDBList(props.server)
     const db = find(dblist, { db: props.db })
-    return `${checkedCount.value} / ${db.maxKeys}`
+    return `${checkedCount.value} / ${Math.max(db.maxKeys, checkedCount.value)}`
 })
 
 const onReload = async () => {
@@ -267,7 +270,6 @@ onMounted(() => onReload())
         <!-- tree view -->
         <browser-tree
             ref="browserTreeRef"
-            v-model:checked-count="checkedCount"
             :check-mode="inCheckState"
             :db="props.db"
             :full-loaded="fullyLoaded"
