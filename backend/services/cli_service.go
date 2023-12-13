@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -41,12 +42,12 @@ func Cli() *cliService {
 }
 
 func (c *cliService) runCommand(server, data string) {
-	if cmds := strings.Split(data, " "); len(cmds) > 0 && len(cmds[0]) > 0 {
+	if cmds := strutil.SplitCmd(data); len(cmds) > 0 && len(cmds[0]) > 0 {
 		if client, err := c.getRedisClient(server); err == nil {
 			args := sliceutil.Map(cmds, func(i int) any {
 				return cmds[i]
 			})
-			if result, err := client.Do(c.ctx, args...).Result(); err == nil || err == redis.Nil {
+			if result, err := client.Do(c.ctx, args...).Result(); err == nil || errors.Is(err, redis.Nil) {
 				if strings.ToLower(cmds[0]) == "select" {
 					// switch database
 					if db, ok := strutil.AnyToInt(cmds[1]); ok {
