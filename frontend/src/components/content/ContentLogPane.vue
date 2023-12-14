@@ -76,10 +76,10 @@ const columns = computed(() => [
                 return h(
                     'div',
                     null,
-                    map(cmdList, (c) => h('div', null, c)),
+                    map(cmdList, (c) => h('div', { class: 'cmd-line' }, c)),
                 )
             }
-            return cmd
+            return h('div', { class: 'cmd-line' }, cmd)
         },
     },
     {

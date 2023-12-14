@@ -15,3 +15,9 @@
 
 .tab-content {
 }
+
+:deep(.cmd-line) {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
