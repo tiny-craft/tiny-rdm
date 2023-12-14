@@ -100,6 +100,10 @@ const renderTypeLabel = (option) => {
     )
 }
 
+const onChangeType = () => {
+    newForm.value = null
+}
+
 const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 const onAdd = async () => {
@@ -188,7 +192,11 @@ const onClose = () => {
                         filterable />
                 </n-form-item>
                 <n-form-item :label="$t('interface.type')" path="type" required>
-                    <n-select v-model:value="newForm.type" :options="options" :render-label="renderTypeLabel" />
+                    <n-select
+                        v-model:value="newForm.type"
+                        :options="options"
+                        :render-label="renderTypeLabel"
+                        @update:value="onChangeType" />
                 </n-form-item>
                 <n-form-item :label="$t('interface.ttl')" required>
                     <n-input-group>
