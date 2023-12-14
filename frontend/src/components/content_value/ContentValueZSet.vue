@@ -227,14 +227,13 @@ const actionColumn = {
             onEdit: () => startEdit(index + 1, row.s, row.v),
             onDelete: async () => {
                 try {
-                    const { success, msg } = await browserStore.removeZSetItem(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.v,
-                    )
+                    const { success, msg } = await browserStore.removeZSetItem({
+                        server: props.name,
+                        db: props.db,
+                        key: keyName.value,
+                        value: row.v,
+                    })
                     if (success) {
-                        // props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
                     } else {
                         $message.error(msg)

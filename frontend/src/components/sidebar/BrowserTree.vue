@@ -288,6 +288,7 @@ const onUpdateSelectedKeys = (keys, options) => {
                             server: props.server,
                             db,
                             key: redisKey,
+                            clearValue: true,
                         })
                     }
                     return

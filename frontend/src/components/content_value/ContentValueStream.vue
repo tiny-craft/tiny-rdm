@@ -120,12 +120,12 @@ const actionColumn = {
             },
             onDelete: async () => {
                 try {
-                    const { success, msg } = await browserStore.removeStreamValues(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.id,
-                    )
+                    const { success, msg } = await browserStore.removeStreamValues({
+                        server: props.name,
+                        db: props.db,
+                        key: keyName.value,
+                        ids: row.id,
+                    })
                     if (success) {
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.id }))
                     } else {

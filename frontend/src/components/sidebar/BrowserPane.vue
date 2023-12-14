@@ -166,7 +166,7 @@ const handleSelectDB = async (db) => {
         await browserStore.openDatabase(props.server, db)
         await nextTick()
         await connectionStore.saveLastDB(props.server, db)
-        tabStore.upsertTab({ server: props.server, db })
+        tabStore.upsertTab({ server: props.server, db, clearValue: true })
         // browserTreeRef.value?.resetExpandKey(props.server, db)
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         browserTreeRef.value?.refreshTree()

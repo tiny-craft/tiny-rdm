@@ -183,14 +183,13 @@ const actionColumn = {
             },
             onDelete: async () => {
                 try {
-                    const { success, msg } = await browserStore.removeListItem(
-                        props.name,
-                        props.db,
-                        keyName.value,
+                    const { success, msg } = await browserStore.removeListItem({
+                        server: props.name,
+                        db: props.db,
+                        key: keyName.value,
                         index,
-                    )
+                    })
                     if (success) {
-                        props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: `#${index + 1}` }))
                     } else {
                         $message.error(msg)

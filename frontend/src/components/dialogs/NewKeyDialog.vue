@@ -46,7 +46,7 @@ const options = computed(() => {
         label: t,
     }))
 })
-const addValueComponent = {
+const newValueComponent = {
     [types.STRING]: NewStringValue,
     [types.HASH]: NewHashValue,
     [types.LIST]: NewListValue,
@@ -136,7 +136,7 @@ const onAdd = async () => {
         if (success) {
             // select current key
             tabStore.setSelectedKeys(server, nodeKey)
-            browserStore.loadKeySummary({ server, db, key })
+            browserStore.loadKeySummary({ server, db, key, clearValue: true })
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }
@@ -206,7 +206,7 @@ const onClose = () => {
                         </n-button>
                     </n-input-group>
                 </n-form-item>
-                <component :is="addValueComponent[newForm.type]" ref="subFormRef" v-model:value="newForm.value" />
+                <component :is="newValueComponent[newForm.type]" ref="subFormRef" v-model:value="newForm.value" />
                 <!--  TODO: Add import from txt file option -->
             </n-form>
         </n-scrollbar>

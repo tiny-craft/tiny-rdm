@@ -145,7 +145,6 @@ const onSave = async () => {
             decode: viewAs.decode,
         })
         if (success) {
-            // await browserStore.loadKeyDetail({ server: props.name, db: props.db, key: keyName.value })
             $message.success(i18n.t('interface.save_value_succ'))
         } else {
             $message.error(msg)

@@ -9,7 +9,7 @@ import AddListValue from '@/components/new_value/AddListValue.vue'
 import AddHashValue from '@/components/new_value/AddHashValue.vue'
 import AddZSetValue from '@/components/new_value/AddZSetValue.vue'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
-import { isEmpty, size, slice } from 'lodash'
+import { get, isEmpty, size, slice } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
 import useTabStore from 'stores/tab.js'
 
@@ -22,7 +22,7 @@ const newForm = reactive({
     type: '',
     opType: 0,
     value: null,
-    reload: true,
+    reload: false,
 })
 
 const addValueComponent = {
@@ -89,88 +89,102 @@ const onAdd = async () => {
             value = defaultValue[type]
         }
         const keyName = isEmpty(keyCode) ? key : keyCode
-        let updated = false
+        let success = false
+        let msg = ''
         switch (type) {
             case types.LIST:
                 {
                     let data
                     if (newForm.opType === 1) {
-                        data = await browserStore.prependListItem({ server, db, key: keyName, values: value })
+                        data = await browserStore.prependListItem({
+                            server,
+                            db,
+                            key: keyName,
+                            values: value,
+                            reload: newForm.reload,
+                        })
                     } else {
-                        data = await browserStore.appendListItem({ server, db, key: keyName, values: value })
+                        data = await browserStore.appendListItem({
+                            server,
+                            db,
+                            key: keyName,
+                            values: value,
+                            reload: newForm.reload,
+                        })
                     }
-                    const { success, msg } = data
-                    if (success) {
-                        updated = true
-                        $message.success(i18n.t('dialogue.handle_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
+                    success = get(data, 'success')
+                    msg = get(data, 'msg')
                 }
                 break
 
             case types.HASH:
                 {
-                    const { success, msg } = await browserStore.addHashField(server, db, keyName, newForm.opType, value)
-                    if (success) {
-                        updated = true
-                        $message.success(i18n.t('dialogue.handle_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
+                    const data = await browserStore.addHashField({
+                        server,
+                        db,
+                        key: keyName,
+                        action: newForm.opType,
+                        fieldItems: value,
+                        reload: newForm.reload,
+                    })
+                    success = get(data, 'success')
+                    msg = get(data, 'msg')
                 }
                 break
 
             case types.SET:
                 {
-                    const { success, msg } = await browserStore.addSetItem(server, db, keyName, value)
-                    if (success) {
-                        updated = true
-                        $message.success(i18n.t('dialogue.handle_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
+                    const data = await browserStore.addSetItem({
+                        server,
+                        db,
+                        key: keyName,
+                        value,
+                        reload: newForm.reload,
+                    })
+                    success = get(data, 'success')
+                    msg = get(data, 'msg')
                 }
                 break
 
             case types.ZSET:
                 {
-                    const { success, msg } = await browserStore.addZSetItem(server, db, keyName, newForm.opType, value)
-                    if (success) {
-                        updated = true
-                        $message.success(i18n.t('dialogue.handle_succ'))
-                    } else {
-                        $message.error(msg)
-                    }
+                    const data = await browserStore.addZSetItem({
+                        server,
+                        db,
+                        key: keyName,
+                        action: newForm.opType,
+                        vs: value,
+                        reload: newForm.reload,
+                    })
+                    success = get(data, 'success')
+                    msg = get(data, 'msg')
                 }
                 break
 
             case types.STREAM:
                 {
                     if (size(value) > 2) {
-                        const { success, msg } = await browserStore.addStreamValue(
+                        const data = await browserStore.addStreamValue({
                             server,
                             db,
-                            keyName,
-                            value[0],
-                            slice(value, 1),
-                        )
-                        if (success) {
-                            updated = true
-                            $message.success(i18n.t('dialogue.handle_succ'))
-                        } else {
-                            $message.error(msg)
-                        }
+                            key: keyName,
+                            id: value[0],
+                            values: slice(value, 1),
+                            reload: newForm.reload,
+                        })
+                        success = get(data, 'success')
+                        msg = get(data, 'msg')
                     }
                 }
                 break
         }
 
-        if (updated) {
-            if (newForm.reload) {
-                browserStore.reloadKey({ server, db, key: keyName })
-            }
+        if (success) {
+            $message.success(i18n.t('dialogue.handle_succ'))
+        } else if (!isEmpty(msg)) {
+            $message.error(msg)
         }
+
         dialogStore.closeAddFieldsDialog()
     } catch (e) {
         $message.error(e.message)

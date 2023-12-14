@@ -562,47 +562,59 @@ func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
-	var keyType string
-	var dur time.Duration
-	keyType, err = client.Type(ctx, key).Result()
+
+	pipe := client.Pipeline()
+	typeVal := pipe.Type(ctx, key)
+	ttlVal := pipe.TTL(ctx, key)
+	sizeVal := pipe.MemoryUsage(ctx, key, 0)
+	_, err = pipe.Exec(ctx)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
 
-	if keyType == "none" {
+	if typeVal.Err() != nil {
+		resp.Msg = typeVal.Err().Error()
+		return
+	}
+	data := types.KeySummary{
+		Type: strings.ToLower(typeVal.Val()),
+		Size: sizeVal.Val(),
+	}
+	if data.Type == "none" {
 		resp.Msg = "key not exists"
 		return
 	}
 
-	var data types.KeySummary
-	data.Type = strings.ToLower(keyType)
-	if dur, err = client.TTL(ctx, key).Result(); err != nil {
+	if ttlVal.Err() != nil {
 		data.TTL = -1
 	} else {
-		if dur < 0 {
+		if ttlVal.Val() < 0 {
 			data.TTL = -1
 		} else {
-			data.TTL = int64(dur.Seconds())
+			data.TTL = int64(ttlVal.Val().Seconds())
 		}
 	}
 
-	data.Size, _ = client.MemoryUsage(ctx, key, 0).Result()
 	switch data.Type {
 	case "string":
-		data.Length, _ = client.StrLen(ctx, key).Result()
+		data.Length, err = client.StrLen(ctx, key).Result()
 	case "list":
-		data.Length, _ = client.LLen(ctx, key).Result()
+		data.Length, err = client.LLen(ctx, key).Result()
 	case "hash":
-		data.Length, _ = client.HLen(ctx, key).Result()
+		data.Length, err = client.HLen(ctx, key).Result()
 	case "set":
-		data.Length, _ = client.SCard(ctx, key).Result()
+		data.Length, err = client.SCard(ctx, key).Result()
 	case "zset":
-		data.Length, _ = client.ZCard(ctx, key).Result()
+		data.Length, err = client.ZCard(ctx, key).Result()
 	case "stream":
-		data.Length, _ = client.XLen(ctx, key).Result()
+		data.Length, err = client.XLen(ctx, key).Result()
 	default:
-		resp.Msg = "unknown key type"
+		err = errors.New("unknown key type")
+	}
+
+	if err != nil {
+		resp.Msg = err.Error()
 		return
 	}
 

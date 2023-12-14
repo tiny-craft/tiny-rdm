@@ -205,12 +205,13 @@ const actionColumn = {
             onEdit: () => startEdit(index + 1, row.k, row.v),
             onDelete: async () => {
                 try {
-                    const { removed, success, msg } = await browserStore.removeHashField(
-                        props.name,
-                        props.db,
-                        keyName.value,
-                        row.k,
-                    )
+                    const { removed, success, msg } = await browserStore.removeHashField({
+                        server: props.name,
+                        db: props.db,
+                        key: keyName.value,
+                        field: row.k,
+                        reload: false,
+                    })
                     if (success) {
                         props.value.splice(index, 1)
                         $message.success(i18n.t('dialogue.delete_key_succ', { key: row.k }))

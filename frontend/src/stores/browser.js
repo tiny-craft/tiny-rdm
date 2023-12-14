@@ -413,9 +413,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string|number[]} [key] null or blank indicate that update tab to display normal content (blank content or server status)
+         * @param {boolean} [clearValue]
          * @return {Promise<void>}
          */
-        async loadKeySummary({ server, db, key }) {
+        async loadKeySummary({ server, db, key, clearValue }) {
             try {
                 const tab = useTabStore()
                 if (!isEmpty(key)) {
@@ -438,6 +439,7 @@ const useBrowserStore = defineStore('browser', {
                             key: k,
                             size,
                             length,
+                            clearValue,
                         })
                         return
                     } else {
@@ -458,9 +460,9 @@ const useBrowserStore = defineStore('browser', {
                     ttl: -1,
                     key: null,
                     keyCode: null,
-                    value: null,
                     size: 0,
                     length: 0,
+                    clearValue,
                 })
             } catch (e) {
                 $message.error('')
@@ -511,7 +513,7 @@ const useBrowserStore = defineStore('browser', {
             const tab = useTabStore()
             try {
                 tab.updateLoading({ server, db, loading: true })
-                await this.loadKeySummary({ server, db, key })
+                await this.loadKeySummary({ server, db, key, clearValue: true })
                 await this.loadKeyDetail({ server, db, key, decode, format, matchPattern, reset: true })
             } finally {
                 tab.updateLoading({ server, db, loading: false })
@@ -1065,6 +1067,8 @@ const useBrowserStore = defineStore('browser', {
                     }
                     const tab = useTabStore()
                     tab.updateValue({ server, db, key, value })
+
+                    this.loadKeySummary({ server, db, key })
                     return {
                         success,
                         nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${key}`,
@@ -1096,6 +1100,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {formatTypes} [retFormat]
          * @param {boolean} [refresh]
          * @param {number} [index] index for retrieve affect entries quickly
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: {}}>}
          */
         async setHash({
@@ -1110,6 +1115,7 @@ const useBrowserStore = defineStore('browser', {
             retDecode,
             retFormat,
             index,
+            reload,
         }) {
             try {
                 const { data, success, msg } = await SetHashValue({
@@ -1150,6 +1156,12 @@ const useBrowserStore = defineStore('browser', {
                             index: [index],
                         })
                     }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success, updated }
                 } else {
                     return { success, msg }
@@ -1166,9 +1178,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {number }action 0:ignore duplicated fields 1:overwrite duplicated fields
          * @param {string[]} fieldItems field1, value1, filed2, value2...
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean, [updated]: [], [added]: []}>}
          */
-        async addHashField(server, db, key, action, fieldItems) {
+        async addHashField({ server, db, key, action, fieldItems, reload }) {
             try {
                 const { data, success, msg } = await AddHashField(server, db, key, action, fieldItems)
                 if (success) {
@@ -1179,6 +1192,12 @@ const useBrowserStore = defineStore('browser', {
                     }
                     if (!isEmpty(added)) {
                         tab.insertValueEntries({ server, db, key, type: 'hash', entries: added })
+                    }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
                     }
                     return { success, updated, added }
                 } else {
@@ -1195,9 +1214,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} field
+         * @param {boolean} reload
          * @returns {Promise<{[msg]: {}, success: boolean, [removed]: string[]}>}
          */
-        async removeHashField(server, db, key, field) {
+        async removeHashField({ server, db, key, field, reload }) {
             try {
                 const { data, success, msg } = await SetHashValue({ server, db, key, field, newField: '' })
                 if (success) {
@@ -1206,27 +1226,16 @@ const useBrowserStore = defineStore('browser', {
                     //     const tab = useTabStore()
                     //     tab.removeValueEntries({ server, db, key, type: 'hash', entries: removed })
                     // }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success, removed }
                 } else {
                     return { success, msg }
                 }
-            } catch (e) {
-                return { success: false, msg: e.message }
-            }
-        },
-
-        /**
-         * insert list item
-         * @param {string} connName
-         * @param {number} db
-         * @param {string|number[]} key
-         * @param {int} action 0: push to head, 1: push to tail
-         * @param {string[]}values
-         * @returns {Promise<*|{msg, success: boolean}>}
-         */
-        async addListItem(connName, db, key, action, values) {
-            try {
-                return AddListItem(connName, db, key, action, values)
             } catch (e) {
                 return { success: false, msg: e.message }
             }
@@ -1238,9 +1247,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string[]} values
+         * @param {boolean} reload
          * @returns {Promise<{[msg]: string, success: boolean, [item]: []}>}
          */
-        async prependListItem({ server, db, key, values }) {
+        async prependListItem({ server, db, key, values, reload }) {
             try {
                 const { data, success, msg } = await AddListItem(server, db, key, 0, values)
                 if (success) {
@@ -1255,6 +1265,12 @@ const useBrowserStore = defineStore('browser', {
                             entries: left,
                             prepend: true,
                         })
+                        if (reload === true) {
+                            this.reloadKey({ server, db, key })
+                        } else {
+                            // reload summary only
+                            this.loadKeySummary({ server, db, key })
+                        }
                     }
                     return { success, item: left }
                 } else {
@@ -1271,9 +1287,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string[]} values
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean, [item]: any[]}>}
          */
-        async appendListItem({ server, db, key, values }) {
+        async appendListItem({ server, db, key, values, reload }) {
             try {
                 const { data, success, msg } = await AddListItem(server, db, key, 1, values)
                 if (success) {
@@ -1289,6 +1306,12 @@ const useBrowserStore = defineStore('browser', {
                             entries: right,
                             prepend: false,
                         })
+                        if (reload === true) {
+                            this.reloadKey({ server, db, key })
+                        } else {
+                            // reload summary only
+                            this.loadKeySummary({ server, db, key })
+                        }
                     }
                     return { success, item: right }
                 } else {
@@ -1310,6 +1333,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {formatTypes} format
          * @param {decodeTypes} [retDecode]
          * @param {formatTypes} [retFormat]
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async updateListItem({
@@ -1322,6 +1346,7 @@ const useBrowserStore = defineStore('browser', {
             format = formatTypes.RAW,
             retDecode,
             retFormat,
+            reload,
         }) {
             try {
                 const { data, success, msg } = await SetListItem({
@@ -1358,6 +1383,12 @@ const useBrowserStore = defineStore('browser', {
                             entries: removedIndex,
                         })
                     }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success }
                 } else {
                     return { success, msg }
@@ -1373,9 +1404,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {number} index
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: string[]}>}
          */
-        async removeListItem(server, db, key, index) {
+        async removeListItem({ server, db, key, index, reload }) {
             try {
                 const { data, success, msg } = await SetListItem({ server, db, key, index })
                 if (success) {
@@ -1390,6 +1422,12 @@ const useBrowserStore = defineStore('browser', {
                             type: 'list',
                             entries: removedIndexes,
                         })
+                        if (reload === true) {
+                            this.reloadKey({ server, db, key })
+                        } else {
+                            // reload summary only
+                            this.loadKeySummary({ server, db, key })
+                        }
                     }
                     return { success, removed }
                 } else {
@@ -1406,9 +1444,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number} key
          * @param {string|string[]} value
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addSetItem(server, db, key, value) {
+        async addSetItem({ server, db, key, value, reload }) {
             try {
                 if ((!value) instanceof Array) {
                     value = [value]
@@ -1419,6 +1458,12 @@ const useBrowserStore = defineStore('browser', {
                     if (!isEmpty(added)) {
                         const tab = useTabStore()
                         tab.insertValueEntries({ server, db, key, type: 'set', entries: added })
+                    }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
                     }
                     return { success }
                 } else {
@@ -1440,6 +1485,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {formatTypes} [format]
          * @param {decodeTypes} [retDecode]
          * @param {formatTypes} [retFormat]
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async updateSetItem({
@@ -1452,6 +1498,7 @@ const useBrowserStore = defineStore('browser', {
             format = formatTypes.RAW,
             retDecode,
             retFormat,
+            reload,
         }) {
             try {
                 const { data, success, msg } = await UpdateSetItem({
@@ -1475,6 +1522,12 @@ const useBrowserStore = defineStore('browser', {
                     if (!isEmpty(added)) {
                         tab.insertValueEntries({ server, db, key, type: 'set', entries: added })
                     }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success }
                 } else {
                     return { success: false, msg }
@@ -1490,9 +1543,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} value
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async removeSetItem(server, db, key, value) {
+        async removeSetItem({ server, db, key, value, reload }) {
             try {
                 const { data, success, msg } = await SetSetItem(server, db, key, true, [value])
                 if (success) {
@@ -1501,6 +1555,12 @@ const useBrowserStore = defineStore('browser', {
                     if (!isEmpty(removed)) {
                         const removedValues = map(removed, 'v')
                         tab.removeValueEntries({ server, db, key, type: 'set', entries: removedValues })
+                    }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
                     }
                     return { success }
                 } else {
@@ -1518,9 +1578,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {number} action
          * @param {Object.<string, number>} vs value: score
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addZSetItem(server, db, key, action, vs) {
+        async addZSetItem({ server, db, key, action, vs, reload }) {
             try {
                 const { data, success, msg } = await AddZSetValue(server, db, key, action, vs)
                 if (success) {
@@ -1531,6 +1592,12 @@ const useBrowserStore = defineStore('browser', {
                     }
                     if (!isEmpty(updated)) {
                         tab.updateValueEntries({ server, db, key, type: 'zset', entries: updated })
+                    }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
                     }
                     return { success }
                 } else {
@@ -1554,6 +1621,7 @@ const useBrowserStore = defineStore('browser', {
          * @param {decodeTypes} [retDecode]
          * @param {formatTypes} [retFormat]
          * @param {number} [index] index for retrieve affect entries quickly
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
         async updateZSetItem({
@@ -1568,6 +1636,7 @@ const useBrowserStore = defineStore('browser', {
             retDecode,
             retFormat,
             index,
+            reload,
         }) {
             try {
                 const { data, success, msg } = await UpdateZSetValue({
@@ -1598,6 +1667,12 @@ const useBrowserStore = defineStore('browser', {
                     if (!isEmpty(replaced)) {
                         tab.replaceValueEntries({ server, db, key, type: 'zset', entries: replaced, index: [index] })
                     }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success, updated, removed }
                 } else {
                     return { success, msg }
@@ -1613,9 +1688,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} key
          * @param {string} value
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean, [removed]: []}>}
          */
-        async removeZSetItem(server, db, key, value) {
+        async removeZSetItem({ server, db, key, value, reload }) {
             try {
                 const { data, success, msg } = await UpdateZSetValue({ server, db, key, value, newValue: '', score: 0 })
                 if (success) {
@@ -1624,6 +1700,12 @@ const useBrowserStore = defineStore('browser', {
                     if (!isEmpty(removed)) {
                         const removeValues = map(removed, 'v')
                         tab.removeValueEntries({ server, db, key, type: 'zset', entries: removeValues })
+                    }
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
                     }
                     return { success, removed }
                 } else {
@@ -1641,9 +1723,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string|number[]} key
          * @param {string} id
          * @param {string[]} values field1, value1, filed2, value2...
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: string, success: boolean}>}
          */
-        async addStreamValue(server, db, key, id, values) {
+        async addStreamValue({ server, db, key, id, values, reload }) {
             try {
                 const { data = {}, success, msg } = await AddStreamValue(server, db, key, id, values)
                 if (success) {
@@ -1657,6 +1740,12 @@ const useBrowserStore = defineStore('browser', {
                             type: 'stream',
                             entries: added,
                         })
+                        if (reload === true) {
+                            this.reloadKey({ server, db, key })
+                        } else {
+                            // reload summary only
+                            this.loadKeySummary({ server, db, key })
+                        }
                     }
                     return { success }
                 } else {
@@ -1669,21 +1758,28 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * remove stream field
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {string[]|string} ids
+         * @param {boolean} [reload]
          * @returns {Promise<{[msg]: {}, success: boolean}>}
          */
-        async removeStreamValues(connName, db, key, ids) {
+        async removeStreamValues({ server, db, key, ids, reload }) {
             if (typeof ids === 'string') {
                 ids = [ids]
             }
             try {
-                const { data = {}, success, msg } = await RemoveStreamValues(connName, db, key, ids)
+                const { data = {}, success, msg } = await RemoveStreamValues(server, db, key, ids)
                 if (success) {
                     const tab = useTabStore()
-                    tab.removeValueEntries({ server: connName, db, key, type: 'stream', entries: ids })
+                    tab.removeValueEntries({ server, db, key, type: 'stream', entries: ids })
+                    if (reload === true) {
+                        this.reloadKey({ server, db, key })
+                    } else {
+                        // reload summary only
+                        this.loadKeySummary({ server, db, key })
+                    }
                     return { success }
                 } else {
                     return { success, msg }

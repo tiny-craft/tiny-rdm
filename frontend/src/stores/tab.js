@@ -162,7 +162,7 @@ const useTabStore = defineStore('tab', {
         },
 
         openBlank(server) {
-            this.upsertTab({ server })
+            this.upsertTab({ server, clearValue: true })
         },
 
         /**
@@ -177,9 +177,10 @@ const useTabStore = defineStore('tab', {
          * @param {number} [size]
          * @param {number} [length]
          * @param {string} [matchPattern]
+         * @param {boolean} [clearValue]
          * @param {*} [value]
          */
-        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, matchPattern = '' }) {
+        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, matchPattern = '', clearValue }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 this.tabList.push({
@@ -213,7 +214,9 @@ const useTabStore = defineStore('tab', {
                 tab.size = size
                 tab.length = length
                 tab.matchPattern = matchPattern
-                tab.value = undefined
+                if (clearValue === true) {
+                    tab.value = undefined
+                }
             }
             this._setActivatedIndex(tabIndex, true, subTab)
             // this.activatedTab = tab.name
@@ -224,14 +227,16 @@ const useTabStore = defineStore('tab', {
          * @param {string} server
          * @param {number} db
          * @param {string} key
-         * @param {*} value
+         * @param {*} [value]
          * @param {string} [format]
          * @param {string] [decode]
          * @param {string} [matchPattern]
          * @param {boolean} [reset]
          * @param {boolean} [end] keep end status if not set
+         * @param {number} [size]
+         * @param {number} [length]
          */
-        updateValue({ server, db, key, value, format, decode, matchPattern, reset, end }) {
+        updateValue({ server, db, key, value, format, decode, matchPattern, reset, end, size = -1, length = -1 }) {
             const tabData = find(this.tabList, { name: server, db, key })
             if (tabData == null) {
                 return
@@ -240,6 +245,12 @@ const useTabStore = defineStore('tab', {
             tabData.format = format || tabData.format
             tabData.decode = decode || tabData.decode
             tabData.matchPattern = matchPattern || ''
+            if (size >= 0) {
+                tabData.size = size
+            }
+            if (length >= 0) {
+                tabData.length = length
+            }
             if (typeof end === 'boolean') {
                 tabData.end = end
             }
