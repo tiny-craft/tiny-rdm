@@ -73,9 +73,14 @@ func main() {
 			services.GA().Startup(version)
 		},
 		OnDomReady: func(ctx context.Context) {
-			runtime2.WindowShow(ctx)
 			x, y := prefSvc.GetWindowPosition(ctx)
 			runtime2.WindowSetPosition(ctx, x, y)
+			runtime2.WindowShow(ctx)
+		},
+		OnBeforeClose: func(ctx context.Context) (prevent bool) {
+			x, y := runtime2.WindowGetPosition(ctx)
+			prefSvc.SaveWindowPosition(x, y)
+			return false
 		},
 		OnShutdown: func(ctx context.Context) {
 			browserSvc.Stop()

@@ -63,7 +63,7 @@ func (s *systemService) SelectFile(title string) (resp types.JSResp) {
 
 func (s *systemService) loopWindowEvent() {
 	var fullscreen, maximised, minimised, normal bool
-	var width, height, posx, posy int
+	var width, height int
 	var dirty bool
 	for {
 		time.Sleep(300 * time.Millisecond)
@@ -81,12 +81,6 @@ func (s *systemService) loopWindowEvent() {
 		if w, h := runtime.WindowGetSize(s.ctx); w != width || h != height {
 			// window size changed
 			width, height = w, h
-			dirty = true
-		}
-
-		if x, y := runtime.WindowGetPosition(s.ctx); x != posx || y != posy {
-			// window position changed
-			posx, posy = x, y
 			dirty = true
 		}
 
@@ -118,7 +112,6 @@ func (s *systemService) loopWindowEvent() {
 			if !fullscreen && !minimised {
 				// save window size and position
 				Preferences().SaveWindowSize(width, height, maximised)
-				Preferences().SaveWindowPosition(posx, posy)
 			}
 		}
 	}

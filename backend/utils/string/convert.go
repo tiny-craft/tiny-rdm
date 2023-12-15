@@ -132,10 +132,11 @@ func autoDecode(str string) (value, resultDecode string) {
 				return
 			}
 
-			if value, ok = decodeBrotli(str); ok {
-				resultDecode = types.DECODE_BROTLI
-				return
-			}
+			// FIXME: skip decompress with brotli due to incorrect format checking
+			//if value, ok = decodeBrotli(str); ok {
+			//	resultDecode = types.DECODE_BROTLI
+			//	return
+			//}
 		}
 	}
 
