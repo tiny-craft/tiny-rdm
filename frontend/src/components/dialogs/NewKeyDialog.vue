@@ -182,14 +182,10 @@ const onClose = () => {
                 label-placement="top"
                 style="padding-right: 15px">
                 <n-form-item :label="$t('common.key')" path="key" required>
-                    <n-input v-model:value="newForm.key" :input-props="{ spellcheck: 'false' }" placeholder="" />
+                    <n-input v-model:value="newForm.key" placeholder="" />
                 </n-form-item>
                 <n-form-item :label="$t('dialogue.key.db_index')" path="db" required>
-                    <n-select
-                        v-model:value="newForm.db"
-                        :input-props="{ spellcheck: 'false' }"
-                        :options="dbOptions"
-                        filterable />
+                    <n-select v-model:value="newForm.db" :options="dbOptions" filterable />
                 </n-form-item>
                 <n-form-item :label="$t('interface.type')" path="type" required>
                     <n-select

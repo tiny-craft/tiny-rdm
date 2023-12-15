@@ -88,14 +88,12 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.language')" :span="24" required>
                             <n-select
                                 v-model:value="prefStore.general.language"
-                                :input-props="{ spellcheck: 'false' }"
                                 :options="prefStore.langOption"
                                 filterable />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
                             <n-select
                                 v-model:value="prefStore.general.font"
-                                :input-props="{ spellcheck: 'false' }"
                                 :options="prefStore.fontOption"
                                 filterable />
                         </n-form-item-gi>
@@ -106,10 +104,7 @@ const onClose = () => {
                             <n-input-number v-model:value="prefStore.general.scanSize" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.key_icon_style')" :span="12">
-                            <n-select
-                                v-model:value="prefStore.general.keyIconStyle"
-                                :input-props="{ spellcheck: 'false' }"
-                                :options="keyOptions" />
+                            <n-select v-model:value="prefStore.general.keyIconStyle" :options="keyOptions" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">
                             <n-space>
@@ -136,7 +131,6 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.font')" :span="24" required>
                             <n-select
                                 v-model:value="prefStore.editor.font"
-                                :input-props="{ spellcheck: 'false' }"
                                 :options="prefStore.fontOption"
                                 filterable />
                         </n-form-item-gi>

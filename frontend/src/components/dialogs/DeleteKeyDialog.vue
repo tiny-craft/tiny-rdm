@@ -109,11 +109,7 @@ const onClose = () => {
                     v-if="!(deleteForm.key instanceof Array)"
                     :label="$t('dialogue.key.key_expression')"
                     required>
-                    <n-input
-                        v-model:value="deleteForm.key"
-                        :input-props="{ spellcheck: 'false' }"
-                        placeholder=""
-                        @input="resetAffected" />
+                    <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
                 </n-form-item>
                 <!--                <n-form-item :label="$t('dialogue.key.async_delete')" required>-->
                 <!--                    <n-checkbox v-model:checked="deleteForm.async">-->

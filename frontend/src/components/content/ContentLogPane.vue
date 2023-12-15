@@ -148,7 +148,7 @@ defineExpose({
                     style="min-width: 100px" />
             </n-form-item>
             <n-form-item :label="$t('log.filter_keyword')">
-                <n-input v-model:value="data.keyword" :input-props="{ spellcheck: 'false' }" clearable placeholder="" />
+                <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
             <n-form-item label="&nbsp;">
                 <icon-button :icon="Refresh" border t-tooltip="log.refresh" @click="loadHistory" />

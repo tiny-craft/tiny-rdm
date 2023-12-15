@@ -41,7 +41,7 @@ defineExpose({
 
 <template>
     <n-form-item label="ID">
-        <n-input v-model:value="id" :input-props="{ spellcheck: 'false' }" />
+        <n-input v-model:value="id" />
     </n-form-item>
     <n-form-item :label="$t('common.field') + ':' + $t('common.value')" required>
         <n-dynamic-input

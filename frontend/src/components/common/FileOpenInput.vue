@@ -23,12 +23,7 @@ const handleSelectFile = async () => {
 
 <template>
     <n-input-group>
-        <n-input
-            v-model:value="props.value"
-            :disabled="props.disabled"
-            :input-props="{ spellcheck: 'false' }"
-            :placeholder="placeholder"
-            clearable />
+        <n-input v-model:value="props.value" :disabled="props.disabled" :placeholder="placeholder" clearable />
         <n-button :disabled="props.disabled" :focusable="false" @click="handleSelectFile">...</n-button>
     </n-input-group>
 </template>

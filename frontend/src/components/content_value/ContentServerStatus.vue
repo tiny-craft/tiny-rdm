@@ -186,7 +186,7 @@ const infoFilter = ref('')
             </n-card>
             <n-card :title="$t('status.all_info')" embedded>
                 <template #header-extra>
-                    <n-input v-model:value="infoFilter" :input-props="{ spellcheck: 'false' }" clearable placeholder="">
+                    <n-input v-model:value="infoFilter" clearable placeholder="">
                         <template #prefix>
                             <icon-button :icon="Filter" size="18" />
                         </template>

@@ -112,7 +112,7 @@ const onClose = () => {
             :show-require-mark="false"
             label-placement="top">
             <n-form-item :label="$t('dialogue.group.name')" path="name" required>
-                <n-input v-model:value="groupForm.name" :input-props="{ spellcheck: 'false' }" placeholder="" />
+                <n-input v-model:value="groupForm.name" placeholder="" />
             </n-form-item>
         </n-form>
     </n-modal>

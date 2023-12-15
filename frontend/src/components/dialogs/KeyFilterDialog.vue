@@ -85,7 +85,6 @@ const onClose = () => {
                         <template #trigger>
                             <n-input
                                 v-model:value="filterForm.pattern"
-                                :input-props="{ spellcheck: 'false' }"
                                 :placeholder="$t('dialogue.filter.filter_pattern')"
                                 clearable />
                         </template>

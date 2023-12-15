@@ -33,11 +33,7 @@ const filterPattern = ref('')
                 stroke-width="4"
                 t-tooltip="interface.new_group"
                 @click="dialogStore.openNewGroupDialog()" />
-            <n-input
-                v-model:value="filterPattern"
-                :input-props="{ spellcheck: 'false' }"
-                :placeholder="$t('interface.filter')"
-                clearable>
+            <n-input v-model:value="filterPattern" :placeholder="$t('interface.filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" size="20" />
                 </template>
