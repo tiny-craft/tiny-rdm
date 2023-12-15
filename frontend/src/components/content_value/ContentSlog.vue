@@ -58,7 +58,11 @@ const columns = computed(() => [
         align: 'center',
         titleAlign: 'center',
         ellipsis: {
-            tooltip: true,
+            tooltip: {
+                style: {
+                    maxWidth: '80vw',
+                },
+            },
         },
         render: ({ client, addr }, index) => {
             let content = ''

@@ -89,7 +89,11 @@ const fieldColumn = computed(() => ({
     titleAlign: 'center',
     resizable: true,
     ellipsis: {
-        tooltip: true,
+        tooltip: {
+            style: {
+                maxWidth: '80vw',
+            },
+        },
     },
     filterOptionValue: fieldFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
@@ -114,7 +118,11 @@ const valueColumn = computed(() => ({
     ellipsis: displayCode.value
         ? false
         : {
-              tooltip: true,
+              tooltip: {
+                  style: {
+                      maxWidth: '80vw',
+                  },
+              },
           },
     // filterOptionValue: valueFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
