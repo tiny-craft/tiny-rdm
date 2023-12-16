@@ -69,6 +69,10 @@ const preferencesOptions = computed(() => {
         //     icon: render.renderIcon(Help, { strokeWidth: 3 }),
         // },
         {
+            label: i18n.t('menu.report_bug'),
+            key: 'report',
+        },
+        {
             label: i18n.t('menu.check_update'),
             key: 'update',
         },
@@ -96,6 +100,9 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'update':
             prefStore.checkForUpdate(true)
+            break
+        case 'report':
+            BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm/issues')
             break
         case 'about':
             dialogStore.openAboutDialog()
