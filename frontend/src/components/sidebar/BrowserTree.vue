@@ -581,6 +581,13 @@ defineExpose({
             dialogStore.openDeleteKeyDialog(props.server, props.db, redisKeys)
         }
     },
+    exportCheckedItems: () => {
+        const checkedKeys = tabStore.currentCheckedKeys
+        const redisKeys = map(checkedKeys, 'redisKey')
+        if (!isEmpty(redisKeys)) {
+            dialogStore.openExportKeyDialog(props.server, props.db, redisKeys)
+        }
+    },
 })
 </script>
 

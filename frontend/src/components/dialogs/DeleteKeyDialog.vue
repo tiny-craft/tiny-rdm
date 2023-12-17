@@ -99,10 +99,10 @@ const onClose = () => {
             <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
                 <n-grid :x-gap="10">
                     <n-form-item-gi :label="$t('dialogue.key.server')" :span="12">
-                        <n-input :value="deleteForm.server" readonly />
+                        <n-input :autofocus="false" :value="deleteForm.server" readonly />
                     </n-form-item-gi>
                     <n-form-item-gi :label="$t('dialogue.key.db_index')" :span="12">
-                        <n-input :value="deleteForm.db.toString()" readonly />
+                        <n-input :autofocus="false" :value="deleteForm.db.toString()" readonly />
                     </n-form-item-gi>
                 </n-grid>
                 <n-form-item

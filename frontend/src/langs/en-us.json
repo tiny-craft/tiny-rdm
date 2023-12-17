@@ -79,6 +79,7 @@
     "check_mode": "Check Mode",
     "quit_check_mode": "Quit Check Mode",
     "delete_checked": "Delete Checked Items",
+    "export_checked": "Export Checked Items",
     "copy_value": "Copy Value",
     "edit_value": "Edit Value",
     "save_update": "Save Update",
@@ -146,6 +147,7 @@
     "delete_completed": "Deletion process has been completed, {success} successed, {fail} failed",
     "rename_binary_key_fail": "Rename binary key name is unsupported",
     "handle_succ": "Success!",
+    "handle_cancel": "The operation has been canceled.",
     "reload_succ": "Reloaded!",
     "field_required": "This item should not be blank",
     "spec_field_required": "\"{key}\" should not be blank",
@@ -268,6 +270,14 @@
       "set_key_filter": "Set Key Filter",
       "filter_pattern": "Pattern",
       "filter_pattern_tip": "* : Matches zero or more characters. For example, 'key*' matches all keys starting with 'key'.\n? : Matches a single character. For example, 'key?' matches 'key1', 'key2'.\n[] : Matches a single character within the specified range. For example, 'key[1-3]' matches keys like 'key1', 'key2', 'key3'.\n\\ : Escape character. To match *, ?, [, or ], use the backslash '\\' for escaping."
+    },
+    "export": {
+      "name": "Export Keys",
+      "export": "Export",
+      "save_file": "Export Path",
+      "save_file_tip": "Select the export file save path",
+      "exporting": "Exporting key: {key} ({index}/{count})",
+      "export_completed": "Export process has been completed, {success} successed, {fail} failed"
     },
     "ttl": {
       "title": "Set Key TTL"

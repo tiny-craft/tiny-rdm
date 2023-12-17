@@ -2,11 +2,15 @@ package services
 
 import (
 	"context"
+	"encoding/csv"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"net/url"
+	"os"
 	"slices"
 	"sort"
 	"strconv"
@@ -1933,6 +1937,77 @@ func (b *browserService) DeleteOneKey(server string, db int, k any) (resp types.
 	}
 
 	resp.Success = true
+	return
+}
+
+// ExportKey export keys
+func (b *browserService) ExportKey(server string, db int, ks []any, path string) (resp types.JSResp) {
+	// connect a new connection to export keys
+	conf := Connection().getConnection(server)
+	if conf == nil {
+		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
+		return
+	}
+	var client redis.UniversalClient
+	var err error
+	var connConfig = conf.ConnectionConfig
+	connConfig.LastDB = db
+	if client, err = Connection().createRedisClient(connConfig); err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	// TODO: add cancel handle
+	ctx, cancelFunc := context.WithCancel(b.ctx)
+	defer cancelFunc()
+
+	file, err := os.Create(path)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	runtime.EventsOnce(ctx, "export:stop:"+path, func(data ...any) {
+		cancelFunc()
+	})
+	processEvent := "exporting:" + path
+	total := len(ks)
+	var exported, failed int64
+	var canceled bool
+	for i, k := range ks {
+		param := map[string]any{
+			"total":      total,
+			"progress":   i + 1,
+			"processing": k,
+		}
+		runtime.EventsEmit(b.ctx, processEvent, param)
+
+		key := strutil.DecodeRedisKey(k)
+		content, dumpErr := client.Dump(ctx, key).Bytes()
+		if errors.Is(dumpErr, context.Canceled) {
+			canceled = true
+			break
+		}
+		if err = writer.Write([]string{hex.EncodeToString([]byte(key)), hex.EncodeToString(content)}); err != nil {
+			failed += 1
+		} else {
+			exported += 1
+		}
+	}
+
+	resp.Success = true
+	resp.Data = struct {
+		Canceled bool  `json:"canceled"`
+		Exported int64 `json:"exported"`
+		Failed   int64 `json:"failed"`
+	}{
+		Canceled: canceled,
+		Exported: exported,
+		Failed:   failed,
+	}
 	return
 }
 

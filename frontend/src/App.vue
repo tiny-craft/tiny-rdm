@@ -18,6 +18,7 @@ import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime
 import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
+import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -67,6 +68,7 @@ watch(
             <add-fields-dialog />
             <rename-key-dialog />
             <delete-key-dialog />
+            <export-key-dialog />
             <flush-db-dialog />
             <set-ttl-dialog />
             <preferences-dialog />

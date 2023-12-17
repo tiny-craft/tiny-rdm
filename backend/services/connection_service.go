@@ -127,6 +127,9 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		WriteTimeout: time.Duration(config.ExecTimeout) * time.Second,
 		TLSConfig:    tlsConfig,
 	}
+	if config.LastDB > 0 {
+		option.DB = config.LastDB
+	}
 	if sshClient != nil {
 		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return sshClient.Dial(network, addr)

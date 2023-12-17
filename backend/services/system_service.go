@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"log"
 	"sync"
 	"time"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
+	sliceutil "tinyrdm/backend/utils/slice"
 )
 
 type systemService struct {
@@ -50,7 +50,30 @@ func (s *systemService) SelectFile(title string) (resp types.JSResp) {
 		ShowHiddenFiles: true,
 	})
 	if err != nil {
-		log.Println(err)
+		resp.Msg = err.Error()
+		return
+	}
+	resp.Success = true
+	resp.Data = map[string]any{
+		"path": filepath,
+	}
+	return
+}
+
+// SaveFile open file dialog to save a file
+func (s *systemService) SaveFile(title string, defaultName string, extensions []string) (resp types.JSResp) {
+	filters := sliceutil.Map(extensions, func(i int) runtime.FileFilter {
+		return runtime.FileFilter{
+			Pattern: "*." + extensions[i],
+		}
+	})
+	filepath, err := runtime.SaveFileDialog(s.ctx, runtime.SaveDialogOptions{
+		Title:           title,
+		ShowHiddenFiles: true,
+		DefaultFilename: defaultName,
+		Filters:         filters,
+	})
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}

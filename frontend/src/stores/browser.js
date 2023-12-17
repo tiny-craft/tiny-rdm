@@ -26,6 +26,7 @@ import {
     ConvertValue,
     DeleteKey,
     DeleteOneKey,
+    ExportKey,
     FlushDB,
     GetCmdHistory,
     GetKeyDetail,
@@ -56,6 +57,7 @@ import useConnectionStore from 'stores/connections.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { isRedisGlob } from '@/utils/glob_pattern.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
 
 const useBrowserStore = defineStore('browser', {
     /**
@@ -2009,6 +2011,60 @@ const useBrowserStore = defineStore('browser', {
             } else {
                 // some fail
                 $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+            }
+        },
+
+        /**
+         * export multiple keys
+         * @param {string} server
+         * @param {number} db
+         * @param {string[]|number[][]} keys
+         * @param {string} path
+         * @returns {Promise<void>}
+         */
+        async exportKeys(server, db, keys, path) {
+            const delMsgRef = $message.loading('', { duration: 0, closable: true })
+            let exported = 0
+            let failCount = 0
+            let canceled = false
+            const eventName = 'exporting:' + path
+            try {
+                EventsOn(eventName, ({ total, progress, processing }) => {
+                    // update export progress
+                    delMsgRef.content = i18nGlobal.t('dialogue.export.exporting', {
+                        key: decodeRedisKey(processing),
+                        index: progress,
+                        count: total,
+                    })
+                })
+                delMsgRef.onClose = () => {
+                    EventsEmit('export:stop:' + path)
+                }
+                const { data, success, msg } = await ExportKey(server, db, keys, path)
+                if (success) {
+                    canceled = get(data, 'canceled', false)
+                    exported = get(data, 'exported', 0)
+                    failCount = get(data, 'failed', 0)
+                } else {
+                    $message.error(msg)
+                }
+            } finally {
+                delMsgRef.destroy()
+                EventsOff(eventName)
+            }
+            if (canceled) {
+                $message.info(i18nGlobal.t('dialogue.handle_cancel'))
+            } else if (failCount <= 0) {
+                // no fail
+                $message.success(
+                    i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }),
+                )
+            } else if (failCount >= exported) {
+                // all fail
+                $message.error(i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }))
+            } else {
+                // some fail
+                $message.warn(i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }))
             }
         },
 

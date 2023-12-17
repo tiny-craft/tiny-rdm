@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
-import useConnectionStore from "./connections.js";
+import { defineStore } from 'pinia'
+import useConnectionStore from './connections.js'
 
 /**
  * connection dialog type
@@ -62,6 +62,13 @@ const useDialogStore = defineStore('dialog', {
             key: '',
         },
         deleteKeyDialogVisible: false,
+
+        exportKeyParam: {
+            server: '',
+            db: 0,
+            keys: [],
+        },
+        exportKeyDialogVisible: false,
 
         flushDBParam: {
             server: '',
@@ -164,7 +171,7 @@ const useDialogStore = defineStore('dialog', {
          *
          * @param {string} server
          * @param {number} db
-         * @param {string | string[]} key
+         * @param {string|string[]} key
          */
         openDeleteKeyDialog(server, db, key) {
             this.deleteKeyParam.server = server
@@ -174,6 +181,22 @@ const useDialogStore = defineStore('dialog', {
         },
         closeDeleteKeyDialog() {
             this.deleteKeyDialogVisible = false
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {number} db
+         * @param {string|string[]} keys
+         */
+        openExportKeyDialog(server, db, keys) {
+            this.exportKeyParam.server = server
+            this.exportKeyParam.db = db
+            this.exportKeyParam.keys = keys
+            this.exportKeyDialogVisible = true
+        },
+        closeExportKeyDialog() {
+            this.exportKeyDialogVisible = false
         },
 
         openFlushDBDialog(server, db) {

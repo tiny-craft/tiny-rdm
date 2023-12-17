@@ -23,6 +23,7 @@ import useConnectionStore from 'stores/connections.js'
 import ListCheckbox from '@/components/icons/ListCheckbox.vue'
 import Close from '@/components/icons/Close.vue'
 import More from '@/components/icons/More.vue'
+import Export from '@/components/icons/Export.vue'
 
 const props = defineProps({
     server: String,
@@ -144,6 +145,10 @@ const onLoadAll = async () => {
 
 const onDeleteChecked = () => {
     browserTreeRef.value?.deleteCheckedItems()
+}
+
+const onExportChecked = () => {
+    browserTreeRef.value?.exportCheckedItems()
 }
 
 const onFlush = () => {
@@ -329,6 +334,14 @@ onMounted(() => onReload())
 
                 <!-- check mode function bar -->
                 <div v-else class="flex-box-h nav-pane-func">
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :disabled="checkedCount <= 0"
+                        :icon="Export"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.export_checked"
+                        @click="onExportChecked" />
                     <icon-button
                         :button-class="['nav-pane-func-btn']"
                         :disabled="checkedCount <= 0"
