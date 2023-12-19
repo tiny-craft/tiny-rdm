@@ -102,9 +102,11 @@ const useBrowserStore = defineStore('browser', {
      * @typedef {Object} BrowserState
      * @property {Object} serverStats
      * @property {Object.<string, FilterItem>} filter
+     * @property {Object.<string, LoadingState>} loadingState
      * @property {Object.<string, KeyViewType>} viewType
      * @property {Object.<string, DatabaseItem[]>} databases
      * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
+     * @property {Object.<string, string>} openedDB
      */
 
     /**
@@ -118,7 +120,6 @@ const useBrowserStore = defineStore('browser', {
         viewType: {}, // view type selection for all opened connections group by 'server'
         databases: {}, // all database lists in opened connections group by 'server name'
         nodeMap: {}, // all nodes in opened connections group by 'server#db' and 'type/key'
-        keySet: {}, // all keys set in opened connections group by 'server#db
         openedDB: {}, // opened database map by server and database index
     }),
     getters: {
@@ -151,7 +152,6 @@ const useBrowserStore = defineStore('browser', {
 
             this.databases = {}
             this.nodeMap.clear()
-            this.keySet.clear()
             this.serverStats = {}
             const tabStore = useTabStore()
             tabStore.removeAllTab()
@@ -209,32 +209,31 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} connName
          * @param {number} viewType
          */
-        async switchKeyView(connName, viewType) {
-            if (viewType !== KeyViewType.Tree && viewType !== KeyViewType.List) {
-                return
-            }
-
-            const t = get(this.viewType, connName, KeyViewType.Tree)
-            if (t === viewType) {
-                return
-            }
-
-            this.viewType[connName] = viewType
-            const dbs = get(this.databases, connName, [])
-            for (const dbItem of dbs) {
-                if (!dbItem.opened) {
-                    continue
-                }
-
-                dbItem.children = undefined
-                dbItem.keys = 0
-                const { db = 0 } = dbItem
-                this._getNodeMap(connName, db).clear()
-                const keys = this._getKeySet(connName, db)
-                this._addKeyNodes(connName, db, keys)
-                this._tidyNode(connName, db, '')
-            }
-        },
+        // async switchKeyView(connName, viewType) {
+        //     if (viewType !== KeyViewType.Tree && viewType !== KeyViewType.List) {
+        //         return
+        //     }
+        //
+        //     const t = get(this.viewType, connName, KeyViewType.Tree)
+        //     if (t === viewType) {
+        //         return
+        //     }
+        //
+        //     this.viewType[connName] = viewType
+        //     const dbs = get(this.databases, connName, [])
+        //     for (const dbItem of dbs) {
+        //         if (!dbItem.opened) {
+        //             continue
+        //         }
+        //
+        //         dbItem.children = undefined
+        //         dbItem.keys = 0
+        //         const { db = 0 } = dbItem
+        //         this._getNodeMap(connName, db).clear()
+        //         this._addKeyNodes(connName, db, keys)
+        //         this._tidyNode(connName, db, '')
+        //     }
+        // },
 
         /**
          * open connection
@@ -269,7 +268,6 @@ const useBrowserStore = defineStore('browser', {
             let containLastDB = false
             for (let i = 0; i < db.length; i++) {
                 this._getNodeMap(name, i).clear()
-                this._getKeySet(name, i).clear()
                 dbs.push({
                     key: `${name}/${db[i].name}`,
                     label: db[i].name,
@@ -311,7 +309,6 @@ const useBrowserStore = defineStore('browser', {
             if (!isEmpty(dbs)) {
                 for (const db of dbs) {
                     this._getNodeMap(name, db.db).clear()
-                    this._getKeySet(name, db.db).clear()
                 }
             }
             delete this.filter[name]
@@ -369,7 +366,6 @@ const useBrowserStore = defineStore('browser', {
             selDB.isLeaf = false
 
             this._getNodeMap(connName, db).clear()
-            this._getKeySet(connName, db).clear()
             delete this.filter[connName]
         },
 
@@ -389,7 +385,6 @@ const useBrowserStore = defineStore('browser', {
             selDB.keys = 0
 
             this._getNodeMap(server, db).clear()
-            this._getKeySet(server, db).clear()
             delete this.filter[server]
         },
 
@@ -667,34 +662,34 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * reload keys under layer
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string} prefix
          * @return {Promise<void>}
          */
-        async reloadLayer(connName, db, prefix) {
+        async reloadLayer(server, db, prefix) {
             if (isEmpty(prefix)) {
                 return
             }
             let match = prefix
-            const separator = this._getSeparator(connName)
+            const separator = this._getSeparator(server)
             if (!endsWith(match, separator)) {
                 match += separator + '*'
             } else {
                 match += '*'
             }
             // FIXME: ignore original match pattern due to redis not support combination matching
-            const { match: originMatch, type: keyType } = this.getKeyFilter(connName, db)
-            const { keys, maxKeys, success } = await this._loadKeys(connName, db, match, keyType, true)
+            const { match: originMatch, type: keyType } = this.getKeyFilter(server)
+            const { keys, maxKeys, success } = await this._loadKeys(server, db, match, keyType, true)
             if (!success) {
                 return
             }
 
-            this._setDBMaxKeys(connName, db, maxKeys)
+            this._setDBMaxKeys(server, db, maxKeys)
             // remove current keys below prefix
-            this._deleteKeyNode(connName, db, prefix, true)
-            this._addKeyNodes(connName, db, keys)
-            this._tidyNode(connName, db, prefix)
+            this._deleteKeyNode(server, db, prefix, true)
+            this._addKeyNodes(server, db, keys)
+            this._tidyNode(server, db, prefix)
         },
 
         /**
@@ -728,21 +723,6 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * get all keys in a database
-         * @param {string} connName
-         * @param {number} db
-         * @return {Set<string|number[]>}
-         * @private
-         */
-        _getKeySet(connName, db) {
-            if (!this.keySet.hasOwnProperty(`${connName}#${db}`)) {
-                this.keySet[`${connName}#${db}`] = new Set()
-            }
-            // construct a key set
-            return this.keySet[`${connName}#${db}`]
-        },
-
-        /**
          * remove keys in db
          * @param {string} connName
          * @param {number} db
@@ -771,7 +751,6 @@ const useBrowserStore = defineStore('browser', {
                 selDB.children = []
             }
             const nodeMap = this._getNodeMap(connName, db)
-            const keySet = this._getKeySet(connName, db)
             const rootChildren = selDB.children
             const viewType = get(this.viewType, connName, KeyViewType.Tree)
             if (viewType === KeyViewType.List) {
@@ -793,7 +772,6 @@ const useBrowserStore = defineStore('browser', {
                         isLeaf: true,
                     }
                     nodeMap.set(nodeKey, selectedNode)
-                    keySet.add(key)
                     if (!replaceKey) {
                         if (sortInsert) {
                             const index = sortedIndexBy(rootChildren, selectedNode, 'key')
@@ -860,7 +838,6 @@ const useBrowserStore = defineStore('browser', {
                                 isLeaf: true,
                             }
                             nodeMap.set(nodeKey, selectedNode)
-                            keySet.add(key)
                             if (!replaceKey) {
                                 if (sortInsert) {
                                     const index = sortedIndexBy(children, selectedNode, 'key')
@@ -1844,9 +1821,8 @@ const useBrowserStore = defineStore('browser', {
             }
 
             const nodeMap = this._getNodeMap(connName, db)
-            const keySet = this._getKeySet(connName, db)
             if (isLayer === true) {
-                this._deleteChildrenKeyNodes(nodeMap, keySet, key)
+                this._deleteChildrenKeyNodes(nodeMap, key)
             }
             if (isEmpty(key)) {
                 // clear all key nodes
@@ -1884,7 +1860,6 @@ const useBrowserStore = defineStore('browser', {
 
                         if (isEmpty(anceNode.children)) {
                             nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
-                            keySet.delete(anceNode.redisKeyCode || anceNode.redisKey)
                         } else {
                             break
                         }
@@ -1894,7 +1869,6 @@ const useBrowserStore = defineStore('browser', {
                         const node = nodeMap.get(`${ConnectionType.RedisValue}/${keyParts[0]}`)
                         if (node != null) {
                             nodeMap.delete(`${ConnectionType.RedisValue}/${keyParts[0]}`)
-                            keySet.delete(node.redisKeyCode || node.redisKey)
                         }
                     }
                 }
@@ -1906,14 +1880,12 @@ const useBrowserStore = defineStore('browser', {
         /**
          * delete node and all it's children from nodeMap
          * @param {Map<string, DatabaseItem>} nodeMap
-         * @param {Set<string|number[]>} keySet
          * @param {string} [key] clean nodeMap if key is empty
          * @private
          */
-        _deleteChildrenKeyNodes(nodeMap, keySet, key) {
+        _deleteChildrenKeyNodes(nodeMap, key) {
             if (isEmpty(key)) {
                 nodeMap.clear()
-                keySet.clear()
             } else {
                 const mapKey = `${ConnectionType.RedisKey}/${key}`
                 const node = nodeMap.get(mapKey)
@@ -1922,15 +1894,13 @@ const useBrowserStore = defineStore('browser', {
                         if (!nodeMap.delete(`${ConnectionType.RedisValue}/${child.redisKey}`)) {
                             console.warn('delete:', `${ConnectionType.RedisValue}/${child.redisKey}`)
                         }
-                        keySet.delete(child.redisKeyCode || child.redisKey)
                     } else if (child.type === ConnectionType.RedisKey) {
-                        this._deleteChildrenKeyNodes(nodeMap, keySet, child.redisKey)
+                        this._deleteChildrenKeyNodes(nodeMap, child.redisKey)
                     }
                 }
                 if (!nodeMap.delete(mapKey)) {
                     console.warn('delete map key', mapKey)
                 }
-                keySet.delete(node.redisKeyCode || node.redisKey)
             }
         },
 
