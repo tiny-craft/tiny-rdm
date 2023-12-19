@@ -143,7 +143,7 @@
     "remove_tip": "{type} \"{name}\" will be deleted",
     "remove_group_tip": "Group \"{name}\" and all connections in it will be deleted",
     "delete_key_succ": "\"{key}\" has been deleted",
-    "deleting_key": "Deleting key: {key} ({index}/{count})",
+    "deleting_key": "Deleting key({index}/{count}): {key}",
     "delete_completed": "Deletion process has been completed, {success} successed, {fail} failed",
     "rename_binary_key_fail": "Rename binary key name is unsupported",
     "handle_succ": "Success!",
@@ -276,7 +276,7 @@
       "export": "Export",
       "save_file": "Export Path",
       "save_file_tip": "Select the export file save path",
-      "exporting": "Exporting key: {key} ({index}/{count})",
+      "exporting": "Exporting key({index}/{count}): {key}",
       "export_completed": "Export process has been completed, {success} successed, {fail} failed"
     },
     "ttl": {

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import { isEmpty, map, size } from 'lodash'
@@ -70,6 +70,7 @@ const onConfirmDelete = async () => {
     try {
         deleting.value = true
         const { server, db, key, affectedKeys } = deleteForm
+        await nextTick()
         browserStore.deleteKeys(server, db, affectedKeys).catch((e) => {})
     } catch (e) {
         $message.error(e.message)

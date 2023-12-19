@@ -25,7 +25,7 @@ import {
     CloseConnection,
     ConvertValue,
     DeleteKey,
-    DeleteOneKey,
+    DeleteKeys,
     ExportKey,
     FlushDB,
     GetCmdHistory,
@@ -1974,35 +1974,52 @@ const useBrowserStore = defineStore('browser', {
          */
         async deleteKeys(server, db, keys) {
             const delMsgRef = $message.loading('', { duration: 0, closable: true })
-            let progress = 0
-            let count = size(keys)
-            let deletedCount = 0
+            let deleted = []
             let failCount = 0
+            let canceled = false
+            const serialNo = Date.now().valueOf().toString()
+            const eventName = 'deleting:' + serialNo
+            const cancelEvent = 'deleting:' + serialNo
             try {
-                for (const key of keys) {
-                    delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
-                        key: decodeRedisKey(key),
-                        index: ++progress,
-                        count,
-                    })
-                    const { success } = await DeleteOneKey(server, db, key)
-                    if (success) {
-                        this._deleteKeyNode(server, db, key, false)
-                        deletedCount += 1
-                    } else {
-                        failCount += 1
+                let maxProgress = 0
+                EventsOn(eventName, ({ total, progress, processing }) => {
+                    // update delete progress
+                    if (progress > maxProgress) {
+                        maxProgress = progress
                     }
+                    const k = decodeRedisKey(processing)
+                    delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
+                        key: k,
+                        index: maxProgress,
+                        count: total,
+                    })
+                    // this._deleteKeyNode(server, db, k, false)
+                })
+                delMsgRef.onClose = () => {
+                    EventsEmit(cancelEvent)
+                }
+                const { data, success, msg } = await DeleteKeys(server, db, keys, serialNo)
+                if (success) {
+                    canceled = get(data, 'canceled', false)
+                    deleted = get(data, 'deleted', [])
+                    failCount = get(data, 'failed', 0)
+                } else {
+                    $message.error(msg)
                 }
             } finally {
                 delMsgRef.destroy()
+                EventsOff(eventName)
                 // clear checked keys
                 const tab = useTabStore()
                 tab.setCheckedKeys(server)
             }
             // refresh model data
+            const deletedCount = size(deleted)
             this._tidyNode(server, db, '', true)
             this._updateDBMaxKeys(server, db, -deletedCount)
-            if (failCount <= 0) {
+            if (canceled) {
+                $message.info(i18nGlobal.t('dialogue.handle_cancel'))
+            } else if (failCount <= 0) {
                 // no fail
                 $message.success(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
             } else if (failCount >= deletedCount) {
@@ -2012,6 +2029,25 @@ const useBrowserStore = defineStore('browser', {
                 // some fail
                 $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
             }
+
+            // FIXME: update tree view
+            // if (!isEmpty(deleted)) {
+            //     let updateDeleted = []
+            //     let count = size(deleted)
+            //     for (const k of deleted) {
+            //         updateDeleted.push(k)
+            //         console.log(count)
+            //         count -= 1
+            //         if (size(updateDeleted) > 100 || count <= 0) {
+            //             for (const dk of updateDeleted) {
+            //                 this._deleteKeyNode(server, db, dk, false)
+            //                 await nextTick()
+            //             }
+            //             updateDeleted = []
+            //             console.warn('updateDeleted:', updateDeleted)
+            //         }
+            //     }
+            // }
         },
 
         /**
