@@ -142,9 +142,9 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 		// only one database in cluster mode
 		dbs = []types.ConnectionDB{
 			{
-				Name:  "db0",
-				Index: 0,
-				Keys:  int(clusterKeyCount),
+				Name:    "db0",
+				Index:   0,
+				MaxKeys: int(clusterKeyCount),
 			},
 		}
 	} else {
@@ -179,7 +179,7 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 				return types.ConnectionDB{
 					Name:    dbName,
 					Index:   idx,
-					Keys:    dbInfo["keys"],
+					MaxKeys: dbInfo["keys"],
 					Expires: dbInfo["expires"],
 					AvgTTL:  dbInfo["avg_ttl"],
 				}
@@ -454,7 +454,7 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 		return nil
 	}
 
-	var keys []any
+	keys := make([]any, 0)
 	if cluster, ok := client.(*redis.ClusterClient); ok {
 		// cluster mode
 		var mutex sync.Mutex
@@ -472,7 +472,7 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 		})
 	}
 	if err != nil {
-		return nil, cursor, err
+		return keys, cursor, err
 	}
 	return keys, cursor, nil
 }
@@ -778,6 +778,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			if param.Full || matchPattern != "*" {
 				// load all
 				cursor, reset = 0, true
+				items = []types.HashEntryItem{}
 				for {
 					loadedVal, cursor, subErr = client.HScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if subErr != nil {
@@ -848,6 +849,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			if param.Full || matchPattern != "*" {
 				// load all
 				cursor, reset = 0, true
+				items = []types.SetEntryItem{}
 				for {
 					loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if subErr != nil {
@@ -912,6 +914,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				// load all
 				var loadedVal []string
 				cursor, reset = 0, true
+				items = []types.ZSetEntryItem{}
 				for {
 					loadedVal, cursor, err = client.ZScan(ctx, key, cursor, matchPattern, scanSize).Result()
 					if err != nil {
@@ -1158,7 +1161,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 					score, _ := strconv.ParseFloat(strs[i+1].(string), 64)
 					members = append(members, redis.Z{
 						Score:  score,
-						Member: strs[i],
+						Member: strs[i].(string),
 					})
 				}
 				err = client.ZAdd(ctx, key, members...).Err()

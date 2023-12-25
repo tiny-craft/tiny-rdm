@@ -36,7 +36,7 @@ type Connections []Connection
 type ConnectionDB struct {
 	Name    string `json:"name"`
 	Index   int    `json:"index"`
-	Keys    int    `json:"keys"`
+	MaxKeys int    `json:"maxKeys"`
 	Expires int    `json:"expires,omitempty"`
 	AvgTTL  int    `json:"avgTtl,omitempty"`
 }

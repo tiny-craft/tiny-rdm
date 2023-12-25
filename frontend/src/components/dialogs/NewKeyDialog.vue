@@ -2,7 +2,7 @@
 import { computed, h, reactive, ref, watch } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
-import { get, isEmpty, keys, map, trim } from 'lodash'
+import { endsWith, get, isEmpty, keys, map, trim } from 'lodash'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
 import NewHashValue from '@/components/new_value/NewHashValue.vue'
 import NewListValue from '@/components/new_value/NewListValue.vue'
@@ -32,7 +32,7 @@ const formRules = computed(() => {
     }
 })
 const dbOptions = computed(() =>
-    map(keys(browserStore.databases[newForm.server]), (key) => ({
+    map(keys(browserStore.getDBList(newForm.server)), (key) => ({
         label: key,
         value: parseInt(key),
     })),
@@ -69,8 +69,17 @@ watch(
     (visible) => {
         if (visible) {
             const { prefix, server, db } = dialogStore.newKeyParam
+            const separator = browserStore.getSeparator(server)
             newForm.server = server
-            newForm.key = isEmpty(prefix) ? '' : prefix
+            if (isEmpty(prefix)) {
+                newForm.key = ''
+            } else {
+                if (!endsWith(prefix, separator)) {
+                    newForm.key = prefix + separator
+                } else {
+                    newForm.key = prefix
+                }
+            }
             newForm.db = db
             newForm.type = options.value[0].value
             newForm.ttl = -1

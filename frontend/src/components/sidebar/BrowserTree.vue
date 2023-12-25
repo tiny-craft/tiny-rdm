@@ -423,7 +423,7 @@ const renderPrefix = ({ option }) => {
 const renderLabel = ({ option }) => {
     switch (option.type) {
         case ConnectionType.RedisKey:
-            return `${option.label} (${option.keys || 0})`
+            return `${option.label} (${option.keyCount || 0})`
         // case ConnectionType.RedisValue:
         //   return `[${option.keyType}]${option.label}`
     }
@@ -587,6 +587,9 @@ defineExpose({
         if (!isEmpty(redisKeys)) {
             dialogStore.openExportKeyDialog(props.server, props.db, redisKeys)
         }
+    },
+    getSelectedKey: () => {
+        return selectedKeys.value || []
     },
 })
 </script>

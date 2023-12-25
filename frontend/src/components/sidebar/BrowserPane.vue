@@ -4,7 +4,7 @@ import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
 import { computed, nextTick, onMounted, reactive, ref, unref } from 'vue'
-import { find, map, size } from 'lodash'
+import { find, get, map, size } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
@@ -24,6 +24,7 @@ import ListCheckbox from '@/components/icons/ListCheckbox.vue'
 import Close from '@/components/icons/Close.vue'
 import More from '@/components/icons/More.vue'
 import Export from '@/components/icons/Export.vue'
+import { ConnectionType } from '@/consts/connection_type.js'
 
 const props = defineProps({
     server: String,
@@ -51,7 +52,7 @@ const dbSelectOptions = computed(() => {
         if (props.db === db.db) {
             return {
                 value: db.db,
-                label: `db${db.db} (${db.keys}/${db.maxKeys})`,
+                label: `db${db.db} (${db.keyCount}/${db.maxKeys})`,
             }
         }
         return {
@@ -77,7 +78,7 @@ const loadProgress = computed(() => {
     if (db.maxKeys <= 0) {
         return 100
     }
-    return (db.keys * 100) / Math.max(db.keys, db.maxKeys)
+    return (db.keyCount * 100) / Math.max(db.keyCount, db.maxKeys)
 })
 
 const checkedCount = computed(() => {
@@ -87,7 +88,7 @@ const checkedCount = computed(() => {
 const checkedTip = computed(() => {
     const dblist = browserStore.getDBList(props.server)
     const db = find(dblist, { db: props.db })
-    return `${checkedCount.value} / ${Math.max(db.maxKeys, checkedCount.value)}`
+    return `${checkedCount.value} / ${Math.max(db.keyCount, checkedCount.value)}`
 })
 
 const onReload = async () => {
@@ -117,6 +118,16 @@ const onReload = async () => {
 }
 
 const onAddKey = () => {
+    const selectedKey = get(browserTreeRef.value?.getSelectedKey(), 0)
+    if (selectedKey != null) {
+        const node = browserStore.getNode(selectedKey)
+        const { type = ConnectionType.RedisValue, redisKey } = node
+        if (type === ConnectionType.RedisKey) {
+            // has prefix
+            dialogStore.openNewKeyDialog(redisKey, props.server, props.db)
+            return
+        }
+    }
     dialogStore.openNewKeyDialog('', props.server, props.db)
 }
 

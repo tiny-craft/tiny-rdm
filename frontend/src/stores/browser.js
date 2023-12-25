@@ -1,21 +1,5 @@
 import { defineStore } from 'pinia'
-import {
-    endsWith,
-    find,
-    get,
-    initial,
-    isEmpty,
-    join,
-    map,
-    remove,
-    set,
-    size,
-    slice,
-    sortedIndexBy,
-    split,
-    sumBy,
-    toUpper,
-} from 'lodash'
+import { endsWith, get, isEmpty, map, size } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -58,36 +42,15 @@ import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { isRedisGlob } from '@/utils/glob_pattern.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
+import { RedisNodeItem } from '@/objects/redisNodeItem.js'
+import { RedisServerState } from '@/objects/redisServerState.js'
+import { RedisDatabaseItem } from '@/objects/redisDatabaseItem.js'
 
 const useBrowserStore = defineStore('browser', {
-    /**
-     * @typedef {Object} DatabaseItem
-     * @property {string} key - tree node unique key
-     * @property {string} label
-     * @property {string} [name] - server name, type != ConnectionType.Group only
-     * @property {number} type
-     * @property {number} [db] - database index, type == ConnectionType.RedisDB only
-     * @property {string} [redisKey] - redis key, type == ConnectionType.RedisKey || type == ConnectionType.RedisValue only
-     * @property {number[]} [redisKeyCode] - redis key char code array, optional for redis key which contains binary data
-     * @property {number} [keys] - children key count
-     * @property {number} [maxKeys] - max key count for database
-     * @property {boolean} [isLeaf]
-     * @property {boolean} [opened] - redis db is opened, type == ConnectionType.RedisDB only
-     * @property {boolean} [expanded] - current node is expanded
-     * @property {DatabaseItem[]} [children]
-     * @property {string} [redisType] - redis type name, 'loading' indicate that is in loading progress
-     */
-
     /**
      * @typedef {Object} FilterItem
      * @property {string} pattern key pattern filter
      * @property {string} type type filter
-     */
-
-    /**
-     * @typedef {Object} LoadingState
-     * @property {string} loading indicated that is loading children now
-     * @property {string} fullLoaded indicated that all children already loaded
      */
 
     /**
@@ -100,13 +63,7 @@ const useBrowserStore = defineStore('browser', {
 
     /**
      * @typedef {Object} BrowserState
-     * @property {Object} serverStats
-     * @property {Object.<string, FilterItem>} filter
-     * @property {Object.<string, LoadingState>} loadingState
-     * @property {Object.<string, KeyViewType>} viewType
-     * @property {Object.<string, DatabaseItem[]>} databases
-     * @property {Object.<string, Map<string, DatabaseItem>>} nodeMap key format likes 'server#db', children key format likes 'key#type'
-     * @property {Object.<string, string>} openedDB
+     * @property {Object.<string, RedisServerState>} servers
      */
 
     /**
@@ -114,20 +71,11 @@ const useBrowserStore = defineStore('browser', {
      * @returns {BrowserState}
      */
     state: () => ({
-        serverStats: {}, // current server status info
-        filter: {}, // all filters in opened connections map by server and FilterItem
-        loadingState: {}, // all loading state in opened connections map by server and LoadingState
-        viewType: {}, // view type selection for all opened connections group by 'server'
-        databases: {}, // all database lists in opened connections group by 'server name'
-        nodeMap: {}, // all nodes in opened connections group by 'server#db' and 'type/key'
-        openedDB: {}, // opened database map by server and database index
+        servers: {},
     }),
     getters: {
         anyConnectionOpened() {
-            return !isEmpty(this.databases)
-        },
-        selectedDatabases() {
-            return this.openedDB || {}
+            return !isEmpty(this.servers)
         },
     },
     actions: {
@@ -137,8 +85,7 @@ const useBrowserStore = defineStore('browser', {
          * @returns {boolean}
          */
         isConnected(name) {
-            let dbs = get(this.databases, name, [])
-            return !isEmpty(dbs)
+            return this.servers.hasOwnProperty(name)
         },
 
         /**
@@ -146,13 +93,11 @@ const useBrowserStore = defineStore('browser', {
          * @returns {Promise<void>}
          */
         async closeAllConnection() {
-            for (const name in this.databases) {
-                await CloseConnection(name)
+            for (const serverName in this.servers) {
+                await CloseConnection(serverName)
+                this.servers[serverName].dispose()
             }
 
-            this.databases = {}
-            this.nodeMap.clear()
-            this.serverStats = {}
             const tabStore = useTabStore()
             tabStore.removeAllTab()
         },
@@ -160,25 +105,27 @@ const useBrowserStore = defineStore('browser', {
         /**
          * get database info list
          * @param server
-         * @return {DatabaseItem[]}
+         * @return {RedisDatabaseItem[]}
          */
         getDBList(server) {
-            return this.databases[server] || []
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                return serverInst.getDatabase()
+            }
+            return []
         },
 
         /**
          * get database by server name and database index
          * @param {string} server
          * @param {number} db
-         * @return {DatabaseItem|null}
+         * @return {RedisDatabaseItem|null}
          */
         getDatabase(server, db) {
-            const dbs = this.databases[server]
-            if (dbs != null) {
-                const selDB = find(dbs, (item) => item.db === db)
-                if (selDB != null) {
-                    return selDB
-                }
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                return serverInst.databases[db] || null
             }
             return null
         },
@@ -189,19 +136,27 @@ const useBrowserStore = defineStore('browser', {
          * @return {number}
          */
         getSelectedDB(server) {
-            return this.selectedDatabases[server] || 0
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                return serverInst.db
+            }
+            return 0
         },
 
         /**
          * get key list in current database
          * @param server
-         * @return {DatabaseItem[]}
+         * @return {RedisNodeItem[]}
          */
         getKeyList(server) {
-            const db = this.getSelectedDB(server)
-            const dbNodes = this.databases[server]
-            const node = find(dbNodes, (n) => n.db === db)
-            return node.children
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            let rootNode = null
+            if (serverInst != null) {
+                rootNode = serverInst.getRoot()
+            }
+            return get(rootNode, 'children', [])
         },
 
         /**
@@ -227,7 +182,7 @@ const useBrowserStore = defineStore('browser', {
         //         }
         //
         //         dbItem.children = undefined
-        //         dbItem.keys = 0
+        //         dbItem.keyCount = 0
         //         const { db = 0 } = dbItem
         //         this._getNodeMap(connName, db).clear()
         //         this._addKeyNodes(connName, db, keys)
@@ -266,31 +221,32 @@ const useBrowserStore = defineStore('browser', {
             }
             const dbs = []
             let containLastDB = false
+            const serverInst = new RedisServerState({
+                name,
+                separator: this.getSeparator(name),
+            })
+            /** @type RedisDatabaseItem[] **/
+            const databases = []
+
             for (let i = 0; i < db.length; i++) {
-                this._getNodeMap(name, i).clear()
-                dbs.push({
-                    key: `${name}/${db[i].name}`,
-                    label: db[i].name,
-                    name: name,
-                    keys: 0,
-                    maxKeys: db[i].keys,
-                    db: db[i].index,
-                    type: ConnectionType.RedisDB,
-                    isLeaf: false,
-                    children: undefined,
-                })
+                databases.push(
+                    new RedisDatabaseItem({
+                        db: db[i].index,
+                        maxKeys: db[i].maxKeys,
+                    }),
+                )
                 if (db[i].index === lastDB) {
                     containLastDB = true
                 }
             }
-            this.databases[name] = dbs
-            this.viewType[name] = view
+            serverInst.databases = databases
             // get last selected db
             if (containLastDB) {
-                this.openedDB[name] = lastDB
+                serverInst.db = lastDB
             } else {
-                this.openedDB[name] = get(dbs, '0.db', 0)
+                serverInst.db = get(dbs, '0.db', 0)
             }
+            this.servers[name] = serverInst
         },
 
         /**
@@ -304,16 +260,7 @@ const useBrowserStore = defineStore('browser', {
                 // throw new Error(msg)
                 return false
             }
-
-            const dbs = this.databases[name]
-            if (!isEmpty(dbs)) {
-                for (const db of dbs) {
-                    this._getNodeMap(name, db.db).clear()
-                }
-            }
-            delete this.filter[name]
-            delete this.databases[name]
-            delete this.serverStats[name]
+            delete this.servers[name]
 
             const tabStore = useTabStore()
             tabStore.removeTabByName(name)
@@ -338,35 +285,23 @@ const useBrowserStore = defineStore('browser', {
                 return
             }
 
-            selDB.opened = true
-            selDB.maxKeys = maxKeys
-            this.openedDB[server] = db
-            set(this.loadingState, 'fullLoaded', end)
-            if (isEmpty(keys)) {
-                selDB.children = []
-            } else {
-                // append db node to current connection's children
-                this._addKeyNodes(server, db, keys)
-            }
-            this._tidyNode(server, db)
-        },
-
-        /**
-         * reopen database
-         * @param connName
-         * @param db
-         * @returns {Promise<void>}
-         */
-        async reopenDatabase(connName, db) {
-            const selDB = this.getDatabase(connName, db)
-            if (selDB == null) {
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
                 return
             }
-            selDB.children = undefined
-            selDB.isLeaf = false
+            serverInst.db = db
+            serverInst.setDatabaseKeyCount(db, maxKeys)
+            serverInst.loadingState.fullLoaded = end
 
-            this._getNodeMap(connName, db).clear()
-            delete this.filter[connName]
+            if (isEmpty(keys)) {
+                selDB.children = []
+                serverInst.nodeMap.clear()
+            } else {
+                // append db node to current connection's children
+                serverInst.addKeyNodes(keys)
+            }
+            serverInst.tidyNode()
         },
 
         /**
@@ -375,17 +310,22 @@ const useBrowserStore = defineStore('browser', {
          * @param db
          */
         closeDatabase(server, db) {
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return
+            }
+            if (serverInst.db !== db) {
+                return
+            }
+            serverInst.closeDatabase()
+
+            /** @type {RedisDatabaseItem} **/
             const selDB = this.getDatabase(server, db)
             if (selDB == null) {
                 return
             }
-            delete selDB.children
-            selDB.isLeaf = false
-            selDB.opened = false
-            selDB.keys = 0
-
-            this._getNodeMap(server, db).clear()
-            delete this.filter[server]
+            selDB.keyCount = 0
         },
 
         /**
@@ -397,7 +337,11 @@ const useBrowserStore = defineStore('browser', {
             try {
                 const { success, data } = await ServerInfo(server)
                 if (success) {
-                    this.serverStats[server] = data
+                    /** @type {RedisServerState} **/
+                    const serverInst = this.servers[server]
+                    if (serverInst != null) {
+                        serverInst.stats = data
+                    }
                     return data
                 }
             } finally {
@@ -476,8 +420,12 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<void>}
          */
         async loadKeyType({ server, db, key, keyCode }) {
-            const nodeMap = this._getNodeMap(server, db)
-            const node = nodeMap.get(`${ConnectionType.RedisValue}/${key}`)
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return
+            }
+            const node = serverInst.getNode(ConnectionType.RedisValue, key)
             if (node == null || !isEmpty(node.redisType)) {
                 return
             }
@@ -585,19 +533,19 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * scan keys with prefix
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string} match
          * @param {string} [matchType]
          * @param {boolean} [full]
          * @returns {Promise<{keys: string[], maxKeys: number, end: boolean}>}
          */
-        async scanKeys(connName, db, match, matchType, full) {
+        async scanKeys(server, db, match, matchType, full) {
             let resp
             if (full) {
-                resp = await LoadAllKeys(connName, db, match || '*', matchType)
+                resp = await LoadAllKeys(server, db, match || '*', matchType)
             } else {
-                resp = await LoadNextKeys(connName, db, match || '*', matchType)
+                resp = await LoadNextKeys(server, db, match || '*', matchType)
             }
             const { data, success, msg } = resp || {}
             if (!success) {
@@ -609,7 +557,7 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          *
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|null} prefix
          * @param {string|null} matchType
@@ -617,47 +565,55 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<{keys: Array<string|number[]>, maxKeys: number, end: boolean}>}
          * @private
          */
-        async _loadKeys(connName, db, prefix, matchType, all) {
+        async _loadKeys(server, db, prefix, matchType, all) {
             let match = prefix
             if (isEmpty(match)) {
                 match = '*'
             } else if (!isRedisGlob(match)) {
-                const separator = this._getSeparator(connName)
+                const separator = this.getSeparator(server)
                 if (!endsWith(prefix, separator + '*')) {
                     match = prefix + separator + '*'
                 }
             }
-            return this.scanKeys(connName, db, match, matchType, all)
+            return this.scanKeys(server, db, match, matchType, all)
         },
 
         /**
          * load more keys within the database
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @return {Promise<boolean>}
          */
-        async loadMoreKeys(connName, db) {
-            const { match, type: keyType } = this.getKeyFilter(connName)
-            const { keys, maxKeys, end } = await this._loadKeys(connName, db, match, keyType, false)
-            this._setDBMaxKeys(connName, db, maxKeys)
-            // remove current keys below prefix
-            this._addKeyNodes(connName, db, keys)
-            this._tidyNode(connName, db, '')
+        async loadMoreKeys(server, db) {
+            const { match, type: keyType } = this.getKeyFilter(server)
+            const { keys, maxKeys, end } = await this._loadKeys(server, db, match, keyType, false)
+            /** @type RedisServerState **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.setDBKeyCount(db, maxKeys)
+                // remove current keys below prefix
+                serverInst.addKeyNodes(keys)
+                serverInst.tidyNode('')
+            }
             return end
         },
 
         /**
          * load all left keys within the database
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @return {Promise<void>}
          */
-        async loadAllKeys(connName, db) {
-            const { match, type: keyType } = this.getKeyFilter(connName, db)
-            const { keys, maxKeys } = await this._loadKeys(connName, db, match, keyType, true)
-            this._setDBMaxKeys(connName, db, maxKeys)
-            this._addKeyNodes(connName, db, keys)
-            this._tidyNode(connName, db, '')
+        async loadAllKeys(server, db) {
+            const { match, type: keyType } = this.getKeyFilter(server)
+            const { keys, maxKeys } = await this._loadKeys(server, db, match, keyType, true)
+            /** @type RedisServerState **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.setDBKeyCount(db, maxKeys)
+                serverInst.addKeyNodes(keys)
+                serverInst.tidyNode('')
+            }
         },
 
         /**
@@ -672,7 +628,7 @@ const useBrowserStore = defineStore('browser', {
                 return
             }
             let match = prefix
-            const separator = this._getSeparator(server)
+            const separator = this.getSeparator(server)
             if (!endsWith(match, separator)) {
                 match += separator + '*'
             } else {
@@ -685,11 +641,15 @@ const useBrowserStore = defineStore('browser', {
                 return
             }
 
-            this._setDBMaxKeys(server, db, maxKeys)
-            // remove current keys below prefix
-            this._deleteKeyNode(server, db, prefix, true)
-            this._addKeyNodes(server, db, keys)
-            this._tidyNode(server, db, prefix)
+            /** @type RedisServerState **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.setDBKeyCount(db, maxKeys)
+                // remove current keys below prefix
+                serverInst.removeKeyNode(prefix, true)
+                serverInst.addKeyNodes(keys)
+                serverInst.tidyNode(prefix)
+            }
         },
 
         /**
@@ -698,7 +658,7 @@ const useBrowserStore = defineStore('browser', {
          * @returns {string}
          * @private
          */
-        _getSeparator(server) {
+        getSeparator(server) {
             const connStore = useConnectionStore()
             const { keySeparator } = connStore.getDefaultSeparator(server)
             if (isEmpty(keySeparator)) {
@@ -708,282 +668,9 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * get node map
-         * @param {string} connName
-         * @param {number} db
-         * @returns {Map<string, DatabaseItem>}
-         * @private
-         */
-        _getNodeMap(connName, db) {
-            if (!this.nodeMap.hasOwnProperty(`${connName}#${db}`)) {
-                this.nodeMap[`${connName}#${db}`] = new Map()
-            }
-            // construct a tree node list, the format of item key likes 'server/db#type/key'
-            return this.nodeMap[`${connName}#${db}`]
-        },
-
-        /**
-         * remove keys in db
-         * @param {string} connName
-         * @param {number} db
-         * @param {Array<string|number[]>|Set<string|number[]>} keys
-         * @param {boolean} [sortInsert]
-         * @return {{success: boolean, newKey: number, newLayer: number, replaceKey: number}}
-         * @private
-         */
-        _addKeyNodes(connName, db, keys, sortInsert) {
-            const result = {
-                success: false,
-                newLayer: 0,
-                newKey: 0,
-                replaceKey: 0,
-            }
-            if (isEmpty(keys)) {
-                return result
-            }
-            const separator = this._getSeparator(connName)
-            const selDB = this.getDatabase(connName, db)
-            if (selDB == null) {
-                return result
-            }
-
-            if (selDB.children == null) {
-                selDB.children = []
-            }
-            const nodeMap = this._getNodeMap(connName, db)
-            const rootChildren = selDB.children
-            const viewType = get(this.viewType, connName, KeyViewType.Tree)
-            if (viewType === KeyViewType.List) {
-                // construct list view data
-                for (const key of keys) {
-                    const k = decodeRedisKey(key)
-                    const isBinaryKey = k !== key
-                    const nodeKey = `${ConnectionType.RedisValue}/${nativeRedisKey(key)}`
-                    const replaceKey = nodeMap.has(nodeKey)
-                    const selectedNode = {
-                        key: `${connName}/db${db}#${nodeKey}`,
-                        label: k,
-                        db,
-                        keys: 0,
-                        redisKey: k,
-                        redisKeyCode: isBinaryKey ? key : undefined,
-                        redisKeyType: undefined,
-                        type: ConnectionType.RedisValue,
-                        isLeaf: true,
-                    }
-                    nodeMap.set(nodeKey, selectedNode)
-                    if (!replaceKey) {
-                        if (sortInsert) {
-                            const index = sortedIndexBy(rootChildren, selectedNode, 'key')
-                            rootChildren.splice(index, 0, selectedNode)
-                        } else {
-                            rootChildren.push(selectedNode)
-                        }
-                        result.newKey += 1
-                    } else {
-                        result.replaceKey += 1
-                    }
-                }
-            } else {
-                // construct tree view data
-                for (const key of keys) {
-                    const k = decodeRedisKey(key)
-                    const isBinaryKey = k !== key
-                    const keyParts = isBinaryKey ? [nativeRedisKey(key)] : split(k, separator)
-                    const len = size(keyParts)
-                    const lastIdx = len - 1
-                    let handlePath = ''
-                    let children = rootChildren
-                    for (let i = 0; i < len; i++) {
-                        handlePath += keyParts[i]
-                        if (i !== lastIdx) {
-                            // layer
-                            const nodeKey = `${ConnectionType.RedisKey}/${handlePath}`
-                            let selectedNode = nodeMap.get(nodeKey)
-                            if (selectedNode == null) {
-                                selectedNode = {
-                                    key: `${connName}/db${db}#${nodeKey}`,
-                                    label: keyParts[i],
-                                    db,
-                                    keys: 0,
-                                    redisKey: handlePath,
-                                    type: ConnectionType.RedisKey,
-                                    isLeaf: false,
-                                    children: [],
-                                }
-                                nodeMap.set(nodeKey, selectedNode)
-                                if (sortInsert) {
-                                    const index = sortedIndexBy(children, selectedNode, 'key')
-                                    children.splice(index, 0, selectedNode)
-                                } else {
-                                    children.push(selectedNode)
-                                }
-                                result.newLayer += 1
-                            }
-                            children = selectedNode.children
-                            handlePath += separator
-                        } else {
-                            // key
-                            const nodeKey = `${ConnectionType.RedisValue}/${handlePath}`
-                            const replaceKey = nodeMap.has(nodeKey)
-                            const selectedNode = {
-                                key: `${connName}/db${db}#${nodeKey}`,
-                                label: isBinaryKey ? k : keyParts[i],
-                                db,
-                                keys: 0,
-                                redisKey: handlePath,
-                                redisKeyCode: isBinaryKey ? key : undefined,
-                                redisKeyType: undefined,
-                                type: ConnectionType.RedisValue,
-                                isLeaf: true,
-                            }
-                            nodeMap.set(nodeKey, selectedNode)
-                            if (!replaceKey) {
-                                if (sortInsert) {
-                                    const index = sortedIndexBy(children, selectedNode, 'key')
-                                    children.splice(index, 0, selectedNode)
-                                } else {
-                                    children.push(selectedNode)
-                                }
-                                result.newKey += 1
-                            } else {
-                                result.replaceKey += 1
-                            }
-                        }
-                    }
-                }
-            }
-            return result
-        },
-
-        /**
-         *
-         * @param {DatabaseItem[]} nodeList
-         * @private
-         */
-        _sortNodes(nodeList) {
-            if (nodeList == null) {
-                return
-            }
-            nodeList.sort((a, b) => {
-                return a.key > b.key ? 1 : -1
-            })
-        },
-
-        /**
-         * tidy node by key
-         * @param {string} connName
-         * @param {number} db
-         * @param {string} [key]
-         * @param {boolean} [skipResort]
-         * @private
-         */
-        _tidyNode(connName, db, key, skipResort) {
-            const nodeMap = this._getNodeMap(connName, db)
-            const dbNode = this.getDatabase(connName, db) || {}
-            const separator = this._getSeparator(connName)
-            const keyParts = split(key, separator)
-            const totalParts = size(keyParts)
-            let node
-            // find last exists ancestor key
-            let i = totalParts - 1
-            for (; i > 0; i--) {
-                const parentKey = join(slice(keyParts, 0, i), separator)
-                node = nodeMap.get(`${ConnectionType.RedisKey}/${parentKey}`)
-                if (node != null) {
-                    break
-                }
-            }
-            if (node == null) {
-                node = dbNode
-            }
-            const keyCountUpdated = this._tidyNodeChildren(node, skipResort)
-
-            if (keyCountUpdated) {
-                // update key count of parent and above
-                for (; i > 0; i--) {
-                    const parentKey = join(slice(keyParts, 0, i), separator)
-                    const parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${parentKey}`)
-                    if (parentNode == null) {
-                        break
-                    }
-                    parentNode.keys = sumBy(parentNode.children, 'keys')
-                }
-                // update key count of db
-                dbNode.keys = sumBy(dbNode.children, 'keys')
-            }
-            return true
-        },
-
-        /**
-         * sort all node item's children and calculate keys count
-         * @param {DatabaseItem} node
-         * @param {boolean} skipSort skip sorting children
-         * @returns {boolean} return whether key count changed
-         * @private
-         */
-        _tidyNodeChildren(node, skipSort) {
-            let count = 0
-            if (!isEmpty(node.children)) {
-                if (skipSort !== true) {
-                    this._sortNodes(node.children)
-                }
-
-                for (const elem of node.children) {
-                    this._tidyNodeChildren(elem, skipSort)
-                    count += elem.keys
-                }
-            } else {
-                if (node.type === ConnectionType.RedisValue) {
-                    count += 1
-                } else {
-                    // no children in db node or layer node, set count to 0
-                    count = 0
-                }
-            }
-            if (node.keys !== count) {
-                node.keys = count
-                return true
-            }
-            return false
-        },
-
-        /**
-         * update max key by increase/decrease value
-         * @param {string} connName
-         * @param {number} db
-         * @param {number} [updateValue]
-         * @private
-         */
-        _updateDBMaxKeys(connName, db, updateValue) {
-            if (updateValue === undefined) {
-                return
-            }
-            const database = this.getDatabase(connName, db)
-            if (database != null) {
-                const maxKeys = get(database, 'maxKeys', 0)
-                database.maxKeys = Math.max(0, maxKeys + updateValue)
-            }
-        },
-
-        /**
-         * set db max keys value
-         * @param {string} connName
-         * @param {number} db
-         * @param {number} maxKeys
-         * @private
-         */
-        _setDBMaxKeys(connName, db, maxKeys) {
-            const database = this.getDatabase(connName, db)
-            if (database != null) {
-                set(database, 'maxKeys', maxKeys)
-            }
-        },
-
-        /**
          * get tree node by key name
          * @param key
-         * @return {DatabaseItem|null}
+         * @return {RedisNodeItem|null}
          */
         getNode(key) {
             let idx = key.indexOf('#')
@@ -997,19 +684,23 @@ const useBrowserStore = defineStore('browser', {
                 return null
             }
             const server = dbPart.substring(0, idx2)
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return null
+            }
+
             const db = parseInt(dbPart.substring(idx2 + 3))
             if (isNaN(db)) {
                 return null
             }
 
-            if (size(key) > idx + 1) {
-                const keyPart = key.substring(idx + 1)
-                // contains redis key
-                const nodeMap = this._getNodeMap(server, db)
-                return nodeMap.get(keyPart)
-            } else {
-                return this.getDatabase(server, db)
+            if (size(key) <= idx + 1) {
+                return null
             }
+            // contains redis key
+            const keyPart = key.substring(idx + 1)
+            return serverInst.nodeMap.get(keyPart)
         },
 
         /**
@@ -1037,12 +728,16 @@ const useBrowserStore = defineStore('browser', {
                     decode,
                 })
                 if (success) {
-                    // const { value } = data
-                    // update tree view data
-                    const { newKey = 0 } = this._addKeyNodes(server, db, [key], true)
-                    if (newKey > 0) {
-                        this._tidyNode(server, db, key)
-                        this._updateDBMaxKeys(server, db, newKey)
+                    /** @type RedisServerState **/
+                    const serverInst = this.servers[server]
+                    if (serverInst != null) {
+                        // const { value } = data
+                        // update tree view data
+                        const { newKey = 0 } = serverInst.addKeyNodes([key], true)
+                        if (newKey > 0) {
+                            serverInst.tidyNode(key)
+                            serverInst.updateDBKeyCount(db, newKey)
+                        }
                     }
                     const tab = useTabStore()
                     tab.updateValue({ server, db, key, value })
@@ -1770,15 +1465,15 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * reset key's ttl
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string} key
          * @param {number} ttl
          * @returns {Promise<boolean>}
          */
-        async setTTL(connName, db, key, ttl) {
+        async setTTL(server, db, key, ttl) {
             try {
-                const { success, msg } = await SetKeyTTL(connName, db, key, ttl)
+                const { success, msg } = await SetKeyTTL(server, db, key, ttl)
                 return success === true
             } catch (e) {
                 return false
@@ -1786,149 +1481,34 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         *
-         * @param {string} server
-         * @param {number} db
-         * @param {string} key
-         * @param {string} newKey
-         * @private
-         */
-        _renameKeyNode(server, db, key, newKey) {
-            this._deleteKeyNode(server, db, key, false)
-            const { success } = this._addKeyNodes(server, db, [newKey])
-
-            if (success) {
-                const separator = this._getSeparator(server)
-                const layer = initial(key.split(separator)).join(separator)
-                this._tidyNode(server, db, layer)
-            }
-        },
-
-        /**
-         *
-         * @param {string} connName
-         * @param {number} db
-         * @param {string} [key]
-         * @param {boolean} [isLayer]
-         * @private
-         */
-        _deleteKeyNode(connName, db, key, isLayer) {
-            const dbRoot = this.getDatabase(connName, db) || {}
-            const separator = this._getSeparator(connName)
-
-            if (dbRoot == null) {
-                return false
-            }
-
-            const nodeMap = this._getNodeMap(connName, db)
-            if (isLayer === true) {
-                this._deleteChildrenKeyNodes(nodeMap, key)
-            }
-            if (isEmpty(key)) {
-                // clear all key nodes
-                dbRoot.children = []
-                dbRoot.keys = 0
-            } else {
-                const keyParts = split(key, separator)
-                const totalParts = size(keyParts)
-                // remove from parent in tree node
-                const parentKey = slice(keyParts, 0, totalParts - 1)
-                let parentNode
-                if (isEmpty(parentKey)) {
-                    parentNode = dbRoot
-                } else {
-                    parentNode = nodeMap.get(`${ConnectionType.RedisKey}/${join(parentKey, separator)}`)
-                }
-
-                // not found parent node
-                if (parentNode == null) {
-                    return false
-                }
-                remove(parentNode.children, {
-                    type: isLayer ? ConnectionType.RedisKey : ConnectionType.RedisValue,
-                    redisKey: key,
-                })
-
-                // check and remove empty layer node
-                let i = totalParts - 1
-                for (; i >= 0; i--) {
-                    const anceKey = join(slice(keyParts, 0, i), separator)
-                    if (i > 0) {
-                        const anceNode = nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
-                        const redisKey = join(slice(keyParts, 0, i + 1), separator)
-                        remove(anceNode.children, { type: ConnectionType.RedisKey, redisKey })
-
-                        if (isEmpty(anceNode.children)) {
-                            nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
-                        } else {
-                            break
-                        }
-                    } else {
-                        // last one, remove from db node
-                        remove(dbRoot.children, { type: ConnectionType.RedisKey, redisKey: keyParts[0] })
-                        const node = nodeMap.get(`${ConnectionType.RedisValue}/${keyParts[0]}`)
-                        if (node != null) {
-                            nodeMap.delete(`${ConnectionType.RedisValue}/${keyParts[0]}`)
-                        }
-                    }
-                }
-            }
-
-            return true
-        },
-
-        /**
-         * delete node and all it's children from nodeMap
-         * @param {Map<string, DatabaseItem>} nodeMap
-         * @param {string} [key] clean nodeMap if key is empty
-         * @private
-         */
-        _deleteChildrenKeyNodes(nodeMap, key) {
-            if (isEmpty(key)) {
-                nodeMap.clear()
-            } else {
-                const mapKey = `${ConnectionType.RedisKey}/${key}`
-                const node = nodeMap.get(mapKey)
-                for (const child of node.children || []) {
-                    if (child.type === ConnectionType.RedisValue) {
-                        if (!nodeMap.delete(`${ConnectionType.RedisValue}/${child.redisKey}`)) {
-                            console.warn('delete:', `${ConnectionType.RedisValue}/${child.redisKey}`)
-                        }
-                    } else if (child.type === ConnectionType.RedisKey) {
-                        this._deleteChildrenKeyNodes(nodeMap, child.redisKey)
-                    }
-                }
-                if (!nodeMap.delete(mapKey)) {
-                    console.warn('delete map key', mapKey)
-                }
-            }
-        },
-
-        /**
          * delete redis key
-         * @param {string} connName
+         * @param {string} server
          * @param {number} db
          * @param {string|number[]} key
          * @param {boolean} [soft] do not try to remove from redis if true, just remove from tree data
          * @returns {Promise<boolean>}
          */
-        async deleteKey(connName, db, key, soft) {
+        async deleteKey(server, db, key, soft) {
             try {
                 let deleteCount = 0
                 if (soft !== true) {
-                    const { data } = await DeleteKey(connName, db, key)
+                    const { data } = await DeleteKey(server, db, key)
                     deleteCount = get(data, 'deleteCount', 0)
                 }
 
                 const k = nativeRedisKey(key)
                 // update tree view data
-                this._deleteKeyNode(connName, db, k)
-                this._tidyNode(connName, db, k, true)
-                this._updateDBMaxKeys(connName, db, -deleteCount)
+                /** @type RedisServerState **/
+                const serverInst = this.servers[server]
+                if (serverInst != null) {
+                    serverInst.removeKeyNode(k)
+                    serverInst.tidyNode(k, true)
+                    serverInst.updateDBKeyCount(db, -deleteCount)
+                }
 
                 // set tab content empty
                 const tab = useTabStore()
-                tab.emptyTab(connName)
+                tab.emptyTab(server)
                 return true
             } finally {
             }
@@ -1985,8 +1565,12 @@ const useBrowserStore = defineStore('browser', {
             }
             // refresh model data
             const deletedCount = size(deleted)
-            this._tidyNode(server, db, '', true)
-            this._updateDBMaxKeys(server, db, -deletedCount)
+            /** @type RedisServerState **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.tidyNode('', true)
+                serverInst.updateDBKeyCount(db, -deletedCount)
+            }
             if (canceled) {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else if (failCount <= 0) {
@@ -2076,22 +1660,26 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * flush database
-         * @param connName
+         * @param server
          * @param db
          * @param async
          * @return {Promise<boolean>}
          */
-        async flushDatabase(connName, db, async) {
+        async flushDatabase(server, db, async) {
             try {
-                const { success = false } = await FlushDB(connName, db, async)
+                const { success = false } = await FlushDB(server, db, async)
 
                 if (success === true) {
-                    // update tree view data
-                    this._deleteKeyNode(connName, db)
-                    this._setDBMaxKeys(connName, db, 0)
+                    /** @type RedisServerState **/
+                    const serverInst = this.servers[server]
+                    if (serverInst != null) {
+                        // update tree view data
+                        serverInst.removeKeyNode()
+                        serverInst.setDBKeyCount(db, 0)
+                    }
                     // set tab content empty
                     const tab = useTabStore()
-                    tab.emptyTab(connName)
+                    tab.emptyTab(server)
                     return true
                 }
             } finally {
@@ -2111,7 +1699,11 @@ const useBrowserStore = defineStore('browser', {
             const { success = false, msg } = await RenameKey(server, db, key, newKey)
             if (success) {
                 // delete old key and add new key struct
-                this._renameKeyNode(server, db, key, newKey)
+                /** @type RedisServerState **/
+                const serverInst = this.servers[server]
+                if (serverInst != null) {
+                    serverInst.renameKey(key, newKey)
+                }
                 return { success: true, nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${newKey}` }
             } else {
                 return { success: false, msg }
@@ -2174,29 +1766,27 @@ const useBrowserStore = defineStore('browser', {
          * @returns {{match: string, type: string}}
          */
         getKeyFilter(server) {
-            let { pattern = '', type = '' } = this.filter[server] || {}
-            if (isEmpty(pattern)) {
-                // no custom match pattern, use default
-                const conn = useConnectionStore()
-                pattern = conn.getDefaultKeyFilter(server)
+            let serverInst = this.servers[server]
+            if (serverInst == null) {
+                serverInst = new RedisServerState({
+                    name: server,
+                    separator: this.getSeparator(name),
+                })
             }
-            return {
-                match: pattern,
-                type: toUpper(type),
-            }
+            return serverInst.getFilter()
         },
 
         /**
          *
          * @param {string} server
-         * @param {string} [type]
          * @param {string} [pattern]
+         * @param {string} [type]
          */
-        setKeyFilter(server, { type, pattern }) {
-            const filter = this.filter[server] || {}
-            filter.type = type === null ? filter.type : type
-            filter.pattern = type === null ? filter.pattern : pattern
-            this.filter[server] = filter
+        setKeyFilter(server, { pattern, type }) {
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.setFilter({ pattern, type })
+            }
         },
     },
 })
