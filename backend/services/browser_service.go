@@ -504,8 +504,8 @@ func (b *browserService) LoadNextKeys(connName string, db int, match, keyType st
 	return
 }
 
-// LoadAllKeys load all keys
-func (b *browserService) LoadAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
+// LoadNextAllKeys load next all keys
+func (b *browserService) LoadNextAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
 	item, err := b.getRedisClient(connName, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -526,6 +526,28 @@ func (b *browserService) LoadAllKeys(connName string, db int, match, keyType str
 	resp.Data = map[string]any{
 		"keys":    keys,
 		"maxKeys": maxKeys,
+	}
+	return
+}
+
+// LoadAllKeys load all keys
+func (b *browserService) LoadAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := b.getRedisClient(connName, db)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	keys, _, err := b.scanKeys(ctx, client, match, keyType, 0, 0)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	resp.Success = true
+	resp.Data = map[string]any{
+		"keys": keys,
 	}
 	return
 }

@@ -18,6 +18,7 @@ import {
     GetKeyType,
     GetSlowLogs,
     LoadAllKeys,
+    LoadNextAllKeys,
     LoadNextKeys,
     OpenConnection,
     OpenDatabase,
@@ -537,15 +538,22 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string} match
          * @param {string} [matchType]
-         * @param {boolean} [full]
+         * @param {number} [loadType] 0.load next; 1.load next full; 2.reload load all
          * @returns {Promise<{keys: string[], maxKeys: number, end: boolean}>}
          */
-        async scanKeys(server, db, match, matchType, full) {
+        async scanKeys({ server, db, match = '*', matchType = '', loadType = 0 }) {
             let resp
-            if (full) {
-                resp = await LoadAllKeys(server, db, match || '*', matchType)
-            } else {
-                resp = await LoadNextKeys(server, db, match || '*', matchType)
+            switch (loadType) {
+                case 0:
+                default:
+                    resp = await LoadNextKeys(server, db, match, matchType)
+                    break
+                case 1:
+                    resp = await LoadNextAllKeys(server, db, match, matchType)
+                    break
+                case 2:
+                    resp = await LoadAllKeys(server, db, match, matchType)
+                    break
             }
             const { data, success, msg } = resp || {}
             if (!success) {
@@ -575,7 +583,7 @@ const useBrowserStore = defineStore('browser', {
                     match = prefix + separator + '*'
                 }
             }
-            return this.scanKeys(server, db, match, matchType, all)
+            return this.scanKeys({ server, db, match, matchType, loadType: all ? 1 : 0 })
         },
 
         /**
@@ -1583,25 +1591,6 @@ const useBrowserStore = defineStore('browser', {
                 // some fail
                 $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
             }
-
-            // FIXME: update tree view
-            // if (!isEmpty(deleted)) {
-            //     let updateDeleted = []
-            //     let count = size(deleted)
-            //     for (const k of deleted) {
-            //         updateDeleted.push(k)
-            //         console.log(count)
-            //         count -= 1
-            //         if (size(updateDeleted) > 100 || count <= 0) {
-            //             for (const dk of updateDeleted) {
-            //                 this._deleteKeyNode(server, db, dk, false)
-            //                 await nextTick()
-            //             }
-            //             updateDeleted = []
-            //             console.warn('updateDeleted:', updateDeleted)
-            //         }
-            //     }
-            // }
         },
 
         /**

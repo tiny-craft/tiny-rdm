@@ -1,4 +1,4 @@
-import { isEmpty, remove, sortedIndexBy, sumBy } from 'lodash'
+import { isEmpty, remove, sortBy, sortedIndexBy, sumBy } from 'lodash'
 import { ConnectionType } from '@/consts/connection_type.js'
 
 /**
@@ -74,29 +74,55 @@ export class RedisNodeItem {
      * @returns {boolean} return whether key count changed
      */
     tidy(skipSort) {
-        let count = 0
-        if (!isEmpty(this.children)) {
-            if (skipSort !== true) {
-                this._sortNodes(this.children)
-            }
-
-            for (const elem of this.children) {
-                elem.tidy(skipSort)
-                count += elem.keyCount
-            }
-        } else {
-            if (this.type === ConnectionType.RedisValue) {
-                count += 1
+        if (this.type === ConnectionType.RedisValue) {
+            this.keyCount = 1
+        } else if (this.type === ConnectionType.RedisKey || this.type === ConnectionType.RedisDB) {
+            let keyCount = 0
+            if (!isEmpty(this.children)) {
+                if (skipSort !== true) {
+                    this.sortChildren()
+                }
+                for (const child of this.children) {
+                    child.tidy(skipSort)
+                    keyCount += child.keyCount
+                }
             } else {
-                // no children in db node or layer node, set count to 0
-                count = 0
+                keyCount = 0
             }
-        }
-        if (this.keyCount !== count) {
-            this.keyCount = count
-            return true
+            if (this.keyCount !== keyCount) {
+                this.keyCount = keyCount
+                return true
+            }
         }
         return false
+
+        // let count = 0
+        // if (!isEmpty(this.children)) {
+        //     if (skipSort !== true) {
+        //         this.sortChildren()
+        //     }
+        //
+        //     for (const elem of this.children) {
+        //         elem.tidy(skipSort)
+        //         count += elem.keyCount
+        //     }
+        // } else {
+        //     if (this.type === ConnectionType.RedisValue) {
+        //         count += 1
+        //     } else {
+        //         // no children in db node or layer node, set count to 0
+        //         count = 0
+        //     }
+        // }
+        // if (this.keyCount !== count) {
+        //     this.keyCount = count
+        //     return true
+        // }
+        // return false
+    }
+
+    sortChildren() {
+        sortBy(this.children, (item) => item.key)
     }
 
     /**
@@ -123,7 +149,7 @@ export class RedisNodeItem {
         }
         const removed = remove(this.children, predicate)
         if (this.children.length <= 0) {
-            // remove from parent if no children
+            // TODO: remove from parent if no children
         }
     }
 
@@ -131,10 +157,11 @@ export class RedisNodeItem {
         return this.children
     }
 
-    calcKeyCount() {
+    reCalcKeyCount() {
         if (this.type === ConnectionType.RedisValue) {
-            return 1
+            this.keyCount = 1
         }
-        return sumBy(this.children, (c) => c.keyCount)
+        this.keyCount = sumBy(this.children, (c) => c.keyCount)
+        return this.keyCount
     }
 }

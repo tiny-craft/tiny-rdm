@@ -47,7 +47,12 @@ const scanAffectedKey = async () => {
     try {
         loading.value = true
         deleteForm.loadingAffected = true
-        const { keys = [] } = await browserStore.scanKeys(deleteForm.server, deleteForm.db, deleteForm.key)
+        const { keys = [] } = await browserStore.scanKeys({
+            server: deleteForm.server,
+            db: deleteForm.db,
+            match: deleteForm.key,
+            loadType: 2,
+        })
         deleteForm.affectedKeys = keys || []
         deleteForm.showAffected = true
     } finally {

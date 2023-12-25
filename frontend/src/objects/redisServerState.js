@@ -1,4 +1,4 @@
-import { initial, isEmpty, join, last, mapValues, size, slice, sortBy, split, sumBy, toUpper } from 'lodash'
+import { initial, isEmpty, join, last, mapValues, size, slice, sortBy, split, toUpper } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { RedisDatabaseItem } from '@/objects/redisDatabaseItem.js'
@@ -79,7 +79,7 @@ export class RedisServerState {
 
     /**
      * update max key by increase/decrease value
-     * @param {string} db
+     * @param {number} db
      * @param {number} updateVal
      */
     updateDBKeyCount(db, updateVal) {
@@ -309,26 +309,26 @@ export class RedisServerState {
                 redisKey: key,
             })
 
-            // check and remove empty layer node
-            let i = totalParts - 1
-            for (; i >= 0; i--) {
-                const anceKey = join(slice(keyParts, 0, i), this.separator)
-                if (i > 0) {
-                    const anceNode = this.nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
-                    const redisKey = join(slice(keyParts, 0, i + 1), this.separator)
-                    anceNode.removeChild({ type: ConnectionType.RedisKey, redisKey })
-
-                    if (isEmpty(anceNode.children)) {
-                        this.nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
-                    } else {
-                        break
-                    }
-                } else {
-                    // last one, remove from db node
-                    dbRoot.removeChild({ type: ConnectionType.RedisKey, redisKey: keyParts[0] })
-                    this.nodeMap.delete(`${ConnectionType.RedisValue}/${keyParts[0]}`)
-                }
-            }
+            // // check and remove empty layer node
+            // let i = totalParts - 1
+            // for (; i >= 0; i--) {
+            //     const anceKey = join(slice(keyParts, 0, i), this.separator)
+            //     if (i > 0) {
+            //         const anceNode = this.nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
+            //         const redisKey = join(slice(keyParts, 0, i + 1), this.separator)
+            //         anceNode.removeChild({ type: ConnectionType.RedisKey, redisKey })
+            //
+            //         if (isEmpty(anceNode.children)) {
+            //             this.nodeMap.delete(`${ConnectionType.RedisKey}/${anceKey}`)
+            //         } else {
+            //             break
+            //         }
+            //     } else {
+            //         // last one, remove from db node
+            //         dbRoot.removeChild({ type: ConnectionType.RedisKey, redisKey: keyParts[0] })
+            //         this.nodeMap.delete(`${ConnectionType.RedisValue}/${keyParts[0]}`)
+            //     }
+            // }
         }
 
         return true
@@ -358,7 +358,6 @@ export class RedisServerState {
             node = dbNode
         }
         const keyCountUpdated = node.tidy(skipResort)
-
         if (keyCountUpdated) {
             // update key count of parent and above
             for (; i > 0; i--) {
@@ -367,16 +366,14 @@ export class RedisServerState {
                 if (parentNode == null) {
                     break
                 }
-                parentNode.keyCount = parentNode.calcKeyCount()
+                parentNode.reCalcKeyCount()
             }
             // update key count of db
-            // dbNode.keyCount = sumBy(dbNode.children, 'keyCount')
             const dbInst = this.databases[this.db]
             if (dbInst != null) {
-                dbInst.keyCount = sumBy(dbNode.children, (c) => c.keyCount)
+                dbInst.keyCount = dbNode.reCalcKeyCount()
             }
         }
-        return true
     }
 
     /**
