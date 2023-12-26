@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, get, isEmpty, map, size } from 'lodash'
+import { endsWith, get, isEmpty, map, now, size } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -46,6 +46,7 @@ import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
 import { RedisNodeItem } from '@/objects/redisNodeItem.js'
 import { RedisServerState } from '@/objects/redisServerState.js'
 import { RedisDatabaseItem } from '@/objects/redisDatabaseItem.js'
+import { timeout } from '@/utils/promise.js'
 
 const useBrowserStore = defineStore('browser', {
     /**
@@ -1537,7 +1538,7 @@ const useBrowserStore = defineStore('browser', {
             let canceled = false
             const serialNo = Date.now().valueOf().toString()
             const eventName = 'deleting:' + serialNo
-            const cancelEvent = 'deleting:' + serialNo
+            const cancelEvent = 'delete:stop:' + serialNo
             try {
                 let maxProgress = 0
                 EventsOn(eventName, ({ total, progress, processing }) => {
@@ -1551,7 +1552,6 @@ const useBrowserStore = defineStore('browser', {
                         index: maxProgress,
                         count: total,
                     })
-                    // this._deleteKeyNode(server, db, k, false)
                 })
                 delMsgRef.onClose = () => {
                     EventsEmit(cancelEvent)
@@ -1573,12 +1573,6 @@ const useBrowserStore = defineStore('browser', {
             }
             // refresh model data
             const deletedCount = size(deleted)
-            /** @type RedisServerState **/
-            const serverInst = this.servers[server]
-            if (serverInst != null) {
-                serverInst.tidyNode('', true)
-                serverInst.updateDBKeyCount(db, -deletedCount)
-            }
             if (canceled) {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else if (failCount <= 0) {
@@ -1591,6 +1585,23 @@ const useBrowserStore = defineStore('browser', {
                 // some fail
                 $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
             }
+            // update ui
+            timeout(100).then(async () => {
+                /** @type RedisServerState **/
+                const serverInst = this.servers[server]
+                if (serverInst != null) {
+                    let start = now()
+                    for (let i = 0; i < deleted.length; i++) {
+                        serverInst.removeKeyNode(deleted[i], false)
+                        if (now() - start > 300) {
+                            await timeout(100)
+                            start = now()
+                        }
+                    }
+                    serverInst.tidyNode('', true)
+                    serverInst.updateDBKeyCount(db, -deletedCount)
+                }
+            })
         },
 
         /**

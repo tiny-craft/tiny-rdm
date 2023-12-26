@@ -1999,6 +1999,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	var deletedKeys = make([]any, 0, total)
 	var mutex sync.Mutex
 	del := func(ctx context.Context, cli redis.UniversalClient) error {
+		startTime := time.Now()
 		for i, k := range ks {
 			// emit progress per second
 			param := map[string]any{
@@ -2006,12 +2007,13 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 				"progress":   i + 1,
 				"processing": k,
 			}
-			runtime.EventsEmit(b.ctx, processEvent, param)
+			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
+				startTime = time.Now()
+				runtime.EventsEmit(b.ctx, processEvent, param)
+			}
 
 			key := strutil.DecodeRedisKey(k)
 			delErr := cli.Del(ctx, key).Err()
-			// do some sleep to prevent blocking the Redis server
-			time.Sleep(100 * time.Microsecond)
 			if err != nil {
 				failed.Add(1)
 			} else {
@@ -2024,6 +2026,8 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 				canceled = true
 				break
 			}
+			// do some sleep to prevent blocking the Redis server
+			time.Sleep(100 * time.Microsecond)
 		}
 		return nil
 	}

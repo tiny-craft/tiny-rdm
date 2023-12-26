@@ -143,7 +143,7 @@
     "remove_tip": "{type} \"{name}\" will be deleted",
     "remove_group_tip": "Group \"{name}\" and all connections in it will be deleted",
     "delete_key_succ": "\"{key}\" has been deleted",
-    "deleting_key": "Deleting key({index}/{count}): {key}",
+    "deleting_key": "Deleting key({index}/{count})",
     "delete_completed": "Deletion process has been completed, {success} successed, {fail} failed",
     "rename_binary_key_fail": "Rename binary key name is unsupported",
     "handle_succ": "Success!",

@@ -143,7 +143,7 @@
     "remove_tip": "{type} \"{name}\" 将会被删除",
     "remove_group_tip": "分组 \"{name}\"及其所有连接将会被删除",
     "delete_key_succ": "{key} 已被删除",
-    "deleting_key": "正在删除键({index}/{count})：{key}",
+    "deleting_key": "正在删除键({index}/{count})",
     "delete_completed": "已完成删除操作，成功{success}个，失败{fail}个",
     "rename_binary_key_fail": "不支持重命名二进制键名",
     "handle_succ": "操作成功",

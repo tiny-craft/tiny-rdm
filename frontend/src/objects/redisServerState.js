@@ -25,7 +25,7 @@ export class RedisServerState {
      * @param {string|null} typeFilter redis type filter
      * @param {LoadingState} loadingState all loading state in opened connections map by server and LoadingState
      * @param {KeyViewType} viewType view type selection for all opened connections group by 'server'
-     * @param {Map<string, RedisNodeItem>} nodeMap map nodes by "key#type"
+     * @param {Map<string, RedisNodeItem>} nodeMap map nodes by "type#key"
      */
     constructor({
         name,
@@ -341,7 +341,7 @@ export class RedisServerState {
      * @return
      */
     tidyNode(key, skipResort) {
-        const dbNode = this.getRoot()
+        const rootNode = this.getRoot()
         const keyParts = split(key, this.separator)
         const totalParts = size(keyParts)
         let node
@@ -355,7 +355,7 @@ export class RedisServerState {
             }
         }
         if (node == null) {
-            node = dbNode
+            node = rootNode
         }
         const keyCountUpdated = node.tidy(skipResort)
         if (keyCountUpdated) {
@@ -366,12 +366,23 @@ export class RedisServerState {
                 if (parentNode == null) {
                     break
                 }
-                parentNode.reCalcKeyCount()
+                const count = parentNode.reCalcKeyCount()
+                if (count <= 0) {
+                    let anceKeyNode = rootNode
+                    // remove from ancestor node
+                    if (i > 1) {
+                        const anceKey = join(slice(keyParts, 0, i - 1), this.separator)
+                        anceKeyNode = this.nodeMap.get(`${ConnectionType.RedisKey}/${anceKey}`)
+                    }
+                    if (anceKeyNode != null) {
+                        anceKeyNode.removeChild({ type: ConnectionType.RedisKey, redisKey: parentKey })
+                    }
+                }
             }
             // update key count of db
             const dbInst = this.databases[this.db]
             if (dbInst != null) {
-                dbInst.keyCount = dbNode.reCalcKeyCount()
+                dbInst.keyCount = rootNode.reCalcKeyCount()
             }
         }
     }

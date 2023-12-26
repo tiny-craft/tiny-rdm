@@ -1,4 +1,4 @@
-import { isEmpty, remove, sortBy, sortedIndexBy, sumBy } from 'lodash'
+import { isEmpty, remove, size, sortBy, sortedIndexBy, sumBy } from 'lodash'
 import { ConnectionType } from '@/consts/connection_type.js'
 
 /**
@@ -95,30 +95,6 @@ export class RedisNodeItem {
             }
         }
         return false
-
-        // let count = 0
-        // if (!isEmpty(this.children)) {
-        //     if (skipSort !== true) {
-        //         this.sortChildren()
-        //     }
-        //
-        //     for (const elem of this.children) {
-        //         elem.tidy(skipSort)
-        //         count += elem.keyCount
-        //     }
-        // } else {
-        //     if (this.type === ConnectionType.RedisValue) {
-        //         count += 1
-        //     } else {
-        //         // no children in db node or layer node, set count to 0
-        //         count = 0
-        //     }
-        // }
-        // if (this.keyCount !== count) {
-        //     this.keyCount = count
-        //     return true
-        // }
-        // return false
     }
 
     sortChildren() {
@@ -142,15 +118,14 @@ export class RedisNodeItem {
     /**
      *
      * @param {{}} predicate
+     * @return {number}
      */
     removeChild(predicate) {
-        if (this.type !== ConnectionType.RedisKey) {
-            return
+        if (this.type !== ConnectionType.RedisKey && this.type !== ConnectionType.RedisDB) {
+            return 0
         }
         const removed = remove(this.children, predicate)
-        if (this.children.length <= 0) {
-            // TODO: remove from parent if no children
-        }
+        return size(removed)
     }
 
     getChildren() {
