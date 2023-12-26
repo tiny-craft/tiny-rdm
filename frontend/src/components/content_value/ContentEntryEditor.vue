@@ -97,6 +97,8 @@ const viewLanguage = computed(() => {
     switch (viewAs.format) {
         case formatTypes.JSON:
             return 'json'
+        case formatTypes.YAML:
+            return 'yaml'
         default:
             return 'plaintext'
     }
@@ -116,6 +118,7 @@ const onFormatChanged = async (decode = null, format = null) => {
             decode: retDecode,
             format: retFormat,
         } = await browserStore.convertValue({
+            key: props.field,
             value: props.value,
             decode,
             format,

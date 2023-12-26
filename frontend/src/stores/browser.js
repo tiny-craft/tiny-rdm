@@ -570,14 +570,15 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * convert value by decode type or format
+         * @param {string} key
          * @param {string|number[]} value
          * @param {string} [decode]
          * @param {string} [format]
          * @return {Promise<{[format]: string, [decode]: string, value: string}>}
          */
-        async convertValue({ value, decode, format }) {
+        async convertValue({ key, value, decode, format }) {
             try {
-                const { data, success } = await ConvertValue(value, decode, format)
+                const { data, success } = await ConvertValue( key, value, decode, format)
                 if (success) {
                     const { value: retVal, decode: retDecode, format: retFormat } = data
                     return { value: retVal, decode: retDecode, format: retFormat }

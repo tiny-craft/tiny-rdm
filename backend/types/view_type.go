@@ -2,6 +2,7 @@ package types
 
 const FORMAT_RAW = "Raw"
 const FORMAT_JSON = "JSON"
+const FORMAT_YAML = "YAML"
 const FORMAT_HEX = "Hex"
 const FORMAT_BINARY = "Binary"
 

@@ -7,6 +7,7 @@ export const formatTypes = {
     JSON: 'JSON',
     // XML: 'XML',
     // YML: 'YML',
+    YAML: 'YAML',
     HEX: 'Hex',
     BINARY: 'Binary',
 }

@@ -21,7 +21,7 @@ import (
 // ConvertTo convert string to specified type
 // @param decodeType empty string indicates automatic detection
 // @param formatType empty string indicates automatic detection
-func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultFormat string) {
+func ConvertTo(key, str, decodeType, formatType string) (value, resultDecode, resultFormat string) {
 	if len(str) <= 0 {
 		// empty content
 		if len(formatType) <= 0 {
@@ -40,7 +40,7 @@ func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultF
 	// decode first
 	value, resultDecode = decodeWith(str, decodeType)
 	// then format content
-	value, resultFormat = viewAs(value, formatType)
+	value, resultFormat = viewAs(key, value, formatType)
 	return
 }
 
@@ -145,7 +145,7 @@ func autoDecode(str string) (value, resultDecode string) {
 	return
 }
 
-func viewAs(str, formatType string) (value, resultFormat string) {
+func viewAs(key string, str, formatType string) (value, resultFormat string) {
 	if len(formatType) > 0 {
 		switch formatType {
 		case types.FORMAT_RAW:
@@ -182,12 +182,12 @@ func viewAs(str, formatType string) (value, resultFormat string) {
 		}
 	}
 
-	return autoViewAs(str)
+	return autoViewAs(key, str)
 }
 
 // attempt automatic convert to possible types
 // if no conversion is possible, it will return the origin string value and "plain text" type
-func autoViewAs(str string) (value, resultFormat string) {
+func autoViewAs(key string, str string) (value, resultFormat string) {
 	if len(str) > 0 {
 		var ok bool
 		if value, ok = decodeJson(str); ok {
@@ -200,6 +200,12 @@ func autoViewAs(str string) (value, resultFormat string) {
 				resultFormat = types.FORMAT_HEX
 				return
 			}
+		}
+
+		if strings.HasSuffix(key, ".yaml") {
+			value = str
+			resultFormat = types.FORMAT_YAML
+			return
 		}
 	}
 
