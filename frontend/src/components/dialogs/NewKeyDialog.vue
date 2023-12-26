@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, reactive, ref, watch } from 'vue'
+import { computed, h, nextTick, reactive, ref, watch } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
 import { endsWith, get, isEmpty, keys, map, trim } from 'lodash'
@@ -148,6 +148,7 @@ const onAdd = async () => {
         })
         if (success) {
             // select current key
+            await nextTick()
             tabStore.setSelectedKeys(server, nodeKey)
             browserStore.loadKeySummary({ server, db, key, clearValue: true })
         } else if (!isEmpty(msg)) {

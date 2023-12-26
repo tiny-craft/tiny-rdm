@@ -282,10 +282,6 @@ const useBrowserStore = defineStore('browser', {
                 throw new Error(msg)
             }
             const { keys = [], end = false, maxKeys = 0 } = data
-            const selDB = this.getDatabase(server, db)
-            if (selDB == null) {
-                return
-            }
 
             /** @type {RedisServerState} **/
             const serverInst = this.servers[server]
@@ -297,13 +293,12 @@ const useBrowserStore = defineStore('browser', {
             serverInst.loadingState.fullLoaded = end
 
             if (isEmpty(keys)) {
-                selDB.children = []
                 serverInst.nodeMap.clear()
             } else {
                 // append db node to current connection's children
                 serverInst.addKeyNodes(keys)
             }
-            serverInst.tidyNode()
+            serverInst.tidyNode('', false)
         },
 
         /**

@@ -1,4 +1,4 @@
-import { isEmpty, remove, size, sortBy, sortedIndexBy, sumBy } from 'lodash'
+import { isEmpty, remove, size, sortedIndexBy, sumBy } from 'lodash'
 import { ConnectionType } from '@/consts/connection_type.js'
 
 /**
@@ -79,7 +79,7 @@ export class RedisNodeItem {
         } else if (this.type === ConnectionType.RedisKey || this.type === ConnectionType.RedisDB) {
             let keyCount = 0
             if (!isEmpty(this.children)) {
-                if (skipSort !== true) {
+                if (!!!skipSort) {
                     this.sortChildren()
                 }
                 for (const child of this.children) {
@@ -98,7 +98,9 @@ export class RedisNodeItem {
     }
 
     sortChildren() {
-        sortBy(this.children, (item) => item.key)
+        this.children.sort((a, b) => {
+            return a.key > b.key ? 1 : -1
+        })
     }
 
     /**
