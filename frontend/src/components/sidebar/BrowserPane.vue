@@ -285,7 +285,7 @@ onMounted(() => onReload())
         <!-- loaded progress -->
         <n-progress
             :border-radius="0"
-            :color="fullyLoaded ? '#0000' : themeVars.primaryColor"
+            :color="loadProgress >= 100 ? '#0000' : themeVars.primaryColor"
             :height="2"
             :percentage="loadProgress"
             :processing="loading"
