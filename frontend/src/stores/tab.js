@@ -1,38 +1,8 @@
 import { assign, find, findIndex, get, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
+import { TabItem } from '@/objects/tabItem.js'
 
 const useTabStore = defineStore('tab', {
-    /**
-     * @typedef {Object} TabItem
-     * @property {string} name connection name
-     * @property {boolean} blank is blank tab
-     * @property {string} subTab secondary tab value
-     * @property {string} [title] tab title
-     * @property {string} [icon] tab icon
-     * @property {string[]} selectedKeys
-     * @property {CheckedKey[]} checkedKeys
-     * @property {string} [type] key type
-     * @property {*} [value] key value
-     * @property {string} [server] server name
-     * @property {int} [db] database index
-     * @property {string} [key] current key name
-     * @property {number[]|null|undefined} [keyCode] current key name as char array
-     * @param {number} [size] memory usage
-     * @param {number} [length] length of content or entries
-     * @property {int} [ttl] ttl of current key
-     * @param {string} [decode]
-     * @param {string} [format]
-     * @param {string} [matchPattern]
-     * @param {boolean} [end]
-     * @param {boolean} [loading]
-     */
-
-    /**
-     * @typedef {Object} CheckedKey
-     * @property {string} key
-     * @property {string} [redisKey]
-     */
-
     /**
      * @typedef {Object} ListEntryItem
      * @property {string|number[]} v value
@@ -90,14 +60,21 @@ const useTabStore = defineStore('tab', {
      */
 
     /**
+     * @typedef {Object} TabState
+     * @property {string} nav
+     * @property {number} asideWidth
+     * @property {TabItem[]} tabList
+     * @property {number} activatedIndex
+     */
+
+    /**
      *
-     * @returns {{tabList: TabItem[], activatedTab: string, activatedIndex: number}}
+     * @returns {TabState}
      */
     state: () => ({
         nav: 'server',
         asideWidth: 300,
         tabList: [],
-        activatedTab: '',
         activatedIndex: 0, // current activated tab index
     }),
     getters: {
@@ -118,11 +95,6 @@ const useTabStore = defineStore('tab', {
          */
         currentTab() {
             return get(this.tabs, this.activatedIndex)
-            // let current = find(this.tabs, {name: this.activatedTab})
-            // if (current == null) {
-            //     current = this.tabs[0]
-            // }
-            // return current
         },
 
         currentTabName() {
@@ -183,7 +155,7 @@ const useTabStore = defineStore('tab', {
         upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, matchPattern = '', clearValue }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
-                this.tabList.push({
+                const tabItem = new TabItem({
                     name: server,
                     title: server,
                     subTab,
@@ -198,6 +170,7 @@ const useTabStore = defineStore('tab', {
                     matchPattern,
                     value: undefined,
                 })
+                this.tabList.push(tabItem)
                 tabIndex = this.tabList.length - 1
             } else {
                 const tab = this.tabList[tabIndex]
@@ -219,7 +192,6 @@ const useTabStore = defineStore('tab', {
                 }
             }
             this._setActivatedIndex(tabIndex, true, subTab)
-            // this.activatedTab = tab.name
         },
 
         /**

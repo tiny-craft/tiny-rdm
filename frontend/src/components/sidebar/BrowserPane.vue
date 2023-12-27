@@ -100,7 +100,7 @@ const onReload = async () => {
         tabStore.setSelectedKeys(props.server)
         const db = props.db
         browserStore.closeDatabase(props.server, db)
-        browserTreeRef.value?.resetExpandKey(props.server, db)
+        // browserTreeRef.value?.resetExpandKey(props.server, db)
 
         let matchType = unref(filterForm.type)
         if (!types.hasOwnProperty(matchType)) {
