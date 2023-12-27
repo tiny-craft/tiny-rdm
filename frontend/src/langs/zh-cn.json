@@ -274,6 +274,8 @@
     },
     "export": {
       "name": "导出数据",
+      "export_expire_title": "过期时间",
+      "export_expire": "同时导出过期时间",
       "export": "确认导出",
       "save_file": "导出路径",
       "save_file_tip": "选择导出文件保存路径",
@@ -282,6 +284,8 @@
     },
     "import": {
       "name": "导入数据",
+      "import_expire_title": "过期时间",
+      "import_expire": "尝试同时导入过期时间",
       "import": "确认导入",
       "open_csv_file": "导入文件路径",
       "open_csv_file_tip": "选择需要导入的文件",

@@ -2056,7 +2056,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 }
 
 // ExportKey export keys
-func (b *browserService) ExportKey(server string, db int, ks []any, path string) (resp types.JSResp) {
+func (b *browserService) ExportKey(server string, db int, ks []any, path string, includeExpire bool) (resp types.JSResp) {
 	// connect a new connection to export keys
 	conf := Connection().getConnection(server)
 	if conf == nil {
@@ -2111,7 +2111,15 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string)
 			canceled = true
 			break
 		}
-		if err = writer.Write([]string{hex.EncodeToString([]byte(key)), hex.EncodeToString(content)}); err != nil {
+		record := []string{hex.EncodeToString([]byte(key)), hex.EncodeToString(content)}
+		if includeExpire {
+			if dur, ttlErr := client.PTTL(ctx, key).Result(); ttlErr == nil && dur > 0 {
+				record = append(record, strconv.FormatInt(time.Now().Add(dur).UnixMilli(), 10))
+			} else {
+				record = append(record, "-1")
+			}
+		}
+		if err = writer.Write(record); err != nil {
 			failed += 1
 		} else {
 			exported += 1
@@ -2133,7 +2141,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string)
 }
 
 // ImportCSV import data from csv file
-func (b *browserService) ImportCSV(server string, db int, path string, conflict int) (resp types.JSResp) {
+func (b *browserService) ImportCSV(server string, db int, path string, conflict int, includeExpire bool) (resp types.JSResp) {
 	// connect a new connection to export keys
 	conf := Connection().getConnection(server)
 	if conf == nil {
@@ -2169,7 +2177,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 	var line []string
 	var readErr error
 	var key, value []byte
-	var ttl int64
+	var ttl time.Duration
 	var imported, ignored int64
 	var canceled bool
 	startTime := time.Now().Add(-10 * time.Second)
@@ -2192,19 +2200,19 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 			continue
 		}
 		// get ttl
-		if len(line) > 2 {
-			if ttl, readErr = strconv.ParseInt(line[2], 10, 64); readErr != nil {
-				ttl = redis.KeepTTL
+		if includeExpire && len(line) > 2 {
+			if expire, ttlErr := strconv.ParseInt(line[2], 10, 64); ttlErr == nil && expire > 0 {
+				ttl = time.UnixMilli(expire).Sub(time.Now())
 			}
 		}
 		if conflict == 0 {
-			readErr = client.RestoreReplace(ctx, string(key), time.Duration(ttl), string(value)).Err()
+			readErr = client.RestoreReplace(ctx, string(key), ttl, string(value)).Err()
 		} else {
 			keyStr := string(key)
 			// go-redis may crash when batch calling restore
 			// use "exists" to filter first
 			if n, _ := client.Exists(ctx, keyStr).Result(); n <= 0 {
-				readErr = client.Restore(ctx, keyStr, time.Duration(ttl), string(value)).Err()
+				readErr = client.Restore(ctx, keyStr, ttl, string(value)).Err()
 			} else {
 				readErr = errors.New("key existed")
 			}

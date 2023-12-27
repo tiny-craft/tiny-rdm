@@ -11,6 +11,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value'])
 
+const onInput = (val) => {
+    emit('update:value', val)
+}
+
 const onClear = () => {
     emit('update:value', '')
 }
@@ -29,10 +33,11 @@ const handleSaveFile = async () => {
 <template>
     <n-input-group>
         <n-input
-            v-model:value="props.value"
+            :value="props.value"
             :disabled="props.disabled"
             :placeholder="placeholder"
             clearable
+            @input="onInput"
             @clear="onClear" />
         <n-button :disabled="props.disabled" :focusable="false" @click="handleSaveFile">...</n-button>
     </n-input-group>

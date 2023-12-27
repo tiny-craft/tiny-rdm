@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 const exportKeyForm = reactive({
     server: '',
     db: 0,
+    expire: false,
     keys: [],
     file: '',
 })
@@ -24,7 +25,9 @@ watchEffect(() => {
         const { server, db, keys } = dialogStore.exportKeyParam
         exportKeyForm.server = server
         exportKeyForm.db = db
+        exportKeyForm.ttl = false
         exportKeyForm.keys = keys
+        exportKeyForm.file = ''
         exporting.value = false
     }
 })
@@ -41,8 +44,8 @@ const i18n = useI18n()
 const onConfirmExport = async () => {
     try {
         exporting.value = true
-        const { server, db, keys, file } = exportKeyForm
-        browserStore.exportKeys(server, db, keys, file).catch((e) => {})
+        const { server, db, keys, file, expire } = exportKeyForm
+        browserStore.exportKeys(server, db, keys, file, expire).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -77,6 +80,11 @@ const onClose = () => {
                         <n-input :autofocus="false" :value="exportKeyForm.db.toString()" readonly />
                     </n-form-item-gi>
                 </n-grid>
+                <n-form-item :label="$t('dialogue.export.export_expire_title')">
+                    <n-checkbox v-model:checked="exportKeyForm.expire" :autofocus="false">
+                        {{ $t('dialogue.export.export_expire') }}
+                    </n-checkbox>
+                </n-form-item>
                 <n-form-item :label="$t('dialogue.export.save_file')" required>
                     <file-save-input
                         v-model:value="exportKeyForm.file"
@@ -94,12 +102,14 @@ const onClose = () => {
 
         <template #action>
             <div class="flex-item n-dialog__action">
-                <n-button :disabled="loading" :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
+                <n-button :disabled="loading" :focusable="false" @click="onClose">
+                    {{ $t('common.cancel') }}
+                </n-button>
                 <n-button
                     :disabled="!exportEnable"
                     :focusable="false"
                     :loading="loading"
-                    type="error"
+                    type="primary"
                     @click="onConfirmExport">
                     {{ $t('dialogue.export.export') }}
                 </n-button>

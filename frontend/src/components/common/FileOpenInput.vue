@@ -11,6 +11,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value'])
 
+const onInput = (val) => {
+    emit('update:value', val)
+}
+
+const onClear = () => {
+    emit('update:value', '')
+}
+
 const handleSelectFile = async () => {
     const { success, data } = await SelectFile('', isEmpty(props.ext) ? null : [props.ext])
     if (success) {
@@ -24,7 +32,13 @@ const handleSelectFile = async () => {
 
 <template>
     <n-input-group>
-        <n-input v-model:value="props.value" :disabled="props.disabled" :placeholder="placeholder" clearable />
+        <n-input
+            :disabled="props.disabled"
+            :placeholder="placeholder"
+            :value="props.value"
+            clearable
+            @clear="onClear"
+            @input="onInput" />
         <n-button :disabled="props.disabled" :focusable="false" @click="handleSelectFile">...</n-button>
     </n-input-group>
 </template>

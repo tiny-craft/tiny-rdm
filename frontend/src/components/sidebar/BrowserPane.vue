@@ -66,6 +66,7 @@ const dbSelectOptions = computed(() => {
 const moreOptions = computed(() => {
     return [
         { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
+        { key: 'divider', type: 'divider' },
         { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
         {
             key: 'disconnect',

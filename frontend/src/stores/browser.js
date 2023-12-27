@@ -1606,9 +1606,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string[]|number[][]} keys
          * @param {string} path
+         * @param {boolean} [expire]
          * @returns {Promise<void>}
          */
-        async exportKeys(server, db, keys, path) {
+        async exportKeys(server, db, keys, path, expire) {
             const msgRef = $message.loading('', { duration: 0, closable: true })
             let exported = 0
             let failCount = 0
@@ -1626,7 +1627,7 @@ const useBrowserStore = defineStore('browser', {
                 msgRef.onClose = () => {
                     EventsEmit('export:stop:' + path)
                 }
-                const { data, success, msg } = await ExportKey(server, db, keys, path)
+                const { data, success, msg } = await ExportKey(server, db, keys, path, expire)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     exported = get(data, 'exported', 0)
@@ -1659,10 +1660,11 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string} path
-         * @param {int} conflict
+         * @param {number} conflict
+         * @param {boolean} [expire]
          * @return {Promise<void>}
          */
-        async importKeysFromCSVFile(server, db, path, conflict) {
+        async importKeysFromCSVFile(server, db, path, conflict, expire) {
             const msgRef = $message.loading('', { duration: 0, closable: true })
             let imported = 0
             let ignored = 0
@@ -1680,7 +1682,7 @@ const useBrowserStore = defineStore('browser', {
                 msgRef.onClose = () => {
                     EventsEmit('import:stop:' + path)
                 }
-                const { data, success, msg } = await ImportCSV(server, db, path, conflict)
+                const { data, success, msg } = await ImportCSV(server, db, path, conflict, expire)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     imported = get(data, 'imported', 0)

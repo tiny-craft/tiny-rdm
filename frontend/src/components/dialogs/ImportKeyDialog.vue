@@ -9,6 +9,7 @@ import FileOpenInput from '@/components/common/FileOpenInput.vue'
 const importKeyForm = reactive({
     server: '',
     db: 0,
+    expire: true,
     file: '',
     type: 0,
     conflict: 0,
@@ -23,6 +24,7 @@ watchEffect(() => {
         const { server, db } = dialogStore.importKeyParam
         importKeyForm.server = server
         importKeyForm.db = db
+        importKeyForm.expire = true
         importKeyForm.file = ''
         importKeyForm.type = 0
         importKeyForm.conflict = 0
@@ -49,8 +51,8 @@ const importEnable = computed(() => {
 const onConfirmImport = async () => {
     try {
         importing.value = true
-        const { server, db, file, conflict } = importKeyForm
-        browserStore.importKeysFromCSVFile(server, db, file, conflict).catch((e) => {})
+        const { server, db, file, conflict, expire } = importKeyForm
+        browserStore.importKeysFromCSVFile(server, db, file, conflict, expire).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -91,6 +93,11 @@ const onClose = () => {
                         :placeholder="$t('dialogue.import.open_csv_file_tip')"
                         ext="csv" />
                 </n-form-item>
+                <n-form-item :label="$t('dialogue.import.import_expire_title')">
+                    <n-checkbox v-model:checked="importKeyForm.expire" :autofocus="false">
+                        {{ $t('dialogue.import.import_expire') }}
+                    </n-checkbox>
+                </n-form-item>
                 <n-form-item :label="$t('dialogue.import.conflict_handle')">
                     <n-radio-group v-model:value="importKeyForm.conflict">
                         <n-radio-button
@@ -110,7 +117,7 @@ const onClose = () => {
                     :disabled="!importEnable"
                     :focusable="false"
                     :loading="loading"
-                    type="error"
+                    type="primary"
                     @click="onConfirmImport">
                     {{ $t('dialogue.export.export') }}
                 </n-button>
