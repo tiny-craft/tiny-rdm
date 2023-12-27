@@ -29,8 +29,8 @@ const useTabStore = defineStore('tab', {
 
     /**
      * @typedef {Object} CheckedKey
-     * @property {string[]} key
-     * @property {string[]} redisKey
+     * @property {string} key
+     * @property {string} [redisKey]
      */
 
     /**

@@ -112,7 +112,7 @@ export class RedisServerState {
             // create root node
             root = new RedisNodeItem({
                 key: rootKey,
-                label: this.separator,
+                label: `db${this.db}`,
                 type: ConnectionType.RedisDB,
                 children: [],
             })

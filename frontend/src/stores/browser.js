@@ -148,16 +148,20 @@ const useBrowserStore = defineStore('browser', {
         },
 
         /**
-         * get key list in current database
-         * @param server
+         * get key struct in current database
+         * @param {string} server
+         * @param {boolean} [includeRoot]
          * @return {RedisNodeItem[]}
          */
-        getKeyList(server) {
+        getKeyStruct(server, includeRoot) {
             /** @type {RedisServerState} **/
             const serverInst = this.servers[server]
             let rootNode = null
             if (serverInst != null) {
                 rootNode = serverInst.getRoot()
+            }
+            if (includeRoot === true) {
+                return [rootNode]
             }
             return get(rootNode, 'children', [])
         },

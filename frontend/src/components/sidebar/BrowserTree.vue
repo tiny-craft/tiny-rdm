@@ -40,21 +40,13 @@ const props = defineProps({
 const themeVars = useThemeVars()
 const render = useRender()
 const i18n = useI18n()
+/** @type {Ref<UnwrapRef<string[]>>} */
 const expandedKeys = ref([])
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
 const prefStore = usePreferencesStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
-
-watchEffect(
-    () => {
-        if (!props.checkMode) {
-            tabStore.setCheckedKeys(props.server)
-        }
-    },
-    { flush: 'post' },
-)
 
 /**
  *
@@ -82,9 +74,7 @@ const checkedKeys = computed(() => {
 })
 
 const data = computed(() => {
-    // const dbs = get(browserStore.databases, props.server, [])
-    // return dbs
-    return browserStore.getKeyList(props.server)
+    return browserStore.getKeyStruct(props.server, props.checkMode)
 })
 
 const backgroundColor = computed(() => {
@@ -178,6 +168,10 @@ const renderContextLabel = (option) => {
     return h('div', { class: 'context-menu-item' }, option.label)
 }
 
+/**
+ *
+ * @param {string} key
+ */
 const expandKey = (key) => {
     const idx = indexOf(expandedKeys.value, key)
     if (idx === -1) {
@@ -562,6 +556,17 @@ const nodeProps = ({ option }) => {
 const handleOutsideContextMenu = () => {
     contextMenuParam.show = false
 }
+
+watchEffect(
+    () => {
+        if (!props.checkMode) {
+            tabStore.setCheckedKeys(props.server)
+        } else {
+            expandKey(`${ConnectionType.RedisDB}`)
+        }
+    },
+    { flush: 'post' },
+)
 
 // the NTree node may get incorrect height after change data
 // add key property to force refresh the component and then everything back to normal
