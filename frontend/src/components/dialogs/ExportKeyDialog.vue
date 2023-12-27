@@ -18,15 +18,14 @@ const exportKeyForm = reactive({
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
 const loading = ref(false)
-const deleting = ref(false)
+const exporting = ref(false)
 watchEffect(() => {
     if (dialogStore.exportKeyDialogVisible) {
         const { server, db, keys } = dialogStore.exportKeyParam
         exportKeyForm.server = server
         exportKeyForm.db = db
         exportKeyForm.keys = keys
-        // exportKeyForm.async = true
-        deleting.value = false
+        exporting.value = false
     }
 })
 
@@ -39,16 +38,16 @@ const exportEnable = computed(() => {
 })
 
 const i18n = useI18n()
-const onConfirmDelete = async () => {
+const onConfirmExport = async () => {
     try {
-        deleting.value = true
+        exporting.value = true
         const { server, db, keys, file } = exportKeyForm
         browserStore.exportKeys(server, db, keys, file).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
     } finally {
-        deleting.value = false
+        exporting.value = false
     }
     dialogStore.closeExportKeyDialog()
 }
@@ -101,7 +100,7 @@ const onClose = () => {
                     :focusable="false"
                     :loading="loading"
                     type="error"
-                    @click="onConfirmDelete">
+                    @click="onConfirmExport">
                     {{ $t('dialogue.export.export') }}
                 </n-button>
             </div>

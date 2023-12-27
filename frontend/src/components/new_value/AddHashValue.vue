@@ -45,7 +45,7 @@ const onUpdate = (val) => {
 </script>
 
 <template>
-    <n-form-item :label="$t('interface.type')">
+    <n-form-item :label="$t('dialogue.field.conflict_handle')">
         <n-radio-group :value="props.type" @update:value="(val) => emit('update:type', val)">
             <n-radio-button v-for="(op, i) in updateOption" :key="i" :label="op.label" :value="op.value" />
         </n-radio-group>

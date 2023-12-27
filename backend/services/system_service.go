@@ -44,10 +44,16 @@ func (s *systemService) Start(ctx context.Context) {
 }
 
 // SelectFile open file dialog to select a file
-func (s *systemService) SelectFile(title string) (resp types.JSResp) {
+func (s *systemService) SelectFile(title string, extensions []string) (resp types.JSResp) {
+	filters := sliceutil.Map(extensions, func(i int) runtime.FileFilter {
+		return runtime.FileFilter{
+			Pattern: "*." + extensions[i],
+		}
+	})
 	filepath, err := runtime.OpenFileDialog(s.ctx, runtime.OpenDialogOptions{
 		Title:           title,
 		ShowHiddenFiles: true,
+		Filters:         filters,
 	})
 	if err != nil {
 		resp.Msg = err.Error()

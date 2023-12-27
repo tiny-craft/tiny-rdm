@@ -17,6 +17,7 @@ import {
     GetKeySummary,
     GetKeyType,
     GetSlowLogs,
+    ImportCSV,
     LoadAllKeys,
     LoadNextAllKeys,
     LoadNextKeys,
@@ -1527,7 +1528,7 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<void>}
          */
         async deleteKeys(server, db, keys) {
-            const delMsgRef = $message.loading('', { duration: 0, closable: true })
+            const msgRef = $message.loading('', { duration: 0, closable: true })
             let deleted = []
             let failCount = 0
             let canceled = false
@@ -1542,13 +1543,13 @@ const useBrowserStore = defineStore('browser', {
                         maxProgress = progress
                     }
                     const k = decodeRedisKey(processing)
-                    delMsgRef.content = i18nGlobal.t('dialogue.deleting_key', {
+                    msgRef.content = i18nGlobal.t('dialogue.deleting_key', {
                         key: k,
                         index: maxProgress,
                         count: total,
                     })
                 })
-                delMsgRef.onClose = () => {
+                msgRef.onClose = () => {
                     EventsEmit(cancelEvent)
                 }
                 const { data, success, msg } = await DeleteKeys(server, db, keys, serialNo)
@@ -1560,7 +1561,7 @@ const useBrowserStore = defineStore('browser', {
                     $message.error(msg)
                 }
             } finally {
-                delMsgRef.destroy()
+                msgRef.destroy()
                 EventsOff(eventName)
                 // clear checked keys
                 const tab = useTabStore()
@@ -1608,7 +1609,7 @@ const useBrowserStore = defineStore('browser', {
          * @returns {Promise<void>}
          */
         async exportKeys(server, db, keys, path) {
-            const delMsgRef = $message.loading('', { duration: 0, closable: true })
+            const msgRef = $message.loading('', { duration: 0, closable: true })
             let exported = 0
             let failCount = 0
             let canceled = false
@@ -1616,13 +1617,13 @@ const useBrowserStore = defineStore('browser', {
             try {
                 EventsOn(eventName, ({ total, progress, processing }) => {
                     // update export progress
-                    delMsgRef.content = i18nGlobal.t('dialogue.export.exporting', {
-                        key: decodeRedisKey(processing),
+                    msgRef.content = i18nGlobal.t('dialogue.export.exporting', {
+                        // key: decodeRedisKey(processing),
                         index: progress,
                         count: total,
                     })
                 })
-                delMsgRef.onClose = () => {
+                msgRef.onClose = () => {
                     EventsEmit('export:stop:' + path)
                 }
                 const { data, success, msg } = await ExportKey(server, db, keys, path)
@@ -1634,7 +1635,7 @@ const useBrowserStore = defineStore('browser', {
                     $message.error(msg)
                 }
             } finally {
-                delMsgRef.destroy()
+                msgRef.destroy()
                 EventsOff(eventName)
             }
             if (canceled) {
@@ -1650,6 +1651,52 @@ const useBrowserStore = defineStore('browser', {
             } else {
                 // some fail
                 $message.warn(i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }))
+            }
+        },
+
+        /**
+         * import multiple keys from csv file
+         * @param {string} server
+         * @param {number} db
+         * @param {string} path
+         * @param {int} conflict
+         * @return {Promise<void>}
+         */
+        async importKeysFromCSVFile(server, db, path, conflict) {
+            const msgRef = $message.loading('', { duration: 0, closable: true })
+            let imported = 0
+            let ignored = 0
+            let canceled = false
+            const eventName = 'importing:' + path
+            try {
+                EventsOn(eventName, ({ imported = 0, ignored = 0 }) => {
+                    // update export progress
+                    msgRef.content = i18nGlobal.t('dialogue.import.importing', {
+                        // key: decodeRedisKey(processing),
+                        imported,
+                        conflict: ignored,
+                    })
+                })
+                msgRef.onClose = () => {
+                    EventsEmit('import:stop:' + path)
+                }
+                const { data, success, msg } = await ImportCSV(server, db, path, conflict)
+                if (success) {
+                    canceled = get(data, 'canceled', false)
+                    imported = get(data, 'imported', 0)
+                    ignored = get(data, 'ignored', 0)
+                } else {
+                    $message.error(msg)
+                }
+            } finally {
+                msgRef.destroy()
+                EventsOff(eventName)
+            }
+            if (canceled) {
+                $message.info(i18nGlobal.t('dialogue.handle_cancel'))
+            } else {
+                // no fail
+                $message.success(i18nGlobal.t('dialogue.import.import_completed', { success: imported, ignored }))
             }
         },
 

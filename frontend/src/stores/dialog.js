@@ -70,6 +70,12 @@ const useDialogStore = defineStore('dialog', {
         },
         exportKeyDialogVisible: false,
 
+        importKeyParam: {
+            server: '',
+            db: 0,
+        },
+        importKeyDialogVisible: false,
+
         flushDBParam: {
             server: '',
             db: 0,
@@ -197,6 +203,20 @@ const useDialogStore = defineStore('dialog', {
         },
         closeExportKeyDialog() {
             this.exportKeyDialogVisible = false
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {number} db
+         */
+        openImportKeyDialog(server, db) {
+            this.importKeyParam.server = server
+            this.importKeyParam.db = db
+            this.importKeyDialogVisible = true
+        },
+        closeImportKeyDialog() {
+            this.importKeyDialogVisible = false
         },
 
         openFlushDBDialog(server, db) {

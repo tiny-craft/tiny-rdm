@@ -1,17 +1,18 @@
 <script setup>
 import { SelectFile } from 'wailsjs/go/services/systemService.js'
-import { get } from 'lodash'
+import { get, isEmpty } from 'lodash'
 
 const props = defineProps({
     value: String,
     placeholder: String,
     disabled: Boolean,
+    ext: String,
 })
 
 const emit = defineEmits(['update:value'])
 
 const handleSelectFile = async () => {
-    const { success, data } = await SelectFile()
+    const { success, data } = await SelectFile('', isEmpty(props.ext) ? null : [props.ext])
     if (success) {
         const path = get(data, 'path', '')
         emit('update:value', path)

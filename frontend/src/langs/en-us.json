@@ -75,6 +75,7 @@
     "rename_key": "Rename Key",
     "delete_key": "Delete Key",
     "batch_delete_key": "Batch Delete Keys",
+    "import_key": "Import Key",
     "flush_db": "Flush Database",
     "check_mode": "Check Mode",
     "quit_check_mode": "Quit Check Mode",
@@ -225,8 +226,7 @@
       },
       "cluster": {
         "title": "Cluster",
-        "enable": "Serve as Cluster Node",
-        "readonly": "Enables read-only commands on slave nodes"
+        "enable": "Serve as Cluster Node"
       }
     },
     "group": {
@@ -252,6 +252,7 @@
     "field": {
       "new": "Add New Field",
       "new_item": "Add New Item",
+      "conflict_handle": "When Field Conflict",
       "overwrite_field": "Overwrite Existing Field",
       "ignore_field": "Ignore Existing Field",
       "insert_type": "Insert",
@@ -272,12 +273,23 @@
       "filter_pattern_tip": "* : Matches zero or more characters. For example, 'key*' matches all keys starting with 'key'.\n? : Matches a single character. For example, 'key?' matches 'key1', 'key2'.\n[] : Matches a single character within the specified range. For example, 'key[1-3]' matches keys like 'key1', 'key2', 'key3'.\n\\ : Escape character. To match *, ?, [, or ], use the backslash '\\' for escaping."
     },
     "export": {
-      "name": "Export Keys",
+      "name": "Export Data",
       "export": "Export",
       "save_file": "Export Path",
-      "save_file_tip": "Select the export file save path",
-      "exporting": "Exporting key({index}/{count}): {key}",
-      "export_completed": "Export process has been completed, {success} successed, {fail} failed"
+      "save_file_tip": "Select the path to save exported file",
+      "exporting": "Exporting keys({index}/{count})",
+      "export_completed": "Export completed, {success} successes, {fail} failed"
+    },
+    "import": {
+      "name": "Import Data",
+      "import": "Import",
+      "open_csv_file": "Import File",
+      "open_csv_file_tip": "Select the file for import",
+      "conflict_handle": "Handle Key Conflict",
+      "conflict_overwrite": "Overwrite",
+      "conflict_ignore": "Ignore",
+      "importing": "Importing Keys imported/overwrite:{imported} conflict/fail:{conflict}",
+      "import_completed": "Import completed, {success} successes, {ignored} failed"
     },
     "ttl": {
       "title": "Set Key TTL"

@@ -19,6 +19,7 @@ import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
 import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
+import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -69,6 +70,7 @@ watch(
             <rename-key-dialog />
             <delete-key-dialog />
             <export-key-dialog />
+            <import-key-dialog />
             <flush-db-dialog />
             <set-ttl-dialog />
             <preferences-dialog />

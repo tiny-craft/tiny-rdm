@@ -25,6 +25,7 @@ import Close from '@/components/icons/Close.vue'
 import More from '@/components/icons/More.vue'
 import Export from '@/components/icons/Export.vue'
 import { ConnectionType } from '@/consts/connection_type.js'
+import Import from '@/components/icons/Import.vue'
 
 const props = defineProps({
     server: String,
@@ -64,6 +65,7 @@ const dbSelectOptions = computed(() => {
 
 const moreOptions = computed(() => {
     return [
+        { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
         { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
         {
             key: 'disconnect',
@@ -162,6 +164,10 @@ const onExportChecked = () => {
     browserTreeRef.value?.exportCheckedItems()
 }
 
+const onImportData = () => {
+    dialogStore.openImportKeyDialog(props.server, props.db)
+}
+
 const onFlush = () => {
     dialogStore.openFlushDBDialog(props.server, props.db)
 }
@@ -215,6 +221,9 @@ const onMatchInput = (matchVal, filterVal) => {
 
 const onSelectOptions = (select) => {
     switch (select) {
+        case 'import':
+            onImportData()
+            break
         case 'flush':
             onFlush()
             break

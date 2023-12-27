@@ -41,7 +41,7 @@ defineExpose({
 </script>
 
 <template>
-    <n-form-item :label="$t('dialogue.field.element')" required>
+    <n-form-item :label="$t('dialogue.field.conflict_handle')" required>
         <n-dynamic-input v-model:value="zset" @create="onCreate" @update:value="onUpdate">
             <template #default="{ value }">
                 <n-input
