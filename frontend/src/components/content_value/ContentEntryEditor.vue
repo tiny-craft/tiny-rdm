@@ -97,6 +97,10 @@ const viewLanguage = computed(() => {
     switch (viewAs.format) {
         case formatTypes.JSON:
             return 'json'
+        case formatTypes.YAML:
+            return 'yaml'
+        case formatTypes.XML:
+            return 'xml'
         default:
             return 'plaintext'
     }
@@ -127,11 +131,6 @@ const onFormatChanged = async (decode = null, format = null) => {
     } finally {
         loading.value = false
     }
-}
-
-const onUpdateValue = (value) => {
-    // emit('update:value', value)
-    viewAs.value = value
 }
 
 const onInput = (content) => {

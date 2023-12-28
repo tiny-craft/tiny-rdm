@@ -5,8 +5,8 @@
 export const formatTypes = {
     RAW: 'Raw',
     JSON: 'JSON',
-    // XML: 'XML',
-    // YML: 'YML',
+    YAML: 'YAML',
+    XML: 'XML',
     HEX: 'Hex',
     BINARY: 'Binary',
 }

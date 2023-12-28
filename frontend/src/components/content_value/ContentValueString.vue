@@ -53,6 +53,10 @@ const viewLanguage = computed(() => {
     switch (viewAs.format) {
         case formatTypes.JSON:
             return 'json'
+        case formatTypes.YAML:
+            return 'yaml'
+        case formatTypes.XML:
+            return 'xml'
         default:
             return 'plaintext'
     }

@@ -148,7 +148,7 @@ func autoDecode(str string) (value, resultDecode string) {
 func viewAs(str, formatType string) (value, resultFormat string) {
 	if len(formatType) > 0 {
 		switch formatType {
-		case types.FORMAT_RAW:
+		case types.FORMAT_RAW, types.FORMAT_YAML, types.FORMAT_XML:
 			value = str
 			resultFormat = formatType
 			return
