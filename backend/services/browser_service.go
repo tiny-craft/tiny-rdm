@@ -57,6 +57,7 @@ type browserService struct {
 	ctx        context.Context
 	connMap    map[string]*connectionItem
 	cmdHistory []cmdHistoryItem
+	mutex      sync.Mutex
 }
 
 var browser *browserService
@@ -280,6 +281,9 @@ func (b *browserService) createRedisClient(selConn types.ConnectionConfig) (clie
 // get a redis client from local cache or create a new open
 // if db >= 0, will also switch to db index
 func (b *browserService) getRedisClient(server string, db int) (item *connectionItem, err error) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
 	var ok bool
 	var client redis.UniversalClient
 	if item, ok = b.connMap[server]; ok {
@@ -307,8 +311,8 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	}
 
 	// BUG: go-redis might not be executing commands on the corresponding database
-	// requiring a database switch with each command
-	if db >= 0 /*&& item.db != db*/ {
+	// requiring a database switch before execute each command
+	if db >= 0 && item.db != db {
 		var rdb *redis.Client
 		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
 			_, err = rdb.Pipelined(item.ctx, func(pipe redis.Pipeliner) error {
