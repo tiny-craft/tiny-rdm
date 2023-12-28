@@ -150,12 +150,7 @@ const onListLimitChanged = (limit) => {
 </script>
 
 <template>
-    <n-card
-        :bordered="false"
-        :theme-overrides="{ borderRadius: '0px' }"
-        :title="$t('slog.title')"
-        class="content-container flex-box-v"
-        content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray">
+    <div class="content-log content-container content-value fill-height flex-box-v">
         <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('slog.limit')">
                 <n-input-number
@@ -183,18 +178,16 @@ const onListLimitChanged = (limit) => {
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
         </n-form>
-        <div class="content-value fill-height flex-box-h">
-            <n-data-table
-                ref="tableRef"
-                :columns="columns"
-                :data="data.list"
-                :loading="data.loading"
-                class="flex-item-expand"
-                flex-height
-                virtual-scroll
-                @update:sorter="({ order }) => (data.sortOrder = order)" />
-        </div>
-    </n-card>
+        <n-data-table
+            ref="tableRef"
+            :columns="columns"
+            :data="data.list"
+            :loading="data.loading"
+            class="flex-item-expand"
+            flex-height
+            virtual-scroll
+            @update:sorter="({ order }) => (data.sortOrder = order)" />
+    </div>
 </template>
 
 <style lang="scss" scoped>

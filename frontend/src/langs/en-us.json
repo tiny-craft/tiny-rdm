@@ -353,5 +353,16 @@
     "cost_time": "Cost",
     "refresh": "Refresh Now",
     "auto_refresh": "Auto Refresh"
+  },
+  "monitor": {
+    "title": "Monitor Commands",
+    "actions": "Actions",
+    "start": "Start",
+    "stop": "Stop",
+    "search": "Search",
+    "copy_log": "Copy Log",
+    "save_log": "Save Log",
+    "clean_log": "Clean Log",
+    "always_show_last": "Always To Last Line"
   }
 }

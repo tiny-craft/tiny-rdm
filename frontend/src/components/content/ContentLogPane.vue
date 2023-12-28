@@ -133,12 +133,8 @@ defineExpose({
 </script>
 
 <template>
-    <n-card
-        :bordered="false"
-        :theme-overrides="{ borderRadius: '0px' }"
-        :title="$t('log.title')"
-        class="content-container flex-box-v"
-        content-style="display: flex;flex-direction: column; overflow: hidden; backgroundColor: gray">
+    <div class="content-log content-container content-value fill-height flex-box-v">
+        <n-h3>{{ $t('log.title') }}</n-h3>
         <n-form :disabled="data.loading" class="flex-item" inline>
             <n-form-item :label="$t('log.filter_server')">
                 <n-select
@@ -157,24 +153,17 @@ defineExpose({
                 <icon-button :icon="Delete" border t-tooltip="log.clean_log" @click="cleanHistory" />
             </n-form-item>
         </n-form>
-        <div class="content-value fill-height flex-box-h">
-            <n-data-table
-                ref="tableRef"
-                :columns="columns"
-                :data="data.history"
-                :loading="data.loading"
-                class="flex-item-expand"
-                flex-height
-                virtual-scroll />
-        </div>
-    </n-card>
+        <n-data-table
+            ref="tableRef"
+            :columns="columns"
+            :data="data.history"
+            :loading="data.loading"
+            class="flex-item-expand"
+            flex-height
+            virtual-scroll />
+    </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/content';
-
-.content-container {
-    padding: 5px;
-    box-sizing: border-box;
-}
 </style>

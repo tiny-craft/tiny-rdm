@@ -15,6 +15,7 @@ import Monitor from '@/components/icons/Monitor.vue'
 import Pub from '@/components/icons/Pub.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
+import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
 
 const themeVars = useThemeVars()
 
@@ -173,7 +174,7 @@ watch(
             </n-tab-pane>
 
             <!-- command monitor pane -->
-            <n-tab-pane :disabled="true" :name="BrowserTabType.CmdMonitor.toString()" display-directive="if">
+            <n-tab-pane :name="BrowserTabType.CmdMonitor.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -185,6 +186,7 @@ watch(
                         <span>{{ $t('interface.sub_tab.cmd_monitor') }}</span>
                     </n-space>
                 </template>
+                <content-monitor :server="props.server" />
             </n-tab-pane>
 
             <!-- pub/sub message pane -->

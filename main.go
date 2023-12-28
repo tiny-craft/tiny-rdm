@@ -31,6 +31,7 @@ func main() {
 	connSvc := services.Connection()
 	browserSvc := services.Browser()
 	cliSvc := services.Cli()
+	monitorSvc := services.Monitor()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
 	windowWidth, windowHeight, maximised := prefSvc.GetWindowSize()
@@ -68,6 +69,7 @@ func main() {
 			connSvc.Start(ctx)
 			browserSvc.Start(ctx)
 			cliSvc.Start(ctx)
+			monitorSvc.Start(ctx)
 
 			services.GA().SetSecretKey(gaMeasurementID, gaSecretKey)
 			services.GA().Startup(version)
@@ -85,12 +87,14 @@ func main() {
 		OnShutdown: func(ctx context.Context) {
 			browserSvc.Stop()
 			cliSvc.CloseAll()
+			monitorSvc.StopAll()
 		},
 		Bind: []interface{}{
 			sysSvc,
 			connSvc,
 			browserSvc,
 			cliSvc,
+			monitorSvc,
 			prefSvc,
 		},
 		Mac: &mac.Options{
