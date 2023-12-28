@@ -226,33 +226,27 @@ const useBrowserStore = defineStore('browser', {
             if (isEmpty(db)) {
                 throw new Error('no db loaded')
             }
-            const dbs = []
-            let containLastDB = false
             const serverInst = new RedisServerState({
                 name,
                 separator: this.getSeparator(name),
+                db: -1,
             })
-            /** @type RedisDatabaseItem[] **/
-            const databases = []
-
-            for (let i = 0; i < db.length; i++) {
-                databases.push(
-                    new RedisDatabaseItem({
-                        db: db[i].index,
-                        maxKeys: db[i].maxKeys,
-                    }),
-                )
-                if (db[i].index === lastDB) {
-                    containLastDB = true
+            /** @type {Object.<number,RedisDatabaseItem>} **/
+            const databases = {}
+            for (const dbItem of db) {
+                databases[dbItem.index] = new RedisDatabaseItem({
+                    db: dbItem.index,
+                    maxKeys: dbItem.maxKeys,
+                })
+                if (dbItem.index === lastDB) {
+                    // set last opened database as default
+                    serverInst.db = dbItem.index
+                } else if (serverInst.db === -1) {
+                    // set the first database as default
+                    serverInst.db = dbItem.index
                 }
             }
             serverInst.databases = databases
-            // get last selected db
-            if (containLastDB) {
-                serverInst.db = lastDB
-            } else {
-                serverInst.db = get(dbs, '0.db', 0)
-            }
             this.servers[name] = serverInst
         },
 
