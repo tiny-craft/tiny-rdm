@@ -37,12 +37,13 @@
 * List/Hash/Set/Sorted Set的分段加载和查询
 * List/Hash/Set/Sorted Set值的转码显示
 * 内置高级编辑器Monaco Editor
+* 支持命令实时监控
+* 支持数据导入/导出
 
 ## 未来版本规划
-- [ ] 命令实时监控
+
 - [ ] 发布/订阅支持
 - [ ] 连接配置导入/导出
-- [ ] 数据导入/导出
 
 ## 安装
 
@@ -54,34 +55,42 @@
 > ```
 
 ## 构建项目
+
 ### 运行环境要求
+
 * Go（最新版本）
 * Node.js >= 16
 * NPM >= 9
 
 ### 安装wails
+
 ```bash
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
 ### 拉取代码
+
 ```bash
 git clone https://github.com/tiny-craft/tiny-rdm --depth=1
 ```
 
 ### 构建前端代码
+
 ```bash
 npm install --prefix ./frontend
 ```
 
 ### 编译运行开发版本
+
 ```bash
 wails dev
 ```
 
 ## 关于
+
 此APP由我个人开发，也作为本人第一个开源项目的尝试，由于精力有限，可能会存在BUG或者使用体验上的问题，欢迎提交issue和PR。
 同时本人也在探索开源代码、独立开发和盈利性商业应用之间的平衡关系，欢迎有共同意向的小伙伴加入群聊探讨和交换想法。
+
 * QQ群：831077639
 
 ## 开源许可

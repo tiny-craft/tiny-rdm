@@ -1,4 +1,5 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tiny-craft/tiny-rdm/blob/main/README_zh.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> | <a href="https://github.com/tiny-craft/tiny-rdm/blob/main/README_zh.md">
+简体中文</a></h4>
 <div align="center">
 <a href="https://github.com/tiny-craft/tiny-rdm/"><img src="build/appicon.png" width="120"/></a>
 </div>
@@ -12,7 +13,8 @@
 [![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
 [![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
-<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux.</strong>
+<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and
+Linux.</strong>
 </div>
 
 <picture>
@@ -23,7 +25,8 @@
 
 ## Feature
 
-* Super lightweight, built on Webview2, without embedded browsers (Thanks to [Wails](https://github.com/wailsapp/wails)).
+* Super lightweight, built on Webview2, without embedded browsers (Thanks
+  to [Wails](https://github.com/wailsapp/wails)).
 * More elegant UI, frameless, offering light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
   and [IconPark](https://iconpark.oceanengine.com)).
 * Multi-language support ([Need more languages ? Click here to contribute](.github/CONTRIBUTING.md)).
@@ -37,12 +40,13 @@
 * Segmented loading and querying for List/Hash/Set/Sorted Set.
 * Decode/decompression display for value of List/Hash/Set/Sorted Set.
 * Inbuilt advanced editor - Monaco Editor.
+* Real-time commands monitoring.
+* Support import/export data.
 
 ## Roadmap
-- [ ] Real-time commands monitoring
+
 - [ ] Pub/Sub operations
 - [ ] Import/export connection profile
-- [ ] Import/export data
 
 ## Installation
 
@@ -54,27 +58,33 @@ Available to download for free from [here](https://github.com/tiny-craft/tiny-rd
 > ```
 
 ## Build Guidelines
+
 ### Prerequisites
+
 * Go (latest version)
 * Node.js >= 16
 * NPM >= 9
 
 ### Install wails
+
 ```bash
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
 ### Clone the code
+
 ```bash
 git clone https://github.com/tiny-craft/tiny-rdm --depth=1
 ```
 
 ### Build frontend
+
 ```bash
 npm install --prefix ./frontend
 ```
 
 ### Compile and run
+
 ```bash
 wails dev
 ```
