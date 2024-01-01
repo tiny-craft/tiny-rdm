@@ -14,14 +14,14 @@
     "lodash": "^4.17.21",
     "monaco-editor": "^0.45.0",
     "pinia": "^2.1.7",
-    "sass": "^1.69.5",
-    "vue": "^3.3.13",
+    "sass": "^1.69.6",
+    "vue": "^3.4.3",
     "vue-i18n": "^9.8.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.0.2",
     "naive-ui": "^2.36.0",
     "prettier": "^3.1.1",
     "unplugin-auto-import": "^0.17.3",
