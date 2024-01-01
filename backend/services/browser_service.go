@@ -81,7 +81,9 @@ func (b *browserService) Start(ctx context.Context) {
 func (b *browserService) Stop() {
 	for _, item := range b.connMap {
 		if item.client != nil {
-			item.cancelFunc()
+			if item.cancelFunc != nil {
+				item.cancelFunc()
+			}
 			item.client.Close()
 		}
 	}
@@ -227,7 +229,9 @@ func (b *browserService) CloseConnection(name string) (resp types.JSResp) {
 	if ok {
 		delete(b.connMap, name)
 		if item.client != nil {
-			item.cancelFunc()
+			if item.cancelFunc != nil {
+				item.cancelFunc()
+			}
 			item.client.Close()
 		}
 	}
@@ -287,44 +291,41 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	var ok bool
 	var client redis.UniversalClient
 	if item, ok = b.connMap[server]; ok {
-		client = item.client
-	} else {
-		selConn := Connection().getConnection(server)
-		if selConn == nil {
-			err = fmt.Errorf("no match connection \"%s\"", server)
+		if item.db == db {
 			return
 		}
-		client, err = b.createRedisClient(selConn.ConnectionConfig)
-		ctx, cancelFunc := context.WithCancel(b.ctx)
-		item = &connectionItem{
-			client:      client,
-			ctx:         ctx,
-			cancelFunc:  cancelFunc,
-			cursor:      map[int]uint64{},
-			entryCursor: map[int]entryCursor{},
-			stepSize:    int64(selConn.LoadSize),
+
+		// close previous connection if database is not the same
+		if item.cancelFunc != nil {
+			item.cancelFunc()
 		}
-		if item.stepSize <= 0 {
-			item.stepSize = consts.DEFAULT_LOAD_SIZE
-		}
-		b.connMap[server] = item
+		item.client.Close()
+		delete(b.connMap, server)
 	}
 
-	// BUG: go-redis might not be executing commands on the corresponding database
-	// requiring a database switch before execute each command
-	if db >= 0 && item.db != db {
-		var rdb *redis.Client
-		if rdb, ok = client.(*redis.Client); ok && rdb != nil {
-			_, err = rdb.Pipelined(item.ctx, func(pipe redis.Pipeliner) error {
-				return pipe.Select(item.ctx, db).Err()
-			})
-			if err != nil {
-				return
-			}
-			item.db = db
-			b.connMap[server].db = db
-		}
+	// recreate new connection after switch database
+	selConn := Connection().getConnection(server)
+	if selConn == nil {
+		err = fmt.Errorf("no match connection \"%s\"", server)
+		return
 	}
+	var connConfig = selConn.ConnectionConfig
+	connConfig.LastDB = db
+	client, err = b.createRedisClient(connConfig)
+	ctx, cancelFunc := context.WithCancel(b.ctx)
+	item = &connectionItem{
+		client:      client,
+		ctx:         ctx,
+		cancelFunc:  cancelFunc,
+		cursor:      map[int]uint64{},
+		entryCursor: map[int]entryCursor{},
+		stepSize:    int64(selConn.LoadSize),
+		db:          db,
+	}
+	if item.stepSize <= 0 {
+		item.stepSize = consts.DEFAULT_LOAD_SIZE
+	}
+	b.connMap[server] = item
 	return
 }
 
