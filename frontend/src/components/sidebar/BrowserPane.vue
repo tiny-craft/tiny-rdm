@@ -20,12 +20,13 @@ import RedisTypeSelector from '@/components/common/RedisTypeSelector.vue'
 import { types } from '@/consts/support_redis_type.js'
 import Plus from '@/components/icons/Plus.vue'
 import useConnectionStore from 'stores/connections.js'
-import ListCheckbox from '@/components/icons/ListCheckbox.vue'
 import Close from '@/components/icons/Close.vue'
 import More from '@/components/icons/More.vue'
 import Export from '@/components/icons/Export.vue'
 import { ConnectionType } from '@/consts/connection_type.js'
 import Import from '@/components/icons/Import.vue'
+import Down from '@/components/icons/Down.vue'
+import Checkbox from '@/components/icons/Checkbox.vue'
 
 const props = defineProps({
     server: String,
@@ -63,18 +64,20 @@ const dbSelectOptions = computed(() => {
     })
 })
 
-const moreOptions = computed(() => {
-    return [
-        { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
-        { key: 'divider', type: 'divider' },
-        { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
-        {
-            key: 'disconnect',
-            label: i18n.t('interface.disconnect'),
-            icon: render.renderIcon(Unlink, { strokeWidth: 3.5 }),
-        },
-    ]
-})
+const addOptions = computed(() => [
+    { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
+])
+
+const moreOptions = computed(() => [
+    // { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
+    { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
+    { key: 'divider', type: 'divider' },
+    {
+        key: 'disconnect',
+        label: i18n.t('interface.disconnect'),
+        icon: render.renderIcon(Unlink, { strokeWidth: 3.5 }),
+    },
+])
 
 const loadProgress = computed(() => {
     const db = browserStore.getDatabase(props.server, props.db)
@@ -258,27 +261,32 @@ onMounted(() => onReload())
                     <redis-type-selector v-model:value="filterForm.type" @update:value="onSelectFilterType" />
                 </template>
             </content-search-input>
+            <icon-button
+                :disabled="loading"
+                :icon="Refresh"
+                border
+                size="18"
+                small
+                stroke-width="4"
+                t-tooltip="interface.reload"
+                @click="onReload" />
             <n-button-group>
-                <n-tooltip :show-arrow="false">
-                    <template #trigger>
-                        <n-button :disabled="loading" :focusable="false" bordered size="small" @click="onReload">
-                            <template #icon>
-                                <n-icon :component="Refresh" size="18" />
-                            </template>
-                        </n-button>
-                    </template>
-                    {{ $t('interface.reload') }}
-                </n-tooltip>
-                <n-tooltip :show-arrow="false">
-                    <template #trigger>
-                        <n-button :disabled="loading" :focusable="false" bordered size="small" @click="onAddKey">
-                            <template #icon>
-                                <n-icon :component="Plus" size="18" />
-                            </template>
-                        </n-button>
-                    </template>
-                    {{ $t('interface.new_key') }}
-                </n-tooltip>
+                <icon-button
+                    :disabled="loading"
+                    :icon="Plus"
+                    border
+                    size="18"
+                    small
+                    stroke-width="4"
+                    t-tooltip="interface.new_key"
+                    @click="onAddKey" />
+                <n-dropdown :options="addOptions" placement="bottom-end" @select="onSelectOptions">
+                    <n-button :focusable="false" size="small" style="padding: 0 3px">
+                        <n-icon size="10">
+                            <down :stroke-width="6" />
+                        </n-icon>
+                    </n-button>
+                </n-dropdown>
             </n-button-group>
         </div>
 
@@ -343,7 +351,7 @@ onMounted(() => onReload())
                     <div class="flex-item-expand" style="min-width: 10px" />
                     <icon-button
                         :button-class="['nav-pane-func-btn']"
-                        :icon="ListCheckbox"
+                        :icon="Checkbox"
                         :stroke-width="3.5"
                         size="20"
                         t-tooltip="interface.check_mode"
