@@ -63,6 +63,13 @@ export const themeOverrides = {
         thPaddingSmall: '6px 8px',
         tdPaddingSmall: '6px 8px',
     },
+    Dropdown: {
+        borderRadius: '5px',
+        optionIconSizeMedium: '18px',
+        padding: '6px 2px',
+        optionColorHover: '#D33A31',
+        optionTextColorHover: '#FFF',
+    },
 }
 
 /**

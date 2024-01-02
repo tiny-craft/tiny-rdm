@@ -280,7 +280,11 @@ onMounted(() => onReload())
                     stroke-width="4"
                     t-tooltip="interface.new_key"
                     @click="onAddKey" />
-                <n-dropdown :options="addOptions" placement="bottom-end" @select="onSelectOptions">
+                <n-dropdown
+                    :options="addOptions"
+                    placement="bottom-end"
+                    style="min-width: 130px"
+                    @select="onSelectOptions">
                     <n-button :focusable="false" size="small" style="padding: 0 3px">
                         <n-icon size="10">
                             <down :stroke-width="6" />
@@ -356,7 +360,11 @@ onMounted(() => onReload())
                         size="20"
                         t-tooltip="interface.check_mode"
                         @click="inCheckState = true" />
-                    <n-dropdown :options="moreOptions" placement="top-end" @select="onSelectOptions">
+                    <n-dropdown
+                        :options="moreOptions"
+                        placement="top-end"
+                        style="min-width: 130px"
+                        @select="onSelectOptions">
                         <icon-button :button-class="['nav-pane-func-btn']" :icon="More" :stroke-width="3.5" size="20" />
                     </n-dropdown>
                 </div>
