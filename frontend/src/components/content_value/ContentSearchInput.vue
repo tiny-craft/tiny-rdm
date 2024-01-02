@@ -130,6 +130,7 @@ defineExpose({
             :size="small ? 16 : 20"
             border
             small
+            stroke-width="4"
             t-tooltip="interface.full_search"
             @click="onFullSearch" />
         <n-button v-else :disabled="hasMatch && !hasFilter" :focusable="false" @click="onFullSearch">

@@ -107,7 +107,7 @@ const onCleanLog = () => {
 
 <template>
     <div class="content-log content-container fill-height flex-box-v">
-        <n-form class="flex-item" label-align="left" label-placement="left" label-width="auto">
+        <n-form class="flex-item" label-align="left" label-placement="left" label-width="auto" size="small">
             <n-form-item :label="$t('monitor.actions')">
                 <n-space>
                     <n-button
@@ -129,10 +129,28 @@ const onCleanLog = () => {
                         {{ $t('monitor.stop') }}
                     </n-button>
                     <n-button-group>
-                        <icon-button :icon="Copy" border t-tooltip="monitor.copy_log" @click="onCopyLog" />
-                        <icon-button :icon="Export" border t-tooltip="monitor.save_log" @click="onExportLog" />
+                        <icon-button
+                            :icon="Copy"
+                            border
+                            size="18"
+                            stroke-width="3.5"
+                            t-tooltip="monitor.copy_log"
+                            @click="onCopyLog" />
+                        <icon-button
+                            :icon="Export"
+                            border
+                            size="18"
+                            stroke-width="3.5"
+                            t-tooltip="monitor.save_log"
+                            @click="onExportLog" />
                     </n-button-group>
-                    <icon-button :icon="Delete" border t-tooltip="monitor.clean_log" @click="onCleanLog" />
+                    <icon-button
+                        :icon="Delete"
+                        border
+                        size="18"
+                        stroke-width="3.5"
+                        t-tooltip="monitor.clean_log"
+                        @click="onCleanLog" />
                 </n-space>
             </n-form-item>
             <n-form-item :label="$t('monitor.search')">

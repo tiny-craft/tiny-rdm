@@ -19,6 +19,8 @@ export const themeOverrides = {
     },
     Button: {
         heightMedium: '32px',
+        paddingSmall: '0 8px',
+        paddingMedium: '0 12px',
     },
     Tag: {
         // borderRadius: '3px'

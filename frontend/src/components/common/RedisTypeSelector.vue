@@ -10,6 +10,10 @@ const props = defineProps({
         type: String,
         default: 'ALL',
     },
+    placement: {
+        type: String,
+        default: 'bottom-start',
+    },
 })
 
 const emit = defineEmits(['update:value', 'select'])
@@ -80,6 +84,7 @@ const handleSelect = (select) => {
 <template>
     <n-dropdown
         :options="options"
+        :placement="props.placement"
         :render-icon="renderIcon"
         :render-label="renderLabel"
         show-arrow

@@ -33,12 +33,12 @@ const handleSaveFile = async () => {
 <template>
     <n-input-group>
         <n-input
-            :value="props.value"
             :disabled="props.disabled"
             :placeholder="placeholder"
+            :value="props.value"
             clearable
-            @input="onInput"
-            @clear="onClear" />
+            @clear="onClear"
+            @input="onInput" />
         <n-button :disabled="props.disabled" :focusable="false" @click="handleSaveFile">...</n-button>
     </n-input-group>
 </template>

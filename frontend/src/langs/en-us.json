@@ -299,7 +299,7 @@
     "upgrade": {
       "title": "New Version Available",
       "import_expire_title": "Expiration",
-      "import_expire": "Try Import Expiration Time",
+      "import_expire": "Include Expiration Time",
       "new_version_tip": "A new version({ver}) is available. Download now?",
       "no_update": "You're update to date",
       "download_now": "Download",
