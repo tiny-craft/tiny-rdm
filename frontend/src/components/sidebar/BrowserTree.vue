@@ -171,12 +171,13 @@ const renderContextLabel = (option) => {
 /**
  *
  * @param {string} key
+ * @param {boolean} [toggle]
  */
-const expandKey = (key) => {
+const expandKey = (key, toggle) => {
     const idx = indexOf(expandedKeys.value, key)
     if (idx === -1) {
         expandedKeys.value.push(key)
-    } else {
+    } else if (toggle !== false) {
         expandedKeys.value.splice(idx, 1)
     }
 }
@@ -562,7 +563,7 @@ watchEffect(
         if (!props.checkMode) {
             tabStore.setCheckedKeys(props.server)
         } else {
-            expandKey(`${ConnectionType.RedisDB}`)
+            expandKey(`${ConnectionType.RedisDB}`, false)
         }
     },
     { flush: 'post' },
