@@ -90,6 +90,7 @@ defineExpose({
             v-model:value="inputData.filter"
             :placeholder="$t('interface.filter')"
             :size="props.small ? 'small' : ''"
+            :theme-overrides="{ paddingSmall: '0 3px', paddingMedium: '0 6px' }"
             clearable
             @clear="onClearFilter"
             @input="onInput"

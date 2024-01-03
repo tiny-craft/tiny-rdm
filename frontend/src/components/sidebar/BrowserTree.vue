@@ -367,13 +367,7 @@ const renderPrefix = ({ option }) => {
 
         case ConnectionType.RedisValue:
             if (prefStore.keyIconType === typesIconStyle.ICON) {
-                return h(
-                    NIcon,
-                    { size: 20 },
-                    {
-                        default: () => h(!!option.redisKeyCode ? Binary : Key),
-                    },
-                )
+                return h(NIcon, { size: 20 }, () => h(Key))
             }
             const loading = isEmpty(option.redisType) || option.redisType === 'loading'
             if (loading) {
@@ -506,10 +500,8 @@ const calcValueMenu = () => {
 
 // render menu function icon
 const renderSuffix = ({ option }) => {
-    if (
-        (option.type === ConnectionType.RedisDB && option.opened) ||
-        (includes(selectedKeys.value, option.key) && !props.checkMode)
-    ) {
+    const selected = includes(selectedKeys.value, option.key)
+    if (selected && !props.checkMode) {
         switch (option.type) {
             case ConnectionType.RedisDB:
                 return renderIconMenu(calcDBMenu(option.opened, option.loading, option.fullLoaded))
@@ -518,6 +510,9 @@ const renderSuffix = ({ option }) => {
             case ConnectionType.RedisValue:
                 return renderIconMenu(calcValueMenu())
         }
+    } else if (!selected && !!option.redisKeyCode && option.type === ConnectionType.RedisValue) {
+        // render binary icon
+        return renderIconMenu(h(NIcon, { size: 20 }, () => h(Binary)))
     }
     return null
 }

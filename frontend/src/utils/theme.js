@@ -23,7 +23,7 @@ export const themeOverrides = {
         paddingMedium: '0 12px',
     },
     Tag: {
-        // borderRadius: '3px'
+        borderRadius: '4px',
         heightLarge: '32px',
     },
     Input: {
