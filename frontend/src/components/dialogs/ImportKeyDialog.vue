@@ -10,6 +10,7 @@ const importKeyForm = reactive({
     server: '',
     db: 0,
     expire: true,
+    reload: true,
     file: '',
     type: 0,
     conflict: 0,
@@ -25,6 +26,7 @@ watchEffect(() => {
         importKeyForm.server = server
         importKeyForm.db = db
         importKeyForm.expire = true
+        importKeyForm.reload = true
         importKeyForm.file = ''
         importKeyForm.type = 0
         importKeyForm.conflict = 0
@@ -33,7 +35,7 @@ watchEffect(() => {
 })
 
 const i18n = useI18n()
-const conflictOption = [
+const conflictOption = computed(() => [
     {
         value: 0,
         label: i18n.t('dialogue.import.conflict_overwrite'),
@@ -42,7 +44,7 @@ const conflictOption = [
         value: 1,
         label: i18n.t('dialogue.import.conflict_ignore'),
     },
-]
+])
 
 const importEnable = computed(() => {
     return !isEmpty(importKeyForm.file)
@@ -51,8 +53,8 @@ const importEnable = computed(() => {
 const onConfirmImport = async () => {
     try {
         importing.value = true
-        const { server, db, file, conflict, expire } = importKeyForm
-        browserStore.importKeysFromCSVFile(server, db, file, conflict, expire).catch((e) => {})
+        const { server, db, file, conflict, expire, reload } = importKeyForm
+        browserStore.importKeysFromCSVFile(server, db, file, conflict, expire, reload).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -93,11 +95,6 @@ const onClose = () => {
                         :placeholder="$t('dialogue.import.open_csv_file_tip')"
                         ext="csv" />
                 </n-form-item>
-                <n-form-item :label="$t('dialogue.import.import_expire_title')">
-                    <n-checkbox v-model:checked="importKeyForm.expire" :autofocus="false">
-                        {{ $t('dialogue.import.import_expire') }}
-                    </n-checkbox>
-                </n-form-item>
                 <n-form-item :label="$t('dialogue.import.conflict_handle')">
                     <n-radio-group v-model:value="importKeyForm.conflict">
                         <n-radio-button
@@ -106,6 +103,16 @@ const onClose = () => {
                             :label="op.label"
                             :value="op.value" />
                     </n-radio-group>
+                </n-form-item>
+                <n-form-item :label="$t('dialogue.import.import_expire_title')" :show-label="false">
+                    <n-space :wrap-item="false">
+                        <n-checkbox v-model:checked="importKeyForm.expire" :autofocus="false">
+                            {{ $t('dialogue.import.import_expire') }}
+                        </n-checkbox>
+                        <n-checkbox v-model:checked="importKeyForm.reload" :autofocus="false">
+                            {{ $t('dialogue.import.reload') }}
+                        </n-checkbox>
+                    </n-space>
                 </n-form-item>
             </n-form>
         </n-spin>

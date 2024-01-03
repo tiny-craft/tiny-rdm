@@ -219,7 +219,7 @@ const onClose = () => {
                     :is="addValueComponent[newForm.type]"
                     v-model:type="newForm.opType"
                     v-model:value="newForm.value" />
-                <n-form-item label=" " path="key" required>
+                <n-form-item :show-label="false" path="key" required>
                     <n-checkbox v-model:checked="newForm.reload">
                         {{ $t('dialogue.field.reload_when_succ') }}
                     </n-checkbox>

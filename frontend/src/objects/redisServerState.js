@@ -19,6 +19,7 @@ export class RedisServerState {
     /**
      * @param {string} name server name
      * @param {number} db current opened database
+     * @param {number} reloadKey try to reload when changed
      * @param {{}} stats current server status info
      * @param {Object.<number, RedisDatabaseItem>} databases database list
      * @param {string|null} patternFilter pattern filter
@@ -40,6 +41,7 @@ export class RedisServerState {
     }) {
         this.name = name
         this.db = db
+        this.reloadKey = Date.now()
         this.stats = stats
         this.databases = databases
         this.patternFilter = patternFilter

@@ -3,7 +3,7 @@ import { useThemeVars } from 'naive-ui'
 import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
-import { computed, nextTick, onMounted, reactive, ref, unref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue'
 import { find, get, map, size } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
@@ -238,6 +238,11 @@ const onSelectOptions = (select) => {
 }
 
 onMounted(() => onReload())
+
+watch(
+    () => browserStore.getReloadKey(props.server),
+    (key) => onReload(),
+)
 // forbid dynamic switch key view due to performance issues
 // const viewType = ref(0)
 // const onSwitchView = (selectView) => {
@@ -284,6 +289,7 @@ onMounted(() => onReload())
                     :options="addOptions"
                     placement="bottom-end"
                     style="min-width: 130px"
+                    trigger="click"
                     @select="onSelectOptions">
                     <n-button :focusable="false" size="small" style="padding: 0 3px">
                         <n-icon size="10">

@@ -166,6 +166,20 @@ const useBrowserStore = defineStore('browser', {
             return get(rootNode, 'children', [])
         },
 
+        getReloadKey(server) {
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            return serverInst != null ? serverInst.reloadKey : 0
+        },
+
+        reloadServer(server) {
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                serverInst.reloadKey = Date.now()
+            }
+        },
+
         /**
          * switch key view
          * @param {string} connName
@@ -1660,9 +1674,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} path
          * @param {number} conflict
          * @param {boolean} [expire]
+         * @param {boolean} [reload]
          * @return {Promise<void>}
          */
-        async importKeysFromCSVFile(server, db, path, conflict, expire) {
+        async importKeysFromCSVFile(server, db, path, conflict, expire, reload) {
             const msgRef = $message.loading('', { duration: 0, closable: true })
             let imported = 0
             let ignored = 0
@@ -1695,8 +1710,11 @@ const useBrowserStore = defineStore('browser', {
             if (canceled) {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else {
-                // no fail
+                // finish
                 $message.success(i18nGlobal.t('dialogue.import.import_completed', { success: imported, ignored }))
+                if (reload) {
+                    this.reloadServer(server)
+                }
             }
         },
 

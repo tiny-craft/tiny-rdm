@@ -289,6 +289,7 @@
       "name": "导入数据",
       "import_expire_title": "过期时间",
       "import_expire": "包含键过期时间",
+      "reload": "导入完成后重新载入",
       "import": "确认导入",
       "open_csv_file": "导入文件路径",
       "open_csv_file_tip": "选择需要导入的文件",
