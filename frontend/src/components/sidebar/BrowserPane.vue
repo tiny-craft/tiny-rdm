@@ -127,11 +127,13 @@ const onAddKey = () => {
     const selectedKey = get(browserTreeRef.value?.getSelectedKey(), 0)
     if (selectedKey != null) {
         const node = browserStore.getNode(selectedKey)
-        const { type = ConnectionType.RedisValue, redisKey } = node
-        if (type === ConnectionType.RedisKey) {
-            // has prefix
-            dialogStore.openNewKeyDialog(redisKey, props.server, props.db)
-            return
+        if (node != null) {
+            const { type = ConnectionType.RedisValue, redisKey } = node
+            if (type === ConnectionType.RedisKey) {
+                // has prefix
+                dialogStore.openNewKeyDialog(redisKey, props.server, props.db)
+                return
+            }
         }
     }
     dialogStore.openNewKeyDialog('', props.server, props.db)
