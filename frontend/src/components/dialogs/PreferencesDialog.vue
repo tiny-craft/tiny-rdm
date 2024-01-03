@@ -101,7 +101,11 @@ const onClose = () => {
                             <n-input-number v-model:value="prefStore.general.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.scan_size')" :span="12">
-                            <n-input-number v-model:value="prefStore.general.scanSize" :min="1" />
+                            <n-input-number
+                                v-model:value="prefStore.general.scanSize"
+                                :min="1"
+                                :show-button="false"
+                                style="width: 100%" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.key_icon_style')" :span="12">
                             <n-select v-model:value="prefStore.general.keyIconStyle" :options="keyOptions" />
@@ -128,13 +132,13 @@ const onClose = () => {
             <n-tab-pane :tab="$t('preferences.editor.name')" display-directive="show" name="editor">
                 <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
-                        <n-form-item-gi :label="$t('preferences.general.font')" :span="24" required>
+                        <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
                             <n-select
                                 v-model:value="prefStore.editor.font"
                                 :options="prefStore.fontOption"
                                 filterable />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.font_size')" :show-feedback="false" :span="24">
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :show-feedback="false" :span="12">
                             <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :show-feedback="false" :span="24">

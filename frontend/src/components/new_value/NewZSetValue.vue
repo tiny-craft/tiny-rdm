@@ -52,6 +52,7 @@ defineExpose({
                 <n-input-number
                     v-model:value="value.score"
                     :placeholder="$t('dialogue.field.enter_score')"
+                    :show-button="false"
                     @update:value="onUpdate" />
             </template>
             <template #action="{ index, create, remove, move }">

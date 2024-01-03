@@ -289,6 +289,7 @@ const onClose = () => {
                                     v-model:value="generalForm.port"
                                     :max="65535"
                                     :min="1"
+                                    :show-button="false"
                                     style="width: 200px" />
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.pwd')" :span="12" path="password">
@@ -336,7 +337,12 @@ const onClose = () => {
                                 :label="$t('dialogue.connection.advn.conn_timeout')"
                                 :span="12"
                                 path="connTimeout">
-                                <n-input-number v-model:value="generalForm.connTimeout" :max="999999" :min="1">
+                                <n-input-number
+                                    v-model:value="generalForm.connTimeout"
+                                    :max="999999"
+                                    :min="1"
+                                    :show-button="false"
+                                    style="width: 100%">
                                     <template #suffix>
                                         {{ $t('common.second') }}
                                     </template>
@@ -346,7 +352,12 @@ const onClose = () => {
                                 :label="$t('dialogue.connection.advn.exec_timeout')"
                                 :span="12"
                                 path="execTimeout">
-                                <n-input-number v-model:value="generalForm.execTimeout" :max="999999" :min="1">
+                                <n-input-number
+                                    v-model:value="generalForm.execTimeout"
+                                    :max="999999"
+                                    :min="1"
+                                    :show-button="false"
+                                    style="width: 100%">
                                     <template #suffix>
                                         {{ $t('common.second') }}
                                     </template>
@@ -363,7 +374,11 @@ const onClose = () => {
                                 </n-radio-group>
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.advn.load_size')" :span="12">
-                                <n-input-number v-model:value="generalForm.loadSize" :min="0" />
+                                <n-input-number
+                                    v-model:value="generalForm.loadSize"
+                                    :min="0"
+                                    :show-button="false"
+                                    style="width: 100%" />
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.advn.dbfilter_type')" :span="24">
                                 <n-radio-group
@@ -470,6 +485,7 @@ const onClose = () => {
                                 v-model:value="generalForm.ssh.port"
                                 :max="65535"
                                 :min="1"
+                                :show-button="false"
                                 style="width: 200px" />
                         </n-form-item>
                         <n-form-item :label="$t('dialogue.connection.ssh.login_type')">
