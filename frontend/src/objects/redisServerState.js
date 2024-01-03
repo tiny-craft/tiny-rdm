@@ -83,7 +83,7 @@ export class RedisServerState {
      * @param {number} updateVal
      */
     updateDBKeyCount(db, updateVal) {
-        const dbInst = this.databases[this.db]
+        const dbInst = this.databases[db]
         if (dbInst != null) {
             dbInst.maxKeys = Math.max(0, dbInst.maxKeys + updateVal)
         }
@@ -288,6 +288,11 @@ export class RedisServerState {
             // clear all key nodes
             this.nodeMap.clear()
             this.getRoot()
+            const dbInst = this.databases[this.db]
+            if (dbInst != null) {
+                dbInst.maxKeys = 0
+                dbInst.keyCount = 0
+            }
         } else {
             const keyParts = split(key, this.separator)
             const totalParts = size(keyParts)

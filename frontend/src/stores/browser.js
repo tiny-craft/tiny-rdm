@@ -1493,7 +1493,7 @@ const useBrowserStore = defineStore('browser', {
          */
         async deleteKey(server, db, key, soft) {
             try {
-                let deleteCount = 0
+                let deleteCount = 1
                 if (soft !== true) {
                     const { data } = await DeleteKey(server, db, key)
                     deleteCount = get(data, 'deleteCount', 0)
@@ -1717,7 +1717,6 @@ const useBrowserStore = defineStore('browser', {
                     if (serverInst != null) {
                         // update tree view data
                         serverInst.removeKeyNode()
-                        serverInst.setDBKeyCount(db, 0)
                     }
                     // set tab content empty
                     const tab = useTabStore()
