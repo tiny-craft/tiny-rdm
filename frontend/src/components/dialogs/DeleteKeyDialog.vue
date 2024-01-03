@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import { isEmpty, map, size } from 'lodash'
@@ -18,28 +18,26 @@ const deleteForm = reactive({
 
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
-watch(
-    () => dialogStore.deleteKeyDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { server, db, key } = dialogStore.deleteKeyParam
-            deleteForm.server = server
-            deleteForm.db = db
-            deleteForm.key = key
-            deleteForm.loadingAffected = false
-            // deleteForm.async = true
-            loading.value = false
-            deleting.value = false
-            if (key instanceof Array) {
-                deleteForm.showAffected = true
-                deleteForm.affectedKeys = key
-            } else {
-                deleteForm.showAffected = false
-                deleteForm.affectedKeys = []
-            }
+
+watchEffect(() => {
+    if (dialogStore.deleteKeyDialogVisible) {
+        const { server, db, key } = dialogStore.deleteKeyParam
+        deleteForm.server = server
+        deleteForm.db = db
+        deleteForm.key = key
+        deleteForm.loadingAffected = false
+        // deleteForm.async = true
+        loading.value = false
+        deleting.value = false
+        if (key instanceof Array) {
+            deleteForm.showAffected = true
+            deleteForm.affectedKeys = key
+        } else {
+            deleteForm.showAffected = false
+            deleteForm.affectedKeys = []
         }
-    },
-)
+    }
+})
 
 const loading = ref(false)
 const deleting = ref(false)

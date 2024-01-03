@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import { types } from '@/consts/support_redis_type.js'
@@ -26,18 +26,16 @@ const typeOptions = computed(() => {
 })
 
 const dialogStore = useDialog()
-watch(
-    () => dialogStore.keyFilterDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { server, db, type, pattern } = dialogStore.keyFilterParam
-            filterForm.server = server
-            filterForm.db = db || 0
-            filterForm.type = type || ''
-            filterForm.pattern = pattern || '*'
-        }
-    },
-)
+
+watchEffect(() => {
+    if (dialogStore.keyFilterDialogVisible) {
+        const { server, db, type, pattern } = dialogStore.keyFilterParam
+        filterForm.server = server
+        filterForm.db = db || 0
+        filterForm.type = type || ''
+        filterForm.pattern = pattern || '*'
+    }
+})
 
 const browserStore = useBrowserStore()
 const onConfirm = () => {}

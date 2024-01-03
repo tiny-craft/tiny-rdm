@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, nextTick, reactive, ref, watch } from 'vue'
+import { computed, h, nextTick, reactive, ref, watchEffect } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
 import { endsWith, get, isEmpty, keys, map, trim } from 'lodash'
@@ -64,29 +64,26 @@ const defaultValue = {
 }
 
 const dialogStore = useDialog()
-watch(
-    () => dialogStore.newKeyDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { prefix, server, db } = dialogStore.newKeyParam
-            const separator = browserStore.getSeparator(server)
-            newForm.server = server
-            if (isEmpty(prefix)) {
-                newForm.key = ''
+watchEffect(() => {
+    if (dialogStore.newKeyDialogVisible) {
+        const { prefix, server, db } = dialogStore.newKeyParam
+        const separator = browserStore.getSeparator(server)
+        newForm.server = server
+        if (isEmpty(prefix)) {
+            newForm.key = ''
+        } else {
+            if (!endsWith(prefix, separator)) {
+                newForm.key = prefix + separator
             } else {
-                if (!endsWith(prefix, separator)) {
-                    newForm.key = prefix + separator
-                } else {
-                    newForm.key = prefix
-                }
+                newForm.key = prefix
             }
-            newForm.db = db
-            newForm.type = options.value[0].value
-            newForm.ttl = -1
-            newForm.value = null
         }
-    },
-)
+        newForm.db = db
+        newForm.type = options.value[0].value
+        newForm.ttl = -1
+        newForm.value = null
+    }
+})
 
 const renderTypeLabel = (option) => {
     return h(

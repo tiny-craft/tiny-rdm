@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, watchEffect } from 'vue'
 import { types } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
@@ -63,21 +63,18 @@ const title = computed(() => {
 })
 
 const dialogStore = useDialog()
-watch(
-    () => dialogStore.addFieldsDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { server, db, key, keyCode, type } = dialogStore.addFieldParam
-            newForm.server = server
-            newForm.db = db
-            newForm.key = key
-            newForm.keyCode = keyCode
-            newForm.type = type
-            newForm.opType = 0
-            newForm.value = null
-        }
-    },
-)
+watchEffect(() => {
+    if (dialogStore.addFieldsDialogVisible) {
+        const { server, db, key, keyCode, type } = dialogStore.addFieldParam
+        newForm.server = server
+        newForm.db = db
+        newForm.key = key
+        newForm.keyCode = keyCode
+        newForm.type = type
+        newForm.opType = 0
+        newForm.value = null
+    }
+})
 
 const browserStore = useBrowserStore()
 const tab = useTabStore()

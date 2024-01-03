@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import useBrowserStore from 'stores/browser.js'
@@ -15,18 +15,16 @@ const renameForm = reactive({
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
 const tab = useTabStore()
-watch(
-    () => dialogStore.renameDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { server, db, key } = dialogStore.renameKeyParam
-            renameForm.server = server
-            renameForm.db = db
-            renameForm.key = key
-            renameForm.newKey = key
-        }
-    },
-)
+
+watchEffect(() => {
+    if (dialogStore.renameDialogVisible) {
+        const { server, db, key } = dialogStore.renameKeyParam
+        renameForm.server = server
+        renameForm.db = db
+        renameForm.key = key
+        renameForm.newKey = key
+    }
+})
 
 const i18n = useI18n()
 const onRename = async () => {

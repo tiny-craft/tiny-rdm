@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
@@ -36,14 +36,11 @@ const isRenameMode = computed(() => !isEmpty(editGroup.value))
 
 const dialogStore = useDialog()
 const connectionStore = useConnectionStore()
-watch(
-    () => dialogStore.groupDialogVisible,
-    (visible) => {
-        if (visible) {
-            groupForm.name = editGroup.value = dialogStore.editGroup
-        }
-    },
-)
+watchEffect(() => {
+    if (dialogStore.groupDialogVisible) {
+        groupForm.name = editGroup.value = dialogStore.editGroup
+    }
+})
 
 const i18n = useI18n()
 const onConfirm = async () => {

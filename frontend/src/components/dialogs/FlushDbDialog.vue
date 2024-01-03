@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import { useI18n } from 'vue-i18n'
 import useBrowserStore from 'stores/browser.js'
@@ -14,19 +14,17 @@ const flushForm = reactive({
 
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
-watch(
-    () => dialogStore.flushDBDialogVisible,
-    (visible) => {
-        if (visible) {
-            const { server, db } = dialogStore.flushDBParam
-            flushForm.server = server
-            flushForm.db = db
-            flushForm.async = true
-            flushForm.confirm = false
-            loading.value = false
-        }
-    },
-)
+
+watchEffect(() => {
+    if (dialogStore.flushDBDialogVisible) {
+        const { server, db } = dialogStore.flushDBParam
+        flushForm.server = server
+        flushForm.db = db
+        flushForm.async = true
+        flushForm.confirm = false
+        loading.value = false
+    }
+})
 
 const loading = ref(false)
 const i18n = useI18n()

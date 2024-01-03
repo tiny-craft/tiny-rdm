@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import useTabStore from 'stores/tab.js'
 import Binary from '@/components/icons/Binary.vue'
@@ -18,27 +18,24 @@ const dialogStore = useDialog()
 const browserStore = useBrowserStore()
 const tabStore = useTabStore()
 
-watch(
-    () => dialogStore.ttlDialogVisible,
-    (visible) => {
-        if (visible) {
-            // get ttl from current tab
-            const tab = tabStore.currentTab
-            if (tab != null) {
-                ttlForm.server = tab.name
-                ttlForm.db = tab.db
-                ttlForm.key = tab.key
-                ttlForm.keyCode = tab.keyCode
-                if (tab.ttl < 0) {
-                    // forever
-                    ttlForm.ttl = -1
-                } else {
-                    ttlForm.ttl = tab.ttl
-                }
+watchEffect(() => {
+    if (dialogStore.ttlDialogVisible) {
+        // get ttl from current tab
+        const tab = tabStore.currentTab
+        if (tab != null) {
+            ttlForm.server = tab.name
+            ttlForm.db = tab.db
+            ttlForm.key = tab.key
+            ttlForm.keyCode = tab.keyCode
+            if (tab.ttl < 0) {
+                // forever
+                ttlForm.ttl = -1
+            } else {
+                ttlForm.ttl = tab.ttl
             }
         }
-    },
-)
+    }
+})
 
 const onClose = () => {
     dialogStore.closeTTLDialog()

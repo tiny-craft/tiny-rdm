@@ -1,7 +1,7 @@
 <script setup>
 import ContentPane from './components/content/ContentPane.vue'
 import BrowserPane from './components/sidebar/BrowserPane.vue'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
 import { debounce } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import Ribbon from './components/sidebar/Ribbon.vue'
@@ -43,14 +43,11 @@ const handleResize = () => {
     saveSidebarWidth()
 }
 
-watch(
-    () => tabStore.nav,
-    (nav) => {
-        if (nav === 'log') {
-            logPaneRef.value?.refresh()
-        }
-    },
-)
+watchEffect(() => {
+    if (tabStore.nav === 'log') {
+        logPaneRef.value?.refresh()
+    }
+})
 
 const logoWrapperWidth = computed(() => {
     return `${data.navMenuWidth + prefStore.behavior.asideWidth - 4}px`
