@@ -10,6 +10,9 @@
     "update": "更新",
     "none": "无",
     "second": "秒",
+    "minute": "分钟",
+    "hour": "小时",
+    "day": "天",
     "unit_day": "天",
     "unit_hour": "小时",
     "unit_minute": "分钟",
@@ -296,7 +299,8 @@
       "import_completed": "已完成导入操作，成功{success}个，忽略{ignored}个"
     },
     "ttl": {
-      "title": "设置键存活时间"
+      "title": "设置键存活时间",
+      "quick_set": "快捷设置"
     },
     "upgrade": {
       "title": "有可用新版本",

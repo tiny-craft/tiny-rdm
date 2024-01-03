@@ -207,6 +207,7 @@ const onClose = () => {
                             v-model:value="newForm.ttl"
                             :max="Number.MAX_SAFE_INTEGER"
                             :min="-1"
+                            :show-button="false"
                             placeholder="TTL">
                             <template #suffix>
                                 {{ $t('common.second') }}

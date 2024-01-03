@@ -10,6 +10,9 @@
     "update": "Update",
     "none": "None",
     "second": "Second(s)",
+    "minute": "Minutes(s)",
+    "hour": "Hour(s)",
+    "day": "Day(s)",
     "unit_day": "D",
     "unit_hour": "H",
     "unit_minute": "M",
@@ -294,7 +297,8 @@
       "import_completed": "Import completed, {success} successes, {ignored} failed"
     },
     "ttl": {
-      "title": "Set Key TTL"
+      "title": "Set Key TTL",
+      "quick_set": "Quick Settings"
     },
     "upgrade": {
       "title": "New Version Available",
