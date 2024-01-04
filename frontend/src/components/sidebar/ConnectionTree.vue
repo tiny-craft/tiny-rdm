@@ -447,6 +447,9 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
     if (dragNodeSiblings === null || dragNodeIndex === null) {
         return
     }
+    if (node.type === ConnectionType.Group && dragNode.type === ConnectionType.Group) {
+        return
+    }
     dragNodeSiblings.splice(dragNodeIndex, 1)
     if (dropPosition === 'inside') {
         if (node.children) {
