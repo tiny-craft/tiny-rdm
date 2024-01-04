@@ -214,7 +214,7 @@ const onClose = () => {
                             </template>
                         </n-input-number>
                         <n-button :focusable="false" secondary type="primary" @click="() => (newForm.ttl = -1)">
-                            {{ $t('dialogue.key.persist_key') }}
+                            {{ $t('interface.forever') }}
                         </n-button>
                     </n-input-group>
                 </n-form-item>

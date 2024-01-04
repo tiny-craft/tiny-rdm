@@ -129,7 +129,7 @@ const onDelete = () => {
         const { name, db } = data.value
         browserStore.deleteKey(name, db, keyName.value).then((success) => {
             if (success) {
-                $message.success(i18n.t('dialogue.delete_key_succ', { key: data.value.keyPath }))
+                $message.success(i18n.t('dialogue.delete.success', { key: data.value.keyPath }))
             }
         })
     })

@@ -215,7 +215,6 @@
     "key": {
       "new": "Nova Chave",
       "new_name": "Novo Nome da Chave",
-      "persist_key": "Persistir Chave",
       "server": "Conexão",
       "db_index": "Índice do Banco de Dados",
       "key_expression": "Expressão da Chave",

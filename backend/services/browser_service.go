@@ -1836,14 +1836,13 @@ func (b *browserService) SetKeyTTL(connName string, db int, k any, ttl int64) (r
 
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(k)
-	var expiration time.Duration
 	if ttl < 0 {
 		if err = client.Persist(ctx, key).Err(); err != nil {
 			resp.Msg = err.Error()
 			return
 		}
 	} else {
-		expiration = time.Duration(ttl) * time.Second
+		expiration := time.Duration(ttl) * time.Second
 		if err = client.Expire(ctx, key, expiration).Err(); err != nil {
 			resp.Msg = err.Error()
 			return
@@ -1851,6 +1850,95 @@ func (b *browserService) SetKeyTTL(connName string, db int, k any, ttl int64) (r
 	}
 
 	resp.Success = true
+	return
+}
+
+// BatchSetTTL batch set ttl
+func (b *browserService) BatchSetTTL(server string, db int, ks []any, ttl int64, serialNo string) (resp types.JSResp) {
+	conf := Connection().getConnection(server)
+	if conf == nil {
+		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
+		return
+	}
+	var client redis.UniversalClient
+	var err error
+	var connConfig = conf.ConnectionConfig
+	connConfig.LastDB = db
+	if client, err = b.createRedisClient(connConfig); err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	ctx, cancelFunc := context.WithCancel(b.ctx)
+	defer client.Close()
+	defer cancelFunc()
+
+	//cancelEvent := "ttling:stop:" + serialNo
+	//runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	//	cancelFunc()
+	//})
+	//processEvent := "ttling:" + serialNo
+	total := len(ks)
+	var failed, updated atomic.Int64
+	var canceled bool
+
+	expiration := time.Now().Add(time.Duration(ttl) * time.Second)
+	del := func(ctx context.Context, cli redis.UniversalClient) error {
+		startTime := time.Now().Add(-10 * time.Second)
+		for i, k := range ks {
+			// emit progress per second
+			//param := map[string]any{
+			//	"total":      total,
+			//	"progress":   i + 1,
+			//	"processing": k,
+			//}
+			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
+				startTime = time.Now()
+				//runtime.EventsEmit(b.ctx, processEvent, param)
+				// do some sleep to prevent blocking the Redis server
+				time.Sleep(10 * time.Millisecond)
+			}
+
+			key := strutil.DecodeRedisKey(k)
+			var expErr error
+			if ttl < 0 {
+				expErr = cli.Persist(ctx, key).Err()
+			} else {
+				expErr = cli.ExpireAt(ctx, key, expiration).Err()
+			}
+			if err != nil {
+				failed.Add(1)
+			} else {
+				// save deleted key
+				updated.Add(1)
+			}
+			if errors.Is(expErr, context.Canceled) || canceled {
+				canceled = true
+				break
+			}
+		}
+		return nil
+	}
+
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			return del(ctx, cli)
+		})
+	} else {
+		err = del(ctx, client)
+	}
+
+	//runtime.EventsOff(ctx, cancelEvent)
+	resp.Success = true
+	resp.Data = struct {
+		Canceled bool  `json:"canceled"`
+		Updated  int64 `json:"updated"`
+		Failed   int64 `json:"failed"`
+	}{
+		Canceled: canceled,
+		Updated:  updated.Load(),
+		Failed:   failed.Load(),
+	}
 	return
 }
 
@@ -2007,13 +2095,13 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 		startTime := time.Now().Add(-10 * time.Second)
 		for i, k := range ks {
 			// emit progress per second
-			param := map[string]any{
-				"total":      total,
-				"progress":   i + 1,
-				"processing": k,
-			}
 			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
 				startTime = time.Now()
+				param := map[string]any{
+					"total":      total,
+					"progress":   i + 1,
+					"processing": k,
+				}
 				runtime.EventsEmit(b.ctx, processEvent, param)
 				// do some sleep to prevent blocking the Redis server
 				time.Sleep(10 * time.Millisecond)

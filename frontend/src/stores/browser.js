@@ -5,6 +5,7 @@ import {
     AddListItem,
     AddStreamValue,
     AddZSetValue,
+    BatchSetTTL,
     CleanCmdHistory,
     CloseConnection,
     ConvertValue,
@@ -1484,17 +1485,79 @@ const useBrowserStore = defineStore('browser', {
          * reset key's ttl
          * @param {string} server
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number} ttl
          * @returns {Promise<boolean>}
          */
         async setTTL(server, db, key, ttl) {
             try {
                 const { success, msg } = await SetKeyTTL(server, db, key, ttl)
+                if (success) {
+                    const tabStore = useTabStore()
+                    tabStore.updateTTL({
+                        server,
+                        db,
+                        key,
+                        ttl,
+                    })
+                }
                 return success === true
             } catch (e) {
                 return false
             }
+        },
+
+        async setTTLs(server, db, keys, ttl) {
+            // const msgRef = $message.loading('', { duration: 0, closable: true })
+            // let updated = []
+            // let failCount = 0
+            // let canceled = false
+            const serialNo = Date.now().valueOf().toString()
+            // const eventName = 'ttling:' + serialNo
+            // const cancelEvent = 'ttling:stop:' + serialNo
+            try {
+                // let maxProgress = 0
+                // EventsOn(eventName, ({ total, progress, processing }) => {
+                //     // update delete progress
+                //     if (progress > maxProgress) {
+                //         maxProgress = progress
+                //     }
+                //     const k = decodeRedisKey(processing)
+                //     msgRef.content = i18nGlobal.t('dialogue.delete.doing', {
+                //         key: k,
+                //         index: maxProgress,
+                //         count: total,
+                //     })
+                // })
+                // msgRef.onClose = () => {
+                //     EventsEmit(cancelEvent)
+                // }
+                const { data, success, msg } = await BatchSetTTL(server, db, keys, ttl, serialNo)
+                if (success) {
+                    // canceled = get(data, 'canceled', false)
+                    // updated = get(data, 'updated', [])
+                    // failCount = get(data, 'failed', 0)
+                } else {
+                    $message.error(msg)
+                }
+            } finally {
+                // msgRef.destroy()
+                // EventsOff(eventName)
+            }
+            $message.success(i18nGlobal.t('dialogue.ttl.success'))
+            // const deletedCount = size(updated)
+            // if (canceled) {
+            //     $message.info(i18nGlobal.t('dialogue.handle_cancel'))
+            // } else if (failCount <= 0) {
+            //     // no fail
+            //     $message.success(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            // } else if (failCount >= deletedCount) {
+            //     // all fail
+            //     $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            // } else {
+            //     // some fail
+            //     $message.warn(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            // }
         },
 
         /**
@@ -1557,7 +1620,7 @@ const useBrowserStore = defineStore('browser', {
                         maxProgress = progress
                     }
                     const k = decodeRedisKey(processing)
-                    msgRef.content = i18nGlobal.t('dialogue.deleting_key', {
+                    msgRef.content = i18nGlobal.t('dialogue.delete.doing', {
                         key: k,
                         index: maxProgress,
                         count: total,
@@ -1587,13 +1650,13 @@ const useBrowserStore = defineStore('browser', {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else if (failCount <= 0) {
                 // no fail
-                $message.success(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+                $message.success(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             } else if (failCount >= deletedCount) {
                 // all fail
-                $message.error(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+                $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             } else {
                 // some fail
-                $message.warn(i18nGlobal.t('dialogue.delete_completed', { success: deletedCount, fail: failCount }))
+                $message.warn(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             }
             // update ui
             timeout(100).then(async () => {

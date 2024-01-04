@@ -222,7 +222,7 @@ const actionColumn = {
                     })
                     if (success) {
                         props.value.splice(index, 1)
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.k }))
+                        $message.success(i18n.t('dialogue.delete.success', { key: row.k }))
                     } else {
                         $message.error(msg)
                     }

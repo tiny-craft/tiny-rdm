@@ -27,6 +27,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import Import from '@/components/icons/Import.vue'
 import Down from '@/components/icons/Down.vue'
 import Checkbox from '@/components/icons/Checkbox.vue'
+import Timer from '@/components/icons/Timer.vue'
 
 const props = defineProps({
     server: String,
@@ -168,6 +169,10 @@ const onDeleteChecked = () => {
 
 const onExportChecked = () => {
     browserTreeRef.value?.exportCheckedItems()
+}
+
+const onUpdateTTLChecked = () => {
+    browserTreeRef.value?.updateTTLCheckedItems()
 }
 
 const onImportData = () => {
@@ -348,7 +353,7 @@ watch(
                         :icon="LoadList"
                         :loading="loading"
                         :stroke-width="3.5"
-                        size="20"
+                        size="21"
                         t-tooltip="interface.load_more"
                         @click="onLoadMore" />
                     <icon-button
@@ -357,7 +362,7 @@ watch(
                         :icon="LoadAll"
                         :loading="loading"
                         :stroke-width="3.5"
-                        size="20"
+                        size="21"
                         t-tooltip="interface.load_all"
                         @click="onLoadAll" />
                     <div class="flex-item-expand" style="min-width: 10px" />
@@ -365,7 +370,7 @@ watch(
                         :button-class="['nav-pane-func-btn']"
                         :icon="Checkbox"
                         :stroke-width="3.5"
-                        size="20"
+                        size="19"
                         t-tooltip="interface.check_mode"
                         @click="inCheckState = true" />
                     <n-dropdown
@@ -387,6 +392,14 @@ watch(
                         size="20"
                         t-tooltip="interface.export_checked"
                         @click="onExportChecked" />
+                    <icon-button
+                        :button-class="['nav-pane-func-btn']"
+                        :disabled="checkedCount <= 0"
+                        :icon="Timer"
+                        :stroke-width="3.5"
+                        size="20"
+                        t-tooltip="interface.ttl_checked"
+                        @click="onUpdateTTLChecked" />
                     <icon-button
                         :button-class="['nav-pane-func-btn']"
                         :disabled="checkedCount <= 0"

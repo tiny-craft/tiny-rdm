@@ -84,6 +84,7 @@
     "quit_check_mode": "退出勾选模式",
     "delete_checked": "删除所选项",
     "export_checked": "导出所选项",
+    "ttl_checked": "为所选项更新TTL",
     "copy_value": "复制值",
     "edit_value": "修改值",
     "save_update": "保存修改",
@@ -147,9 +148,6 @@
     "interrupt_connection": "中断连接",
     "remove_tip": "{type} \"{name}\" 将会被删除",
     "remove_group_tip": "分组 \"{name}\"及其所有连接将会被删除",
-    "delete_key_succ": "{key} 已被删除",
-    "deleting_key": "正在删除键({index}/{count})",
-    "delete_completed": "已完成删除操作，成功{success}个，失败{fail}个",
     "rename_binary_key_fail": "不支持重命名二进制键名",
     "handle_succ": "操作成功",
     "handle_cancel": "操作已取消",
@@ -241,7 +239,6 @@
     "key": {
       "new": "添加新键",
       "new_name": "新键名",
-      "persist_key": "持久化键",
       "server": "所属连接",
       "db_index": "数据库编号",
       "key_expression": "键名表达式",
@@ -252,6 +249,11 @@
       "async_delete_title": "不等待操作结果",
       "confirm_flush": "我知道我正在执行的操作！",
       "confirm_flush_db": "确认清空数据库"
+    },
+    "delete": {
+      "success": "{key} 已被删除",
+      "doing": "正在删除键({index}/{count})",
+      "completed": "已完成删除操作，成功{success}个，失败{fail}个"
     },
     "field": {
       "new": "添加新字段",
@@ -302,7 +304,9 @@
     },
     "ttl": {
       "title": "设置键存活时间",
-      "quick_set": "快捷设置"
+      "title_batch": "批量设置键存活时间({count})",
+      "quick_set": "快捷设置",
+      "success": "已全部更新TTL"
     },
     "upgrade": {
       "title": "有可用新版本",

@@ -84,6 +84,7 @@
     "quit_check_mode": "Quit Check Mode",
     "delete_checked": "Delete Checked Items",
     "export_checked": "Export Checked Items",
+    "ttl_checked": "Update TTL for Checked Items",
     "copy_value": "Copy Value",
     "edit_value": "Edit Value",
     "save_update": "Save Update",
@@ -147,9 +148,6 @@
     "interrupt_connection": "Cancel",
     "remove_tip": "{type} \"{name}\" will be deleted",
     "remove_group_tip": "Group \"{name}\" and all connections in it will be deleted",
-    "delete_key_succ": "\"{key}\" has been deleted",
-    "deleting_key": "Deleting key({index}/{count})",
-    "delete_completed": "Deletion process has been completed, {success} successed, {fail} failed",
     "rename_binary_key_fail": "Rename binary key name is unsupported",
     "handle_succ": "Success!",
     "handle_cancel": "The operation has been canceled.",
@@ -241,7 +239,6 @@
     "key": {
       "new": "New Key",
       "new_name": "New Key Name",
-      "persist_key": "Persist Key",
       "server": "Connection",
       "db_index": "Database Index",
       "key_expression": "Key Expression",
@@ -252,6 +249,11 @@
       "async_delete_title": "Do not waiting for the operation's result",
       "confirm_flush": "I know what I'm doing!",
       "confirm_flush_db": "Confirm Flush Database"
+    },
+    "delete": {
+      "success": "\"{key}\" has been deleted",
+      "doing": "Deleting key({index}/{count})",
+      "completed": "Deletion process has been completed, {success} successed, {fail} failed"
     },
     "field": {
       "new": "Add New Field",
@@ -301,8 +303,10 @@
       "import_completed": "Import completed, {success} successes, {ignored} failed"
     },
     "ttl": {
-      "title": "Set Key TTL",
-      "quick_set": "Quick Settings"
+      "title": "Update TTL",
+      "title_batch": "Batch Update TTL({count})",
+      "quick_set": "Quick Settings",
+      "success": "All TTL of keys have been updated"
     },
     "upgrade": {
       "title": "New Version Available",

@@ -233,7 +233,7 @@ const handleSelectContextMenu = (key) => {
             $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKeyName }), () => {
                 browserStore.deleteKey(props.server, db, redisKey).then((success) => {
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: redisKeyName }))
+                        $message.success(i18n.t('dialogue.delete.success', { key: redisKeyName }))
                     }
                 })
             })
@@ -587,6 +587,17 @@ defineExpose({
         const redisKeys = map(checkedKeys, 'redisKey')
         if (!isEmpty(redisKeys)) {
             dialogStore.openExportKeyDialog(props.server, props.db, redisKeys)
+        }
+    },
+    updateTTLCheckedItems: () => {
+        const checkedKeys = tabStore.currentCheckedKeys
+        const redisKeys = map(checkedKeys, 'redisKey')
+        if (!isEmpty(redisKeys)) {
+            dialogStore.openTTLDialog({
+                server: props.server,
+                db: props.db,
+                keys: redisKeys,
+            })
         }
     },
     getSelectedKey: () => {

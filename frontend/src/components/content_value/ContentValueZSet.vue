@@ -238,7 +238,7 @@ const actionColumn = {
                         value: row.v,
                     })
                     if (success) {
-                        $message.success(i18n.t('dialogue.delete_key_succ', { key: row.v }))
+                        $message.success(i18n.t('dialogue.delete.success', { key: row.v }))
                     } else {
                         $message.error(msg)
                     }

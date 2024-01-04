@@ -1,43 +1,44 @@
 <script setup>
-import { computed, reactive, watchEffect } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
-import useTabStore from 'stores/tab.js'
-import Binary from '@/components/icons/Binary.vue'
-import { isEmpty } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
 import { useI18n } from 'vue-i18n'
+import { isEmpty, size } from 'lodash'
 
 const ttlForm = reactive({
     server: '',
     db: 0,
     key: '',
-    keyCode: null,
+    keys: [],
     ttl: -1,
     unit: 1,
 })
 
 const dialogStore = useDialog()
 const browserStore = useBrowserStore()
-const tabStore = useTabStore()
 
 watchEffect(() => {
     if (dialogStore.ttlDialogVisible) {
         // get ttl from current tab
-        const tab = tabStore.currentTab
-        if (tab != null) {
-            ttlForm.server = tab.name
-            ttlForm.db = tab.db
-            ttlForm.key = tab.key
-            ttlForm.keyCode = tab.keyCode
-            ttlForm.unit = 1
-            if (tab.ttl < 0) {
-                // forever
-                ttlForm.ttl = -1
-            } else {
-                ttlForm.ttl = tab.ttl
-            }
+        const { server, db, key, keys, ttl } = dialogStore.ttlParam
+        ttlForm.server = server
+        ttlForm.db = db
+        ttlForm.key = key
+        ttlForm.keys = keys
+        ttlForm.unit = 1
+        if (ttl < 0) {
+            // forever
+            ttlForm.ttl = -1
+        } else {
+            ttlForm.ttl = ttl
         }
+        procssing.value = false
     }
+})
+
+const procssing = ref(false)
+const isBatchAction = computed(() => {
+    return !isEmpty(ttlForm.keys)
 })
 
 const i18n = useI18n()
@@ -76,24 +77,20 @@ const onClose = () => {
 
 const onConfirm = async () => {
     try {
-        const tab = tabStore.currentTab
-        if (tab == null) {
-            return
-        }
-        const key = isEmpty(ttlForm.keyCode) ? ttlForm.key : ttlForm.keyCode
+        procssing.value = true
         const ttl = ttlForm.ttl * (ttlForm.unit || 1)
-        const success = await browserStore.setTTL(tab.name, tab.db, key, ttl)
+        let success = false
+        if (isBatchAction.value) {
+            success = await browserStore.setTTLs(ttlForm.server, ttlForm.db, ttlForm.keys, ttl)
+        } else {
+            success = await browserStore.setTTL(ttlForm.server, ttlForm.db, ttlForm.key, ttl)
+        }
         if (success) {
-            tabStore.updateTTL({
-                server: ttlForm.server,
-                db: ttlForm.db,
-                key: ttlForm.key,
-                ttl: ttl,
-            })
         }
     } catch (e) {
         $message.error(e.message || 'set ttl fail')
     } finally {
+        procssing.value = false
         dialogStore.closeTTLDialog()
     }
 }
@@ -109,19 +106,17 @@ const onConfirm = async () => {
         :negative-text="$t('common.cancel')"
         :on-negative-click="onClose"
         :on-positive-click="onConfirm"
-        :positive-button-props="{ focusable: false, size: 'medium' }"
+        :positive-button-props="{ focusable: false, size: 'medium', loading: procssing }"
         :positive-text="$t('common.save')"
         :show-icon="false"
-        :title="$t('dialogue.ttl.title')"
+        :title="
+            isBatchAction ? $t('dialogue.ttl.title_batch', { count: size(ttlForm.keys) }) : $t('dialogue.ttl.title')
+        "
         preset="dialog"
         transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
-            <n-form-item :label="$t('common.key')">
-                <n-input :value="ttlForm.key" readonly>
-                    <template #prefix>
-                        <n-icon v-if="!!ttlForm.keyCode" :component="Binary" size="20" />
-                    </template>
-                </n-input>
+            <n-form-item v-if="!isBatchAction" :label="$t('common.key')">
+                <n-input :value="ttlForm.key" readonly />
             </n-form-item>
             <n-form-item :label="$t('interface.ttl')" required>
                 <n-input-group>

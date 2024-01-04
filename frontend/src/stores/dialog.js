@@ -82,8 +82,14 @@ const useDialogStore = defineStore('dialog', {
         },
         flushDBDialogVisible: false,
 
-        selectTTL: -1,
         ttlDialogVisible: false,
+        ttlParam: {
+            server: '',
+            db: 0,
+            key: '',
+            keys: [],
+            ttl: 0,
+        },
 
         preferencesDialogVisible: false,
         aboutDialogVisible: false,
@@ -264,12 +270,23 @@ const useDialogStore = defineStore('dialog', {
             this.addFieldsDialogVisible = false
         },
 
-        openTTLDialog(ttl) {
-            this.selectTTL = ttl
+        /**
+         *
+         * @param {string} server
+         * @param {number} db
+         * @param {string|number[]} [key]
+         * @param {string[]|number[][]} [keys]
+         * @param {number} [ttl]
+         */
+        openTTLDialog({ server, db, key, keys, ttl = -1 }) {
             this.ttlDialogVisible = true
+            this.ttlParam.server = server
+            this.ttlParam.db = db
+            this.ttlParam.key = key
+            this.ttlParam.keys = keys
+            this.ttlParam.ttl = ttl
         },
         closeTTLDialog() {
-            this.selectTTL = -1
             this.ttlDialogVisible = false
         },
 

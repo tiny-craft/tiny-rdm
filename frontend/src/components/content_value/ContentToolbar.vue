@@ -72,6 +72,15 @@ const onCopyKey = () => {
             $message.error(e.message)
         })
 }
+
+const onTTL = () => {
+    dialogStore.openTTLDialog({
+        server: props.server,
+        db: props.db,
+        key: binaryKey.value ? props.keyCode : props.keyPath,
+        ttl: props.ttl,
+    })
+}
 </script>
 
 <template>
@@ -93,7 +102,7 @@ const onCopyKey = () => {
         <n-button-group>
             <n-tooltip>
                 <template #trigger>
-                    <n-button :focusable="false" @click="dialogStore.openTTLDialog(props.ttl)">
+                    <n-button :focusable="false" @click="onTTL">
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
