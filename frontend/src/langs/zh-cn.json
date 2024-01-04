@@ -106,6 +106,7 @@
     "view_as": "查看方式",
     "decode_with": "解码/解压方式",
     "reload": "重新载入",
+    "reload_disable": "全量加载后可重新载入",
     "open_connection": "打开连接",
     "copy_path": "复制路径",
     "copy_key": "复制键名",

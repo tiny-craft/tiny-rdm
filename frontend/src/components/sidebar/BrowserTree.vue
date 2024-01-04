@@ -469,7 +469,7 @@ const calcLayerMenu = (loading) => {
     return [
         // reload layer enable only full loaded
         h(IconButton, {
-            tTooltip: props.fullLoaded ? 'interface.reload' : 'interface.reload',
+            tTooltip: props.fullLoaded ? 'interface.reload' : 'interface.reload_disable',
             icon: Refresh,
             loading: loading === true,
             disabled: !props.fullLoaded,

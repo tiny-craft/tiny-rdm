@@ -106,6 +106,7 @@
     "view_as": "View As",
     "decode_with": "Decode / Decompression",
     "reload": "Reload",
+    "reload_disable": "Reload will enable after full loaded",
     "open_connection": "Open Connection",
     "copy_path": "Copy Path",
     "copy_key": "Copy Key",
