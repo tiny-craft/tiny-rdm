@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
-import { filter, get, includes, isEmpty, join } from 'lodash'
+import { debounce, filter, get, includes, isEmpty, join } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
@@ -53,6 +53,13 @@ const displayList = computed(() => {
     return data.list
 })
 
+const _scrollToBottom = () => {
+    nextTick(() => {
+        listRef.value?.scrollTo({ position: 'bottom' })
+    })
+}
+const scrollToBottom = debounce(_scrollToBottom, 1000, { leading: true, trailing: true })
+
 const onStartMonitor = async () => {
     if (isMonitoring.value) {
         return
@@ -65,11 +72,13 @@ const onStartMonitor = async () => {
     }
     data.monitorEvent = get(ret, 'eventName')
     EventsOn(data.monitorEvent, (content) => {
-        data.list.push(content)
+        if (content instanceof Array) {
+            data.list.push(...content)
+        } else {
+            data.list.push(content)
+        }
         if (data.autoShowLast) {
-            nextTick(() => {
-                listRef.value.scrollTo({ position: 'bottom' })
-            })
+            scrollToBottom()
         }
     })
 }
@@ -108,7 +117,7 @@ const onCleanLog = () => {
 <template>
     <div class="content-log content-container fill-height flex-box-v">
         <n-form class="flex-item" label-align="left" label-placement="left" label-width="auto" size="small">
-            <n-form-item :label="$t('monitor.actions')">
+            <n-form-item :feedback="$t('monitor.warning')" :label="$t('monitor.actions')">
                 <n-space>
                     <n-button
                         v-if="!isMonitoring"

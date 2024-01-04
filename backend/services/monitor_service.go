@@ -17,6 +17,7 @@ import (
 type monitorItem struct {
 	client    *redis.Client
 	cmd       *redis.MonitorCmd
+	mutex     sync.Mutex
 	ch        chan string
 	closeCh   chan struct{}
 	eventName string
@@ -88,7 +89,7 @@ func (c *monitorService) StartMonitor(server string) (resp types.JSResp) {
 	item.cmd = item.client.Monitor(c.ctx, item.ch)
 	item.cmd.Start()
 
-	go c.processMonitor(item.ch, item.closeCh, item.eventName)
+	go c.processMonitor(&item.mutex, item.ch, item.closeCh, item.eventName)
 	resp.Success = true
 	resp.Data = struct {
 		EventName string `json:"eventName"`
@@ -98,12 +99,23 @@ func (c *monitorService) StartMonitor(server string) (resp types.JSResp) {
 	return
 }
 
-func (c *monitorService) processMonitor(ch <-chan string, closeCh <-chan struct{}, eventName string) {
+func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, closeCh <-chan struct{}, eventName string) {
+	lastEmitTime := time.Now().Add(-1 * time.Minute)
+	cache := make([]string, 0, 1000)
 	for {
 		select {
 		case data := <-ch:
 			if data != "OK" {
-				runtime.EventsEmit(c.ctx, eventName, data)
+				go func() {
+					mutex.Lock()
+					defer mutex.Unlock()
+					cache = append(cache, data)
+					if time.Now().Sub(lastEmitTime) > 1*time.Second || len(cache) > 300 {
+						runtime.EventsEmit(c.ctx, eventName, cache)
+						cache = cache[:0:cap(cache)]
+						lastEmitTime = time.Now()
+					}
+				}()
 			}
 
 		case <-closeCh:
