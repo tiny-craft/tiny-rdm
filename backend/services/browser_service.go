@@ -483,8 +483,8 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 }
 
 // LoadNextKeys load next key from saved cursor
-func (b *browserService) LoadNextKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) LoadNextKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -497,7 +497,7 @@ func (b *browserService) LoadNextKeys(connName string, db int, match, keyType st
 		resp.Msg = err.Error()
 		return
 	}
-	b.setClientCursor(connName, db, cursor)
+	b.setClientCursor(server, db, cursor)
 	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
@@ -510,8 +510,8 @@ func (b *browserService) LoadNextKeys(connName string, db int, match, keyType st
 }
 
 // LoadNextAllKeys load next all keys
-func (b *browserService) LoadNextAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) LoadNextAllKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -524,7 +524,7 @@ func (b *browserService) LoadNextAllKeys(connName string, db int, match, keyType
 		resp.Msg = err.Error()
 		return
 	}
-	b.setClientCursor(connName, db, 0)
+	b.setClientCursor(server, db, 0)
 	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
@@ -536,8 +536,8 @@ func (b *browserService) LoadNextAllKeys(connName string, db int, match, keyType
 }
 
 // LoadAllKeys load all keys
-func (b *browserService) LoadAllKeys(connName string, db int, match, keyType string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) LoadAllKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1320,8 +1320,8 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 }
 
 // AddHashField add or update hash field
-func (b *browserService) AddHashField(connName string, db int, k any, action int, fieldItems []any) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) AddHashField(server string, db int, k any, action int, fieldItems []any) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1383,8 +1383,8 @@ func (b *browserService) AddHashField(connName string, db int, k any, action int
 }
 
 // AddListItem add item to list or remove from it
-func (b *browserService) AddListItem(connName string, db int, k any, action int, items []any) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) AddListItem(server string, db int, k any, action int, items []any) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1699,8 +1699,8 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 }
 
 // AddZSetValue add item to sorted set
-func (b *browserService) AddZSetValue(connName string, db int, k any, action int, valueScore map[string]float64) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) AddZSetValue(server string, db int, k any, action int, valueScore map[string]float64) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1757,8 +1757,8 @@ func (b *browserService) AddZSetValue(connName string, db int, k any, action int
 }
 
 // AddStreamValue add stream field
-func (b *browserService) AddStreamValue(connName string, db int, k any, ID string, fieldItems []any) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) AddStreamValue(server string, db int, k any, ID string, fieldItems []any) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1800,8 +1800,8 @@ func (b *browserService) AddStreamValue(connName string, db int, k any, ID strin
 }
 
 // RemoveStreamValues remove stream values by id
-func (b *browserService) RemoveStreamValues(connName string, db int, k any, IDs []string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) RemoveStreamValues(server string, db int, k any, IDs []string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -1827,8 +1827,8 @@ func (b *browserService) RemoveStreamValues(connName string, db int, k any, IDs 
 }
 
 // SetKeyTTL set ttl of key
-func (b *browserService) SetKeyTTL(connName string, db int, k any, ttl int64) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) SetKeyTTL(server string, db int, k any, ttl int64) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -2353,8 +2353,8 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 }
 
 // FlushDB flush database
-func (b *browserService) FlushDB(connName string, db int, async bool) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) FlushDB(server string, db int, async bool) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -2401,8 +2401,8 @@ func (b *browserService) FlushDB(connName string, db int, async bool) (resp type
 }
 
 // RenameKey rename key
-func (b *browserService) RenameKey(connName string, db int, key, newKey string) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) RenameKey(server string, db int, key, newKey string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -2454,8 +2454,8 @@ func (b *browserService) CleanCmdHistory() (resp types.JSResp) {
 }
 
 // GetSlowLogs get slow log list
-func (b *browserService) GetSlowLogs(connName string, db int, num int64) (resp types.JSResp) {
-	item, err := b.getRedisClient(connName, db)
+func (b *browserService) GetSlowLogs(server string, db int, num int64) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return

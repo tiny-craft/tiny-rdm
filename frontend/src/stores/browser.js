@@ -1785,9 +1785,9 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * flush database
-         * @param server
-         * @param db
-         * @param async
+         * @param {string} server
+         * @param {number} db
+         * @param {boolean} async
          * @return {Promise<boolean>}
          */
         async flushDatabase(server, db, async) {
