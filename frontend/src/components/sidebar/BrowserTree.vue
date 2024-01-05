@@ -1,7 +1,7 @@
 <script setup>
 import { computed, h, nextTick, reactive, ref, watchEffect } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
-import { NIcon, NSpace, useThemeVars } from 'naive-ui'
+import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
@@ -397,6 +397,13 @@ const renderPrefix = ({ option }) => {
 const renderLabel = ({ option }) => {
     switch (option.type) {
         case ConnectionType.RedisKey:
+            if (option.label === '') {
+                // blank label name
+                return h('div', [
+                    h(NText, { italic: true, depth: 3 }, () => '[Empty]'),
+                    h('span', () => ` (${option.keyCount || 0})`),
+                ])
+            }
             return `${option.label} (${option.keyCount || 0})`
         // case ConnectionType.RedisValue:
         //   return `[${option.keyType}]${option.label}`
