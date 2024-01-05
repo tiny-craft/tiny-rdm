@@ -5,7 +5,7 @@ import { NIcon, NSpace, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
-import { filter, find, get, includes, indexOf, isEmpty, map, remove, size, startsWith, toUpper } from 'lodash'
+import { filter, find, get, includes, isEmpty, map, size, toUpper } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -40,13 +40,23 @@ const props = defineProps({
 const themeVars = useThemeVars()
 const render = useRender()
 const i18n = useI18n()
-/** @type {Ref<UnwrapRef<string[]>>} */
-const expandedKeys = ref([])
 const connectionStore = useConnectionStore()
 const browserStore = useBrowserStore()
 const prefStore = usePreferencesStore()
 const tabStore = useTabStore()
 const dialogStore = useDialogStore()
+
+/**
+ *
+ * @type {ComputedRef<string[]>}
+ */
+const expandedKeys = computed(() => {
+    const tab = find(tabStore.tabList, { name: props.server })
+    if (tab != null) {
+        return get(tab, 'expandedKeys', [])
+    }
+    return []
+})
 
 /**
  *
@@ -168,31 +178,6 @@ const renderContextLabel = (option) => {
     return h('div', { class: 'context-menu-item' }, option.label)
 }
 
-/**
- *
- * @param {string} key
- * @param {boolean} [toggle]
- */
-const expandKey = (key, toggle) => {
-    const idx = indexOf(expandedKeys.value, key)
-    if (idx === -1) {
-        expandedKeys.value.push(key)
-    } else if (toggle !== false) {
-        expandedKeys.value.splice(idx, 1)
-    }
-}
-
-const resetExpandKey = (server, db, includeDB) => {
-    const prefix = `${server}/db${db}`
-    remove(expandedKeys.value, (k) => {
-        if (!!!includeDB) {
-            return k !== prefix && startsWith(k, prefix)
-        } else {
-            return startsWith(k, prefix)
-        }
-    })
-}
-
 const handleSelectContextMenu = (key) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -298,7 +283,7 @@ const onUpdateSelectedKeys = (keys, options) => {
 }
 
 const onUpdateExpanded = (value, option, meta) => {
-    expandedKeys.value = value
+    tabStore.setExpandedKeys(props.server, value)
     if (!meta.node) {
         return
     }
@@ -310,13 +295,13 @@ const onUpdateExpanded = (value, option, meta) => {
         switch (meta.action) {
             case 'expand':
                 node.expanded = true
-                if (!includes(expandedKeys.value, key)) {
-                    expandedKeys.value.push(key)
+                if (!includes(value, key)) {
+                    tabStore.addExpandedKey(props.server, key)
                 }
                 break
             case 'collapse':
                 node.expanded = false
-                remove(expandedKeys.value, (v) => v === key)
+                tabStore.removeExpandedKey(props.server, key)
                 break
         }
         node = node.children[0]
@@ -525,8 +510,8 @@ const nodeProps = ({ option }) => {
                 return
             }
             if (!props.checkMode) {
-                // default handle is expand current node
-                nextTick().then(() => expandKey(option.key))
+                // default handle is toggle expand current node
+                nextTick().then(() => tabStore.toggleExpandKey(props.server, option.key))
             }
         },
         onContextmenu(e) {
@@ -558,7 +543,7 @@ watchEffect(
         if (!props.checkMode) {
             tabStore.setCheckedKeys(props.server)
         } else {
-            expandKey(`${ConnectionType.RedisDB}`, false)
+            tabStore.addExpandedKey(props.server, `${ConnectionType.RedisDB}`)
         }
     },
     { flush: 'post' },
@@ -569,10 +554,9 @@ watchEffect(
 const treeKey = ref(0)
 defineExpose({
     handleSelectContextMenu,
-    resetExpandKey,
     refreshTree: () => {
         treeKey.value = Date.now()
-        expandedKeys.value = []
+        tabStore.setExpandedKeys(props.server)
         tabStore.setCheckedKeys(props.server)
     },
     deleteCheckedItems: () => {

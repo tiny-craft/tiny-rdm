@@ -104,7 +104,6 @@ const onReload = async () => {
         tabStore.setSelectedKeys(props.server)
         const db = props.db
         browserStore.closeDatabase(props.server, db)
-        // browserTreeRef.value?.resetExpandKey(props.server, db)
 
         let matchType = unref(filterForm.type)
         if (!types.hasOwnProperty(matchType)) {
@@ -200,7 +199,6 @@ const handleSelectDB = async (db) => {
         await nextTick()
         await connectionStore.saveLastDB(props.server, db)
         tabStore.upsertTab({ server: props.server, db, clearValue: true })
-        // browserTreeRef.value?.resetExpandKey(props.server, db)
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
         browserTreeRef.value?.refreshTree()
         tabStore.setSelectedKeys(props.server)

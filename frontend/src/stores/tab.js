@@ -1,4 +1,4 @@
-import { assign, find, findIndex, get, isEmpty, pullAt, remove, set, size } from 'lodash'
+import { assign, find, findIndex, get, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 import { TabItem } from '@/objects/tabItem.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
@@ -638,11 +638,73 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * set selected keys in current display browser tree
+         * set expanded keys for server
+         * @param {string} server
+         * @param {string[]} keys
+         */
+        setExpandedKeys(server, keys = []) {
+            /** @type TabItem**/
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                if (isEmpty(keys)) {
+                    tab.expandedKeys = []
+                } else {
+                    tab.expandedKeys = keys
+                }
+            }
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {string} key
+         */
+        addExpandedKey(server, key) {
+            /** @type TabItem**/
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                tab.expandedKeys.push(key)
+            }
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {string} key
+         */
+        toggleExpandKey(server, key) {
+            /** @type TabItem**/
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                const idx = indexOf(tab.expandedKeys, key)
+                if (idx === -1) {
+                    tab.expandedKeys.push(key)
+                } else {
+                    tab.expandedKeys.splice(idx, 1)
+                }
+            }
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {string} key
+         */
+        removeExpandedKey(server, key) {
+            /** @type TabItem**/
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                remove(tab.expandedKeys, (v) => v === key)
+            }
+        },
+
+        /**
+         * set selected keys for server
          * @param {string} server
          * @param {string|string[]} [keys]
          */
         setSelectedKeys(server, keys = null) {
+            /** @type TabItem**/
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
                 if (keys == null) {
@@ -662,6 +724,7 @@ const useTabStore = defineStore('tab', {
          * @returns {CheckedKey[]}
          */
         getCheckedKeys(server) {
+            /** @type TabItem**/
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
                 return tab.checkedKeys || []
@@ -670,11 +733,12 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * set checked keys in current display browser tree
+         * set checked keys for server
          * @param {string} server
          * @param {CheckedKey[]} [keys]
          */
         setCheckedKeys(server, keys = null) {
+            /** @type TabItem**/
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
                 if (isEmpty(keys)) {

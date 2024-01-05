@@ -1806,6 +1806,7 @@ const useBrowserStore = defineStore('browser', {
                     tab.emptyTab(server)
                     tab.setSelectedKeys(server)
                     tab.setCheckedKeys(server)
+                    tab.setExpandedKeys(server)
                     return true
                 }
             } finally {
