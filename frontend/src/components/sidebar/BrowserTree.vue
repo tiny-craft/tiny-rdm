@@ -359,8 +359,7 @@ const renderPrefix = ({ option }) => {
                 browserStore.loadKeyType({
                     server: props.server,
                     db: option.db,
-                    key: option.redisKey,
-                    keyCode: option.redisKeyCode,
+                    key: option.redisKeyCode || option.redisKey,
                 })
             }
             switch (prefStore.keyIconType) {

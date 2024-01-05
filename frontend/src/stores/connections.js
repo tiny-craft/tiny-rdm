@@ -364,8 +364,8 @@ const useConnectionStore = defineStore('connections', {
          * @return {string}
          */
         getDefaultSeparator(name) {
-            const { defaultSeparator = ':' } = this.serverProfile[name] || {}
-            return defaultSeparator
+            const { keySeparator = ':' } = this.serverProfile[name] || {}
+            return keySeparator
         },
     },
 })

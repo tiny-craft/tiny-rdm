@@ -111,7 +111,13 @@ const onTTL = () => {
                 </template>
                 TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}
             </n-tooltip>
-            <icon-button :icon="Edit" border size="18" t-tooltip="interface.rename_key" @click="emit('rename')" />
+            <icon-button
+                :disabled="binaryKey"
+                :icon="Edit"
+                :t-tooltip="binaryKey ? 'dialogue.rename_binary_key_fail' : 'interface.rename_key'"
+                border
+                size="18"
+                @click="emit('rename')" />
         </n-button-group>
         <n-tooltip :show-arrow="false">
             <template #trigger>

@@ -52,7 +52,7 @@ export class RedisServerState {
         this.getRoot()
 
         const connStore = useConnectionStore()
-        const { keySeparator } = connStore.getDefaultSeparator(name)
+        const keySeparator = connStore.getDefaultSeparator(name)
         this.separator = isEmpty(keySeparator) ? ':' : keySeparator
     }
 
@@ -246,8 +246,8 @@ export class RedisServerState {
 
     /**
      * rename key to a new name
-     * @param key
-     * @param newKey
+     * @param {string} key
+     * @param {string} newKey
      */
     renameKey(key, newKey) {
         const oldLayer = initial(key.split(this.separator)).join(this.separator)
@@ -265,7 +265,11 @@ export class RedisServerState {
             const newNodeKeyName = `${ConnectionType.RedisValue}/${newKey}`
             const keyNode = this.nodeMap.get(oldNodeKeyName)
             keyNode.key = `${this.name}/db${this.db}#${newNodeKeyName}`
-            keyNode.label = last(split(newKey, this.separator))
+            if (this.viewType === KeyViewType.Tree) {
+                keyNode.label = last(split(newKey, this.separator))
+            } else {
+                keyNode.label = newKey
+            }
             keyNode.redisKey = newKey
             // not support rename binary key name yet
             // keyNode.redisKeyCode = []

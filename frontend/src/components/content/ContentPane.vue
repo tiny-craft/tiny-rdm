@@ -16,6 +16,7 @@ import Pub from '@/components/icons/Pub.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
+import { decodeRedisKey } from '@/utils/key_convert.js'
 
 const themeVars = useThemeVars()
 
@@ -50,7 +51,7 @@ const tabContent = computed(() => {
         subTab: tab.subTab,
         type: toUpper(tab.type),
         db: tab.db,
-        keyPath: tab.key,
+        keyPath: tab.keyCode != null ? decodeRedisKey(tab.keyCode) : tab.key,
         keyCode: tab.keyCode,
         ttl: tab.ttl,
         value: tab.value,

@@ -1,7 +1,6 @@
 import { assign, find, findIndex, get, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 import { TabItem } from '@/objects/tabItem.js'
-import { decodeRedisKey } from '@/utils/key_convert.js'
 
 const useTabStore = defineStore('tab', {
     /**
@@ -543,11 +542,11 @@ const useTabStore = defineStore('tab', {
          * update ttl in tab
          * @param {string} server
          * @param {number} db
-         * @param {string|number[]} key
+         * @param {string} key
          * @param {number} ttl
          */
         updateTTL({ server, db, key, ttl }) {
-            let tab = find(this.tabList, { name: server, db, key: decodeRedisKey(key) })
+            let tab = find(this.tabList, { name: server, db, key })
             if (tab == null) {
                 return
             }

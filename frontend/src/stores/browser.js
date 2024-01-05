@@ -245,6 +245,7 @@ const useBrowserStore = defineStore('browser', {
                 name,
                 separator: this.getSeparator(name),
                 db: -1,
+                viewType: view,
             })
             /** @type {Object.<number,RedisDatabaseItem>} **/
             const databases = {}
@@ -379,7 +380,7 @@ const useBrowserStore = defineStore('browser', {
                     })
                     if (success) {
                         const { type, ttl, size, length } = data
-                        const k = decodeRedisKey(key)
+                        const k = nativeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
                             subTab: BrowserTabType.KeyDetail,
@@ -426,23 +427,23 @@ const useBrowserStore = defineStore('browser', {
          * load key type
          * @param {string} server
          * @param {number} db
-         * @param {string} key
+         * @param {string|number[]} key
          * @param {number[]} keyCode
          * @return {Promise<void>}
          */
-        async loadKeyType({ server, db, key, keyCode }) {
+        async loadKeyType({ server, db, key }) {
             /** @type {RedisServerState} **/
             const serverInst = this.servers[server]
             if (serverInst == null) {
                 return
             }
-            const node = serverInst.getNode(ConnectionType.RedisValue, key)
+            const node = serverInst.getNode(ConnectionType.RedisValue, nativeRedisKey(key))
             if (node == null || !isEmpty(node.redisType)) {
                 return
             }
             try {
                 node.redisType = 'loading'
-                const { data, success } = await GetKeyType({ server, db, key: keyCode || key })
+                const { data, success, msg } = await GetKeyType({ server, db, key })
                 if (success) {
                     const { type } = data || {}
                     node.redisType = type
@@ -508,7 +509,7 @@ const useBrowserStore = defineStore('browser', {
                     tab.updateValue({
                         server,
                         db,
-                        key: decodeRedisKey(key),
+                        key: nativeRedisKey(key),
                         value,
                         decode: retDecode,
                         format: retFormat,
@@ -1497,7 +1498,7 @@ const useBrowserStore = defineStore('browser', {
                     tabStore.updateTTL({
                         server,
                         db,
-                        key,
+                        key: nativeRedisKey(key),
                         ttl,
                     })
                 }

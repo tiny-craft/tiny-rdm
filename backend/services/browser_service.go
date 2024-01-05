@@ -2293,7 +2293,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 			continue
 		}
 		// get ttl
-		if ttl < 0 {
+		if ttl < 0 && len(line) > 2 {
 			// use previous
 			if expire, ttlErr := strconv.ParseInt(line[2], 10, 64); ttlErr == nil && expire > 0 {
 				ttlValue = time.UnixMilli(expire).Sub(time.Now())

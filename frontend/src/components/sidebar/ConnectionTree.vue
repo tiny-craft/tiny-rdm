@@ -246,12 +246,12 @@ const getServerMenu = (connected) => {
 const getGroupMenu = () => {
     return [
         h(IconButton, {
-            tTooltip: 'interface.edit_conn',
+            tTooltip: 'interface.rename_conn_group',
             icon: Config,
             onClick: () => handleSelectContextMenu('group_rename'),
         }),
         h(IconButton, {
-            tTooltip: 'interface.remove_conn',
+            tTooltip: 'interface.remove_conn_group',
             icon: Delete,
             onClick: () => handleSelectContextMenu('group_delete'),
         }),
