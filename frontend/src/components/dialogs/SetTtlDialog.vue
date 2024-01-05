@@ -4,6 +4,7 @@ import useDialog from 'stores/dialog'
 import useBrowserStore from 'stores/browser.js'
 import { useI18n } from 'vue-i18n'
 import { isEmpty, size } from 'lodash'
+import TtlInput from '@/components/common/TtlInput.vue'
 
 const ttlForm = reactive({
     server: '',
@@ -42,22 +43,6 @@ const isBatchAction = computed(() => {
 })
 
 const i18n = useI18n()
-const unit = computed(() => [
-    { value: 1, label: i18n.t('common.second') },
-    {
-        value: 60,
-        label: i18n.t('common.minute'),
-    },
-    {
-        value: 3600,
-        label: i18n.t('common.hour'),
-    },
-    {
-        value: 86400,
-        label: i18n.t('common.day'),
-    },
-])
-
 const quickOption = computed(() => [
     { value: -1, unit: 1, label: i18n.t('interface.forever') },
     { value: 10, unit: 1, label: `10 ${i18n.t('common.second')}` },
@@ -119,15 +104,7 @@ const onConfirm = async () => {
                 <n-input :value="ttlForm.key" readonly />
             </n-form-item>
             <n-form-item :label="$t('interface.ttl')" required>
-                <n-input-group>
-                    <n-input-number
-                        v-model:value="ttlForm.ttl"
-                        :max="Number.MAX_SAFE_INTEGER"
-                        :min="-1"
-                        :show-button="false"
-                        class="flex-item-expand" />
-                    <n-select v-model:value="ttlForm.unit" :options="unit" style="max-width: 150px" />
-                </n-input-group>
+                <ttl-input v-model:unit="ttlForm.unit" v-model:value="ttlForm.ttl" />
             </n-form-item>
             <n-form-item :label="$t('dialogue.ttl.quick_set')" :show-feedback="false">
                 <n-space :wrap="true" :wrap-item="false">

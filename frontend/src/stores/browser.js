@@ -1738,11 +1738,11 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string} path
          * @param {number} conflict
-         * @param {boolean} [expire]
+         * @param {number} [ttl] <0:use previous; ==0: persist; >0: custom ttl
          * @param {boolean} [reload]
          * @return {Promise<void>}
          */
-        async importKeysFromCSVFile(server, db, path, conflict, expire, reload) {
+        async importKeysFromCSVFile(server, db, path, conflict, ttl, reload) {
             const msgRef = $message.loading('', { duration: 0, closable: true })
             let imported = 0
             let ignored = 0
@@ -1760,7 +1760,7 @@ const useBrowserStore = defineStore('browser', {
                 msgRef.onClose = () => {
                     EventsEmit('import:stop:' + path)
                 }
-                const { data, success, msg } = await ImportCSV(server, db, path, conflict, expire)
+                const { data, success, msg } = await ImportCSV(server, db, path, conflict, ttl)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     imported = get(data, 'imported', 0)

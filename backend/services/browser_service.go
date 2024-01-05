@@ -2234,7 +2234,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 }
 
 // ImportCSV import data from csv file
-func (b *browserService) ImportCSV(server string, db int, path string, conflict int, includeExpire bool) (resp types.JSResp) {
+func (b *browserService) ImportCSV(server string, db int, path string, conflict int, ttl int64) (resp types.JSResp) {
 	// connect a new connection to export keys
 	conf := Connection().getConnection(server)
 	if conf == nil {
@@ -2270,14 +2270,14 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 	var line []string
 	var readErr error
 	var key, value []byte
-	var ttl time.Duration
+	var ttlValue time.Duration
 	var imported, ignored int64
 	var canceled bool
 	startTime := time.Now().Add(-10 * time.Second)
 	for {
 		readErr = nil
 
-		ttl = redis.KeepTTL
+		ttlValue = redis.KeepTTL
 		line, readErr = reader.Read()
 		if readErr != nil {
 			break
@@ -2293,21 +2293,25 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 			continue
 		}
 		// get ttl
-		if includeExpire && len(line) > 2 {
+		if ttl < 0 {
+			// use previous
 			if expire, ttlErr := strconv.ParseInt(line[2], 10, 64); ttlErr == nil && expire > 0 {
-				ttl = time.UnixMilli(expire).Sub(time.Now())
+				ttlValue = time.UnixMilli(expire).Sub(time.Now())
 			}
+		} else if ttl > 0 {
+			// custom ttl
+			ttlValue = time.Duration(ttl) * time.Second
 		}
 		if conflict == 0 {
-			readErr = client.RestoreReplace(ctx, string(key), ttl, string(value)).Err()
+			readErr = client.RestoreReplace(ctx, string(key), ttlValue, string(value)).Err()
 		} else {
 			keyStr := string(key)
 			// go-redis may crash when batch calling restore
 			// use "exists" to filter first
 			if n, _ := client.Exists(ctx, keyStr).Result(); n <= 0 {
-				readErr = client.Restore(ctx, keyStr, ttl, string(value)).Err()
+				readErr = client.Restore(ctx, keyStr, ttlValue, string(value)).Err()
 			} else {
-				readErr = errors.New("key existed")
+				readErr = errors.New("key already existed")
 			}
 		}
 		if readErr != nil {

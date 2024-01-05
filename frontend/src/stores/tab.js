@@ -674,7 +674,7 @@ const useTabStore = defineStore('tab', {
          * @param {string} server
          * @param {CheckedKey[]} [keys]
          */
-        setCheckedKeys(server, keys) {
+        setCheckedKeys(server, keys = null) {
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
                 if (isEmpty(keys)) {

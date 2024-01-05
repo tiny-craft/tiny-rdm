@@ -5,15 +5,18 @@ import { useI18n } from 'vue-i18n'
 import useBrowserStore from 'stores/browser.js'
 import { isEmpty } from 'lodash'
 import FileOpenInput from '@/components/common/FileOpenInput.vue'
+import TtlInput from '@/components/common/TtlInput.vue'
 
 const importKeyForm = reactive({
     server: '',
     db: 0,
-    expire: true,
     reload: true,
     file: '',
     type: 0,
     conflict: 0,
+    ttlType: 0,
+    ttl: -1,
+    ttlUnit: 1,
 })
 
 const dialogStore = useDialog()
@@ -25,11 +28,12 @@ watchEffect(() => {
         const { server, db } = dialogStore.importKeyParam
         importKeyForm.server = server
         importKeyForm.db = db
-        importKeyForm.expire = true
         importKeyForm.reload = true
         importKeyForm.file = ''
         importKeyForm.type = 0
         importKeyForm.conflict = 0
+        importKeyForm.ttlType = 0
+        importKeyForm.ttl = -1
         importing.value = false
     }
 })
@@ -46,6 +50,21 @@ const conflictOption = computed(() => [
     },
 ])
 
+const ttlOption = computed(() => [
+    {
+        value: 0,
+        label: i18n.t('dialogue.import.ttl_include'),
+    },
+    {
+        value: 1,
+        label: i18n.t('dialogue.import.ttl_ignore'),
+    },
+    {
+        value: 2,
+        label: i18n.t('dialogue.import.ttl_custom'),
+    },
+])
+
 const importEnable = computed(() => {
     return !isEmpty(importKeyForm.file)
 })
@@ -53,8 +72,19 @@ const importEnable = computed(() => {
 const onConfirmImport = async () => {
     try {
         importing.value = true
-        const { server, db, file, conflict, expire, reload } = importKeyForm
-        browserStore.importKeysFromCSVFile(server, db, file, conflict, expire, reload).catch((e) => {})
+        const { server, db, file, conflict, ttlType, ttl, ttlUnit, reload } = importKeyForm
+        let ttlVal = 0
+        switch (ttlType) {
+            case 0:
+                ttlVal = -1
+                break
+            case 1:
+                ttlVal = 0
+                break
+            default:
+                ttlVal = ttl * (ttlUnit || 1)
+        }
+        browserStore.importKeysFromCSVFile(server, db, file, conflict, ttlVal, reload).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -104,15 +134,21 @@ const onClose = () => {
                             :value="op.value" />
                     </n-radio-group>
                 </n-form-item>
-                <n-form-item :label="$t('dialogue.import.import_expire_title')" :show-label="false">
+                <n-form-item :label="$t('dialogue.import.import_expire_title')">
                     <n-space :wrap-item="false">
-                        <n-checkbox v-model:checked="importKeyForm.expire" :autofocus="false">
-                            {{ $t('dialogue.import.import_expire') }}
-                        </n-checkbox>
-                        <n-checkbox v-model:checked="importKeyForm.reload" :autofocus="false">
-                            {{ $t('dialogue.import.reload') }}
-                        </n-checkbox>
+                        <n-radio-group v-model:value="importKeyForm.ttlType">
+                            <n-radio-button v-for="(op, i) in ttlOption" :key="i" :label="op.label" :value="op.value" />
+                        </n-radio-group>
+                        <ttl-input
+                            v-if="importKeyForm.ttlType === 2"
+                            v-model:unit="importKeyForm.ttlUnit"
+                            v-model:value="importKeyForm.ttl" />
                     </n-space>
+                </n-form-item>
+                <n-form-item :label="$t('dialogue.import.import_expire_title')" :show-label="false">
+                    <n-checkbox v-model:checked="importKeyForm.reload" :autofocus="false">
+                        {{ $t('dialogue.import.reload') }}
+                    </n-checkbox>
                 </n-form-item>
             </n-form>
         </n-spin>

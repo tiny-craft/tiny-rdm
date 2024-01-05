@@ -291,7 +291,6 @@
     "import": {
       "name": "Import Data",
       "import_expire_title": "Expiration",
-      "import_expire": "Import Expiration Time",
       "import": "Import",
       "reload": "Reload Keys After Imported",
       "open_csv_file": "Import File",
@@ -299,6 +298,9 @@
       "conflict_handle": "Key Conflict Resolution",
       "conflict_overwrite": "Overwrite",
       "conflict_ignore": "Ignore",
+      "ttl_include": "Import From File",
+      "ttl_ignore": "Do Not Set",
+      "ttl_custom": "Custom",
       "importing": "Importing Keys imported/overwrite:{imported} conflict/fail:{conflict}",
       "import_completed": "Import completed, {success} successes, {ignored} failed"
     },

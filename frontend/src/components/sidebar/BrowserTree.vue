@@ -565,7 +565,7 @@ watchEffect(
 )
 
 // the NTree node may get incorrect height after change data
-// add key property to force refresh the component and then everything back to normal
+// add key property for force refresh the component so that everything back to normal
 const treeKey = ref(0)
 defineExpose({
     handleSelectContextMenu,

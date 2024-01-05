@@ -291,7 +291,6 @@
     "import": {
       "name": "导入数据",
       "import_expire_title": "过期时间",
-      "import_expire": "包含键过期时间",
       "reload": "导入完成后重新载入",
       "import": "确认导入",
       "open_csv_file": "导入文件路径",
@@ -299,6 +298,9 @@
       "conflict_handle": "键冲突处理",
       "conflict_overwrite": "覆盖",
       "conflict_ignore": "忽略",
+      "ttl_include": "尝试导入",
+      "ttl_ignore": "不设置",
+      "ttl_custom": "自定义",
       "importing": "正在导入数据 已导入/覆盖:{imported} 冲突/失败:{conflict}",
       "import_completed": "已完成导入操作，成功{success}个，忽略{ignored}个"
     },
