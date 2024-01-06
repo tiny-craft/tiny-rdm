@@ -505,7 +505,15 @@ const useBrowserStore = defineStore('browser', {
                     lite: true,
                 })
                 if (success) {
-                    const { value, decode: retDecode, format: retFormat, match: retMatch, reset: retReset, end } = data
+                    const {
+                        value,
+                        keyType,
+                        decode: retDecode,
+                        format: retFormat,
+                        match: retMatch,
+                        reset: retReset,
+                        end,
+                    } = data
                     tab.updateValue({
                         server,
                         db,
@@ -758,10 +766,10 @@ const useBrowserStore = defineStore('browser', {
                             serverInst.updateDBKeyCount(db, newKey)
                         }
                     }
-                    const tab = useTabStore()
-                    tab.updateValue({ server, db, key, value })
+                    // const tab = useTabStore()
+                    // tab.updateValue({ server, db, key, value })
 
-                    this.loadKeySummary({ server, db, key })
+                    // this.loadKeySummary({ server, db, key })
                     return {
                         success,
                         nodeKey: `${server}/db${db}#${ConnectionType.RedisValue}/${key}`,

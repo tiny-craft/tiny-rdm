@@ -31,13 +31,14 @@ type KeyDetailParam struct {
 }
 
 type KeyDetail struct {
-	Value  any    `json:"value"`
-	Length int64  `json:"length,omitempty"`
-	Format string `json:"format,omitempty"`
-	Decode string `json:"decode,omitempty"`
-	Match  string `json:"match,omitempty"`
-	Reset  bool   `json:"reset"`
-	End    bool   `json:"end"`
+	Value   any    `json:"value"`
+	KeyType string `json:"key_type"`
+	Length  int64  `json:"length,omitempty"`
+	Format  string `json:"format,omitempty"`
+	Decode  string `json:"decode,omitempty"`
+	Match   string `json:"match,omitempty"`
+	Reset   bool   `json:"reset"`
+	End     bool   `json:"end"`
 }
 
 type SetKeyParam struct {

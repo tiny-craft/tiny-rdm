@@ -685,6 +685,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 	}
 
 	var data types.KeyDetail
+	data.KeyType = strings.ToLower(keyType)
 	//var cursor uint64
 	matchPattern := param.MatchPattern
 	if len(matchPattern) <= 0 {
@@ -728,7 +729,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		}
 	}
 
-	switch strings.ToLower(keyType) {
+	switch data.KeyType {
 	case "string":
 		var str string
 		str, err = client.Get(ctx, key).Result()

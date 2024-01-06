@@ -101,7 +101,7 @@ const checkedTip = computed(() => {
 const onReload = async () => {
     try {
         loading.value = true
-        tabStore.setSelectedKeys(props.server)
+        // tabStore.setSelectedKeys(props.server)
         const db = props.db
         browserStore.closeDatabase(props.server, db)
 

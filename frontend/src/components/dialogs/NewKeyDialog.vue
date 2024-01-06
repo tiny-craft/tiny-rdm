@@ -135,6 +135,7 @@ const onAdd = async () => {
         if (value == null) {
             value = defaultValue[type]
         }
+        // await browserStore.reloadKey({server, db, key: trim(key)})
         const { success, msg, nodeKey } = await browserStore.setKey({
             server,
             db,
@@ -147,7 +148,7 @@ const onAdd = async () => {
             // select current key
             await nextTick()
             tabStore.setSelectedKeys(server, nodeKey)
-            browserStore.loadKeySummary({ server, db, key, clearValue: true })
+            browserStore.reloadKey({ server, db, key })
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }
