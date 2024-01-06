@@ -64,6 +64,7 @@ const defaultValue = {
 }
 
 const dialogStore = useDialog()
+const scrollRef = ref(null)
 watchEffect(() => {
     if (dialogStore.newKeyDialogVisible) {
         const { prefix, server, db } = dialogStore.newKeyParam
@@ -104,6 +105,12 @@ const renderTypeLabel = (option) => {
             ],
         },
     )
+}
+
+const onAppend = () => {
+    nextTick(() => {
+        scrollRef.value?.scrollTo({ position: 'bottom' })
+    })
 }
 
 const onChangeType = () => {
@@ -181,7 +188,7 @@ const onClose = () => {
         transform-origin="center"
         @positive-click="onAdd"
         @negative-click="onClose">
-        <n-scrollbar style="max-height: 500px">
+        <n-scrollbar ref="scrollRef" style="max-height: 500px">
             <n-form
                 ref="newFormRef"
                 :model="newForm"
@@ -219,7 +226,11 @@ const onClose = () => {
                         </n-button>
                     </n-input-group>
                 </n-form-item>
-                <component :is="newValueComponent[newForm.type]" ref="subFormRef" v-model:value="newForm.value" />
+                <component
+                    :is="newValueComponent[newForm.type]"
+                    ref="subFormRef"
+                    v-model:value="newForm.value"
+                    @append="onAppend" />
                 <!--  TODO: Add import from txt file option -->
             </n-form>
         </n-scrollbar>

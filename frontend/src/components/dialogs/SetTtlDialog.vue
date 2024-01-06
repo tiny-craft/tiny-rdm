@@ -3,7 +3,7 @@ import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import useBrowserStore from 'stores/browser.js'
 import { useI18n } from 'vue-i18n'
-import { isEmpty, size } from 'lodash'
+import { isEmpty } from 'lodash'
 import TtlInput from '@/components/common/TtlInput.vue'
 
 const ttlForm = reactive({

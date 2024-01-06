@@ -8,7 +8,7 @@ import IconButton from '@/components/common/IconButton.vue'
 const props = defineProps({
     value: Array,
 })
-const emit = defineEmits(['update:value'])
+const emit = defineEmits(['update:value', 'append'])
 
 /**
  * @typedef ZSetItem
@@ -57,7 +57,15 @@ defineExpose({
             </template>
             <template #action="{ index, create, remove, move }">
                 <icon-button v-if="zset.length > 1" :icon="Delete" size="18" @click="() => remove(index)" />
-                <icon-button :icon="Add" size="18" @click="() => create(index)" />
+                <icon-button
+                    :icon="Add"
+                    size="18"
+                    @click="
+                        () => {
+                            create(index)
+                            emit('append')
+                        }
+                    " />
             </template>
         </n-dynamic-input>
     </n-form-item>
