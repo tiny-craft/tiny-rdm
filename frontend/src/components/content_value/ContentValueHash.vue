@@ -1,7 +1,6 @@
 <script setup>
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ContentToolbar from './ContentToolbar.vue'
 import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
@@ -54,7 +53,7 @@ const props = defineProps({
     loading: Boolean,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'rename', 'delete', 'match'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'match'])
 
 /**
  *
@@ -326,18 +325,7 @@ defineExpose({
 
 <template>
     <div class="content-wrapper flex-box-v">
-        <content-toolbar
-            :db="props.db"
-            :key-code="props.keyCode"
-            :key-path="props.keyPath"
-            :key-type="keyType"
-            :loading="props.loading"
-            :server="props.name"
-            :ttl="ttl"
-            class="value-item-part"
-            @delete="emit('delete')"
-            @reload="emit('reload')"
-            @rename="emit('rename')" />
+        <slot name="toolbar" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-box-h">
                 <content-search-input

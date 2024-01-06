@@ -13,6 +13,7 @@ import { isEmpty } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { useI18n } from 'vue-i18n'
+import ContentToolbar from '@/components/content_value/ContentToolbar.vue'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -42,12 +43,17 @@ const i18n = useI18n()
  *      format: String,
  *      decode: String,
  *      end: Boolean
+ *      loading: Boolean
  * }>}
  */
 const data = computed(() => {
     return props.content
 })
 const initializing = ref(false)
+
+const loading = computed(() => {
+    return data.value.loading === true || initializing.value
+})
 
 const binaryKey = computed(() => {
     return !!data.value.keyCode
@@ -188,7 +194,7 @@ watch(() => data.value?.keyPath, initContent)
         :key-code="data.keyCode"
         :key-path="data.keyPath"
         :length="data.length"
-        :loading="data.loading === true || initializing"
+        :loading="loading"
         :name="data.name"
         :size="data.size"
         :ttl="data.ttl"
@@ -197,8 +203,22 @@ watch(() => data.value?.keyPath, initContent)
         @loadall="onLoadAll"
         @loadmore="onLoadMore"
         @match="onMatch"
-        @reload="onReload"
-        @rename="onRename" />
+        @reload="onReload">
+        <template #toolbar>
+            <content-toolbar
+                :db="data.db"
+                :key-code="data.keyCode"
+                :key-path="data.keyPath"
+                :key-type="data.type"
+                :loading="loading"
+                :server="data.name"
+                :ttl="data.ttl"
+                class="value-item-part"
+                @delete="onDelete"
+                @reload="onReload"
+                @rename="onRename" />
+        </template>
+    </component>
     <!--    </keep-alive>-->
 </template>
 

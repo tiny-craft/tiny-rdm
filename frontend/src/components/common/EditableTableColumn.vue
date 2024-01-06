@@ -16,7 +16,6 @@ const emit = defineEmits(['edit', 'delete', 'copy', 'save', 'cancel'])
 </script>
 
 <template>
-    <!-- TODO: support multiple save -->
     <div v-if="props.editing" class="flex-box-h edit-column-func">
         <icon-button :icon="Save" @click="emit('save')" />
         <icon-button :icon="Close" @click="emit('cancel')" />

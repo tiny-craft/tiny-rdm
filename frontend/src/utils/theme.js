@@ -91,6 +91,9 @@ const _darkThemeOverrides = {
     Dropdown: {
         color: '#272727',
     },
+    Popover: {
+        color: '#2C2C32',
+    },
 }
 
 export const darkThemeOverrides = merge({}, themeOverrides, _darkThemeOverrides)

@@ -10,8 +10,10 @@ import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { computed } from 'vue'
+import { computed, onUnmounted, reactive, watch } from 'vue'
 import { padStart } from 'lodash'
+import { NIcon, useThemeVars } from 'naive-ui'
+import { timeout } from '@/utils/promise.js'
 
 const props = defineProps({
     server: String,
@@ -37,6 +39,12 @@ const props = defineProps({
 
 const emit = defineEmits(['reload', 'rename', 'delete'])
 
+const autoRefresh = reactive({
+    on: false,
+    interval: 2,
+})
+
+const themeVars = useThemeVars()
 const dialogStore = useDialog()
 const i18n = useI18n()
 
@@ -60,6 +68,48 @@ const ttlString = computed(() => {
     }
     return s
 })
+
+const startAutoRefresh = async () => {
+    if (autoRefresh.on) {
+        return
+    }
+    autoRefresh.on = true
+    let lastExec = Date.now()
+    do {
+        if (!autoRefresh.on) {
+            break
+        }
+        await timeout(100)
+        if (props.loading || Date.now() - lastExec < autoRefresh.interval * 1000) {
+            continue
+        }
+        lastExec = Date.now()
+        emit('reload')
+    } while (true)
+    stopAutoRefresh()
+}
+
+const stopAutoRefresh = () => {
+    autoRefresh.on = false
+}
+
+watch(
+    () => props.keyPath,
+    () => {
+        stopAutoRefresh()
+        autoRefresh.interval = props.interval
+    },
+)
+
+onUnmounted(() => stopAutoRefresh())
+
+const onToggleRefresh = (on) => {
+    if (on) {
+        startAutoRefresh()
+    } else {
+        stopAutoRefresh()
+    }
+}
 
 const onCopyKey = () => {
     ClipboardSetText(props.keyPath)
@@ -87,14 +137,48 @@ const onTTL = () => {
     <div class="content-toolbar flex-box-h">
         <n-input-group>
             <redis-type-tag :binary-key="binaryKey" :type="props.keyType" size="large" />
-            <n-input v-model:value="props.keyPath" :title="props.keyPath" readonly>
+            <n-input v-model:value="props.keyPath" :title="props.keyPath" readonly @dblclick="onCopyKey">
                 <template #suffix>
-                    <icon-button
-                        :icon="Refresh"
-                        :loading="props.loading"
-                        size="18"
-                        t-tooltip="interface.reload"
-                        @click="emit('reload')" />
+                    <n-popover :delay="500" keep-alive-on-hover placement="bottom" trigger="hover">
+                        <template #trigger>
+                            <icon-button :loading="props.loading" size="18" @click="emit('reload')">
+                                <n-icon :size="props.size">
+                                    <component
+                                        :is="Refresh"
+                                        :class="{ 'auto-refreshing': autoRefresh.on }"
+                                        :color="autoRefresh.on ? themeVars.primaryColor : undefined"
+                                        :stroke-width="autoRefresh.on ? 5 : 3" />
+                                </n-icon>
+                            </icon-button>
+                        </template>
+                        <n-form
+                            :show-feedback="false"
+                            label-align="right"
+                            label-placement="left"
+                            label-width="auto"
+                            size="small">
+                            <n-form-item :label="$t('interface.auto_refresh')">
+                                <n-switch
+                                    :loading="props.loading"
+                                    :value="autoRefresh.on"
+                                    @update:value="onToggleRefresh" />
+                            </n-form-item>
+                            <n-form-item :label="$t('interface.refresh_interval')">
+                                <n-input-number
+                                    v-model:value="autoRefresh.interval"
+                                    :autofocus="false"
+                                    :disabled="autoRefresh.on"
+                                    :max="9999"
+                                    :min="1"
+                                    :show-button="false"
+                                    style="max-width: 100px">
+                                    <template #suffix>
+                                        {{ $t('common.unit_second') }}
+                                    </template>
+                                </n-input-number>
+                            </n-form-item>
+                        </n-form>
+                    </n-popover>
                 </template>
             </n-input>
             <icon-button :icon="Copy" border size="18" t-tooltip="interface.copy_key" @click="onCopyKey" />
@@ -136,5 +220,15 @@ const onTTL = () => {
 .content-toolbar {
     align-items: center;
     gap: 5px;
+}
+
+.auto-refreshing {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
 }
 </style>

@@ -1,7 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ContentToolbar from './ContentToolbar.vue'
 import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
 import { useThemeVars } from 'naive-ui'
@@ -33,8 +32,6 @@ const props = defineProps({
     length: Number,
     loading: Boolean,
 })
-
-const emit = defineEmits(['reload', 'rename', 'delete'])
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -172,18 +169,7 @@ defineExpose({
 
 <template>
     <div class="content-wrapper flex-box-v">
-        <content-toolbar
-            :db="props.db"
-            :key-code="keyCode"
-            :key-path="keyPath"
-            :key-type="keyType"
-            :loading="loading"
-            :server="props.name"
-            :ttl="ttl"
-            class="value-item-part"
-            @delete="emit('delete')"
-            @reload="emit('reload')"
-            @rename="emit('rename')" />
+        <slot name="toolbar" />
         <div class="tb2 value-item-part flex-box-h">
             <div class="flex-item-expand"></div>
             <n-button-group>
