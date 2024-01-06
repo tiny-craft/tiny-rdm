@@ -13,6 +13,7 @@ import { NSpace } from 'naive-ui'
 import useTabStore from 'stores/tab.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
 import useBrowserStore from 'stores/browser.js'
+import Import from '@/components/icons/Import.vue'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -169,6 +170,11 @@ const onAdd = async () => {
 const onClose = () => {
     dialogStore.closeNewKeyDialog()
 }
+
+const onImport = () => {
+    dialogStore.closeNewKeyDialog()
+    dialogStore.openImportKeyDialog(newForm.server, newForm.db)
+}
 </script>
 
 <template>
@@ -177,17 +183,11 @@ const onClose = () => {
         :closable="false"
         :close-on-esc="false"
         :mask-closable="false"
-        :negative-button-props="{ size: 'medium' }"
-        :negative-text="$t('common.cancel')"
-        :positive-button-props="{ size: 'medium' }"
-        :positive-text="$t('common.confirm')"
         :show-icon="false"
         :title="$t('dialogue.key.new')"
         preset="dialog"
         style="width: 600px"
-        transform-origin="center"
-        @positive-click="onAdd"
-        @negative-click="onClose">
+        transform-origin="center">
         <n-scrollbar ref="scrollRef" style="max-height: 500px">
             <n-form
                 ref="newFormRef"
@@ -234,6 +234,25 @@ const onClose = () => {
                 <!--  TODO: Add import from txt file option -->
             </n-form>
         </n-scrollbar>
+
+        <template #action>
+            <div class="flex-item-expand">
+                <n-button :focusable="false" size="medium" @click="onImport">
+                    <template #icon>
+                        <n-icon :component="Import" />
+                    </template>
+                    {{ $t('interface.import_key') }}
+                </n-button>
+            </div>
+            <div class="flex-item n-dialog__action">
+                <n-button :focusable="false" size="medium" @click="onClose">
+                    {{ $t('common.cancel') }}
+                </n-button>
+                <n-button :focusable="false" size="medium" type="primary" @click="onAdd">
+                    {{ $t('common.confirm') }}
+                </n-button>
+            </div>
+        </template>
     </n-modal>
 </template>
 

@@ -79,7 +79,7 @@
     "rename_key": "Rename Key",
     "delete_key": "Delete Key",
     "batch_delete_key": "Batch Delete Keys",
-    "import_key": "Import Key",
+    "import_key": "Import Key(s)",
     "flush_db": "Flush Database",
     "check_mode": "Check Mode",
     "quit_check_mode": "Quit Check Mode",

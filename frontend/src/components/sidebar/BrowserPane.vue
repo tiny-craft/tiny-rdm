@@ -25,7 +25,6 @@ import More from '@/components/icons/More.vue'
 import Export from '@/components/icons/Export.vue'
 import { ConnectionType } from '@/consts/connection_type.js'
 import Import from '@/components/icons/Import.vue'
-import Down from '@/components/icons/Down.vue'
 import Checkbox from '@/components/icons/Checkbox.vue'
 import Timer from '@/components/icons/Timer.vue'
 
@@ -65,12 +64,8 @@ const dbSelectOptions = computed(() => {
     })
 })
 
-const addOptions = computed(() => [
-    { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
-])
-
 const moreOptions = computed(() => [
-    // { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
+    { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
     { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
     { key: 'divider', type: 'divider' },
     {
@@ -271,16 +266,16 @@ watch(
                     <redis-type-selector v-model:value="filterForm.type" @update:value="onSelectFilterType" />
                 </template>
             </content-search-input>
-            <icon-button
-                :disabled="loading"
-                :icon="Refresh"
-                border
-                size="18"
-                small
-                stroke-width="4"
-                t-tooltip="interface.reload"
-                @click="onReload" />
             <n-button-group>
+                <icon-button
+                    :disabled="loading"
+                    :icon="Refresh"
+                    border
+                    size="18"
+                    small
+                    stroke-width="4"
+                    t-tooltip="interface.reload"
+                    @click="onReload" />
                 <icon-button
                     :disabled="loading"
                     :icon="Plus"
@@ -290,18 +285,6 @@ watch(
                     stroke-width="4"
                     t-tooltip="interface.new_key"
                     @click="onAddKey" />
-                <n-dropdown
-                    :options="addOptions"
-                    placement="bottom-end"
-                    style="min-width: 130px"
-                    trigger="click"
-                    @select="onSelectOptions">
-                    <n-button :focusable="false" size="small" style="padding: 0 3px">
-                        <n-icon size="10">
-                            <down :stroke-width="6" />
-                        </n-icon>
-                    </n-button>
-                </n-dropdown>
             </n-button-group>
         </div>
 
