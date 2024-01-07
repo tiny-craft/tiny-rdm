@@ -91,6 +91,8 @@ const valueColumn = computed(() => ({
               tooltip: {
                   style: {
                       maxWidth: '80vw',
+                      maxHeight: '60vh',
+                      overflowY: 'scroll',
                   },
               },
           },
