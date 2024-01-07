@@ -276,7 +276,7 @@ const onUpdateSelectedKeys = (keys, options) => {
             }
         }
         // default is load blank key to display server status
-        tabStore.openBlank(props.server, props.db)
+        // tabStore.openBlank(props.server)
     } finally {
         tabStore.setSelectedKeys(props.server, keys)
     }
