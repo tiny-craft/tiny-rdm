@@ -28,20 +28,20 @@ Linux.</strong>
 
 * Super lightweight, built on Webview2, without embedded browsers (Thanks
   to [Wails](https://github.com/wailsapp/wails)).
-* More elegant UI, frameless, offering light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
+* Provides visually and user-friendly UI, light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
   and [IconPark](https://iconpark.oceanengine.com)).
 * Multi-language support ([Need more languages ? Click here to contribute](.github/CONTRIBUTING.md)).
 * Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode.
 * Visualize key value operations, CRUD support for Lists, Hashes, Strings, Sets, Sorted Sets, and Streams.
 * Support multiple data viewing format and decode/decompression methods.
 * Use SCAN for segmented loading, making it easy to list millions of keys.
-* Operation command execution logs.
-* Provides command-line operations.
-* Provides slow logs.
+* Logs list for command operation history.
+* Provides command-line mode.
+* Provides slow logs list.
 * Segmented loading and querying for List/Hash/Set/Sorted Set.
-* Decode/decompression display for value of List/Hash/Set/Sorted Set.
-* Inbuilt advanced editor - Monaco Editor.
-* Real-time commands monitoring.
+* Provide value decode/decompression for List/Hash/Set/Sorted Set.
+* Integrate with Monaco Editor
+* Support real-time commands monitoring.
 * Support import/export data.
 
 ## Roadmap
@@ -89,7 +89,12 @@ npm install --prefix ./frontend
 ```bash
 wails dev
 ```
+## About
 
-## License
+### Sponsor
 
-Tiny RDM is licensed under [GNU General Public](/LICENSE) license.
+If this project helpful for you, feel free to buy me a cup of coffee ☕️.
+
+* Wechat Sponsor
+
+<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />

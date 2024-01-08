@@ -10,8 +10,6 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/tiny-craft/tiny-rdm/total)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
-[![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
-[![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
 <strong>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux</strong>
 </div>
@@ -25,7 +23,7 @@
 ## 功能特性
 
 * 极度轻量，基于Webview2，无内嵌浏览器（感谢[Wails](https://github.com/wailsapp/wails)）
-* 更精美的界面，无边框窗口，提供浅色/深色主题（感谢[Naive UI](https://github.com/tusen-ai/naive-ui)
+* 界面精美易用，提供浅色/深色主题（感谢[Naive UI](https://github.com/tusen-ai/naive-ui)
   和 [IconPark](https://iconpark.oceanengine.com)）
 * 多国语言支持：英文/中文（[需要更多语言支持？点我贡献语言](.github/CONTRIBUTING_zh.md)）
 * 更好用的连接管理：支持SSH隧道/SSL/哨兵模式/集群模式
@@ -89,11 +87,24 @@ wails dev
 
 ## 关于
 
-此APP由我个人开发，也作为本人第一个开源项目的尝试，由于精力有限，可能会存在BUG或者使用体验上的问题，欢迎提交issue和PR。
-同时本人也在探索开源代码、独立开发和盈利性商业应用之间的平衡关系，欢迎有共同意向的小伙伴加入群聊探讨和交换想法。
+如果你也同为独立开发者（团队），喜欢开源，或者对Tiny Craft的相关产品感兴趣，可以关注微信公众号或者加入QQ群，探讨心得，反馈意见，交个朋友。
 
-* QQ群：831077639
+### 微信公众号（用户交流微信群）
 
-## 开源许可
+我会不定期更新一些关于独立开发的思考和感悟，以及独立产品的介绍，欢迎扫码关注~👏
 
-Tiny RDM 基于 [GNU General Public](/LICENSE) 开源协议.
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />
+
+### 独立开发互助QQ群
+
+```
+831077639
+```
+
+### 赞助
+
+该项目完全为爱发电，如果对你有所帮助，可以请作者喝杯咖啡 ☕️
+
+* 微信赞赏
+
+<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
