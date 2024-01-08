@@ -3,7 +3,7 @@ import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
 import useBrowserStore from 'stores/browser.js'
 import { useI18n } from 'vue-i18n'
-import { isEmpty } from 'lodash'
+import { isEmpty, size } from 'lodash'
 import TtlInput from '@/components/common/TtlInput.vue'
 
 const ttlForm = reactive({
@@ -40,6 +40,14 @@ watchEffect(() => {
 const procssing = ref(false)
 const isBatchAction = computed(() => {
     return !isEmpty(ttlForm.keys)
+})
+
+const title = computed(() => {
+    if (isBatchAction.value) {
+        return i18n.t('dialogue.ttl.title_batch', { count: size(ttlForm.keys) })
+    } else {
+        return i18n.t('dialogue.ttl.title')
+    }
 })
 
 const i18n = useI18n()
@@ -94,9 +102,7 @@ const onConfirm = async () => {
         :positive-button-props="{ focusable: false, size: 'medium', loading: procssing }"
         :positive-text="$t('common.save')"
         :show-icon="false"
-        :title="
-            isBatchAction ? $t('dialogue.ttl.title_batch', { count: size(ttlForm.keys) }) : $t('dialogue.ttl.title')
-        "
+        :title="title"
         preset="dialog"
         transform-origin="center">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">

@@ -95,7 +95,13 @@ const onClose = () => {
                     :title="$t('dialogue.key.affected_key') + `(${size(exportKeyForm.keys)})`"
                     embedded
                     size="small">
-                    <n-log :line-height="1.5" :lines="keyLines" :rows="10" style="user-select: text; cursor: text" />
+                    <n-virtual-list :item-size="25" :items="keyLines" class="list-wrapper">
+                        <template #default="{ item }">
+                            <div class="line-item content-value">
+                                {{ item }}
+                            </div>
+                        </template>
+                    </n-virtual-list>
                 </n-card>
             </n-form>
         </n-spin>
@@ -118,4 +124,15 @@ const onClose = () => {
     </n-modal>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.line-item {
+    line-height: 1.6;
+}
+
+.list-wrapper {
+    box-sizing: border-box;
+    max-height: 180px;
+    user-select: text;
+    cursor: text;
+}
+</style>

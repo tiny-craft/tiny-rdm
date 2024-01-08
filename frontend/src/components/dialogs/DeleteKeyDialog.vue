@@ -64,7 +64,7 @@ const resetAffected = () => {
     deleteForm.affectedKeys = []
 }
 
-const logLines = computed(() => {
+const keyLines = computed(() => {
     return map(deleteForm.affectedKeys, (k) => decodeRedisKey(k))
 })
 
@@ -126,12 +126,13 @@ const onClose = () => {
                     embedded
                     size="small">
                     <n-skeleton v-if="deleteForm.loadingAffected" :repeat="10" text />
-                    <n-log
-                        v-else
-                        :line-height="1.5"
-                        :lines="logLines"
-                        :rows="10"
-                        style="user-select: text; cursor: text" />
+                    <n-virtual-list v-else :item-size="25" :items="keyLines" class="list-wrapper">
+                        <template #default="{ item }">
+                            <div class="line-item content-value">
+                                {{ item }}
+                            </div>
+                        </template>
+                    </n-virtual-list>
                 </n-card>
             </n-form>
         </n-spin>
@@ -152,7 +153,7 @@ const onClose = () => {
                     :disabled="isEmpty(deleteForm.affectedKeys)"
                     :focusable="false"
                     :loading="loading"
-                    type="error"
+                    type="primary"
                     @click="onConfirmDelete">
                     {{ $t('dialogue.key.confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
                 </n-button>
@@ -161,4 +162,15 @@ const onClose = () => {
     </n-modal>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.line-item {
+    line-height: 1.6;
+}
+
+.list-wrapper {
+    box-sizing: border-box;
+    max-height: 180px;
+    user-select: text;
+    cursor: text;
+}
+</style>
