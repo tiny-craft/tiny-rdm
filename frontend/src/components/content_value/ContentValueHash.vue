@@ -90,10 +90,10 @@ const fieldColumn = computed(() => ({
     ellipsis: {
         tooltip: {
             style: {
-                maxWidth: '80vw',
-                maxHeight: '60vh',
-                overflowY: 'scroll',
+                maxWidth: '50vw',
+                maxHeight: '50vh',
             },
+            scrollable: true,
         },
         lineClamp: 10,
     },
@@ -122,10 +122,10 @@ const valueColumn = computed(() => ({
         : {
               tooltip: {
                   style: {
-                      maxWidth: '80vw',
-                      maxHeight: '60vh',
-                      overflowY: 'scroll',
+                      maxWidth: '50vw',
+                      maxHeight: '50vh',
                   },
+                  scrollable: true,
               },
           },
     // filterOptionValue: valueFilterOption.value,
