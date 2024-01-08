@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.2",
-    "naive-ui": "^2.37.0",
+    "naive-ui": "^2.36.0",
     "prettier": "^3.1.1",
     "unplugin-auto-import": "^0.17.3",
     "unplugin-icons": "^0.18.1",
