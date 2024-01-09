@@ -62,7 +62,7 @@ const ttlString = computed(() => {
         const seconds = Math.floor(props.ttl % 60)
         s += padStart(seconds + '', 2, '0')
     } else if (props.ttl < 0) {
-        s = i18n.t('interface.forever')
+        s = '-1'
     } else {
         s = '00:00:00'
     }
@@ -190,7 +190,7 @@ const onTTL = () => {
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
-                        {{ ttlString }}
+                        {{ ttlString === '-1' ? $t('interface.forever') : ttlString }}
                     </n-button>
                 </template>
                 TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}

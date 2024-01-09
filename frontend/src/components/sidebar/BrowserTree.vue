@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, nextTick, reactive, ref, watchEffect } from 'vue'
+import { computed, h, markRaw, nextTick, reactive, ref, watchEffect } from 'vue'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
@@ -15,7 +15,6 @@ import Delete from '@/components/icons/Delete.vue'
 import useDialogStore from 'stores/dialog.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import useConnectionStore from 'stores/connections.js'
-import Filter from '@/components/icons/Filter.vue'
 import useTabStore from 'stores/tab.js'
 import IconButton from '@/components/common/IconButton.vue'
 import { parseHexColor } from '@/utils/rgb.js'
@@ -104,42 +103,21 @@ const contextMenuParam = reactive({
 })
 
 const menuOptions = {
-    [ConnectionType.RedisDB]: ({ opened }) => {
-        if (opened) {
-            return [
-                {
-                    key: 'db_filter',
-                    label: i18n.t('interface.filter_key'),
-                    icon: render.renderIcon(Filter),
-                },
-                {
-                    type: 'divider',
-                    key: 'd1',
-                },
-                {
-                    type: 'divider',
-                    key: 'd2',
-                },
-            ]
-        } else {
-            return []
-        }
-    },
-    [ConnectionType.RedisKey]: () => [
+    [ConnectionType.RedisKey]: [
         // {
         //     key: 'key_reload',
-        //     label: i18n.t('interface.reload'),
-        //     icon: render.renderIcon(Refresh),
+        //     label: 'interface.reload'),
+        //     icon: Refresh,
         // },
         {
             key: 'key_newkey',
-            label: i18n.t('interface.new_key'),
-            icon: render.renderIcon(Add),
+            label: 'interface.new_key',
+            icon: Add,
         },
         {
             key: 'key_copy',
-            label: i18n.t('interface.copy_path'),
-            icon: render.renderIcon(CopyLink),
+            label: 'interface.copy_path',
+            icon: CopyLink,
         },
         {
             type: 'divider',
@@ -147,20 +125,20 @@ const menuOptions = {
         },
         {
             key: 'key_remove',
-            label: i18n.t('interface.batch_delete_key'),
-            icon: render.renderIcon(Delete),
+            label: 'interface.batch_delete_key',
+            icon: Delete,
         },
     ],
-    [ConnectionType.RedisValue]: () => [
+    [ConnectionType.RedisValue]: [
         {
             key: 'value_reload',
-            label: i18n.t('interface.reload'),
-            icon: render.renderIcon(Refresh),
+            label: 'interface.reload',
+            icon: Refresh,
         },
         {
             key: 'value_copy',
-            label: i18n.t('interface.copy_key'),
-            icon: render.renderIcon(CopyLink),
+            label: 'interface.copy_key',
+            icon: CopyLink,
         },
         {
             type: 'divider',
@@ -168,14 +146,10 @@ const menuOptions = {
         },
         {
             key: 'value_remove',
-            label: i18n.t('interface.remove_key'),
-            icon: render.renderIcon(Delete),
+            label: 'interface.remove_key',
+            icon: Delete,
         },
     ],
-}
-
-const renderContextLabel = (option) => {
-    return h('div', { class: 'context-menu-item' }, option.label)
 }
 
 const handleSelectContextMenu = (key) => {
@@ -526,7 +500,7 @@ const nodeProps = ({ option }) => {
                 return
             }
             contextMenuParam.show = false
-            contextMenuParam.options = menuOptions[option.type](option)
+            contextMenuParam.options = markRaw(menuOptions[option.type] || [])
             nextTick().then(() => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
@@ -627,9 +601,12 @@ defineExpose({
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
             @update:checked-keys="onUpdateCheckedKeys" />
+
+        <!-- context menu -->
         <n-dropdown
             :options="contextMenuParam.options"
-            :render-label="renderContextLabel"
+            :render-icon="({ icon }) => render.renderIcon(icon)"
+            :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
             :show="contextMenuParam.show"
             :x="contextMenuParam.x"
             :y="contextMenuParam.y"

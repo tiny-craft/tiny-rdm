@@ -35,7 +35,7 @@ const tableRef = ref(null)
 
 const columns = computed(() => [
     {
-        title: i18n.t('slog.exec_time'),
+        title: () => i18n.t('slog.exec_time'),
         key: 'timestamp',
         sortOrder: data.sortOrder,
         sorter: 'default',
@@ -47,7 +47,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('slog.client'),
+        title: () => i18n.t('slog.client'),
         key: 'client',
         filterOptionValue: data.client,
         resizable: true,
@@ -81,7 +81,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('slog.cmd'),
+        title: () => i18n.t('slog.cmd'),
         key: 'cmd',
         titleAlign: 'center',
         filterOptionValue: data.keyword,
@@ -102,7 +102,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('slog.cost_time'),
+        title: () => i18n.t('slog.cost_time'),
         key: 'cost',
         width: 100,
         align: 'center',

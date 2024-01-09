@@ -83,7 +83,7 @@ const displayCode = computed(() => {
 const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
-    title: i18n.t('common.value'),
+    title: () => i18n.t('common.value'),
     align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
     ellipsis: displayCode.value
@@ -164,7 +164,7 @@ const resetEdit = () => {
 
 const actionColumn = {
     key: 'action',
-    title: i18n.t('interface.action'),
+    title: () => i18n.t('interface.action'),
     width: 120,
     align: 'center',
     titleAlign: 'center',

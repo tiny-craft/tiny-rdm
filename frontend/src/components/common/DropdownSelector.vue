@@ -2,6 +2,7 @@
 import { computed, h, ref } from 'vue'
 import { get, map } from 'lodash'
 import { NIcon, NText } from 'naive-ui'
+import { useRender } from '@/utils/render.js'
 
 const props = defineProps({
     value: {
@@ -21,13 +22,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:value'])
+const render = useRender()
 
 const renderHeader = () => {
     return h('div', { class: 'type-selector-header' }, [h(NText, null, () => props.tooltip)])
-}
-
-const renderLabel = (option) => {
-    return h('div', { class: 'type-selector-item' }, option.label)
 }
 
 const dropdownOption = computed(() => {
@@ -71,7 +69,7 @@ const onDropdownShow = (show) => {
     <n-dropdown
         :disabled="props.disabled"
         :options="dropdownOption"
-        :render-label="renderLabel"
+        :render-label="({ label }) => render.renderLabel(label, { class: 'type-selector-item' })"
         :show-arrow="true"
         :title="props.tooltip"
         :value="props.value"

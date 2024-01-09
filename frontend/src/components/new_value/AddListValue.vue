@@ -4,7 +4,6 @@ import { compact } from 'lodash'
 import Add from '@/components/icons/Add.vue'
 import Delete from '@/components/icons/Delete.vue'
 import IconButton from '@/components/common/IconButton.vue'
-import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
     type: Number,
@@ -12,15 +11,14 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:value', 'update:type'])
 
-const i18n = useI18n()
 const insertOption = [
     {
         value: 0,
-        label: i18n.t('dialogue.field.append_item'),
+        label: 'dialogue.field.append_item',
     },
     {
         value: 1,
-        label: i18n.t('dialogue.field.prepend_item'),
+        label: 'dialogue.field.prepend_item',
     },
 ]
 
@@ -34,7 +32,7 @@ const onUpdate = (val) => {
 <template>
     <n-form-item :label="$t('interface.type')">
         <n-radio-group :value="props.type" @update:value="(val) => emit('update:type', val)">
-            <n-radio-button v-for="(op, i) in insertOption" :key="i" :label="op.label" :value="op.value" />
+            <n-radio-button v-for="(op, i) in insertOption" :key="i" :label="op.label" :value="$t(op.value)" />
         </n-radio-group>
     </n-form-item>
     <n-form-item :label="$t('dialogue.field.element')" required>

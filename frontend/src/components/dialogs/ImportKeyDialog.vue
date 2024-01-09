@@ -39,31 +39,31 @@ watchEffect(() => {
 })
 
 const i18n = useI18n()
-const conflictOption = computed(() => [
+const conflictOption = [
     {
         value: 0,
-        label: i18n.t('dialogue.import.conflict_overwrite'),
+        label: 'dialogue.import.conflict_overwrite',
     },
     {
         value: 1,
-        label: i18n.t('dialogue.import.conflict_ignore'),
+        label: 'dialogue.import.conflict_ignore',
     },
-])
+]
 
-const ttlOption = computed(() => [
+const ttlOption = [
     {
         value: 0,
-        label: i18n.t('dialogue.import.ttl_include'),
+        label: 'dialogue.import.ttl_include',
     },
     {
         value: 1,
-        label: i18n.t('dialogue.import.ttl_ignore'),
+        label: 'dialogue.import.ttl_ignore',
     },
     {
         value: 2,
-        label: i18n.t('dialogue.import.ttl_custom'),
+        label: 'dialogue.import.ttl_custom',
     },
-])
+]
 
 const importEnable = computed(() => {
     return !isEmpty(importKeyForm.file)
@@ -130,14 +130,18 @@ const onClose = () => {
                         <n-radio-button
                             v-for="(op, i) in conflictOption"
                             :key="i"
-                            :label="op.label"
+                            :label="$t(op.label)"
                             :value="op.value" />
                     </n-radio-group>
                 </n-form-item>
                 <n-form-item :label="$t('dialogue.import.import_expire_title')">
                     <n-space :wrap-item="false">
                         <n-radio-group v-model:value="importKeyForm.ttlType">
-                            <n-radio-button v-for="(op, i) in ttlOption" :key="i" :label="op.label" :value="op.value" />
+                            <n-radio-button
+                                v-for="(op, i) in ttlOption"
+                                :key="i"
+                                :label="$t(op.label)"
+                                :value="op.value" />
                         </n-radio-group>
                         <ttl-input
                             v-if="importKeyForm.ttlType === 2"

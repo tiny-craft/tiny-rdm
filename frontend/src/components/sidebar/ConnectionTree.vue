@@ -1,6 +1,6 @@
 <script setup>
 import useDialogStore from 'stores/dialog.js'
-import { h, nextTick, reactive, ref } from 'vue'
+import { h, markRaw, nextTick, reactive, ref } from 'vue'
 import useConnectionStore from 'stores/connections.js'
 import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import { ConnectionType } from '@/consts/connection_type.js'
@@ -53,13 +53,13 @@ const menuOptions = {
     [ConnectionType.Group]: ({ opened }) => [
         {
             key: 'group_rename',
-            label: i18n.t('interface.rename_conn_group'),
-            icon: render.renderIcon(Edit),
+            label: 'interface.rename_conn_group',
+            icon: Edit,
         },
         {
             key: 'group_delete',
-            label: i18n.t('interface.remove_conn_group'),
-            icon: render.renderIcon(Delete),
+            label: 'interface.remove_conn_group',
+            icon: Delete,
         },
     ],
     [ConnectionType.Server]: ({ name }) => {
@@ -68,18 +68,18 @@ const menuOptions = {
             return [
                 {
                     key: 'server_close',
-                    label: i18n.t('interface.disconnect'),
-                    icon: render.renderIcon(Unlink),
+                    label: 'interface.disconnect',
+                    icon: Unlink,
                 },
                 {
                     key: 'server_edit',
-                    label: i18n.t('interface.edit_conn'),
-                    icon: render.renderIcon(Config),
+                    label: 'interface.edit_conn',
+                    icon: Config,
                 },
                 {
                     key: 'server_dup',
-                    label: i18n.t('interface.dup_conn'),
-                    icon: render.renderIcon(CopyLink),
+                    label: 'interface.dup_conn',
+                    icon: CopyLink,
                 },
                 {
                     type: 'divider',
@@ -87,26 +87,26 @@ const menuOptions = {
                 },
                 {
                     key: 'server_remove',
-                    label: i18n.t('interface.remove_conn'),
-                    icon: render.renderIcon(Delete),
+                    label: 'interface.remove_conn',
+                    icon: Delete,
                 },
             ]
         } else {
             return [
                 {
                     key: 'server_open',
-                    label: i18n.t('interface.open_connection'),
-                    icon: render.renderIcon(Connect),
+                    label: 'interface.open_connection',
+                    icon: Connect,
                 },
                 {
                     key: 'server_edit',
-                    label: i18n.t('interface.edit_conn'),
-                    icon: render.renderIcon(Config),
+                    label: 'interface.edit_conn',
+                    icon: Config,
                 },
                 {
                     key: 'server_dup',
-                    label: i18n.t('interface.dup_conn'),
-                    icon: render.renderIcon(CopyLink),
+                    label: 'interface.dup_conn',
+                    icon: CopyLink,
                 },
                 {
                     type: 'divider',
@@ -114,8 +114,8 @@ const menuOptions = {
                 },
                 {
                     key: 'server_remove',
-                    label: i18n.t('interface.remove_conn'),
-                    icon: render.renderIcon(Delete),
+                    label: 'interface.remove_conn',
+                    icon: Delete,
                 },
             ]
         }
@@ -355,7 +355,7 @@ const nodeProps = ({ option }) => {
             }
             contextMenuParam.show = false
             nextTick().then(() => {
-                contextMenuParam.options = mop(option)
+                contextMenuParam.options = markRaw(mop(option))
                 contextMenuParam.currentNode = option
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
@@ -364,10 +364,6 @@ const nodeProps = ({ option }) => {
             })
         },
     }
-}
-
-const renderContextLabel = (option) => {
-    return h('div', { class: 'context-menu-item' }, option.label)
 }
 
 const handleSelectContextMenu = (key) => {
@@ -533,7 +529,8 @@ const onCancelOpen = () => {
     <n-dropdown
         :keyboard="true"
         :options="contextMenuParam.options"
-        :render-label="renderContextLabel"
+        :render-icon="({ icon }) => render.renderIcon(icon)"
+        :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
         :show="contextMenuParam.show"
         :x="contextMenuParam.x"
         :y="contextMenuParam.y"

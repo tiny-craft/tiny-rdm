@@ -1,5 +1,4 @@
 <script setup>
-import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -15,22 +14,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:value', 'update:unit'])
 
-const i18n = useI18n()
-const unit = computed(() => [
-    { value: 1, label: i18n.t('common.second') },
+const unit = [
+    {
+        value: 1,
+        label: 'common.second',
+    },
     {
         value: 60,
-        label: i18n.t('common.minute'),
+        label: 'common.minute',
     },
     {
         value: 3600,
-        label: i18n.t('common.hour'),
+        label: 'common.hour',
     },
     {
         value: 86400,
-        label: i18n.t('common.day'),
+        label: 'common.day',
     },
-])
+]
 
 const unitValue = computed(() => {
     switch (props.unit) {
@@ -57,6 +58,7 @@ const unitValue = computed(() => {
             @update:value="(val) => emit('update:value', val)" />
         <n-select
             :options="unit"
+            :render-label="({ label }) => $t(label)"
             :value="unitValue"
             style="max-width: 150px"
             @update:value="(val) => emit('update:unit', val)" />

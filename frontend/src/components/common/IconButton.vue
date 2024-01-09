@@ -7,6 +7,10 @@ const emit = defineEmits(['click'])
 const props = defineProps({
     tooltip: String,
     tTooltip: String,
+    tooltipDelay: {
+        type: Number,
+        default: 1000,
+    },
     type: String,
     icon: [String, Object],
     size: {
@@ -35,7 +39,7 @@ const hasTooltip = computed(() => {
 </script>
 
 <template>
-    <n-tooltip v-if="hasTooltip" :show-arrow="false">
+    <n-tooltip v-if="hasTooltip" :delay="tooltipDelay" :show-arrow="false">
         <template #trigger>
             <n-button
                 :class="props.buttonClass"

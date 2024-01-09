@@ -83,7 +83,7 @@ const tableRef = ref(null)
 const fieldFilterOption = ref(null)
 const fieldColumn = computed(() => ({
     key: 'key',
-    title: i18n.t('common.field'),
+    title: () => i18n.t('common.field'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
@@ -113,7 +113,7 @@ const displayCode = computed(() => {
 // const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
-    title: i18n.t('common.value'),
+    title: () => i18n.t('common.value'),
     align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
     resizable: true,
@@ -195,7 +195,7 @@ const resetEdit = () => {
 
 const actionColumn = {
     key: 'action',
-    title: i18n.t('interface.action'),
+    title: () => i18n.t('interface.action'),
     width: 120,
     align: 'center',
     titleAlign: 'center',

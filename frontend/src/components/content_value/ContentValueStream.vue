@@ -74,7 +74,7 @@ const idColumn = computed(() => ({
 const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
-    title: i18n.t('common.value'),
+    title: () => i18n.t('common.value'),
     align: 'left',
     titleAlign: 'center',
     resizable: true,
@@ -98,7 +98,7 @@ const valueColumn = computed(() => ({
 }))
 const actionColumn = {
     key: 'action',
-    title: i18n.t('interface.action'),
+    title: () => i18n.t('interface.action'),
     width: 80,
     align: 'center',
     titleAlign: 'center',

@@ -56,7 +56,7 @@ const groupOptions = computed(() => {
         value: group,
     }))
     options.splice(0, 0, {
-        label: i18n.t('dialogue.connection.no_group'),
+        label: 'dialogue.connection.no_group',
         value: '',
     })
     return options
@@ -278,7 +278,10 @@ const onClose = () => {
                                 :label="$t('dialogue.connection.group')"
                                 :span="24"
                                 required>
-                                <n-select v-model:value="generalForm.group" :options="groupOptions" />
+                                <n-select
+                                    v-model:value="generalForm.group"
+                                    :options="groupOptions"
+                                    :render-label="({ label, value }) => (value === '' ? $t(label) : label)" />
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
                                 <n-input
@@ -543,7 +546,10 @@ const onClose = () => {
                                     :options="masterNameOptions"
                                     filterable
                                     tag />
-                                <n-button :loading="loadingSentinelMaster" @click="onLoadSentinelMasters">
+                                <n-button
+                                    :disabled="!generalForm.sentinel.enable"
+                                    :loading="loadingSentinelMaster"
+                                    @click="onLoadSentinelMasters">
                                     {{ $t('dialogue.connection.sentinel.auto_discover') }}
                                 </n-button>
                             </n-input-group>

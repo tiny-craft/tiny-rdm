@@ -37,7 +37,7 @@ watchEffect(() => {
 const keyOptions = computed(() => {
     const opts = map(typesIconStyle, (v) => ({
         value: v,
-        label: i18n.t('preferences.general.key_icon_style' + v),
+        label: 'preferences.general.key_icon_style' + v,
     }))
     return sortBy(opts, (o) => o.value)
 })
@@ -81,7 +81,7 @@ const onClose = () => {
                                     v-for="opt in prefStore.themeOption"
                                     :key="opt.value"
                                     :value="opt.value">
-                                    {{ opt.label }}
+                                    {{ $t(opt.label) }}
                                 </n-radio-button>
                             </n-radio-group>
                         </n-form-item-gi>
@@ -89,12 +89,14 @@ const onClose = () => {
                             <n-select
                                 v-model:value="prefStore.general.language"
                                 :options="prefStore.langOption"
+                                :render-label="({ label, value }) => (value === 'auto' ? $t(label) : label)"
                                 filterable />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
                             <n-select
                                 v-model:value="prefStore.general.font"
                                 :options="prefStore.fontOption"
+                                :render-label="({ label, value }) => (value === '' ? $t(label) : label)"
                                 filterable />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.font_size')" :span="12">
@@ -108,7 +110,10 @@ const onClose = () => {
                                 style="width: 100%" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.key_icon_style')" :span="12">
-                            <n-select v-model:value="prefStore.general.keyIconStyle" :options="keyOptions" />
+                            <n-select
+                                v-model:value="prefStore.general.keyIconStyle"
+                                :options="keyOptions"
+                                :render-label="({ label }) => $t(label)" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">
                             <n-space>
@@ -136,17 +141,18 @@ const onClose = () => {
                             <n-select
                                 v-model:value="prefStore.editor.font"
                                 :options="prefStore.fontOption"
+                                :render-label="({ label, value }) => value || $t(label)"
                                 filterable />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.font_size')" :show-feedback="false" :span="12">
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="12">
                             <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
-                        <n-form-item-gi :show-feedback="false" :span="24">
+                        <n-form-item-gi :show-feedback="false" :show-label="false" :span="24">
                             <n-checkbox v-model:checked="prefStore.editor.showLineNum">
                                 {{ $t('preferences.editor.show_linenum') }}
                             </n-checkbox>
                         </n-form-item-gi>
-                        <n-form-item-gi :show-feedback="false" :span="24">
+                        <n-form-item-gi :show-feedback="false" :show-label="false" :span="24">
                             <n-checkbox v-model:checked="prefStore.editor.showFolding">
                                 {{ $t('preferences.editor.show_folding') }}
                             </n-checkbox>

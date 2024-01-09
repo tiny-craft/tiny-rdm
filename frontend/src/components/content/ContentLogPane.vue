@@ -26,7 +26,7 @@ const filterServerOption = computed(() => {
         value: server,
     }))
     options.splice(0, 0, {
-        label: i18n.t('common.all'),
+        label: 'common.all',
         value: '',
     })
     return options
@@ -36,7 +36,7 @@ const tableRef = ref(null)
 
 const columns = computed(() => [
     {
-        title: i18n.t('log.exec_time'),
+        title: () => i18n.t('log.exec_time'),
         key: 'timestamp',
         defaultSortOrder: 'ascend',
         sorter: 'default',
@@ -48,7 +48,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('log.server'),
+        title: () => i18n.t('log.server'),
         key: 'server',
         filterOptionValue: data.server,
         filter: (value, row) => {
@@ -62,7 +62,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('log.cmd'),
+        title: () => i18n.t('log.cmd'),
         key: 'cmd',
         titleAlign: 'center',
         filterOptionValue: data.keyword,
@@ -83,7 +83,7 @@ const columns = computed(() => [
         },
     },
     {
-        title: i18n.t('log.cost_time'),
+        title: () => i18n.t('log.cost_time'),
         key: 'cost',
         width: 100,
         align: 'center',
@@ -141,6 +141,7 @@ defineExpose({
                     v-model:value="data.server"
                     :consistent-menu-width="false"
                     :options="filterServerOption"
+                    :render-label="({ label, value }) => (value === '' ? $t(label) : label)"
                     style="min-width: 100px" />
             </n-form-item>
             <n-form-item :label="$t('log.filter_keyword')">

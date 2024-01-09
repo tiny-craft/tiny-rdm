@@ -64,16 +64,12 @@ const dbSelectOptions = computed(() => {
     })
 })
 
-const moreOptions = computed(() => [
-    { key: 'import', label: i18n.t('interface.import_key'), icon: render.renderIcon(Import, { strokeWidth: 3.5 }) },
-    { key: 'flush', label: i18n.t('interface.flush_db'), icon: render.renderIcon(Delete, { strokeWidth: 3.5 }) },
+const moreOptions = [
+    { key: 'import', label: 'interface.import_key', icon: Import },
+    { key: 'flush', label: 'interface.flush_db', icon: Delete },
     { key: 'divider', type: 'divider' },
-    {
-        key: 'disconnect',
-        label: i18n.t('interface.disconnect'),
-        icon: render.renderIcon(Unlink, { strokeWidth: 3.5 }),
-    },
-])
+    { key: 'disconnect', label: 'interface.disconnect', icon: Unlink },
+]
 
 const loadProgress = computed(() => {
     const db = browserStore.getDatabase(props.server, props.db)
@@ -356,6 +352,8 @@ watch(
                         @click="inCheckState = true" />
                     <n-dropdown
                         :options="moreOptions"
+                        :render-icon="({ icon }) => render.renderIcon(icon, { strokeWidth: 3.5 })"
+                        :render-label="({ label }) => $t(label)"
                         placement="top-end"
                         style="min-width: 130px"
                         @select="onSelectOptions">

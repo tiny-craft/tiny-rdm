@@ -44,20 +44,20 @@ const isBatchAction = computed(() => {
 
 const title = computed(() => {
     if (isBatchAction.value) {
-        return i18n.t('dialogue.ttl.title_batch', { count: size(ttlForm.keys) })
+        return () => i18n.t('dialogue.ttl.title_batch', { count: size(ttlForm.keys) })
     } else {
-        return i18n.t('dialogue.ttl.title')
+        return () => i18n.t('dialogue.ttl.title')
     }
 })
 
 const i18n = useI18n()
-const quickOption = computed(() => [
-    { value: -1, unit: 1, label: i18n.t('interface.forever') },
-    { value: 10, unit: 1, label: `10 ${i18n.t('common.second')}` },
-    { value: 1, unit: 60, label: `1 ${i18n.t('common.minute')}` },
-    { value: 1, unit: 3600, label: `1 ${i18n.t('common.hour')}` },
-    { value: 1, unit: 86400, label: `1 ${i18n.t('common.day')}` },
-])
+const quickOption = [
+    { value: -1, unit: 1, label: 'interface.forever' },
+    { value: 10, unit: 1, label: 'common.second' },
+    { value: 1, unit: 60, label: 'common.minute' },
+    { value: 1, unit: 3600, label: 'common.hour' },
+    { value: 1, unit: 86400, label: 'common.day' },
+]
 
 const onQuickSet = (opt) => {
     ttlForm.ttl = opt.value
@@ -121,7 +121,7 @@ const onConfirm = async () => {
                         secondary
                         size="small"
                         @click="onQuickSet(opt)">
-                        {{ opt.label }}
+                        {{ (opt.value > 0 ? opt.value + ' ' : '') + $t(opt.label) }}
                     </n-button>
                 </n-space>
             </n-form-item>

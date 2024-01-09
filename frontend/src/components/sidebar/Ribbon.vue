@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h } from 'vue'
+import { computed } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import Database from '@/components/icons/Database.vue'
 import { useI18n } from 'vue-i18n'
@@ -38,18 +38,18 @@ const i18n = useI18n()
 const menuOptions = computed(() => {
     return [
         {
-            label: i18n.t('ribbon.browser'),
+            label: 'ribbon.browser',
             key: 'browser',
             icon: Database,
             show: browserStore.anyConnectionOpened,
         },
         {
-            label: i18n.t('ribbon.server'),
+            label: 'ribbon.server',
             key: 'server',
             icon: Server,
         },
         {
-            label: i18n.t('ribbon.log'),
+            label: 'ribbon.log',
             key: 'log',
             icon: Record,
         },
@@ -59,21 +59,21 @@ const menuOptions = computed(() => {
 const preferencesOptions = computed(() => {
     return [
         {
-            label: i18n.t('menu.preferences'),
+            label: 'menu.preferences',
             key: 'preferences',
-            icon: render.renderIcon(Config, { strokeWidth: 3 }),
+            icon: Config,
         },
         // {
-        //     label: i18n.t('menu.help'),
+        //     label: 'menu.help',
         //     key: 'help',
-        //     icon: render.renderIcon(Help, { strokeWidth: 3 }),
+        //     icon: Help,
         // },
         {
-            label: i18n.t('menu.report_bug'),
+            label: 'menu.report_bug',
             key: 'report',
         },
         {
-            label: i18n.t('menu.check_update'),
+            label: 'menu.check_update',
             key: 'update',
         },
         {
@@ -81,15 +81,11 @@ const preferencesOptions = computed(() => {
             key: 'd1',
         },
         {
-            label: i18n.t('menu.about'),
+            label: 'menu.about',
             key: 'about',
         },
     ]
 })
-
-const renderContextLabel = (option) => {
-    return h('div', { class: 'context-menu-item' }, option.label)
-}
 
 const dialogStore = useDialogStore()
 const prefStore = usePreferencesStore()
@@ -140,14 +136,15 @@ const exThemeVars = computed(() => {
                         </n-icon>
                     </div>
                 </template>
-                {{ m.label }}
+                {{ $t(m.label) }}
             </n-tooltip>
         </div>
         <div class="flex-item-expand"></div>
         <div class="nav-menu-item flex-box-v">
             <n-dropdown
                 :options="preferencesOptions"
-                :render-label="renderContextLabel"
+                :render-icon="({ icon }) => render.renderIcon(icon)"
+                :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
                 trigger="click"
                 @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" :stroke-width="3" class="nav-menu-button" />

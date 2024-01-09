@@ -9,6 +9,7 @@ import { every, get, includes, isEmpty } from 'lodash'
  * Dialog for create or rename group
  */
 
+const i18n = useI18n()
 const editGroup = ref('')
 const groupForm = reactive({
     name: '',
@@ -42,7 +43,6 @@ watchEffect(() => {
     }
 })
 
-const i18n = useI18n()
 const onConfirm = async () => {
     try {
         await groupFormRef.value?.validate((errs) => {

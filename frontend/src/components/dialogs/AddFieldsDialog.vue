@@ -49,15 +49,15 @@ const defaultValue = {
 const title = computed(() => {
     switch (newForm.type) {
         case types.LIST:
-            return i18n.t('dialogue.field.new_item')
+            return 'dialogue.field.new_item'
         case types.HASH:
-            return i18n.t('dialogue.field.new')
+            return 'dialogue.field.new'
         case types.SET:
-            return i18n.t('dialogue.field.new')
+            return 'dialogue.field.new'
         case types.ZSET:
-            return i18n.t('dialogue.field.new')
+            return 'dialogue.field.new'
         case types.STREAM:
-            return i18n.t('dialogue.field.new')
+            return 'dialogue.field.new'
     }
     return ''
 })
@@ -204,7 +204,7 @@ const onClose = () => {
         :positive-button-props="{ size: 'medium' }"
         :positive-text="$t('common.confirm')"
         :show-icon="false"
-        :title="title"
+        :title="title ? $t(title) : ''"
         preset="dialog"
         style="width: 600px"
         transform-origin="center"

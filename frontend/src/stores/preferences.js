@@ -69,15 +69,15 @@ const usePreferencesStore = defineStore('preferences', {
             return [
                 {
                     value: 'light',
-                    label: i18nGlobal.t('preferences.general.theme_light'),
+                    label: 'preferences.general.theme_light',
                 },
                 {
                     value: 'dark',
-                    label: i18nGlobal.t('preferences.general.theme_dark'),
+                    label: 'preferences.general.theme_dark',
                 },
                 {
                     value: 'auto',
-                    label: i18nGlobal.t('preferences.general.theme_auto'),
+                    label: 'preferences.general.theme_auto',
                 },
             ]
         },
@@ -93,7 +93,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             options.splice(0, 0, {
                 value: 'auto',
-                label: i18nGlobal.t('preferences.general.system_lang'),
+                label: 'preferences.general.system_lang',
             })
             return options
         },
@@ -110,7 +110,7 @@ const usePreferencesStore = defineStore('preferences', {
             }))
             option.splice(0, 0, {
                 value: '',
-                label: i18nGlobal.t('preferences.general.default'),
+                label: 'preferences.general.default',
                 path: '',
             })
             return option

@@ -7,14 +7,25 @@ export function useRender() {
          *
          * @param {string|Object} icon
          * @param {{}} [props]
-         * @return {*}
+         * @return {VNode}
          */
         renderIcon: (icon, props = {}) => {
-            return () => {
-                return h(NIcon, null, {
-                    default: () => h(icon, props),
-                })
+            if (icon == null) {
+                return undefined
             }
+            return h(NIcon, null, {
+                default: () => h(icon, props),
+            })
+        },
+
+        /**
+         *
+         * @param {string} label
+         * @param {{}} [props]
+         * @return {VNode}
+         */
+        renderLabel: (label, props = {}) => {
+            return h('div', props, label)
         },
     }
 }

@@ -1,11 +1,9 @@
 <script setup>
 import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
-import { useI18n } from 'vue-i18n'
 import { types } from '@/consts/support_redis_type.js'
 import useBrowserStore from 'stores/browser.js'
 
-const i18n = useI18n()
 const filterForm = reactive({
     server: '',
     db: 0,
@@ -20,7 +18,7 @@ const typeOptions = computed(() => {
     }))
     options.splice(0, 0, {
         value: '',
-        label: i18n.t('common.all'),
+        label: 'common.all',
     })
     return options
 })
@@ -75,7 +73,10 @@ const onClose = () => {
                 <n-input :value="filterForm.db + ''" readonly></n-input>
             </n-form-item>
             <n-form-item :label="$t('interface.type')" path="type" required>
-                <n-select v-model:value="filterForm.type" :options="typeOptions" />
+                <n-select
+                    v-model:value="filterForm.type"
+                    :options="typeOptions"
+                    :render-label="({ label }) => $t(label)" />
             </n-form-item>
             <n-form-item :label="$t('dialogue.filter.filter_pattern')" required>
                 <n-input-group>

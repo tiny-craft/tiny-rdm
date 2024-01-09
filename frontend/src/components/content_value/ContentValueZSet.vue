@@ -81,7 +81,7 @@ const fullEdit = ref(false)
 // const scoreFilterOption = ref(null)
 const scoreColumn = computed(() => ({
     key: 'score',
-    title: i18n.t('common.score'),
+    title: () => i18n.t('common.score'),
     align: 'center',
     titleAlign: 'center',
     resizable: true,
@@ -130,7 +130,7 @@ const displayCode = computed(() => {
 const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
-    title: i18n.t('common.value'),
+    title: () => i18n.t('common.value'),
     align: displayCode.value ? 'left' : 'center',
     titleAlign: 'center',
     resizable: true,
@@ -210,7 +210,7 @@ const resetEdit = () => {
 
 const actionColumn = {
     key: 'action',
-    title: i18n.t('interface.action'),
+    title: () => i18n.t('interface.action'),
     width: 120,
     align: 'center',
     titleAlign: 'center',
