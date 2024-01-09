@@ -69,6 +69,7 @@ export const themeOverrides = {
         padding: '6px 2px',
         optionColorHover: '#D33A31',
         optionTextColorHover: '#FFF',
+        optionHeightMedium: '28px',
     },
 }
 

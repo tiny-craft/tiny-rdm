@@ -1189,7 +1189,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 					score, _ := strconv.ParseFloat(strs[i+1].(string), 64)
 					members = append(members, redis.Z{
 						Score:  score,
-						Member: strs[i].(string),
+						Member: strs[i],
 					})
 				}
 				err = client.ZAdd(ctx, key, members...).Err()
