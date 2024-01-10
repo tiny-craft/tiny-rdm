@@ -142,7 +142,8 @@
   "ribbon": {
     "server": "服务器",
     "browser": "数据浏览",
-    "log": "日志"
+    "log": "日志",
+    "github": "Github"
   },
   "dialogue": {
     "close_confirm": "是否关闭此连接（{name}）",
@@ -335,6 +336,7 @@
     "help": "帮助",
     "check_update": "检查更新...",
     "report_bug": "报告错误",
+    "wechat_official": "微信公众号",
     "about": "关于"
   },
   "log": {

@@ -114,7 +114,8 @@
   "ribbon": {
     "server": "Servidor",
     "browser": "Navegador de Dados",
-    "log": "Log"
+    "log": "Log",
+    "github": "Github"
   },
   "dialogue": {
     "close_confirm": "Confirmar o fechamento desta guia e conexão ({name})",

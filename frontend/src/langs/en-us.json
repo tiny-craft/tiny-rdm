@@ -70,7 +70,7 @@
     "disconnect": "Disconnect",
     "dup_conn": "Duplicate Connection",
     "remove_conn": "Delete Connection",
-    "edit_conn": "Edit Connection Config",
+    "edit_conn": "Edit Connection",
     "edit_conn_group": "Edit Group",
     "rename_conn_group": "Rename Group",
     "remove_conn_group": "Delete Group",
@@ -142,7 +142,8 @@
   "ribbon": {
     "server": "Server",
     "browser": "Data Browser",
-    "log": "Log"
+    "log": "Log",
+    "github": "Github"
   },
   "dialogue": {
     "close_confirm": "Confirm close this tab and connection ({name})",
@@ -335,6 +336,7 @@
     "help": "Help",
     "check_update": "Check for Updates...",
     "report_bug": "Report a Bug",
+    "wechat_official": "Wechat Official Account",
     "about": "About"
   },
   "log": {

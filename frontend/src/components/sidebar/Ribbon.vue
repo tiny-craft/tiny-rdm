@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import Database from '@/components/icons/Database.vue'
 import { useI18n } from 'vue-i18n'
@@ -14,6 +14,7 @@ import Record from '@/components/icons/Record.vue'
 import { extraTheme } from '@/utils/extra_theme.js'
 import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
+import wechatUrl from '@/assets/images/wechat_official.png'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -35,6 +36,7 @@ const iconSize = computed(() => Math.floor(props.width * 0.45))
 
 const browserStore = useBrowserStore()
 const i18n = useI18n()
+const showWechat = ref(false)
 const menuOptions = computed(() => {
     return [
         {
@@ -81,6 +83,10 @@ const preferencesOptions = computed(() => {
             key: 'd1',
         },
         {
+            label: 'menu.wechat_official',
+            key: 'wechat_official',
+        },
+        {
             label: 'menu.about',
             key: 'about',
         },
@@ -99,6 +105,9 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'report':
             BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm/issues')
+            break
+        case 'wechat_official':
+            showWechat.value = true
             break
         case 'about':
             dialogStore.openAboutDialog()
@@ -149,8 +158,22 @@ const exThemeVars = computed(() => {
                 @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" :stroke-width="3" class="nav-menu-button" />
             </n-dropdown>
-            <icon-button :icon="Github" :size="iconSize" class="nav-menu-button" @click="openGithub" />
+            <icon-button
+                :icon="Github"
+                :size="iconSize"
+                :tooltip="$t('ribbon.github')"
+                class="nav-menu-button"
+                @click="openGithub" />
         </div>
+
+        <!-- wechat official modal -->
+        <n-modal
+            :show="showWechat"
+            transform-origin="center"
+            @close="showWechat = false"
+            @mask-click="showWechat = false">
+            <n-image :src="wechatUrl" :width="400" preview-disabled />
+        </n-modal>
     </div>
 </template>
 
@@ -224,7 +247,7 @@ const exThemeVars = computed(() => {
     .nav-menu-item {
         align-items: center;
         padding: 10px 0;
-        gap: 15px;
+        gap: 18px;
         --wails-draggable: none;
 
         .nav-menu-button {
