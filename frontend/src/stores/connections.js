@@ -159,6 +159,8 @@ const useConnectionStore = defineStore('connections', {
                 markColor: '',
                 ssl: {
                     enable: false,
+                    allowInsecure: true,
+                    sni: '',
                     certFile: '',
                     keyFile: '',
                     caFile: '',

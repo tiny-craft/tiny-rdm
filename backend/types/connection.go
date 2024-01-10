@@ -42,10 +42,12 @@ type ConnectionDB struct {
 }
 
 type ConnectionSSL struct {
-	Enable   bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
-	KeyFile  string `json:"keyFile,omitempty" yaml:"keyFile,omitempty"`
-	CertFile string `json:"certFile,omitempty" yaml:"certFile,omitempty"`
-	CAFile   string `json:"caFile,omitempty" yaml:"caFile,omitempty"`
+	Enable        bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
+	KeyFile       string `json:"keyFile,omitempty" yaml:"keyFile,omitempty"`
+	CertFile      string `json:"certFile,omitempty" yaml:"certFile,omitempty"`
+	CAFile        string `json:"caFile,omitempty" yaml:"caFile,omitempty"`
+	AllowInsecure bool   `json:"allowInsecure,omitempty" yaml:"allowInsecure,omitempty"`
+	SNI           string `json:"sni,omitempty" yaml:"sni,omitempty"`
 }
 
 type ConnectionSSH struct {

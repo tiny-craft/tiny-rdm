@@ -464,6 +464,16 @@ const onClose = () => {
                                 :disabled="!generalForm.ssl.enable"
                                 :placeholder="$t('dialogue.connection.ssl.ca_file_tip')" />
                         </n-form-item>
+                        <n-form-item>
+                            <n-checkbox v-model:checked="generalForm.ssl.allowInsecure" size="medium">
+                                {{ $t('dialogue.connection.ssl.allow_insecure') }}
+                            </n-checkbox>
+                        </n-form-item>
+                        <n-form-item :label="$t('dialogue.connection.ssl.sni')">
+                            <n-input
+                                v-model:value="generalForm.ssl.sni"
+                                :placeholder="$t('dialogue.connection.ssl.sni')" />
+                        </n-form-item>
                     </n-form>
                 </n-tab-pane>
 

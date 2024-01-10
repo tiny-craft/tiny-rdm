@@ -201,6 +201,9 @@
       "ssl": {
         "title": "SSL/TLS",
         "enable": "启用SSL",
+        "allow_insecure": "允许不安全连接",
+        "sni": "服务器名(SNI)",
+        "sni_tip": "(可选)服务器名",
         "cert_file": "公钥文件",
         "key_file": "私钥文件",
         "ca_file": "授权文件",

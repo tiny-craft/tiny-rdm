@@ -107,14 +107,11 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			caCertPool.AppendCertsFromPEM(ca)
 		}
 
-		if len(certs) <= 0 {
-			return nil, errors.New("tls config error")
-		}
-
 		tlsConfig = &tls.Config{
 			RootCAs:            caCertPool,
-			InsecureSkipVerify: false,
+			InsecureSkipVerify: config.SSL.AllowInsecure,
 			Certificates:       certs,
+			ServerName:         strings.TrimSpace(config.SSL.SNI),
 		}
 	}
 

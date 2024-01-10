@@ -25,7 +25,7 @@ const handleSelectFile = async () => {
         const path = get(data, 'path', '')
         emit('update:value', path)
     } else {
-        emit('update:value', '')
+        // emit('update:value', '')
     }
 }
 </script>

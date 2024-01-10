@@ -201,6 +201,9 @@
       "ssl": {
         "title": "SSL/TLS",
         "enable": "Enable SSL/TLS",
+        "allow_insecure": "Allow Insecure Connection",
+        "sni": "Server Name(SNI)",
+        "sni_tip": "(Optional) Server Name",
         "cert_file": "Public Key",
         "key_file": "Private Key",
         "ca_file": "Authority",
