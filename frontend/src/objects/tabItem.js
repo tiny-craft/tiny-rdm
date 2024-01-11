@@ -16,6 +16,7 @@ export class TabItem {
      * @param {string} subTab secondary tab value
      * @param {string} [title] tab title
      * @param {string} [icon] tab icon
+     * @param {string} [activatedKey] current activated key on displaying
      * @param {string[]} expandedKeys
      * @param {string[]} selectedKeys
      * @param {CheckedKey[]} checkedKeys
@@ -63,6 +64,7 @@ export class TabItem {
         this.blank = blank
         this.subTab = subTab
         this.icon = icon
+        this.activatedKey = ''
         this.expandedKeys = expandedKeys
         this.selectedKeys = selectedKeys
         this.checkedKeys = checkedKeys

@@ -231,29 +231,11 @@ const handleSelectContextMenu = (key) => {
 }
 
 const onUpdateSelectedKeys = (keys, options) => {
-    try {
-        if (!isEmpty(options)) {
-            // prevent load duplicate key
-            for (const node of options) {
-                if (node.type === ConnectionType.RedisValue) {
-                    const { key, db } = node
-                    const redisKey = node.redisKeyCode || node.redisKey
-                    if (!includes(selectedKeys.value, key)) {
-                        browserStore.loadKeySummary({
-                            server: props.server,
-                            db,
-                            key: redisKey,
-                            clearValue: true,
-                        })
-                    }
-                    return
-                }
-            }
-        }
+    if (!isEmpty(keys)) {
+        tabStore.setSelectedKeys(props.server, keys)
+    } else {
         // default is load blank key to display server status
         // tabStore.openBlank(props.server)
-    } finally {
-        tabStore.setSelectedKeys(props.server, keys)
     }
 }
 
@@ -485,6 +467,19 @@ const renderSuffix = ({ option }) => {
 
 const nodeProps = ({ option }) => {
     return {
+        onClick: () => {
+            if (option.type === ConnectionType.RedisValue) {
+                if (tabStore.setActivatedKey(props.server, option.key)) {
+                    const { db, redisKey, redisKeyCode } = option
+                    browserStore.loadKeySummary({
+                        server: props.server,
+                        db,
+                        key: redisKeyCode || redisKey,
+                        clearValue: true,
+                    })
+                }
+            }
+        },
         onDblclick: () => {
             if (props.loading) {
                 console.warn('TODO: alert to ignore double click when loading')
@@ -506,7 +501,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
-                onUpdateSelectedKeys([option.key], [option])
+                // onUpdateSelectedKeys([option.key], [option])
             })
         },
         // onMouseover() {
@@ -572,7 +567,7 @@ defineExpose({
 </script>
 
 <template>
-    <div :style="{ backgroundColor }" class="flex-box-v browser-tree-wrapper">
+    <div :style="{ backgroundColor }" class="flex-box-v browser-tree-wrapper" @contextmenu="(e) => e.preventDefault()">
         <n-spin v-if="props.loading" class="fill-height" />
         <n-empty v-else-if="!props.loading && isEmpty(data)" class="empty-content" />
         <n-tree

@@ -101,11 +101,6 @@ const useTabStore = defineStore('tab', {
             return get(this.tabs, [this.activatedIndex, 'name'])
         },
 
-        currentSelectedKeys() {
-            const tab = this.currentTab
-            return get(tab, 'selectedKeys', [])
-        },
-
         currentCheckedKeys() {
             const tab = this.currentTab
             return get(tab, 'checkedKeys', [])
@@ -747,6 +742,23 @@ const useTabStore = defineStore('tab', {
                     tab.checkedKeys = keys
                 }
             }
+        },
+
+        /**
+         * set activated key
+         * @param {string} server
+         * @param {string} key
+         */
+        setActivatedKey(server, key) {
+            /** @type TabItem**/
+            let tab = find(this.tabList, { name: server })
+            if (tab != null) {
+                if (!isEmpty(key) && key !== tab.activatedKey) {
+                    tab.activatedKey = key
+                    return true
+                }
+            }
+            return false
         },
     },
 })
