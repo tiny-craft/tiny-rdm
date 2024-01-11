@@ -15,6 +15,7 @@ import { extraTheme } from '@/utils/extra_theme.js'
 import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
 import wechatUrl from '@/assets/images/wechat_official.png'
+import QRCode from '@/components/icons/QRCode.vue'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -83,10 +84,6 @@ const preferencesOptions = computed(() => {
             key: 'd1',
         },
         {
-            label: 'menu.wechat_official',
-            key: 'wechat_official',
-        },
-        {
             label: 'menu.about',
             key: 'about',
         },
@@ -105,9 +102,6 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'report':
             BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm/issues')
-            break
-        case 'wechat_official':
-            showWechat.value = true
             break
         case 'about':
             dialogStore.openAboutDialog()
@@ -158,6 +152,13 @@ const exThemeVars = computed(() => {
                 @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" :stroke-width="3" class="nav-menu-button" />
             </n-dropdown>
+            <icon-button
+                v-if="prefStore.currentLanguage === 'zh'"
+                :icon="QRCode"
+                :size="iconSize"
+                :tooltip="$t('ribbon.wechat_official')"
+                class="nav-menu-button"
+                @click="showWechat = true" />
             <icon-button
                 :icon="Github"
                 :size="iconSize"
@@ -246,7 +247,7 @@ const exThemeVars = computed(() => {
 
     .nav-menu-item {
         align-items: center;
-        padding: 10px 0;
+        padding: 10px 0 15px;
         gap: 18px;
         --wails-draggable: none;
 

@@ -143,6 +143,7 @@
     "server": "服务器",
     "browser": "数据浏览",
     "log": "日志",
+    "wechat_official": "微信公众号",
     "github": "Github"
   },
   "dialogue": {
@@ -339,7 +340,6 @@
     "help": "帮助",
     "check_update": "检查更新...",
     "report_bug": "报告错误",
-    "wechat_official": "微信公众号",
     "about": "关于"
   },
   "log": {

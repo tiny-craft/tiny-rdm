@@ -143,6 +143,7 @@
     "server": "Server",
     "browser": "Data Browser",
     "log": "Log",
+    "wechat_official": "Wechat Official Account",
     "github": "Github"
   },
   "dialogue": {
@@ -339,7 +340,6 @@
     "help": "Help",
     "check_update": "Check for Updates...",
     "report_bug": "Report a Bug",
-    "wechat_official": "Wechat Official Account",
     "about": "About"
   },
   "log": {
