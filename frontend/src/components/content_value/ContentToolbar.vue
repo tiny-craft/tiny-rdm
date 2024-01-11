@@ -74,6 +74,10 @@ const startAutoRefresh = async () => {
         return
     }
     autoRefresh.on = true
+    if (!isNaN(autoRefresh.interval)) {
+        autoRefresh.interval = 2
+    }
+    autoRefresh.interval = Math.min(autoRefresh.interval, 1)
     let lastExec = Date.now()
     do {
         if (!autoRefresh.on) {
@@ -167,6 +171,7 @@ const onTTL = () => {
                                 <n-input-number
                                     v-model:value="autoRefresh.interval"
                                     :autofocus="false"
+                                    :default-value="2"
                                     :disabled="autoRefresh.on"
                                     :max="9999"
                                     :min="1"

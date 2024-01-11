@@ -9,7 +9,7 @@ const props = defineProps({
     tTooltip: String,
     tooltipDelay: {
         type: Number,
-        default: 1000,
+        default: 800,
     },
     type: String,
     icon: [String, Object],
