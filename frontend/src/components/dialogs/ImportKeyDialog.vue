@@ -166,7 +166,7 @@ const onClose = () => {
                     :loading="loading"
                     type="primary"
                     @click="onConfirmImport">
-                    {{ $t('dialogue.export.export') }}
+                    {{ $t('dialogue.import.import') }}
                 </n-button>
             </div>
         </template>

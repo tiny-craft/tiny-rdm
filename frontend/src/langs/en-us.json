@@ -43,7 +43,7 @@
       "key_icon_style0": "Short",
       "key_icon_style1": "Full",
       "key_icon_style2": "Point",
-      "key_icon_style3": "Key Icon",
+      "key_icon_style3": "Common",
       "proxy": "Proxy",
       "use_system_proxy": "Use system proxy",
       "use_system_proxy_http": "Use system proxy only for HTTP(S) request",

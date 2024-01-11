@@ -43,7 +43,7 @@
       "key_icon_style0": "紧凑类型",
       "key_icon_style1": "全称类型",
       "key_icon_style2": "圆点类型",
-      "key_icon_style3": "键图标",
+      "key_icon_style3": "通用图标",
       "proxy": "代理",
       "use_system_proxy": "使用系统代理",
       "use_system_proxy_http": "仅在HTTP请求时使用系统代理",
