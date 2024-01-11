@@ -149,6 +149,10 @@ const loadProgress = computed(() => {
     return (len * 100) / Math.max(len, props.length)
 })
 
+const showMemoryUsage = computed(() => {
+    return !isNaN(props.size) && props.size > 0
+})
+
 const onAddRow = () => {
     dialogStore.openAddFieldsDialog(props.name, props.db, props.keyPath, props.keyCode, types.STREAM)
 }
@@ -238,8 +242,8 @@ defineExpose({
 
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>
-            <n-divider v-if="!isNaN(props.length)" vertical />
-            <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
+            <n-divider v-if="showMemoryUsage" vertical />
+            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
         </div>
     </div>

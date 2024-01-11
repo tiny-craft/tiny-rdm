@@ -600,7 +600,6 @@ func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.
 	pipe := client.Pipeline()
 	typeVal := pipe.Type(ctx, key)
 	ttlVal := pipe.TTL(ctx, key)
-	sizeVal := pipe.MemoryUsage(ctx, key, 0)
 	_, err = pipe.Exec(ctx)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -611,9 +610,10 @@ func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.
 		resp.Msg = typeVal.Err().Error()
 		return
 	}
+	size, _ := client.MemoryUsage(ctx, key, 0).Result()
 	data := types.KeySummary{
 		Type: strings.ToLower(typeVal.Val()),
-		Size: sizeVal.Val(),
+		Size: size,
 	}
 	if data.Type == "none" {
 		resp.Msg = "key not exists"

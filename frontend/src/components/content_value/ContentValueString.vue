@@ -70,11 +70,16 @@ const editingContent = ref('')
 const enableSave = computed(() => {
     return editingContent.value !== viewAs.value && !props.loading
 })
+
 const displayValue = computed(() => {
     if (props.loading) {
         return ''
     }
     return viewAs.value || decodeRedisKey(props.value)
+})
+
+const showMemoryUsage = computed(() => {
+    return !isNaN(props.size) && props.size > 0
 })
 
 watchEffect(
@@ -209,8 +214,8 @@ defineExpose({
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>
-            <n-divider v-if="!isNaN(props.length)" vertical />
-            <n-text v-if="!isNaN(props.size)">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
+            <n-divider v-if="showMemoryUsage" vertical />
+            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
             <div class="flex-item-expand" />
             <format-selector
                 :decode="viewAs.decode"
