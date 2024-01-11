@@ -153,7 +153,7 @@ const menuOptions = {
     ],
 }
 
-const handleSelectContextMenu = (key) => {
+const handleSelectContextMenu = (action) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
     if (selectedKey == null) {
@@ -163,7 +163,7 @@ const handleSelectContextMenu = (key) => {
     const { db = 0, key: nodeKey, redisKey: rk = '', redisKeyCode: rkc, label } = node || {}
     const redisKey = rkc || rk
     const redisKeyName = !!rkc ? label : redisKey
-    switch (key) {
+    switch (action) {
         case 'key_newkey':
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
@@ -226,7 +226,7 @@ const handleSelectContextMenu = (key) => {
             break
         case 'more_action':
         default:
-            console.warn('TODO: handle context menu:' + key)
+            console.warn('TODO: handle context menu:' + action)
     }
 }
 
@@ -501,7 +501,7 @@ const nodeProps = ({ option }) => {
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
-                // onUpdateSelectedKeys([option.key], [option])
+                onUpdateSelectedKeys([option.key], [option])
             })
         },
         // onMouseover() {
