@@ -400,7 +400,7 @@ const useBrowserStore = defineStore('browser', {
                             $message.error('load key summary fail: ' + msg)
                         }
                         // its danger to delete "non-exists" key, just remove from tree view
-                        await this.deleteKey(server, db, key, true)
+                        // await this.deleteKey(server, db, key, true)
                         // TODO: show key not found page or check exists on server first?
                     }
                 }
