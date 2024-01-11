@@ -15,13 +15,13 @@
     "monaco-editor": "^0.45.0",
     "pinia": "^2.1.7",
     "sass": "^1.69.7",
-    "vue": "^3.4.7",
+    "vue": "^3.4.8",
     "vue-i18n": "^9.9.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.2",
+    "@vitejs/plugin-vue": "^5.0.3",
     "naive-ui": "^2.37.3",
     "prettier": "^3.1.1",
     "unplugin-auto-import": "^0.17.3",
