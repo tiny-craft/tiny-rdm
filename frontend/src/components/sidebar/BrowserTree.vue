@@ -25,6 +25,7 @@ import { useRender } from '@/utils/render.js'
 import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
+import { nativeRedisKey } from '@/utils/key_convert.js'
 
 const props = defineProps({
     server: String,
@@ -199,7 +200,7 @@ const handleSelectContextMenu = (key) => {
             break
         case 'key_copy':
         case 'value_copy':
-            ClipboardSetText(redisKey)
+            ClipboardSetText(nativeRedisKey(redisKey))
                 .then((succ) => {
                     if (succ) {
                         $message.success(i18n.t('interface.copy_succ'))
