@@ -359,9 +359,7 @@
     "connected_clients": "Clients",
     "total_keys": "Keys",
     "memory_used": "Memory",
-    "all_info": "Information",
-    "refresh": "Refresh",
-    "auto_refresh": "Auto Refresh"
+    "all_info": "Information"
   },
   "slog": {
     "title": "Slow Log",

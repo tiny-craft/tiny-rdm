@@ -291,9 +291,7 @@
     "connected_clients": "Clientes Conectados",
     "total_keys": "Chaves Totais",
     "memory_used": "Memória Usada",
-    "all_info": "Informações",
-    "refresh": "Atualizar",
-    "auto_refresh": "Atualização Automática"
+    "all_info": "Informações"
   },
   "slog": {
     "title": "Registro de Operações Lentas",

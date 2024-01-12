@@ -359,9 +359,7 @@
     "connected_clients": "已连客户端",
     "total_keys": "键总数",
     "memory_used": "内存使用",
-    "all_info": "全部信息",
-    "refresh": "立即刷新",
-    "auto_refresh": "自动刷新"
+    "all_info": "全部信息"
   },
   "slog": {
     "title": "慢日志",

@@ -6,16 +6,19 @@ import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useBrowserStore from 'stores/browser.js'
 import { timeout } from '@/utils/promise.js'
+import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
+import { NIcon, useThemeVars } from 'naive-ui'
 
 const props = defineProps({
     server: String,
 })
 
 const browserStore = useBrowserStore()
+const themeVars = useThemeVars()
 const serverInfo = ref({})
 const pageState = reactive({
     autoRefresh: false,
-    refreshInterval: 1,
+    refreshInterval: 5,
     loading: false, // loading status for refresh
     autoLoading: false, // loading status for auto refresh
 })
@@ -41,15 +44,11 @@ const refreshInfo = async (force) => {
     }
 }
 
+const isLoading = computed(() => {
+    return pageState.loading || pageState.autoLoading
+})
+
 const startAutoRefresh = async () => {
-    if (pageState.autoRefresh) {
-        return
-    }
-    pageState.autoRefresh = true
-    if (!isNaN(pageState.refreshInterval)) {
-        pageState.refreshInterval = 5
-    }
-    pageState.refreshInterval = Math.min(pageState.refreshInterval, 1)
     let lastExec = Date.now()
     do {
         if (!pageState.autoRefresh) {
@@ -171,28 +170,34 @@ const infoFilter = ref('')
                     </n-space>
                 </template>
                 <template #header-extra>
-                    <n-space align="center" inline>
-                        {{ $t('status.auto_refresh') }}
-                        <n-switch
+                    <n-popover keep-alive-on-hover placement="bottom-end" trigger="hover">
+                        <template #trigger>
+                            <n-button
+                                :loading="pageState.loading"
+                                :type="isLoading ? 'primary' : 'default'"
+                                circle
+                                size="small"
+                                tertiary
+                                @click="refreshInfo(true)">
+                                <template #icon>
+                                    <n-icon :size="props.size">
+                                        <refresh
+                                            :class="{
+                                                'auto-rotate': pageState.autoRefresh || isLoading,
+                                            }"
+                                            :color="pageState.autoRefresh ? themeVars.primaryColor : undefined"
+                                            :stroke-width="pageState.autoRefresh ? 6 : 3" />
+                                    </n-icon>
+                                </template>
+                            </n-button>
+                        </template>
+                        <auto-refresh-form
+                            v-model:interval="pageState.refreshInterval"
+                            v-model:on="pageState.autoRefresh"
+                            :default-value="5"
                             :loading="pageState.autoLoading"
-                            :value="pageState.autoRefresh"
-                            @update:value="onToggleRefresh" />
-                        <n-tooltip>
-                            {{ $t('status.refresh') }}
-                            <template #trigger>
-                                <n-button
-                                    :loading="pageState.autoLoading"
-                                    circle
-                                    size="small"
-                                    tertiary
-                                    @click="refreshInfo(true)">
-                                    <template #icon>
-                                        <n-icon :component="Refresh" />
-                                    </template>
-                                </n-button>
-                            </template>
-                        </n-tooltip>
-                    </n-space>
+                            @toggle="onToggleRefresh" />
+                    </n-popover>
                 </template>
                 <n-spin :show="pageState.loading">
                     <n-grid style="min-width: 500px" x-gap="5">
