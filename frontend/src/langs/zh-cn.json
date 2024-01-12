@@ -368,9 +368,7 @@
     "exec_time": "执行时间",
     "client": "客户端",
     "cmd": "命令",
-    "cost_time": "耗时",
-    "refresh": "立即刷新",
-    "auto_refresh": "自动刷新"
+    "cost_time": "耗时"
   },
   "monitor": {
     "title": "监控命令",

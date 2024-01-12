@@ -368,9 +368,7 @@
     "exec_time": "Time",
     "client": "Client",
     "cmd": "Command",
-    "cost_time": "Cost",
-    "refresh": "Refresh Now",
-    "auto_refresh": "Auto Refresh"
+    "cost_time": "Cost"
   },
   "monitor": {
     "title": "Monitor Commands",

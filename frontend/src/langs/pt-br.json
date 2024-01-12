@@ -300,8 +300,6 @@
     "exec_time": "Tempo",
     "client": "Cliente",
     "cmd": "Comando",
-    "cost_time": "Custo",
-    "refresh": "Atualizar Agora",
-    "auto_refresh": "Atualização Automática"
+    "cost_time": "Custo"
   }
 }

@@ -6,6 +6,8 @@ import { useI18n } from 'vue-i18n'
 import { useThemeVars } from 'naive-ui'
 import dayjs from 'dayjs'
 import useBrowserStore from 'stores/browser.js'
+import { timeout } from '@/utils/promise.js'
+import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
 
 const themeVars = useThemeVars()
 
@@ -21,12 +23,16 @@ const props = defineProps({
     },
 })
 
+const autoRefresh = reactive({
+    on: false,
+    interval: 5,
+})
+
 const data = reactive({
     list: [],
     sortOrder: 'descend',
     listLimit: 20,
     loading: false,
-    autoLoading: false,
     client: '',
     keyword: '',
 })
@@ -133,19 +139,37 @@ const _loadSlowLog = () => {
 }
 const loadSlowLog = debounce(_loadSlowLog, 1000, { leading: true, trailing: true })
 
-let intervalID
-onMounted(() => {
-    loadSlowLog()
-    intervalID = setInterval(() => {
-        if (data.autoLoading === true) {
-            loadSlowLog()
+const startAutoRefresh = async () => {
+    let lastExec = Date.now()
+    do {
+        if (!autoRefresh.on) {
+            break
         }
-    }, 5000)
-})
+        await timeout(100)
+        if (data.loading || Date.now() - lastExec < autoRefresh.interval * 1000) {
+            continue
+        }
+        lastExec = Date.now()
+        loadSlowLog()
+    } while (true)
+    stopAutoRefresh()
+}
 
-onUnmounted(() => {
-    clearInterval(intervalID)
-})
+const stopAutoRefresh = () => {
+    autoRefresh.on = false
+}
+
+onMounted(() => loadSlowLog())
+
+onUnmounted(() => stopAutoRefresh())
+
+const onToggleRefresh = (on) => {
+    if (on) {
+        startAutoRefresh()
+    } else {
+        stopAutoRefresh()
+    }
+}
 
 const onListLimitChanged = (limit) => {
     loadSlowLog()
@@ -162,23 +186,28 @@ const onListLimitChanged = (limit) => {
                     style="width: 120px"
                     @update:value="onListLimitChanged" />
             </n-form-item>
-            <n-form-item :label="$t('slog.auto_refresh')">
-                <n-switch v-model:value="data.autoLoading" :loading="data.loading" />
+            <n-form-item :label="$t('slog.filter')">
+                <n-input v-model:value="data.keyword" clearable placeholder="" />
             </n-form-item>
             <n-form-item label="&nbsp;">
-                <n-tooltip>
-                    {{ $t('slog.refresh') }}
+                <n-popover :delay="500" keep-alive-on-hover placement="bottom" trigger="hover">
                     <template #trigger>
                         <n-button :loading="data.loading" circle size="small" tertiary @click="_loadSlowLog">
                             <template #icon>
-                                <n-icon :component="Refresh" />
+                                <refresh
+                                    :class="{ 'auto-rotate': autoRefresh.on }"
+                                    :color="autoRefresh.on ? themeVars.primaryColor : undefined"
+                                    :stroke-width="autoRefresh.on ? 6 : 3" />
                             </template>
                         </n-button>
                     </template>
-                </n-tooltip>
-            </n-form-item>
-            <n-form-item :label="$t('slog.filter')">
-                <n-input v-model:value="data.keyword" clearable placeholder="" />
+                    <auto-refresh-form
+                        v-model:interval="autoRefresh.interval"
+                        v-model:on="autoRefresh.on"
+                        :default-value="5"
+                        :loading="data.loading"
+                        @toggle="onToggleRefresh" />
+                </n-popover>
             </n-form-item>
         </n-form>
         <n-data-table
