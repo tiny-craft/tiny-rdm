@@ -5,6 +5,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useBrowserStore from 'stores/browser.js'
+import { timeout } from '@/utils/promise.js'
 
 const props = defineProps({
     server: String,
@@ -13,8 +14,8 @@ const props = defineProps({
 const browserStore = useBrowserStore()
 const serverInfo = ref({})
 const pageState = reactive({
-    auto: false,
-    autoInterval: 5,
+    autoRefresh: false,
+    refreshInterval: 1,
     loading: false, // loading status for refresh
     autoLoading: false, // loading status for auto refresh
 })
@@ -40,18 +41,48 @@ const refreshInfo = async (force) => {
     }
 }
 
-let intervalID
+const startAutoRefresh = async () => {
+    if (pageState.autoRefresh) {
+        return
+    }
+    pageState.autoRefresh = true
+    if (!isNaN(pageState.refreshInterval)) {
+        pageState.refreshInterval = 5
+    }
+    pageState.refreshInterval = Math.min(pageState.refreshInterval, 1)
+    let lastExec = Date.now()
+    do {
+        if (!pageState.autoRefresh) {
+            break
+        }
+        await timeout(100)
+        if (pageState.loading || pageState.autoLoading || Date.now() - lastExec < pageState.refreshInterval * 1000) {
+            continue
+        }
+        lastExec = Date.now()
+        await refreshInfo()
+    } while (true)
+    stopAutoRefresh()
+}
+
+const stopAutoRefresh = () => {
+    pageState.autoRefresh = false
+}
+
+const onToggleRefresh = (on) => {
+    if (on) {
+        startAutoRefresh()
+    } else {
+        stopAutoRefresh()
+    }
+}
+
 onMounted(() => {
     refreshInfo()
-    intervalID = setInterval(() => {
-        if (pageState.auto === true) {
-            refreshInfo()
-        }
-    }, pageState.autoInterval * 1000)
 })
 
 onUnmounted(() => {
-    clearInterval(intervalID)
+    stopAutoRefresh()
 })
 
 const scrollRef = ref(null)
@@ -142,7 +173,10 @@ const infoFilter = ref('')
                 <template #header-extra>
                     <n-space align="center" inline>
                         {{ $t('status.auto_refresh') }}
-                        <n-switch v-model:value="pageState.auto" :loading="pageState.autoLoading" />
+                        <n-switch
+                            :loading="pageState.autoLoading"
+                            :value="pageState.autoRefresh"
+                            @update:value="onToggleRefresh" />
                         <n-tooltip>
                             {{ $t('status.refresh') }}
                             <template #trigger>
