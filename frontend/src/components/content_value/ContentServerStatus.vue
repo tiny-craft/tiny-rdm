@@ -1,6 +1,6 @@
 <script setup>
 import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -12,9 +12,12 @@ const props = defineProps({
 
 const browserStore = useBrowserStore()
 const serverInfo = ref({})
-const autoRefresh = ref(false)
-const loading = ref(false) // loading status for refresh
-const autoLoading = ref(false) // loading status for auto refresh
+const pageState = reactive({
+    auto: false,
+    autoInterval: 5,
+    loading: false, // loading status for refresh
+    autoLoading: false, // loading status for auto refresh
+})
 
 /**
  * refresh server status info
@@ -23,16 +26,16 @@ const autoLoading = ref(false) // loading status for auto refresh
  */
 const refreshInfo = async (force) => {
     if (force) {
-        loading.value = true
+        pageState.loading = true
     } else {
-        autoLoading.value = true
+        pageState.autoLoading = true
     }
     if (!isEmpty(props.server) && browserStore.isConnected(props.server)) {
         try {
             serverInfo.value = await browserStore.getServerInfo(props.server)
         } finally {
-            loading.value = false
-            autoLoading.value = false
+            pageState.loading = false
+            pageState.autoLoading = false
         }
     }
 }
@@ -41,10 +44,10 @@ let intervalID
 onMounted(() => {
     refreshInfo()
     intervalID = setInterval(() => {
-        if (autoRefresh.value === true) {
+        if (pageState.auto === true) {
             refreshInfo()
         }
-    }, 5000)
+    }, pageState.autoInterval * 1000)
 })
 
 onUnmounted(() => {
@@ -128,7 +131,7 @@ const infoFilter = ref('')
                                 <n-tag size="small" type="primary">{{ redisMode }}</n-tag>
                             </template>
                         </n-tooltip>
-                        <n-tooltip v-if="redisMode">
+                        <n-tooltip v-if="role">
                             Role
                             <template #trigger>
                                 <n-tag size="small" type="primary">{{ role }}</n-tag>
@@ -139,12 +142,12 @@ const infoFilter = ref('')
                 <template #header-extra>
                     <n-space align="center" inline>
                         {{ $t('status.auto_refresh') }}
-                        <n-switch v-model:value="autoRefresh" :loading="autoLoading" />
+                        <n-switch v-model:value="pageState.auto" :loading="pageState.autoLoading" />
                         <n-tooltip>
                             {{ $t('status.refresh') }}
                             <template #trigger>
                                 <n-button
-                                    :loading="autoLoading"
+                                    :loading="pageState.autoLoading"
                                     circle
                                     size="small"
                                     tertiary
@@ -157,7 +160,7 @@ const infoFilter = ref('')
                         </n-tooltip>
                     </n-space>
                 </template>
-                <n-spin :show="loading">
+                <n-spin :show="pageState.loading">
                     <n-grid style="min-width: 500px" x-gap="5">
                         <n-gi :span="6">
                             <n-statistic :label="$t('status.uptime')" :value="uptime[0]">
@@ -192,7 +195,7 @@ const infoFilter = ref('')
                         </template>
                     </n-input>
                 </template>
-                <n-spin :show="loading">
+                <n-spin :show="pageState.loading">
                     <n-tabs default-value="CPU" placement="left" type="line">
                         <n-tab-pane v-for="(v, k) in serverInfo" :key="k" :disabled="isEmpty(v)" :name="k">
                             <n-data-table

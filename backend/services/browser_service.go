@@ -291,7 +291,8 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	var ok bool
 	var client redis.UniversalClient
 	if item, ok = b.connMap[server]; ok {
-		if item.db == db {
+		if item.db == db || db < 0 {
+			// return without switch database directly
 			return
 		}
 

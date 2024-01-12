@@ -347,7 +347,7 @@ const useBrowserStore = defineStore('browser', {
          */
         async getServerInfo(server) {
             try {
-                const { success, data } = await ServerInfo(server)
+                const { success, data, msg } = await ServerInfo(server)
                 if (success) {
                     /** @type {RedisServerState} **/
                     const serverInst = this.servers[server]
@@ -355,6 +355,8 @@ const useBrowserStore = defineStore('browser', {
                         serverInst.stats = data
                     }
                     return data
+                } else if (!isEmpty(msg)) {
+                    $message.warning(msg)
                 }
             } finally {
             }
