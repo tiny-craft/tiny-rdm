@@ -11,7 +11,7 @@ import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed, onUnmounted, reactive, watch } from 'vue'
-import { padStart } from 'lodash'
+import { isNumber, padStart } from 'lodash'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 
@@ -74,10 +74,10 @@ const startAutoRefresh = async () => {
         return
     }
     autoRefresh.on = true
-    if (!isNaN(autoRefresh.interval)) {
+    if (!isNumber(autoRefresh.interval)) {
         autoRefresh.interval = 2
     }
-    autoRefresh.interval = Math.min(autoRefresh.interval, 1)
+    autoRefresh.interval = Math.max(autoRefresh.interval, 1)
     let lastExec = Date.now()
     do {
         if (!autoRefresh.on) {
@@ -147,11 +147,10 @@ const onTTL = () => {
                         <template #trigger>
                             <icon-button :loading="props.loading" size="18" @click="emit('reload')">
                                 <n-icon :size="props.size">
-                                    <component
-                                        :is="Refresh"
-                                        :class="{ 'auto-refreshing': autoRefresh.on }"
+                                    <refresh
+                                        :class="{ 'auto-rotate': autoRefresh.on }"
                                         :color="autoRefresh.on ? themeVars.primaryColor : undefined"
-                                        :stroke-width="autoRefresh.on ? 5 : 3" />
+                                        :stroke-width="autoRefresh.on ? 6 : 3" />
                                 </n-icon>
                             </icon-button>
                         </template>
@@ -225,15 +224,5 @@ const onTTL = () => {
 .content-toolbar {
     align-items: center;
     gap: 5px;
-}
-
-.auto-refreshing {
-    animation: rotate 2s linear infinite;
-}
-
-@keyframes rotate {
-    100% {
-        transform: rotate(360deg);
-    }
 }
 </style>
