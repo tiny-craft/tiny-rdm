@@ -11,9 +11,10 @@ import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed, onUnmounted, reactive, watch } from 'vue'
-import { isNumber, padStart } from 'lodash'
+import { padStart } from 'lodash'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
+import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
 
 const props = defineProps({
     server: String,
@@ -70,14 +71,6 @@ const ttlString = computed(() => {
 })
 
 const startAutoRefresh = async () => {
-    if (autoRefresh.on) {
-        return
-    }
-    autoRefresh.on = true
-    if (!isNumber(autoRefresh.interval)) {
-        autoRefresh.interval = 2
-    }
-    autoRefresh.interval = Math.max(autoRefresh.interval, 1)
     let lastExec = Date.now()
     do {
         if (!autoRefresh.on) {
@@ -154,34 +147,12 @@ const onTTL = () => {
                                 </n-icon>
                             </icon-button>
                         </template>
-                        <n-form
-                            :show-feedback="false"
-                            label-align="right"
-                            label-placement="left"
-                            label-width="auto"
-                            size="small">
-                            <n-form-item :label="$t('interface.auto_refresh')">
-                                <n-switch
-                                    :loading="props.loading"
-                                    :value="autoRefresh.on"
-                                    @update:value="onToggleRefresh" />
-                            </n-form-item>
-                            <n-form-item :label="$t('interface.refresh_interval')">
-                                <n-input-number
-                                    v-model:value="autoRefresh.interval"
-                                    :autofocus="false"
-                                    :default-value="2"
-                                    :disabled="autoRefresh.on"
-                                    :max="9999"
-                                    :min="1"
-                                    :show-button="false"
-                                    style="max-width: 100px">
-                                    <template #suffix>
-                                        {{ $t('common.unit_second') }}
-                                    </template>
-                                </n-input-number>
-                            </n-form-item>
-                        </n-form>
+                        <auto-refresh-form
+                            v-model:interval="autoRefresh.interval"
+                            v-model:on="autoRefresh.on"
+                            :default-value="2"
+                            :loading="props.loading"
+                            @toggle="onToggleRefresh" />
                     </n-popover>
                 </template>
             </n-input>
