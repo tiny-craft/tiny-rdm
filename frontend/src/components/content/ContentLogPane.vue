@@ -107,7 +107,8 @@ const loadHistory = async () => {
         data.history = list || []
     } finally {
         data.loading = false
-        tableRef.value?.scrollTo({ top: 999999 })
+        await nextTick()
+        tableRef.value?.scrollTo({ position: 'bottom' })
     }
 }
 
@@ -118,7 +119,8 @@ const cleanHistory = async () => {
             const success = await browserStore.cleanCmdHistory()
             if (success) {
                 data.history = []
-                tableRef.value?.scrollTo({ top: 0 })
+                await nextTick()
+                tableRef.value?.scrollTo({ position: 'top' })
                 $message.success(i18n.t('dialogue.handle_succ'))
             }
         } finally {

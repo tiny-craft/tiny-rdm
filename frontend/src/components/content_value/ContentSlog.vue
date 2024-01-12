@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, h, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import { debounce, isEmpty, map, size, split } from 'lodash'
 import { useI18n } from 'vue-i18n'
@@ -125,9 +125,10 @@ const _loadSlowLog = () => {
         .then((list) => {
             data.list = list || []
         })
-        .finally(() => {
+        .finally(async () => {
             data.loading = false
-            tableRef.value?.scrollTo({ top: data.sortOrder === 'ascend' ? 999999 : 0 })
+            await nextTick()
+            tableRef.value?.scrollTo({ position: data.sortOrder === 'ascend' ? 'bottom' : 'top' })
         })
 }
 const loadSlowLog = debounce(_loadSlowLog, 1000, { leading: true, trailing: true })
