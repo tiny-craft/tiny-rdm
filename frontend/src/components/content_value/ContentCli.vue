@@ -200,16 +200,28 @@ const moveInputCursor = (step) => {
             inputCursor += step
             updateCursor = true
         }
-    } else {
-        // update cursor position only
-        const currentLine = getCurrentInput()
-        inputCursor = Math.max(0, currentLine.length)
-        updateCursor = true
     }
 
     if (updateCursor) {
-        termInst.write(`\x1B[${prefixLen.value + inputCursor + 1}G`)
+        moveInputCursorTo(inputCursor)
     }
+}
+
+/**
+ * move cursor to the end of current line
+ */
+const moveInputCursorToEnd = () => {
+    moveInputCursorTo(Number.MAX_VALUE)
+}
+
+/**
+ * move cursor to pos
+ * @param {number} pos
+ */
+const moveInputCursorTo = (pos) => {
+    const currentLine = getCurrentInput()
+    inputCursor = Math.min(Math.max(0, pos), currentLine.length)
+    termInst.write(`\x1B[${prefixLen.value + inputCursor + 1}G`)
 }
 
 /**
@@ -229,8 +241,7 @@ const updateInput = (data) => {
     if (inputCursor < currentLine.length) {
         // insert
         currentLine = currentLine.substring(0, inputCursor) + data + currentLine.substring(inputCursor)
-        replaceTermInput()
-        termInst.write(currentLine)
+        replaceTermInput(currentLine)
         moveInputCursor(data.length)
     } else {
         // append
@@ -260,15 +271,16 @@ const deleteInput = (back = false) => {
             currentLine = currentLine.substring(0, inputCursor) + currentLine.substring(inputCursor + 1)
         }
     } else {
-        // delete last one
-        currentLine = currentLine.slice(0, -1)
-        inputCursor -= 1
+        if (back) {
+            // delete last one
+            currentLine = currentLine.slice(0, -1)
+            inputCursor -= 1
+        }
     }
 
-    replaceTermInput()
-    termInst.write(currentLine)
+    replaceTermInput(currentLine)
     updateCurrentInput(currentLine)
-    moveInputCursor(0)
+    moveInputCursorTo(inputCursor)
 }
 
 const getCurrentInput = () => {
@@ -315,9 +327,8 @@ const changeHistory = (prev) => {
             return
         }
 
-        replaceTermInput()
-        termInst.write(currentLine)
-        moveInputCursor(0)
+        replaceTermInput(currentLine)
+        moveInputCursorToEnd()
     }
 
     return null
@@ -338,7 +349,7 @@ const flushTermInput = (flushCmd = false) => {
 
 /**
  * clear current input line and replace with new content
- * @param {string} [content]
+ * @param {string|null} [content]
  */
 const replaceTermInput = (content = '') => {
     if (termInst == null) {
