@@ -359,7 +359,12 @@
     "connected_clients": "Clients",
     "total_keys": "Keys",
     "memory_used": "Memory",
-    "all_info": "Information"
+    "all_info": "Information",
+    "env_info": "Environment",
+    "activity_status": "Activity",
+    "act_cmd": "Commands Per Second",
+    "act_network_input": "Network Input",
+    "act_network_output": "Network Output"
   },
   "slog": {
     "title": "Slow Log",

@@ -1,6 +1,6 @@
 <script setup>
-import { get, isEmpty, map, mapValues, pickBy, split, sum, toArray, toNumber } from 'lodash'
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { cloneDeep, flatMap, get, isEmpty, map, mapValues, pickBy, slice, split, sum, toArray, toNumber } from 'lodash'
+import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -8,6 +8,10 @@ import useBrowserStore from 'stores/browser.js'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
 import { NIcon, useThemeVars } from 'naive-ui'
+import { Line } from 'vue-chartjs'
+import dayjs from 'dayjs'
+import { convertBytes, formatBytes } from '@/utils/byte_convert.js'
+import { i18n } from '@/utils/i18n.js'
 
 const props = defineProps({
     server: String,
@@ -22,6 +26,24 @@ const pageState = reactive({
     loading: false, // loading status for refresh
     autoLoading: false, // loading status for auto refresh
 })
+const statusHistory = 5
+const cmdRateRef = ref(null)
+
+/**
+ *
+ * @param origin
+ * @param {string[]} labels
+ * @param {number[][]} datalist
+ * @return {unknown}
+ */
+const generateData = (origin, labels, datalist) => {
+    let ret = toRaw(origin)
+    ret.labels = labels
+    for (let i = 0; i < datalist.length; i++) {
+        ret.datasets[i].data = datalist[i]
+    }
+    return cloneDeep(ret)
+}
 
 /**
  * refresh server status info
@@ -36,11 +58,61 @@ const refreshInfo = async (force) => {
     }
     if (!isEmpty(props.server) && browserStore.isConnected(props.server)) {
         try {
-            serverInfo.value = await browserStore.getServerInfo(props.server)
+            const info = await browserStore.getServerInfo(props.server)
+            serverInfo.value = info
+            _updateChart(info)
         } finally {
             pageState.loading = false
             pageState.autoLoading = false
         }
+    }
+}
+
+const _updateChart = (info) => {
+    let timeLabels = toRaw(cmdRate.value.labels)
+    timeLabels = timeLabels.concat(dayjs().format('hh:mm:ss'))
+    timeLabels = slice(timeLabels, Math.max(0, timeLabels.length - statusHistory))
+
+    // commands per seconds
+    {
+        let dataset = toRaw(cmdRate.value.datasets[0].data)
+        const cmd = parseInt(get(info, 'Stats.instantaneous_ops_per_sec', '0'))
+        dataset = dataset.concat(cmd)
+        dataset = slice(dataset, Math.max(0, dataset.length - statusHistory))
+        cmdRate.value = generateData(cmdRate.value, timeLabels, [dataset])
+    }
+
+    // connected clients
+    {
+        let dataset = toRaw(connectedClients.value.datasets[0].data)
+        const count = parseInt(get(info, 'Clients.connected_clients', '0'))
+        dataset = dataset.concat(count)
+        dataset = slice(dataset, Math.max(0, dataset.length - statusHistory))
+        connectedClients.value = generateData(connectedClients.value, timeLabels, [dataset])
+    }
+
+    // memory usage
+    {
+        let dataset = toRaw(memoryUsage.value.datasets[0].data)
+        let size = parseInt(get(info, 'Memory.used_memory', '0'))
+        dataset = dataset.concat(size)
+        dataset = slice(dataset, Math.max(0, dataset.length - statusHistory))
+        memoryUsage.value = generateData(memoryUsage.value, timeLabels, [dataset])
+    }
+
+    // network input/output rate
+    {
+        let dataset1 = toRaw(networkRate.value.datasets[0].data)
+        const input = parseInt(get(info, 'Stats.instantaneous_input_kbps', '0'))
+        dataset1 = dataset1.concat(input)
+        dataset1 = slice(dataset1, Math.max(0, dataset1.length - statusHistory))
+
+        let dataset2 = toRaw(networkRate.value.datasets[1].data)
+        const output = parseInt(get(info, 'Stats.instantaneous_output_kbps', '0'))
+        dataset2 = dataset2.concat(output)
+        dataset2 = slice(dataset2, Math.max(0, dataset2.length - statusHistory))
+        networkRate.value = generateData(networkRate.value, timeLabels, [dataset1, dataset2])
+        // console.log(dataset1, dataset2)
     }
 }
 
@@ -70,6 +142,7 @@ const stopAutoRefresh = () => {
 
 const onToggleRefresh = (on) => {
     if (on) {
+        tabVal.value = 'activity'
         startAutoRefresh()
     } else {
         stopAutoRefresh()
@@ -84,7 +157,6 @@ onUnmounted(() => {
     stopAutoRefresh()
 })
 
-const scrollRef = ref(null)
 const redisVersion = computed(() => {
     return get(serverInfo.value, 'Server.redis_version', '')
 })
@@ -99,31 +171,24 @@ const role = computed(() => {
 
 const timeUnit = ['common.unit_minute', 'common.unit_hour', 'common.unit_day']
 const uptime = computed(() => {
-    let seconds = get(serverInfo.value, 'Server.uptime_in_seconds', 0)
+    let seconds = parseInt(get(serverInfo.value, 'Server.uptime_in_seconds', '0'))
     seconds /= 60
     if (seconds < 60) {
         // minutes
-        return [Math.floor(seconds), timeUnit[0]]
+        return { value: Math.floor(seconds), unit: timeUnit[0] }
     }
     seconds /= 60
     if (seconds < 60) {
         // hours
-        return [Math.floor(seconds), timeUnit[1]]
+        return { value: Math.floor(seconds), unit: timeUnit[1] }
     }
-    return [Math.floor(seconds / 24), timeUnit[2]]
+    return { value: Math.floor(seconds / 24), unit: timeUnit[2] }
 })
 
-const units = ['B', 'KB', 'MB', 'GB', 'TB']
 const usedMemory = computed(() => {
-    let size = get(serverInfo.value, 'Memory.used_memory', 0)
-    let unitIndex = 0
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-        size /= 1024
-        unitIndex++
-    }
-
-    return [size.toFixed(2), units[unitIndex]]
+    let size = parseInt(get(serverInfo.value, 'Memory.used_memory', '0'))
+    const { value, unit } = convertBytes(size)
+    return [value, unit]
 })
 
 const totalKeys = computed(() => {
@@ -138,127 +203,341 @@ const totalKeys = computed(() => {
     })
     return sum(toArray(nums))
 })
-const infoFilter = ref('')
+
+const tabVal = ref('info')
+const envFilter = reactive({
+    keyword: '',
+    group: 'CPU',
+})
+
+const env = computed(() => {
+    if (!isEmpty(envFilter.group)) {
+        const val = serverInfo.value[envFilter.group]
+        if (!isEmpty(val)) {
+            return map(val, (v, k) => ({
+                key: k,
+                value: v,
+            }))
+        }
+    }
+
+    return flatMap(serverInfo.value, (value, key) => {
+        return map(value, (v, k) => ({
+            group: key,
+            key: k,
+            value: v,
+        }))
+    })
+})
+
+const onFilterGroup = (group) => {
+    if (group === envFilter.group) {
+        envFilter.group = ''
+    } else {
+        envFilter.group = group
+    }
+}
+
+const chartBGColor = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(255, 159, 64, 0.2)',
+    'rgba(153, 102, 255, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+]
+
+const chartBorderColor = [
+    'rgb(255, 99, 132)',
+    'rgb(255, 159, 64)',
+    'rgb(153, 102, 255)',
+    'rgb(75, 192, 192)',
+    'rgb(54, 162, 235)',
+]
+
+const cmdRate = ref({
+    labels: [],
+    datasets: [
+        {
+            label: i18n.global.t('status.act_cmd'),
+            data: [],
+            fill: true,
+            backgroundColor: chartBGColor[0],
+            borderColor: chartBorderColor[0],
+            tension: 0.4,
+        },
+    ],
+})
+
+const connectedClients = ref({
+    labels: [],
+    datasets: [
+        {
+            label: i18n.global.t('status.connected_clients'),
+            data: [],
+            fill: true,
+            backgroundColor: chartBGColor[1],
+            borderColor: chartBorderColor[1],
+            tension: 0.4,
+        },
+    ],
+})
+
+const memoryUsage = ref({
+    labels: [],
+    datasets: [
+        {
+            label: i18n.global.t('status.memory_used'),
+            data: [],
+            fill: true,
+            backgroundColor: chartBGColor[2],
+            borderColor: chartBorderColor[2],
+            tension: 0.4,
+        },
+    ],
+})
+
+const networkRate = ref({
+    labels: [],
+    datasets: [
+        {
+            label: i18n.global.t('status.act_network_input'),
+            data: [],
+            fill: true,
+            backgroundColor: chartBGColor[3],
+            borderColor: chartBorderColor[3],
+            tension: 0.4,
+        },
+        {
+            label: i18n.global.t('status.act_network_output'),
+            data: [],
+            fill: true,
+            backgroundColor: chartBGColor[4],
+            borderColor: chartBorderColor[4],
+            tension: 0.4,
+        },
+    ],
+})
+
+const chartOption = {
+    responsive: true,
+    maintainAspectRatio: false,
+    events: [],
+    scales: {
+        y: {
+            beginAtZero: true,
+            suggestedMin: 0,
+            ticks: {
+                precision: 0,
+            },
+        },
+    },
+}
+
+const byteChartOption = {
+    responsive: true,
+    maintainAspectRatio: false,
+    events: [],
+    scales: {
+        y: {
+            beginAtZero: true,
+            suggestedMin: 0,
+            ticks: {
+                precision: 0,
+                // format display y axios tag
+                callback: function (value, index, values) {
+                    return formatBytes(value, 0)
+                },
+            },
+        },
+    },
+}
 </script>
 
 <template>
-    <n-scrollbar ref="scrollRef">
-        <n-back-top :listen-to="scrollRef" />
-        <n-space :size="5" :wrap-item="false" style="padding: 5px" vertical>
-            <n-card embedded>
-                <template #header>
-                    <n-space :wrap-item="false" align="center" inline size="small">
-                        {{ props.server }}
-                        <n-tooltip v-if="redisVersion">
-                            Redis Version
-                            <template #trigger>
-                                <n-tag size="small" type="primary">v{{ redisVersion }}</n-tag>
-                            </template>
-                        </n-tooltip>
-                        <n-tooltip v-if="redisMode">
-                            Mode
-                            <template #trigger>
-                                <n-tag size="small" type="primary">{{ redisMode }}</n-tag>
-                            </template>
-                        </n-tooltip>
-                        <n-tooltip v-if="role">
-                            Role
-                            <template #trigger>
-                                <n-tag size="small" type="primary">{{ role }}</n-tag>
-                            </template>
-                        </n-tooltip>
-                    </n-space>
-                </template>
-                <template #header-extra>
-                    <n-popover keep-alive-on-hover placement="bottom-end" trigger="hover">
+    <n-space :size="5" :wrap-item="false" style="padding: 5px; box-sizing: border-box; height: 100%" vertical>
+        <n-card embedded>
+            <template #header>
+                <n-space :wrap-item="false" align="center" inline size="small">
+                    {{ props.server }}
+                    <n-tooltip v-if="redisVersion">
+                        Redis Version
                         <template #trigger>
+                            <n-tag size="small" type="primary">v{{ redisVersion }}</n-tag>
+                        </template>
+                    </n-tooltip>
+                    <n-tooltip v-if="redisMode">
+                        Mode
+                        <template #trigger>
+                            <n-tag size="small" type="primary">{{ redisMode }}</n-tag>
+                        </template>
+                    </n-tooltip>
+                    <n-tooltip v-if="role">
+                        Role
+                        <template #trigger>
+                            <n-tag size="small" type="primary">{{ role }}</n-tag>
+                        </template>
+                    </n-tooltip>
+                </n-space>
+            </template>
+            <template #header-extra>
+                <n-popover keep-alive-on-hover placement="bottom-end" trigger="hover">
+                    <template #trigger>
+                        <n-button
+                            :loading="pageState.loading"
+                            :type="isLoading ? 'primary' : 'default'"
+                            circle
+                            size="small"
+                            tertiary
+                            @click="refreshInfo(true)">
+                            <template #icon>
+                                <n-icon :size="props.size">
+                                    <refresh
+                                        :class="{
+                                            'auto-rotate': pageState.autoRefresh || isLoading,
+                                        }"
+                                        :color="pageState.autoRefresh ? themeVars.primaryColor : undefined"
+                                        :stroke-width="pageState.autoRefresh ? 6 : 3" />
+                                </n-icon>
+                            </template>
+                        </n-button>
+                    </template>
+                    <auto-refresh-form
+                        v-model:interval="pageState.refreshInterval"
+                        v-model:on="pageState.autoRefresh"
+                        :default-value="5"
+                        :loading="pageState.autoLoading"
+                        @toggle="onToggleRefresh" />
+                </n-popover>
+            </template>
+            <n-spin :show="pageState.loading">
+                <n-grid style="min-width: 500px" x-gap="5">
+                    <n-gi :span="6">
+                        <n-statistic :label="$t('status.uptime')" :value="uptime.value">
+                            <template #suffix>{{ $t(uptime.unit) }}</template>
+                        </n-statistic>
+                    </n-gi>
+                    <n-gi :span="6">
+                        <n-statistic
+                            :label="$t('status.connected_clients')"
+                            :value="get(serverInfo, 'Clients.connected_clients', '0')" />
+                    </n-gi>
+                    <n-gi :span="6">
+                        <n-statistic :value="totalKeys">
+                            <template #label>
+                                {{ $t('status.total_keys') }}
+                            </template>
+                        </n-statistic>
+                    </n-gi>
+                    <n-gi :span="6">
+                        <n-statistic :label="$t('status.memory_used')" :value="usedMemory[0]">
+                            <template #suffix>{{ usedMemory[1] }}</template>
+                        </n-statistic>
+                    </n-gi>
+                </n-grid>
+            </n-spin>
+        </n-card>
+        <n-card class="flex-item-expand" content-style="padding: 0; height: 100%;" embedded style="overflow: hidden">
+            <n-tabs
+                v-model:value="tabVal"
+                :tabs-padding="20"
+                pane-style="padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; flex-grow: 1;"
+                size="large"
+                style="height: 100%; overflow: hidden"
+                type="line">
+                <template #suffix>
+                    <div v-if="tabVal === 'info'" style="padding-right: 10px">
+                        <n-input v-model:value="envFilter.keyword" clearable placeholder="">
+                            <template #prefix>
+                                <icon-button :icon="Filter" size="18" />
+                            </template>
+                        </n-input>
+                    </div>
+                </template>
+
+                <!-- environment tab pane -->
+                <n-tab-pane :tab="$t('status.env_info')" name="info">
+                    <n-space :wrap="false" :wrap-item="false" class="flex-item-expand">
+                        <n-space align="end" item-style="padding: 0 5px;" vertical>
                             <n-button
-                                :loading="pageState.loading"
-                                :type="isLoading ? 'primary' : 'default'"
-                                circle
+                                v-for="(v, k) in serverInfo"
+                                :key="k"
+                                :disabled="isEmpty(v)"
+                                :focusable="false"
+                                :type="envFilter.group === k ? 'primary' : 'default'"
+                                secondary
                                 size="small"
-                                tertiary
-                                @click="refreshInfo(true)">
-                                <template #icon>
-                                    <n-icon :size="props.size">
-                                        <refresh
-                                            :class="{
-                                                'auto-rotate': pageState.autoRefresh || isLoading,
-                                            }"
-                                            :color="pageState.autoRefresh ? themeVars.primaryColor : undefined"
-                                            :stroke-width="pageState.autoRefresh ? 6 : 3" />
-                                    </n-icon>
-                                </template>
+                                @click="onFilterGroup(k)">
+                                <span style="min-width: 80px">{{ k }}</span>
                             </n-button>
-                        </template>
-                        <auto-refresh-form
-                            v-model:interval="pageState.refreshInterval"
-                            v-model:on="pageState.autoRefresh"
-                            :default-value="5"
-                            :loading="pageState.autoLoading"
-                            @toggle="onToggleRefresh" />
-                    </n-popover>
-                </template>
-                <n-spin :show="pageState.loading">
-                    <n-grid style="min-width: 500px" x-gap="5">
-                        <n-gi :span="6">
-                            <n-statistic :label="$t('status.uptime')" :value="uptime[0]">
-                                <template #suffix>{{ $t(uptime[1]) }}</template>
-                            </n-statistic>
-                        </n-gi>
-                        <n-gi :span="6">
-                            <n-statistic
-                                :label="$t('status.connected_clients')"
-                                :value="get(serverInfo, 'Clients.connected_clients', 0)" />
-                        </n-gi>
-                        <n-gi :span="6">
-                            <n-statistic :value="totalKeys">
-                                <template #label>
-                                    {{ $t('status.total_keys') }}
-                                </template>
-                            </n-statistic>
-                        </n-gi>
-                        <n-gi :span="6">
-                            <n-statistic :label="$t('status.memory_used')" :value="usedMemory[0]">
-                                <template #suffix>{{ usedMemory[1] }}</template>
-                            </n-statistic>
-                        </n-gi>
-                    </n-grid>
-                </n-spin>
-            </n-card>
-            <n-card :title="$t('status.all_info')" embedded>
-                <template #header-extra>
-                    <n-input v-model:value="infoFilter" clearable placeholder="">
-                        <template #prefix>
-                            <icon-button :icon="Filter" size="18" />
-                        </template>
-                    </n-input>
-                </template>
-                <n-spin :show="pageState.loading">
-                    <n-tabs default-value="CPU" placement="left" type="line">
-                        <n-tab-pane v-for="(v, k) in serverInfo" :key="k" :disabled="isEmpty(v)" :name="k">
-                            <n-data-table
-                                :columns="[
-                                    {
-                                        title: $t('common.key'),
-                                        key: 'key',
-                                        defaultSortOrder: 'ascend',
-                                        sorter: 'default',
-                                        minWidth: 100,
-                                        filterOptionValue: infoFilter,
-                                        filter(value, row) {
-                                            return !!~row.key.indexOf(value.toString())
-                                        },
+                        </n-space>
+                        <n-data-table
+                            :columns="[
+                                {
+                                    title: $t('common.key'),
+                                    key: 'key',
+                                    defaultSortOrder: 'ascend',
+                                    minWidth: 80,
+                                    titleAlign: 'center',
+                                    filterOptionValue: envFilter.keyword,
+                                    filter(value, row) {
+                                        return !!~row.key.indexOf(value.toString())
                                     },
-                                    { title: $t('common.value'), key: 'value' },
-                                ]"
-                                :data="map(v, (value, key) => ({ value, key }))" />
-                        </n-tab-pane>
-                    </n-tabs>
-                </n-spin>
-            </n-card>
-        </n-space>
-    </n-scrollbar>
+                                },
+                                { title: $t('common.value'), titleAlign: 'center', key: 'value' },
+                            ]"
+                            :data="env"
+                            :loading="pageState.loading"
+                            :single-line="false"
+                            class="flex-item-expand"
+                            flex-height
+                            striped />
+                    </n-space>
+                </n-tab-pane>
+
+                <!-- activity tab pane -->
+                <n-tab-pane
+                    :tab="$t('status.activity_status')"
+                    class="line-chart"
+                    display-directive="show:lazy"
+                    name="activity">
+                    <div class="line-chart">
+                        <div class="line-chart-item">
+                            <Line ref="cmdRateRef" :data="cmdRate" :options="chartOption" />
+                        </div>
+                        <div class="line-chart-item">
+                            <Line :data="connectedClients" :options="chartOption" />
+                        </div>
+                        <div class="line-chart-item">
+                            <Line :data="memoryUsage" :options="byteChartOption" />
+                        </div>
+                        <div class="line-chart-item">
+                            <Line :data="networkRate" :options="byteChartOption" />
+                        </div>
+                    </div>
+                </n-tab-pane>
+            </n-tabs>
+        </n-card>
+    </n-space>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@import '@/styles/content';
+
+.line-chart {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+
+    &-item {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 50%;
+        height: 50%;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+}
+</style>

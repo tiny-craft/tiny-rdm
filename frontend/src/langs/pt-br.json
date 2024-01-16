@@ -290,8 +290,7 @@
     "uptime": "Tempo de Atividade",
     "connected_clients": "Clientes Conectados",
     "total_keys": "Chaves Totais",
-    "memory_used": "Memória Usada",
-    "all_info": "Informações"
+    "memory_used": "Memória Usada"
   },
   "slog": {
     "title": "Registro de Operações Lentas",

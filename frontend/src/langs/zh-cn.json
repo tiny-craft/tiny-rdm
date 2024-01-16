@@ -359,7 +359,12 @@
     "connected_clients": "已连客户端",
     "total_keys": "键总数",
     "memory_used": "内存使用",
-    "all_info": "全部信息"
+    "all_info": "全部信息",
+    "env_info": "运行环境",
+    "activity_status": "活动状态",
+    "act_cmd": "命令执行数/秒",
+    "act_network_input": "网络输入",
+    "act_network_output": "网络输出"
   },
   "slog": {
     "title": "慢日志",

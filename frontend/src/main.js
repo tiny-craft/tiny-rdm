@@ -10,6 +10,7 @@ import { setupDiscreteApi } from '@/utils/discrete.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { loadEnvironment } from '@/utils/platform.js'
 import { setupMonaco } from '@/utils/monaco.js'
+import { setupChart } from '@/utils/chart.js'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -21,6 +22,7 @@ async function setupApp() {
 
     await loadEnvironment()
     setupMonaco()
+    setupChart()
     const prefStore = usePreferencesStore()
     await prefStore.loadPreferences()
     await setupDiscreteApi()
