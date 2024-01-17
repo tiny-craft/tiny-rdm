@@ -136,7 +136,7 @@
       "cli": "命令行",
       "slow_log": "慢日志",
       "cmd_monitor": "监控命令",
-      "pub_message": "推送/订阅"
+      "pub_message": "发布/订阅"
     }
   },
   "ribbon": {
@@ -385,6 +385,19 @@
     "copy_log": "复制日志",
     "save_log": "保存日志",
     "clean_log": "清空日志",
+    "always_show_last": "总是显示最新"
+  },
+  "pubsub": {
+    "title": "发布订阅",
+    "publish": "发布",
+    "subscribe": "开启订阅",
+    "unsubscribe": "取消订阅",
+    "clear": "清空消息",
+    "time": "时间",
+    "filter": "筛选",
+    "channel": "频道",
+    "message": "消息",
+    "receive_message": "已接收消息 {total} 条",
     "always_show_last": "总是显示最新"
   }
 }

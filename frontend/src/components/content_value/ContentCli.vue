@@ -340,7 +340,6 @@ const changeHistory = (prev) => {
  */
 const flushTermInput = (flushCmd = false) => {
     const currentLine = getCurrentInput()
-    console.log('===send cmd', currentLine, currentLine.length)
     EventsEmit(`cmd:input:${props.name}`, currentLine)
     inputCursor = 0
     // historyIndex = inputHistory.length

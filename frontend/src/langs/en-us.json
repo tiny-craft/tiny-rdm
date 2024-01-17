@@ -386,5 +386,18 @@
     "save_log": "Save Log",
     "clean_log": "Clean Log",
     "always_show_last": "Always To Last Line"
+  },
+  "pubsub": {
+    "title": "Pub/Sub",
+    "publish": "Publish",
+    "subscribe": "Subscribe",
+    "unsubscribe": "Unsubscribe",
+    "clear": "Clear Message",
+    "time": "Time",
+    "filter": "Filter",
+    "channel": "Channel",
+    "message": "Message",
+    "receive_message": "Received Messages {total}",
+    "always_show_last": "Always To Last Line"
   }
 }

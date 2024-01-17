@@ -215,6 +215,7 @@ const onListLimitChanged = (limit) => {
             :loading="data.loading"
             class="flex-item-expand"
             flex-height
+            striped
             virtual-scroll
             @update:sorter="({ order }) => (data.sortOrder = order)" />
     </div>

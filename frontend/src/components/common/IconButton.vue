@@ -31,6 +31,8 @@ const props = defineProps({
     buttonStyle: [String, Object],
     buttonClass: [String, Object],
     small: Boolean,
+    secondary: Boolean,
+    tertiary: Boolean,
 })
 
 const hasTooltip = computed(() => {
@@ -44,13 +46,15 @@ const hasTooltip = computed(() => {
             <n-button
                 :class="props.buttonClass"
                 :color="props.color"
-                :disabled="disabled"
+                :disabled="props.disabled"
                 :focusable="false"
                 :loading="loading"
-                :size="small ? 'small' : ''"
+                :secondary="props.secondary"
+                :size="props.small ? 'small' : ''"
                 :style="props.buttonStyle"
-                :text="!border"
-                :type="type"
+                :tertiary="props.tertiary"
+                :text="!props.border"
+                :type="props.type"
                 @click.prevent="emit('click')">
                 <template #icon>
                     <slot>
@@ -67,13 +71,15 @@ const hasTooltip = computed(() => {
         v-else
         :class="props.buttonClass"
         :color="props.color"
-        :disabled="disabled"
+        :disabled="props.disabled"
         :focusable="false"
         :loading="loading"
-        :size="small ? 'small' : ''"
+        :secondary="props.secondary"
+        :size="props.small ? 'small' : ''"
         :style="props.buttonStyle"
-        :text="!border"
-        :type="type"
+        :tertiary="props.tertiary"
+        :text="!props.border"
+        :type="props.type"
         @click.prevent="emit('click')">
         <template #icon>
             <slot>

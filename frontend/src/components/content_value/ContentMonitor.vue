@@ -12,6 +12,7 @@ import Copy from '@/components/icons/Copy.vue'
 import Export from '@/components/icons/Export.vue'
 import Delete from '@/components/icons/Delete.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import Bottom from '@/components/icons/Bottom.vue'
 
 const themeVars = useThemeVars()
 
@@ -118,7 +119,7 @@ const onCleanLog = () => {
     <div class="content-log content-container fill-height flex-box-v">
         <n-form class="flex-item" label-align="left" label-placement="left" label-width="auto" size="small">
             <n-form-item :feedback="$t('monitor.warning')" :label="$t('monitor.actions')">
-                <n-space>
+                <n-space :wrap="false" :wrap-item="false" style="width: 100%">
                     <n-button
                         v-if="!isMonitoring"
                         :focusable="false"
@@ -154,6 +155,16 @@ const onCleanLog = () => {
                             @click="onExportLog" />
                     </n-button-group>
                     <icon-button
+                        :icon="Bottom"
+                        :secondary="data.autoShowLast"
+                        :type="data.autoShowLast ? 'primary' : 'default'"
+                        border
+                        size="18"
+                        stroke-width="3.5"
+                        t-tooltip="monitor.always_show_last"
+                        @click="data.autoShowLast = !data.autoShowLast" />
+                    <div class="flex-item-expand" />
+                    <icon-button
                         :icon="Delete"
                         border
                         size="18"
@@ -164,9 +175,6 @@ const onCleanLog = () => {
             </n-form-item>
             <n-form-item :label="$t('monitor.search')">
                 <n-input v-model:value="data.keyword" clearable placeholder="" />
-            </n-form-item>
-            <n-form-item :label="$t('monitor.always_show_last')">
-                <n-switch v-model:value="data.autoShowLast" />
             </n-form-item>
         </n-form>
         <n-virtual-list ref="listRef" :item-size="25" :items="displayList" class="list-wrapper">
