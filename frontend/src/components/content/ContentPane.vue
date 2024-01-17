@@ -17,6 +17,7 @@ import ContentSlog from '@/components/content_value/ContentSlog.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
+import ContentPubsub from '@/components/content_value/ContentPubsub.vue'
 
 const themeVars = useThemeVars()
 
@@ -159,7 +160,7 @@ watch(
             </n-tab-pane>
 
             <!-- slow log pane -->
-            <n-tab-pane :name="BrowserTabType.SlowLog.toString()" display-directive="if">
+            <n-tab-pane :name="BrowserTabType.SlowLog.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -171,7 +172,7 @@ watch(
                         <span>{{ $t('interface.sub_tab.slow_log') }}</span>
                     </n-space>
                 </template>
-                <content-slog :db="tabContent.db" :server="props.server" />
+                <content-slog :server="props.server" />
             </n-tab-pane>
 
             <!-- command monitor pane -->
@@ -191,7 +192,7 @@ watch(
             </n-tab-pane>
 
             <!-- pub/sub message pane -->
-            <n-tab-pane :disabled="true" :name="BrowserTabType.PubMessage.toString()">
+            <n-tab-pane :name="BrowserTabType.PubMessage.toString()" display-directive="show:lazy">
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
@@ -203,6 +204,7 @@ watch(
                         <span>{{ $t('interface.sub_tab.pub_message') }}</span>
                     </n-space>
                 </template>
+                <content-pubsub :server="props.server" />
             </n-tab-pane>
         </n-tabs>
     </div>

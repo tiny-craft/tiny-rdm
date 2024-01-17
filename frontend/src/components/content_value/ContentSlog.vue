@@ -3,7 +3,7 @@ import { computed, h, nextTick, onMounted, onUnmounted, reactive, ref } from 'vu
 import Refresh from '@/components/icons/Refresh.vue'
 import { debounce, isEmpty, map, size, split } from 'lodash'
 import { useI18n } from 'vue-i18n'
-import { useThemeVars } from 'naive-ui'
+import { NIcon, useThemeVars } from 'naive-ui'
 import dayjs from 'dayjs'
 import useBrowserStore from 'stores/browser.js'
 import { timeout } from '@/utils/promise.js'
@@ -16,10 +16,6 @@ const i18n = useI18n()
 const props = defineProps({
     server: {
         type: String,
-    },
-    db: {
-        type: Number,
-        default: 0,
     },
 })
 
@@ -127,7 +123,7 @@ const columns = computed(() => [
 const _loadSlowLog = () => {
     data.loading = true
     browserStore
-        .getSlowLog(props.server, props.db, data.listLimit)
+        .getSlowLog(props.server, data.listLimit)
         .then((list) => {
             data.list = list || []
         })
@@ -194,10 +190,12 @@ const onListLimitChanged = (limit) => {
                     <template #trigger>
                         <n-button :loading="data.loading" circle size="small" tertiary @click="_loadSlowLog">
                             <template #icon>
-                                <refresh
-                                    :class="{ 'auto-rotate': autoRefresh.on }"
-                                    :color="autoRefresh.on ? themeVars.primaryColor : undefined"
-                                    :stroke-width="autoRefresh.on ? 6 : 3" />
+                                <n-icon :size="props.size">
+                                    <refresh
+                                        :class="{ 'auto-rotate': autoRefresh.on }"
+                                        :color="autoRefresh.on ? themeVars.primaryColor : undefined"
+                                        :stroke-width="autoRefresh.on ? 6 : 3" />
+                                </n-icon>
                             </template>
                         </n-button>
                     </template>

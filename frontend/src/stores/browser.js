@@ -1884,13 +1884,12 @@ const useBrowserStore = defineStore('browser', {
         /**
          * get slow log list
          * @param {string} server
-         * @param {number} db
          * @param {number} num
          * @return {Promise<[]>}
          */
-        async getSlowLog(server, db, num) {
+        async getSlowLog(server, num) {
             try {
-                const { success, data = { list: [] } } = await GetSlowLogs(server, db, num)
+                const { success, data = { list: [] } } = await GetSlowLogs(server, num)
                 const { list } = data
                 return list
             } catch {

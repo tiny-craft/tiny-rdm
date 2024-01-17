@@ -2456,8 +2456,8 @@ func (b *browserService) CleanCmdHistory() (resp types.JSResp) {
 }
 
 // GetSlowLogs get slow log list
-func (b *browserService) GetSlowLogs(server string, db int, num int64) (resp types.JSResp) {
-	item, err := b.getRedisClient(server, db)
+func (b *browserService) GetSlowLogs(server string, num int64) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, -1)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
