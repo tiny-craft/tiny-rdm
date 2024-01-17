@@ -30,5 +30,5 @@ export const convertBytes = (bytes, decimals = 2) => {
  */
 export const formatBytes = (bytes, decimals = 2) => {
     const res = convertBytes(bytes, decimals)
-    return res.value + ' ' + res.unit
+    return res.value + res.unit
 }

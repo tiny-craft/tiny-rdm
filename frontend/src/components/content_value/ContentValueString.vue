@@ -8,12 +8,12 @@ import { formatTypes } from '@/consts/value_view_type.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
-import bytes from 'bytes'
 import useBrowserStore from 'stores/browser.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
 import usePreferencesStore from 'stores/preferences.js'
+import { formatBytes } from '@/utils/byte_convert.js'
 
 const props = defineProps({
     name: String,
@@ -215,7 +215,7 @@ defineExpose({
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>
             <n-divider v-if="showMemoryUsage" vertical />
-            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
+            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ formatBytes(props.size) }}</n-text>
             <div class="flex-item-expand" />
             <format-selector
                 :decode="viewAs.decode"

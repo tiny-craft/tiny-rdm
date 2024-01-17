@@ -7,7 +7,6 @@ import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
 import { isEmpty, size } from 'lodash'
-import bytes from 'bytes'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
@@ -19,6 +18,7 @@ import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
+import { formatBytes } from '@/utils/byte_convert.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -420,7 +420,7 @@ defineExpose({
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.entries') }}: {{ entries }}</n-text>
             <n-divider v-if="showMemoryUsage" vertical />
-            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ bytes(props.size) }}</n-text>
+            <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ formatBytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
             <format-selector
                 v-show="!inEdit"
