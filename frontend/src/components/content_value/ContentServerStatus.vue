@@ -1,6 +1,6 @@
 <script setup>
 import { cloneDeep, flatMap, get, isEmpty, map, mapValues, pickBy, slice, split, sum, toArray, toNumber } from 'lodash'
-import { computed, onMounted, onUnmounted, reactive, ref, toRaw } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
@@ -11,13 +11,16 @@ import { NIcon, useThemeVars } from 'naive-ui'
 import { Line } from 'vue-chartjs'
 import dayjs from 'dayjs'
 import { convertBytes, formatBytes } from '@/utils/byte_convert.js'
-import { i18n } from '@/utils/i18n.js'
+import usePreferencesStore from 'stores/preferences.js'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
     server: String,
 })
 
 const browserStore = useBrowserStore()
+const prefStore = usePreferencesStore()
+const i18n = useI18n()
 const themeVars = useThemeVars()
 const serverInfo = ref({})
 const pageState = reactive({
@@ -27,20 +30,21 @@ const pageState = reactive({
     autoLoading: false, // loading status for auto refresh
 })
 const statusHistory = 5
-const cmdRateRef = ref(null)
 
 /**
  *
  * @param origin
- * @param {string[]} labels
- * @param {number[][]} datalist
+ * @param {string[]} [labels]
+ * @param {number[][]} [datalist]
  * @return {unknown}
  */
 const generateData = (origin, labels, datalist) => {
     let ret = toRaw(origin)
-    ret.labels = labels
-    for (let i = 0; i < datalist.length; i++) {
-        ret.datasets[i].data = datalist[i]
+    ret.labels = labels || ret.labels
+    if (datalist && datalist.length > 0) {
+        for (let i = 0; i < datalist.length; i++) {
+            ret.datasets[i].data = datalist[i]
+        }
     }
     return cloneDeep(ret)
 }
@@ -238,6 +242,22 @@ const onFilterGroup = (group) => {
     }
 }
 
+watch(
+    () => prefStore.currentLanguage,
+    () => {
+        // force update labels of charts
+        cmdRate.value.datasets[0].label = i18n.t('status.act_cmd')
+        cmdRate.value = generateData(cmdRate.value)
+        connectedClients.value.datasets[0].label = i18n.t('status.connected_clients')
+        connectedClients.value = generateData(connectedClients.value)
+        memoryUsage.value.datasets[0].label = i18n.t('status.memory_used')
+        memoryUsage.value = generateData(memoryUsage.value)
+        networkRate.value.datasets[0].label = i18n.t('status.act_network_input')
+        networkRate.value.datasets[1].label = i18n.t('status.act_network_output')
+        networkRate.value = generateData(networkRate.value)
+    },
+)
+
 const chartBGColor = [
     'rgba(255, 99, 132, 0.2)',
     'rgba(255, 159, 64, 0.2)',
@@ -254,11 +274,11 @@ const chartBorderColor = [
     'rgb(54, 162, 235)',
 ]
 
-const cmdRate = ref({
+const cmdRate = shallowRef({
     labels: [],
     datasets: [
         {
-            label: i18n.global.t('status.act_cmd'),
+            label: i18n.t('status.act_cmd'),
             data: [],
             fill: true,
             backgroundColor: chartBGColor[0],
@@ -268,11 +288,11 @@ const cmdRate = ref({
     ],
 })
 
-const connectedClients = ref({
+const connectedClients = shallowRef({
     labels: [],
     datasets: [
         {
-            label: i18n.global.t('status.connected_clients'),
+            label: i18n.t('status.connected_clients'),
             data: [],
             fill: true,
             backgroundColor: chartBGColor[1],
@@ -282,11 +302,11 @@ const connectedClients = ref({
     ],
 })
 
-const memoryUsage = ref({
+const memoryUsage = shallowRef({
     labels: [],
     datasets: [
         {
-            label: i18n.global.t('status.memory_used'),
+            label: i18n.t('status.memory_used'),
             data: [],
             fill: true,
             backgroundColor: chartBGColor[2],
@@ -296,11 +316,11 @@ const memoryUsage = ref({
     ],
 })
 
-const networkRate = ref({
+const networkRate = shallowRef({
     labels: [],
     datasets: [
         {
-            label: i18n.global.t('status.act_network_input'),
+            label: i18n.t('status.act_network_input'),
             data: [],
             fill: true,
             backgroundColor: chartBGColor[3],
@@ -308,7 +328,7 @@ const networkRate = ref({
             tension: 0.4,
         },
         {
-            label: i18n.global.t('status.act_network_output'),
+            label: i18n.t('status.act_network_output'),
             data: [],
             fill: true,
             backgroundColor: chartBGColor[4],
@@ -502,7 +522,7 @@ const byteChartOption = {
                     name="activity">
                     <div class="line-chart">
                         <div class="line-chart-item">
-                            <Line ref="cmdRateRef" :data="cmdRate" :options="chartOption" />
+                            <Line :data="cmdRate" :options="chartOption" />
                         </div>
                         <div class="line-chart-item">
                             <Line :data="connectedClients" :options="chartOption" />
