@@ -32,6 +32,7 @@ func main() {
 	browserSvc := services.Browser()
 	cliSvc := services.Cli()
 	monitorSvc := services.Monitor()
+	pubsubSvc := services.Pubsub()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
 	windowWidth, windowHeight, maximised := prefSvc.GetWindowSize()
@@ -70,6 +71,7 @@ func main() {
 			browserSvc.Start(ctx)
 			cliSvc.Start(ctx)
 			monitorSvc.Start(ctx)
+			pubsubSvc.Start(ctx)
 
 			services.GA().SetSecretKey(gaMeasurementID, gaSecretKey)
 			services.GA().Startup(version)
@@ -88,6 +90,7 @@ func main() {
 			browserSvc.Stop()
 			cliSvc.CloseAll()
 			monitorSvc.StopAll()
+			pubsubSvc.StopAll()
 		},
 		Bind: []interface{}{
 			sysSvc,
@@ -95,6 +98,7 @@ func main() {
 			browserSvc,
 			cliSvc,
 			monitorSvc,
+			pubsubSvc,
 			prefSvc,
 		},
 		Mac: &mac.Options{

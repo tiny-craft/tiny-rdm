@@ -9,13 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "bytes": "^3.1.2",
+    "chart.js": "^4.4.1",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.45.0",
     "pinia": "^2.1.7",
     "sass": "^1.69.7",
-    "vue": "^3.4.10",
+    "vue": "^3.4.14",
+    "vue-chartjs": "^5.3.0",
     "vue-i18n": "^9.9.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
@@ -23,7 +24,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.3",
     "naive-ui": "^2.37.3",
-    "prettier": "^3.1.1",
+    "prettier": "^3.2.4",
     "unplugin-auto-import": "^0.17.3",
     "unplugin-icons": "^0.18.2",
     "unplugin-vue-components": "^0.26.0",

@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/adrg/sysfont v0.1.2
-	github.com/andybalholm/brotli v1.0.6
+	github.com/andybalholm/brotli v1.1.0
 	github.com/google/uuid v1.5.0
 	github.com/klauspost/compress v1.17.4
 	github.com/redis/go-redis/v9 v9.4.0
