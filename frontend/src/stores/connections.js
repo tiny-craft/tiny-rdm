@@ -164,6 +164,7 @@ const useConnectionStore = defineStore('connections', {
                 keyView: KeyViewType.Tree,
                 loadSize: 10000,
                 markColor: '',
+                alias: {},
                 ssl: {
                     enable: false,
                     allowInsecure: true,

@@ -1,5 +1,5 @@
 <script setup>
-import { every, get, includes, isEmpty, map, sortBy, toNumber } from 'lodash'
+import { every, get, includes, isEmpty, map, reject, sortBy, toNumber } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ListSentinelMasters, TestConnection } from 'wailsjs/go/services/connectionService.js'
@@ -10,6 +10,9 @@ import FileOpenInput from '@/components/common/FileOpenInput.vue'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
+import Delete from '@/components/icons/Delete.vue'
+import Add from '@/components/icons/Add.vue'
+import IconButton from '@/components/common/IconButton.vue'
 
 /**
  * Dialog for new or edit connection
@@ -70,6 +73,24 @@ const onUpdateDBFilterType = (t) => {
             dbFilterList.value = ['0']
         }
     }
+}
+
+const aliasPair = ref([
+    /*{ db: 0, alias: '' }*/
+])
+const onCreateAlias = () => {
+    return {
+        db: 0,
+        alias: '',
+    }
+}
+const onUpdateAlias = () => {
+    const val = reject(aliasPair.value, (v) => v == null || isEmpty(v.alias))
+    const result = {}
+    for (const elem of val) {
+        result[elem.db] = elem.alias
+    }
+    generalForm.value.alias = result
 }
 
 watch(
@@ -210,6 +231,13 @@ watch(
             generalForm.value = dialogStore.connParam || connectionStore.newDefaultConnection()
             dbFilterList.value = map(generalForm.value.dbFilterList, (item) => item + '')
             generalForm.value.ssh.loginType = generalForm.value.ssh.loginType || 'pwd'
+            // update alias display
+            const alias = get(generalForm.value, 'alias', {})
+            const pairs = []
+            for (const db in alias) {
+                pairs.push({ db: parseInt(db), alias: alias[db] })
+            }
+            aliasPair.value = pairs
         }
     },
 )
@@ -254,9 +282,15 @@ const onClose = () => {
         style="width: 600px"
         transform-origin="center">
         <n-spin :show="closingConnection">
-            <n-tabs v-model:value="tab" animated type="line">
+            <n-tabs
+                v-model:value="tab"
+                animated
+                pane-style="min-height: 50vh;"
+                placement="left"
+                tab-style="justify-content: right;"
+                type="line">
                 <!-- General pane -->
-                <n-tab-pane :tab="$t('dialogue.connection.general')" display-directive="show" name="general">
+                <n-tab-pane :tab="$t('dialogue.connection.general')" display-directive="show:lazy" name="general">
                     <n-form
                         ref="generalFormRef"
                         :model="generalForm"
@@ -434,8 +468,42 @@ const onClose = () => {
                     </n-form>
                 </n-tab-pane>
 
+                <n-tab-pane :tab="$t('dialogue.connection.alias.title')" display-directive="show:lazy" name="alias">
+                    <n-form
+                        :model="generalForm.alias"
+                        :show-label="false"
+                        :show-require-mark="false"
+                        label-placement="top">
+                        <n-form-item required>
+                            <n-dynamic-input
+                                v-model:value="aliasPair"
+                                @create="onCreateAlias"
+                                @update:value="onUpdateAlias">
+                                <template #default="{ value }">
+                                    <n-input-number
+                                        v-model:value="value.db"
+                                        :min="0"
+                                        :placeholder="$t('dialogue.connection.alias.db')"
+                                        :show-button="false"
+                                        @update:value="onUpdateAlias" />
+                                    <n-text>:</n-text>
+                                    <n-input
+                                        v-model:value="value.alias"
+                                        :placeholder="$t('dialogue.connection.alias.value')"
+                                        type="text"
+                                        @update:value="onUpdateAlias" />
+                                </template>
+                                <template #action="{ index, create, remove, move }">
+                                    <icon-button :icon="Delete" size="18" @click="() => remove(index)" />
+                                    <icon-button :icon="Add" size="18" @click="() => create(index)" />
+                                </template>
+                            </n-dynamic-input>
+                        </n-form-item>
+                    </n-form>
+                </n-tab-pane>
+
                 <!-- SSL pane -->
-                <n-tab-pane :tab="$t('dialogue.connection.ssl.title')" display-directive="show" name="ssl">
+                <n-tab-pane :tab="$t('dialogue.connection.ssl.title')" display-directive="show:lazy" name="ssl">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.ssl.enable" size="medium">
                             {{ $t('dialogue.connection.ssl.enable') }}
@@ -478,7 +546,7 @@ const onClose = () => {
                 </n-tab-pane>
 
                 <!-- SSH pane -->
-                <n-tab-pane :tab="$t('dialogue.connection.ssh.title')" display-directive="show" name="ssh">
+                <n-tab-pane :tab="$t('dialogue.connection.ssh.title')" display-directive="show:lazy" name="ssh">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.ssh.enable" size="medium">
                             {{ $t('dialogue.connection.ssh.enable') }}
@@ -538,7 +606,10 @@ const onClose = () => {
                 </n-tab-pane>
 
                 <!-- Sentinel pane -->
-                <n-tab-pane :tab="$t('dialogue.connection.sentinel.title')" display-directive="show" name="sentinel">
+                <n-tab-pane
+                    :tab="$t('dialogue.connection.sentinel.title')"
+                    display-directive="show:lazy"
+                    name="sentinel">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.sentinel.enable" size="medium">
                             {{ $t('dialogue.connection.sentinel.enable') }}
@@ -580,7 +651,7 @@ const onClose = () => {
                 </n-tab-pane>
 
                 <!-- Cluster pane -->
-                <n-tab-pane :tab="$t('dialogue.connection.cluster.title')" display-directive="show" name="cluster">
+                <n-tab-pane :tab="$t('dialogue.connection.cluster.title')" display-directive="show:lazy" name="cluster">
                     <n-form-item label-placement="left">
                         <n-checkbox v-model:checked="generalForm.cluster.enable" size="medium">
                             {{ $t('dialogue.connection.cluster.enable') }}

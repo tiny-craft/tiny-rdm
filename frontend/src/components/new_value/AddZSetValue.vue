@@ -25,11 +25,6 @@ const updateOption = [
     },
 ]
 
-/**
- * @typedef ZSetItem
- * @property {string} value
- * @property {string} score
- */
 const zset = ref([{ value: '', score: 0 }])
 const onCreate = () => {
     return {

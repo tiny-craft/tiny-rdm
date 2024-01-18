@@ -20,6 +20,7 @@ type ConnectionConfig struct {
 	LoadSize        int                `json:"loadSize,omitempty" yaml:"load_size,omitempty"`
 	MarkColor       string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
 	RefreshInterval int                `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	Alias           map[int]string     `json:"alias,omitempty" yaml:"alias,omitempty"`
 	SSL             ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
 	SSH             ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 	Sentinel        ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
@@ -36,6 +37,7 @@ type Connections []Connection
 
 type ConnectionDB struct {
 	Name    string `json:"name"`
+	Alias   string `json:"alias,omitempty"`
 	Index   int    `json:"index"`
 	MaxKeys int    `json:"maxKeys"`
 	Expires int    `json:"expires,omitempty"`

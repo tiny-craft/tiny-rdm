@@ -252,6 +252,7 @@ const useBrowserStore = defineStore('browser', {
             for (const dbItem of db) {
                 databases[dbItem.index] = new RedisDatabaseItem({
                     db: dbItem.index,
+                    alias: dbItem.alias,
                     maxKeys: dbItem.maxKeys,
                 })
                 if (dbItem.index === lastDB) {

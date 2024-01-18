@@ -201,6 +201,11 @@
         "load_size": "Size of Keys Per Load",
         "mark_color": "Mark Color"
       },
+      "alias": {
+        "title": "Database Alias",
+        "db": "Input Database Index",
+        "value": "Input Database Alias"
+      },
       "ssl": {
         "title": "SSL/TLS",
         "enable": "Enable SSL/TLS",

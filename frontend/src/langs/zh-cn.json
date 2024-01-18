@@ -201,6 +201,11 @@
         "load_size": "单次加载键数量",
         "mark_color": "标记颜色"
       },
+      "alias": {
+        "title": "数据库别名",
+        "db": "输入数据库索引",
+        "value": "输入别名"
+      },
       "ssl": {
         "title": "SSL/TLS",
         "enable": "启用SSL",

@@ -4,7 +4,7 @@ import BrowserTree from './BrowserTree.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import useTabStore from 'stores/tab.js'
 import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue'
-import { find, get, map, size } from 'lodash'
+import { find, get, isEmpty, map, size } from 'lodash'
 import Refresh from '@/components/icons/Refresh.vue'
 import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
@@ -50,16 +50,22 @@ const inCheckState = ref(false)
 
 const dbSelectOptions = computed(() => {
     const dblist = browserStore.getDBList(props.server)
-    return map(dblist, (db) => {
-        if (props.db === db.db) {
-            return {
-                value: db.db,
-                label: `db${db.db} (${db.keyCount}/${db.maxKeys})`,
-            }
+    return map(dblist, ({ db, alias, keyCount, maxKeys }) => {
+        let label
+        if (!isEmpty(alias)) {
+            // has alias
+            label = `${alias}[${db}]`
+        } else {
+            label = `db${db}`
+        }
+        if (props.db === db) {
+            label += ` (${keyCount}/${maxKeys})`
+        } else {
+            label += ` (${maxKeys})`
         }
         return {
-            value: db.db,
-            label: `db${db.db} (${db.maxKeys})`,
+            value: db,
+            label: label,
         }
     })
 })

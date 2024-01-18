@@ -179,8 +179,13 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 			dbInfoStr := info["Keyspace"][dbName]
 			if len(dbInfoStr) > 0 {
 				dbInfo := b.parseDBItemInfo(dbInfoStr)
+				var alias string
+				if selConn.Alias != nil {
+					alias = selConn.Alias[idx]
+				}
 				return types.ConnectionDB{
 					Name:    dbName,
+					Alias:   alias,
 					Index:   idx,
 					MaxKeys: dbInfo["keys"],
 					Expires: dbInfo["expires"],
