@@ -74,6 +74,8 @@
     "edit_conn_group": "Edit Group",
     "rename_conn_group": "Rename Group",
     "remove_conn_group": "Delete Group",
+    "import_conn": "Import Connections...",
+    "export_conn": "Export Connections...",
     "ttl": "TTL",
     "forever": "Forever",
     "rename_key": "Rename Key",

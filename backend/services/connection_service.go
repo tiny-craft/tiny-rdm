@@ -6,10 +6,15 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"github.com/klauspost/compress/zip"
 	"github.com/redis/go-redis/v9"
+	"github.com/vrischmann/userdir"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
+	"io"
 	"net"
 	"os"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -392,6 +397,118 @@ func (c *connectionService) SaveRefreshInterval(name string, interval int) (resp
 			return
 		}
 	}
+	resp.Success = true
+	return
+}
+
+// ExportConnections export connections to zip file
+func (c *connectionService) ExportConnections() (resp types.JSResp) {
+	defaultFileName := "connections_" + time.Now().Format("20060102150405") + ".zip"
+	filepath, err := runtime.SaveFileDialog(c.ctx, runtime.SaveDialogOptions{
+		ShowHiddenFiles: true,
+		DefaultFilename: defaultFileName,
+		Filters: []runtime.FileFilter{
+			{
+				Pattern: "*.zip",
+			},
+		},
+	})
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	// compress the connections profile with zip
+	const connectionFilename = "connections.yaml"
+	inputFile, err := os.Open(path.Join(userdir.GetConfigHome(), "TinyRDM", connectionFilename))
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	defer inputFile.Close()
+
+	outputFile, err := os.Create(filepath)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	defer outputFile.Close()
+
+	zipWriter := zip.NewWriter(outputFile)
+	defer zipWriter.Close()
+
+	headerWriter, err := zipWriter.CreateHeader(&zip.FileHeader{
+		Name:   connectionFilename,
+		Method: zip.Deflate,
+	})
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	if _, err = io.Copy(headerWriter, inputFile); err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	resp.Success = true
+	resp.Data = struct {
+		Path string `json:"path"`
+	}{
+		Path: filepath,
+	}
+	return
+}
+
+// ImportConnections import connections from local zip file
+func (c *connectionService) ImportConnections() (resp types.JSResp) {
+	filepath, err := runtime.OpenFileDialog(c.ctx, runtime.OpenDialogOptions{
+		ShowHiddenFiles: true,
+		Filters: []runtime.FileFilter{
+			{
+				Pattern: "*.zip",
+			},
+		},
+	})
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	const connectionFilename = "connections.yaml"
+	zipFile, err := zip.OpenReader(filepath)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	var file *zip.File
+	for _, file = range zipFile.File {
+		if file.Name == connectionFilename {
+			break
+		}
+	}
+	if file != nil {
+		zippedFile, err := file.Open()
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		defer zippedFile.Close()
+
+		outputFile, err := os.Create(path.Join(userdir.GetConfigHome(), "TinyRDM", connectionFilename))
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		defer outputFile.Close()
+
+		if _, err = io.Copy(outputFile, zippedFile); err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+	}
+
 	resp.Success = true
 	return
 }

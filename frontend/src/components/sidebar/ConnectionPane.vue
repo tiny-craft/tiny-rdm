@@ -7,10 +7,34 @@ import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
 import { ref } from 'vue'
+import More from '@/components/icons/More.vue'
+import Import from '@/components/icons/Import.vue'
+import { useRender } from '@/utils/render.js'
+import Export from '@/components/icons/Export.vue'
+import useConnectionStore from 'stores/connections.js'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
+const connectionStore = useConnectionStore()
+const render = useRender()
 const filterPattern = ref('')
+
+const moreOptions = [
+    { key: 'import', label: 'interface.import_conn', icon: Import },
+    { key: 'export', label: 'interface.export_conn', icon: Export },
+]
+
+const onSelectOptions = async (select) => {
+    switch (select) {
+        case 'import':
+            await connectionStore.importConnections()
+            await connectionStore.initConnections(true)
+            break
+        case 'export':
+            await connectionStore.exportConnections()
+            break
+    }
+}
 </script>
 
 <template>
@@ -23,14 +47,14 @@ const filterPattern = ref('')
                 :button-class="['nav-pane-func-btn']"
                 :icon="AddLink"
                 size="20"
-                stroke-width="4"
+                :stroke-width="3.5"
                 t-tooltip="interface.new_conn"
                 @click="dialogStore.openNewDialog()" />
             <icon-button
                 :button-class="['nav-pane-func-btn']"
                 :icon="AddGroup"
                 size="20"
-                stroke-width="4"
+                :stroke-width="3.5"
                 t-tooltip="interface.new_group"
                 @click="dialogStore.openNewGroupDialog()" />
             <n-divider vertical />
@@ -39,6 +63,15 @@ const filterPattern = ref('')
                     <n-icon :component="Filter" size="20" />
                 </template>
             </n-input>
+            <n-dropdown
+                :options="moreOptions"
+                :render-icon="({ icon }) => render.renderIcon(icon, { strokeWidth: 3.5 })"
+                :render-label="({ label }) => $t(label)"
+                placement="top-end"
+                style="min-width: 130px"
+                @select="onSelectOptions">
+                <icon-button :button-class="['nav-pane-func-btn']" :icon="More" :stroke-width="3.5" size="20" />
+            </n-dropdown>
         </div>
     </div>
 </template>

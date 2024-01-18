@@ -4,7 +4,9 @@ import {
     CreateGroup,
     DeleteConnection,
     DeleteGroup,
+    ExportConnections,
     GetConnection,
+    ImportConnections,
     ListConnection,
     RenameGroup,
     SaveConnection,
@@ -15,6 +17,7 @@ import {
 import { ConnectionType } from '@/consts/connection_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import useBrowserStore from 'stores/browser.js'
+import { i18nGlobal } from '@/utils/i18n.js'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -398,6 +401,34 @@ const useConnectionStore = defineStore('connections', {
                 return { success: false, msg }
             }
             return { success: true }
+        },
+
+        async exportConnections() {
+            const {
+                success,
+                msg,
+                data: { path = '' },
+            } = await ExportConnections()
+            if (!success) {
+                if (!isEmpty(msg)) {
+                    $message.error(msg)
+                    return
+                }
+            }
+
+            $message.success(i18nGlobal.t('dialogue.handle_succ'))
+        },
+
+        async importConnections() {
+            const { success, msg } = await ImportConnections()
+            if (!success) {
+                if (!isEmpty(msg)) {
+                    $message.error(msg)
+                    return
+                }
+            }
+
+            $message.success(i18nGlobal.t('dialogue.handle_succ'))
         },
     },
 })

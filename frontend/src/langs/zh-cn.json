@@ -74,6 +74,8 @@
     "edit_conn_group": "编辑分组",
     "rename_conn_group": "重命名分组",
     "remove_conn_group": "删除分组",
+    "import_conn": "导入连接...",
+    "export_conn": "导出连接...",
     "ttl": "TTL",
     "forever": "永久",
     "rename_key": "重命名键",
