@@ -11,10 +11,10 @@ import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed, onUnmounted, reactive, watch } from 'vue'
-import { padStart } from 'lodash'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
+import dayjs from 'dayjs'
 
 const props = defineProps({
     server: String,
@@ -54,20 +54,19 @@ const binaryKey = computed(() => {
 })
 
 const ttlString = computed(() => {
-    let s = ''
     if (props.ttl > 0) {
-        const hours = Math.floor(props.ttl / 3600)
-        s += padStart(hours + ':', 3, '0')
-        const minutes = Math.floor((props.ttl % 3600) / 60)
-        s += padStart(minutes + ':', 3, '0')
-        const seconds = Math.floor(props.ttl % 60)
-        s += padStart(seconds + '', 2, '0')
+        const dur = dayjs.duration(props.ttl, 'seconds')
+        const days = dur.days()
+        if (days > 0) {
+            return days + i18n.t('common.unit_day') + ' ' + dur.format('HH:mm:ss')
+        } else {
+            return dur.format('HH:mm:ss')
+        }
     } else if (props.ttl < 0) {
-        s = '-1'
+        return i18n.t('interface.forever')
     } else {
-        s = '00:00:00'
+        return '00:00:00'
     }
-    return s
 })
 
 const startAutoRefresh = async () => {
@@ -165,7 +164,7 @@ const onTTL = () => {
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
-                        {{ ttlString === '-1' ? $t('interface.forever') : ttlString }}
+                        {{ ttlString }}
                     </n-button>
                 </template>
                 TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}
