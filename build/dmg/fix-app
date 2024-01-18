@@ -24,19 +24,17 @@ appPath=$( find "$parentPath" -name '*.app' -maxdepth 1)
 appName=${appPath##*/}
 appBashName=${appName// /\ }
 appDIR="/Applications/${appBashName}"
-echo -e "『${appBashName} 提示已损坏，无法打开/ 来自身份不明的开发者』等问题修复工具"
+echo -e "This tool fix these situations: \"${appBashName}\" is damaged and can't not be opened."
 echo ""
-# 未安装APP时提醒安装，已安装绕过公证
 if [ ! -d "$appDIR" ];then
   echo ""
-  echo -e "执行结果：${RED}您还未安装 ${appBashName} ，请先安装${NC}"
+  echo -e "Execution result: ${RED}You haven't installed ${appBashName} yet, please install it first.${NC}"
   else
-  # 绕过公证
-  echo -e "${YELLOW}请输入开机密码，输入完成后按下回车键（输入过程中密码是看不见的）${NC}"
+  echo -e "${YELLOW}Please enter your login password, and then press enter. (The password is invisible during input)${NC}"
   sudo spctl --master-disable
   sudo xattr -rd com.apple.quarantine /Applications/"$appBashName"
   sudo xattr -rc /Applications/"$appBashName"
   sudo codesign --sign - --force --deep /Applications/"$appBashName"
-  echo -e "执行结果：${GREEN}修复成功！${NC}您现在可以正常运行 ${appBashName} 了。${NC}"
+  echo -e "Execution result: ${GREEN}Already fixed! ${NC} ${appBashName} will work correctly.${NC}"
 fi
-echo -e "本窗口可以关闭啦！"
+echo -e "You can close this window now"

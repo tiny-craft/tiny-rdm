@@ -54,7 +54,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Build frontend assets
         shell: bash
@@ -80,29 +80,34 @@ jobs:
       #          AC_USERNAME: ${{ secrets.AC_USERNAME }}
       #          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
 
-      - name: Compress macOS app
-        shell: bash
-        working-directory: ./build/bin
-        run: |
-          mv tinyrdm.app "Tiny RDM.app"
-          zip -r TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip "Tiny RDM.app"
-
-      - name: Upload release asset (ZIP Package)
-        shell: bash
-        working-directory: ./build/bin/
-        run: |
-          filepath="TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip"
-          filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
+      - name: Checkout create-image
+        uses: actions/checkout@v2
+        with:
+          repository: create-dmg/create-dmg
+          path: ./build/create-dmg
+          ref: master
 
       - name: Build macOS DMG
         shell: bash
-        working-directory: ./build/bin
+        working-directory: ./build
         run: |
-          rm TinyRDM-${{ steps.normalise_platform.outputs.tag }}.zip
-          ln -s /Applications Applications
-          hdiutil create -volname "Tiny RDM" -srcfolder . -ov -format UDBZ TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg
+          mv bin/tinyrdm.app "bin/Tiny RDM.app"
+          ./create-dmg/create-dmg \
+            --no-internet-enable \
+            --volname "Tiny RDM" \
+            --volicon "bin/Tiny RDM.app/Contents/Resources/iconfile.icns" \
+            --background "dmg/background.tiff" \
+            --text-size 12 \
+            --window-pos 400 400 \
+            --window-size 660 450 \
+            --icon-size 80 \
+            --icon "Tiny RDM.app" 180 180 \
+            --hide-extension "Tiny RDM.app" \
+            --app-drop-link 480 180 \
+            --add-file "Repair" "dmg/fix-app" 430 290 \
+            --add-file "损坏修复" "dmg/fix-app_zh" 230 290 \
+            "bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg" \
+            "bin"
 
       - name: Upload release asset (DMG Package)
         shell: bash
