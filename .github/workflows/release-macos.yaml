@@ -104,8 +104,8 @@ jobs:
             --icon "Tiny RDM.app" 180 180 \
             --hide-extension "Tiny RDM.app" \
             --app-drop-link 480 180 \
-            --add-file "Repair" "dmg/fix-app" 430 290 \
-            --add-file "损坏修复" "dmg/fix-app_zh" 230 290 \
+            --add-file "Repair" "dmg/fix-app" 230 290 \
+            --add-file "损坏修复" "dmg/fix-app_zh" 430 290 \
             "bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg" \
             "bin"
 

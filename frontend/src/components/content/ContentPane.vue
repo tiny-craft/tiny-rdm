@@ -12,12 +12,12 @@ import Detail from '@/components/icons/Detail.vue'
 import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.vue'
 import ContentCli from '@/components/content_value/ContentCli.vue'
 import Monitor from '@/components/icons/Monitor.vue'
-import Pub from '@/components/icons/Pub.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentPubsub from '@/components/content_value/ContentPubsub.vue'
+import Subscribe from '@/components/icons/Subscribe.vue'
 
 const themeVars = useThemeVars()
 
@@ -198,7 +198,7 @@ watch(
                 <template #tab>
                     <n-space :size="5" :wrap-item="false" align="center" inline justify="center">
                         <n-icon size="16">
-                            <pub
+                            <subscribe
                                 :inverse="selectedSubTab === BrowserTabType.PubMessage.toString()"
                                 :stroke-color="themeVars.tabColor"
                                 stroke-width="4" />

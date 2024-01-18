@@ -45,7 +45,7 @@ const keyOptions = computed(() => {
 const onSavePreferences = async () => {
     const success = await prefStore.savePreferences()
     if (success) {
-        $message.success(i18n.t('dialogue.handle_succ'))
+        // $message.success(i18n.t('dialogue.handle_succ'))
         dialogStore.closePreferencesDialog()
     }
 }

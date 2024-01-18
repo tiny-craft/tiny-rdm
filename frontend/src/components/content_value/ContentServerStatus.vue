@@ -1,5 +1,19 @@
 <script setup>
-import { cloneDeep, flatMap, get, isEmpty, map, mapValues, pickBy, slice, split, sum, toArray, toNumber } from 'lodash'
+import {
+    cloneDeep,
+    flatMap,
+    get,
+    isEmpty,
+    map,
+    mapValues,
+    pickBy,
+    random,
+    slice,
+    split,
+    sum,
+    toArray,
+    toNumber,
+} from 'lodash'
 import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
@@ -119,7 +133,59 @@ const _updateChart = (info) => {
         dataset2 = dataset2.concat(output)
         dataset2 = slice(dataset2, Math.max(0, dataset2.length - statusHistory))
         networkRate.value = generateData(networkRate.value, timeLabels, [dataset1, dataset2])
-        // console.log(dataset1, dataset2)
+    }
+}
+
+/**
+ * for mock activity data only
+ * @private
+ */
+const _mockChart = () => {
+    const timeLabels = []
+    for (let i = 0; i < 5; i++) {
+        timeLabels.push(dayjs().add(5, 'seconds').format('hh:mm:ss'))
+    }
+
+    // commands per seconds
+    {
+        const dataset = []
+        for (let i = 0; i < 5; i++) {
+            dataset.push(random(10, 200))
+        }
+        cmdRate.value = generateData(cmdRate.value, timeLabels, [dataset])
+    }
+
+    // connected clients
+    {
+        const dataset = []
+        for (let i = 0; i < 5; i++) {
+            dataset.push(random(10, 20))
+        }
+        connectedClients.value = generateData(connectedClients.value, timeLabels, [dataset])
+    }
+
+    // memory usage
+    {
+        const dataset = []
+        for (let i = 0; i < 5; i++) {
+            dataset.push(random(120 * 1024 * 1024, 200 * 1024 * 1024))
+        }
+        memoryUsage.value = generateData(memoryUsage.value, timeLabels, [dataset])
+    }
+
+    // network input/output rate
+    {
+        const dataset1 = []
+        for (let i = 0; i < 5; i++) {
+            dataset1.push(random(100, 1500))
+        }
+
+        const dataset2 = []
+        for (let i = 0; i < 5; i++) {
+            dataset2.push(random(200, 3000))
+        }
+
+        networkRate.value = generateData(networkRate.value, timeLabels, [dataset1, dataset2])
     }
 }
 
@@ -172,6 +238,7 @@ onMounted(() => {
         onToggleRefresh(true)
     } else {
         setTimeout(refreshInfo, 5000)
+        // setTimeout(_mockChart, 1000)
     }
     refreshInfo()
 })
@@ -357,40 +424,83 @@ const networkRate = shallowRef({
     ],
 })
 
-const chartOption = {
-    responsive: true,
-    maintainAspectRatio: false,
-    events: [],
-    scales: {
-        y: {
-            beginAtZero: true,
-            stepSize: 1024,
-            suggestedMin: 0,
-            ticks: {
-                precision: 0,
+const chartOption = computed(() => {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        events: [],
+        scales: {
+            x: {
+                grid: {
+                    color: themeVars.value.borderColor,
+                },
+                ticks: {
+                    color: themeVars.value.textColor3,
+                },
             },
-        },
-    },
-}
-
-const byteChartOption = {
-    responsive: true,
-    maintainAspectRatio: false,
-    events: [],
-    scales: {
-        y: {
-            beginAtZero: true,
-            suggestedMin: 0,
-            ticks: {
-                precision: 0,
-                // format display y axios tag
-                callback: function (value, index, values) {
-                    return formatBytes(value, 1)
+            y: {
+                beginAtZero: true,
+                stepSize: 1024,
+                suggestedMin: 0,
+                grid: {
+                    color: themeVars.value.borderColor,
+                },
+                ticks: {
+                    color: themeVars.value.textColor3,
+                    precision: 0,
                 },
             },
         },
-    },
-}
+        plugins: {
+            legend: {
+                labels: {
+                    color: themeVars.value.textColor2,
+                },
+            },
+        },
+    }
+})
+
+const byteChartOption = computed(() => {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        events: [],
+        scales: {
+            x: {
+                grid: {
+                    color: themeVars.value.borderColor,
+                },
+                ticks: {
+                    color: themeVars.value.textColor3,
+                },
+            },
+            y: {
+                beginAtZero: true,
+                stepSize: 1024,
+                suggestedMin: 0,
+                grid: {
+                    color: themeVars.value.borderColor,
+                },
+                ticks: {
+                    color: themeVars.value.textColor3,
+                    precision: 0,
+                    // format display y axios tag
+                    callback: function (value, index, values) {
+                        return formatBytes(value, 1)
+                    },
+                },
+            },
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: themeVars.value.textColor2,
+                },
+            },
+        },
+    }
+})
 </script>
 
 <template>
