@@ -20,6 +20,12 @@
  <img alt="screenshot" src="screenshots/dark_zh.png">
 </picture>
 
+<picture>
+ <source media="(prefers-color-scheme: dark)" srcset="screenshots/dark_zh2.png">
+ <source media="(prefers-color-scheme: light)" srcset="screenshots/light_zh2.png">
+ <img alt="screenshot" src="screenshots/dark_zh2.png">
+</picture>
+
 ## 功能特性
 
 * 极度轻量，基于Webview2，无内嵌浏览器（感谢[Wails](https://github.com/wailsapp/wails)）

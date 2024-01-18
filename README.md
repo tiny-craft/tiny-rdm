@@ -24,6 +24,12 @@ Linux.</strong>
  <img alt="screenshot" src="screenshots/dark_en.png">
 </picture>
 
+<picture>
+ <source media="(prefers-color-scheme: dark)" srcset="screenshots/dark_en2.png">
+ <source media="(prefers-color-scheme: light)" srcset="screenshots/light_en2.png">
+ <img alt="screenshot" src="screenshots/dark_en2.png">
+</picture>
+
 ## Feature
 
 * Super lightweight, built on Webview2, without embedded browsers (Thanks
