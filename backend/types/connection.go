@@ -3,26 +3,27 @@ package types
 type ConnectionCategory int
 
 type ConnectionConfig struct {
-	Name          string             `json:"name" yaml:"name"`
-	Group         string             `json:"group,omitempty" yaml:"-"`
-	LastDB        int                `json:"lastDB" yaml:"last_db"`
-	Addr          string             `json:"addr,omitempty" yaml:"addr,omitempty"`
-	Port          int                `json:"port,omitempty" yaml:"port,omitempty"`
-	Username      string             `json:"username,omitempty" yaml:"username,omitempty"`
-	Password      string             `json:"password,omitempty" yaml:"password,omitempty"`
-	DefaultFilter string             `json:"defaultFilter,omitempty" yaml:"default_filter,omitempty"`
-	KeySeparator  string             `json:"keySeparator,omitempty" yaml:"key_separator,omitempty"`
-	ConnTimeout   int                `json:"connTimeout,omitempty" yaml:"conn_timeout,omitempty"`
-	ExecTimeout   int                `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
-	DBFilterType  string             `json:"dbFilterType" yaml:"db_filter_type,omitempty"`
-	DBFilterList  []int              `json:"dbFilterList" yaml:"db_filter_list,omitempty"`
-	KeyView       int                `json:"keyView,omitempty" yaml:"key_view,omitempty"`
-	LoadSize      int                `json:"loadSize,omitempty" yaml:"load_size,omitempty"`
-	MarkColor     string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
-	SSL           ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
-	SSH           ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
-	Sentinel      ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
-	Cluster       ConnectionCluster  `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Name            string             `json:"name" yaml:"name"`
+	Group           string             `json:"group,omitempty" yaml:"-"`
+	LastDB          int                `json:"lastDB" yaml:"last_db"`
+	Addr            string             `json:"addr,omitempty" yaml:"addr,omitempty"`
+	Port            int                `json:"port,omitempty" yaml:"port,omitempty"`
+	Username        string             `json:"username,omitempty" yaml:"username,omitempty"`
+	Password        string             `json:"password,omitempty" yaml:"password,omitempty"`
+	DefaultFilter   string             `json:"defaultFilter,omitempty" yaml:"default_filter,omitempty"`
+	KeySeparator    string             `json:"keySeparator,omitempty" yaml:"key_separator,omitempty"`
+	ConnTimeout     int                `json:"connTimeout,omitempty" yaml:"conn_timeout,omitempty"`
+	ExecTimeout     int                `json:"execTimeout,omitempty" yaml:"exec_timeout,omitempty"`
+	DBFilterType    string             `json:"dbFilterType" yaml:"db_filter_type,omitempty"`
+	DBFilterList    []int              `json:"dbFilterList" yaml:"db_filter_list,omitempty"`
+	KeyView         int                `json:"keyView,omitempty" yaml:"key_view,omitempty"`
+	LoadSize        int                `json:"loadSize,omitempty" yaml:"load_size,omitempty"`
+	MarkColor       string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
+	RefreshInterval int                `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	SSL             ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
+	SSH             ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
+	Sentinel        ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
+	Cluster         ConnectionCluster  `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 }
 
 type Connection struct {

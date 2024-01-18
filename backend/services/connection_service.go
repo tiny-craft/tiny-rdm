@@ -367,10 +367,30 @@ func (c *connectionService) SaveLastDB(name string, db int) (resp types.JSResp) 
 		return
 	}
 
-	param.LastDB = db
-	if err := c.conns.UpdateConnection(name, param.ConnectionConfig); err != nil {
-		resp.Msg = "save connection fail:" + err.Error()
+	if param.LastDB != db {
+		param.LastDB = db
+		if err := c.conns.UpdateConnection(name, param.ConnectionConfig); err != nil {
+			resp.Msg = "save connection fail:" + err.Error()
+			return
+		}
+	}
+	resp.Success = true
+	return
+}
+
+// SaveRefreshInterval save auto refresh interval
+func (c *connectionService) SaveRefreshInterval(name string, interval int) (resp types.JSResp) {
+	param := c.conns.GetConnection(name)
+	if param == nil {
+		resp.Msg = "no connection named \"" + name + "\""
 		return
+	}
+	if param.RefreshInterval != interval {
+		param.RefreshInterval = interval
+		if err := c.conns.UpdateConnection(name, param.ConnectionConfig); err != nil {
+			resp.Msg = "save connection fail:" + err.Error()
+			return
+		}
 	}
 	resp.Success = true
 	return

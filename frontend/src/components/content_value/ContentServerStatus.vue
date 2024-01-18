@@ -13,13 +13,16 @@ import dayjs from 'dayjs'
 import { convertBytes, formatBytes } from '@/utils/byte_convert.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { useI18n } from 'vue-i18n'
+import useConnectionStore from 'stores/connections.js'
 
 const props = defineProps({
     server: String,
+    pause: Boolean,
 })
 
 const browserStore = useBrowserStore()
 const prefStore = usePreferencesStore()
+const connectionStore = useConnectionStore()
 const i18n = useI18n()
 const themeVars = useThemeVars()
 const serverInfo = ref({})
@@ -125,13 +128,19 @@ const isLoading = computed(() => {
 })
 
 const startAutoRefresh = async () => {
+    // connectionStore.getRefreshInterval()
     let lastExec = Date.now()
     do {
         if (!pageState.autoRefresh) {
             break
         }
         await timeout(100)
-        if (pageState.loading || pageState.autoLoading || Date.now() - lastExec < pageState.refreshInterval * 1000) {
+        if (
+            props.pause ||
+            pageState.loading ||
+            pageState.autoLoading ||
+            Date.now() - lastExec < pageState.refreshInterval * 1000
+        ) {
             continue
         }
         lastExec = Date.now()
@@ -147,13 +156,23 @@ const stopAutoRefresh = () => {
 const onToggleRefresh = (on) => {
     if (on) {
         tabVal.value = 'activity'
+        connectionStore.saveRefreshInterval(props.server, pageState.refreshInterval || 5)
         startAutoRefresh()
     } else {
+        connectionStore.saveRefreshInterval(props.server, -1)
         stopAutoRefresh()
     }
 }
 
 onMounted(() => {
+    const interval = connectionStore.getRefreshInterval(props.server)
+    if (interval >= 0) {
+        pageState.autoRefresh = true
+        pageState.refreshInterval = interval === 0 ? 5 : interval
+        onToggleRefresh(true)
+    } else {
+        setTimeout(refreshInfo, 5000)
+    }
     refreshInfo()
 })
 
@@ -208,15 +227,15 @@ const totalKeys = computed(() => {
     return sum(toArray(nums))
 })
 
-const tabVal = ref('info')
-const envFilter = reactive({
+const tabVal = ref('activity')
+const infoFilter = reactive({
     keyword: '',
     group: 'CPU',
 })
 
-const env = computed(() => {
-    if (!isEmpty(envFilter.group)) {
-        const val = serverInfo.value[envFilter.group]
+const info = computed(() => {
+    if (!isEmpty(infoFilter.group)) {
+        const val = serverInfo.value[infoFilter.group]
         if (!isEmpty(val)) {
             return map(val, (v, k) => ({
                 key: k,
@@ -235,10 +254,10 @@ const env = computed(() => {
 })
 
 const onFilterGroup = (group) => {
-    if (group === envFilter.group) {
-        envFilter.group = ''
+    if (group === infoFilter.group) {
+        infoFilter.group = ''
     } else {
-        envFilter.group = group
+        infoFilter.group = group
     }
 }
 
@@ -345,6 +364,7 @@ const chartOption = {
     scales: {
         y: {
             beginAtZero: true,
+            stepSize: 1024,
             suggestedMin: 0,
             ticks: {
                 precision: 0,
@@ -365,7 +385,7 @@ const byteChartOption = {
                 precision: 0,
                 // format display y axios tag
                 callback: function (value, index, values) {
-                    return formatBytes(value, 0)
+                    return formatBytes(value, 1)
                 },
             },
         },
@@ -429,32 +449,30 @@ const byteChartOption = {
                         @toggle="onToggleRefresh" />
                 </n-popover>
             </template>
-            <n-spin :show="pageState.loading">
-                <n-grid style="min-width: 500px" x-gap="5">
-                    <n-gi :span="6">
-                        <n-statistic :label="$t('status.uptime')" :value="uptime.value">
-                            <template #suffix>{{ $t(uptime.unit) }}</template>
-                        </n-statistic>
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic
-                            :label="$t('status.connected_clients')"
-                            :value="get(serverInfo, 'Clients.connected_clients', '0')" />
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic :value="totalKeys">
-                            <template #label>
-                                {{ $t('status.total_keys') }}
-                            </template>
-                        </n-statistic>
-                    </n-gi>
-                    <n-gi :span="6">
-                        <n-statistic :label="$t('status.memory_used')" :value="usedMemory[0]">
-                            <template #suffix>{{ usedMemory[1] }}</template>
-                        </n-statistic>
-                    </n-gi>
-                </n-grid>
-            </n-spin>
+            <n-grid style="min-width: 500px" x-gap="5">
+                <n-gi :span="6">
+                    <n-statistic :label="$t('status.uptime')" :value="uptime.value">
+                        <template #suffix>{{ $t(uptime.unit) }}</template>
+                    </n-statistic>
+                </n-gi>
+                <n-gi :span="6">
+                    <n-statistic
+                        :label="$t('status.connected_clients')"
+                        :value="get(serverInfo, 'Clients.connected_clients', '0')" />
+                </n-gi>
+                <n-gi :span="6">
+                    <n-statistic :value="totalKeys">
+                        <template #label>
+                            {{ $t('status.total_keys') }}
+                        </template>
+                    </n-statistic>
+                </n-gi>
+                <n-gi :span="6">
+                    <n-statistic :label="$t('status.memory_used')" :value="usedMemory[0]">
+                        <template #suffix>{{ usedMemory[1] }}</template>
+                    </n-statistic>
+                </n-gi>
+            </n-grid>
         </n-card>
         <n-card class="flex-item-expand" content-style="padding: 0; height: 100%;" embedded style="overflow: hidden">
             <n-tabs
@@ -466,53 +484,13 @@ const byteChartOption = {
                 type="line">
                 <template #suffix>
                     <div v-if="tabVal === 'info'" style="padding-right: 10px">
-                        <n-input v-model:value="envFilter.keyword" clearable placeholder="">
+                        <n-input v-model:value="infoFilter.keyword" clearable placeholder="">
                             <template #prefix>
                                 <icon-button :icon="Filter" size="18" />
                             </template>
                         </n-input>
                     </div>
                 </template>
-
-                <!-- environment tab pane -->
-                <n-tab-pane :tab="$t('status.env_info')" name="info">
-                    <n-space :wrap="false" :wrap-item="false" class="flex-item-expand">
-                        <n-space align="end" item-style="padding: 0 5px;" vertical>
-                            <n-button
-                                v-for="(v, k) in serverInfo"
-                                :key="k"
-                                :disabled="isEmpty(v)"
-                                :focusable="false"
-                                :type="envFilter.group === k ? 'primary' : 'default'"
-                                secondary
-                                size="small"
-                                @click="onFilterGroup(k)">
-                                <span style="min-width: 80px">{{ k }}</span>
-                            </n-button>
-                        </n-space>
-                        <n-data-table
-                            :columns="[
-                                {
-                                    title: $t('common.key'),
-                                    key: 'key',
-                                    defaultSortOrder: 'ascend',
-                                    minWidth: 80,
-                                    titleAlign: 'center',
-                                    filterOptionValue: envFilter.keyword,
-                                    filter(value, row) {
-                                        return !!~row.key.indexOf(value.toString())
-                                    },
-                                },
-                                { title: $t('common.value'), titleAlign: 'center', key: 'value' },
-                            ]"
-                            :data="env"
-                            :loading="pageState.loading"
-                            :single-line="false"
-                            class="flex-item-expand"
-                            flex-height
-                            striped />
-                    </n-space>
-                </n-tab-pane>
 
                 <!-- activity tab pane -->
                 <n-tab-pane
@@ -534,6 +512,46 @@ const byteChartOption = {
                             <Line :data="networkRate" :options="byteChartOption" />
                         </div>
                     </div>
+                </n-tab-pane>
+
+                <!-- info tab pane -->
+                <n-tab-pane :tab="$t('status.server_info')" name="info">
+                    <n-space :wrap="false" :wrap-item="false" class="flex-item-expand">
+                        <n-space align="end" item-style="padding: 0 5px;" vertical>
+                            <n-button
+                                v-for="(v, k) in serverInfo"
+                                :key="k"
+                                :disabled="isEmpty(v)"
+                                :focusable="false"
+                                :type="infoFilter.group === k ? 'primary' : 'default'"
+                                secondary
+                                size="small"
+                                @click="onFilterGroup(k)">
+                                <span style="min-width: 80px">{{ k }}</span>
+                            </n-button>
+                        </n-space>
+                        <n-data-table
+                            :columns="[
+                                {
+                                    title: $t('common.key'),
+                                    key: 'key',
+                                    defaultSortOrder: 'ascend',
+                                    minWidth: 80,
+                                    titleAlign: 'center',
+                                    filterOptionValue: infoFilter.keyword,
+                                    filter(value, row) {
+                                        return !!~row.key.indexOf(value.toString())
+                                    },
+                                },
+                                { title: $t('common.value'), titleAlign: 'center', key: 'value' },
+                            ]"
+                            :data="info"
+                            :loading="pageState.loading"
+                            :single-line="false"
+                            class="flex-item-expand"
+                            flex-height
+                            striped />
+                    </n-space>
                 </n-tab-pane>
             </n-tabs>
         </n-card>

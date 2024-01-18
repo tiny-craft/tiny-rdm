@@ -9,6 +9,7 @@ import {
     RenameGroup,
     SaveConnection,
     SaveLastDB,
+    SaveRefreshInterval,
     SaveSortedConnection,
 } from 'wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '@/consts/connection_type.js'
@@ -31,6 +32,7 @@ const useConnectionStore = defineStore('connections', {
      * @property {string} defaultFilter
      * @property {string} keySeparator
      * @property {string} markColor
+     * @property {number} refreshInterval
      */
 
     /**
@@ -63,7 +65,7 @@ const useConnectionStore = defineStore('connections', {
             const conns = []
             const groups = []
             const profiles = {}
-            const { data = [{ groupName: '', connections: [] }] } = await ListConnection()
+            const { data = [{ groupName: '', connections: [], refreshInterval: 5 }] } = await ListConnection()
             for (const conn of data) {
                 if (conn.type !== 'group') {
                     // top level
@@ -79,6 +81,7 @@ const useConnectionStore = defineStore('connections', {
                         defaultFilter: conn.defaultFilter,
                         keySeparator: conn.keySeparator,
                         markColor: conn.markColor,
+                        refreshInterval: conn.refreshInterval,
                     }
                 } else {
                     // custom group
@@ -99,6 +102,7 @@ const useConnectionStore = defineStore('connections', {
                             defaultFilter: item.defaultFilter,
                             keySeparator: item.keySeparator,
                             markColor: item.markColor,
+                            refreshInterval: conn.refreshInterval,
                         }
                     }
                     conns.push({
@@ -368,6 +372,32 @@ const useConnectionStore = defineStore('connections', {
         getDefaultSeparator(name) {
             const { keySeparator = ':' } = this.serverProfile[name] || {}
             return keySeparator
+        },
+
+        /**
+         * get default status refresh interval by server name
+         * @param {string} name
+         * @return {number}
+         */
+        getRefreshInterval(name) {
+            const { refreshInterval = 5 } = this.serverProfile[name] || {}
+            return refreshInterval
+        },
+
+        /**
+         * set and save default refresh interval
+         * @param {string} name
+         * @param {number} interval
+         * @return {Promise<{success: boolean}|{msg: undefined, success: boolean}>}
+         */
+        async saveRefreshInterval(name, interval) {
+            const profile = this.serverProfile[name] || {}
+            profile.refreshInterval = interval
+            const { success, msg } = await SaveRefreshInterval(name, interval)
+            if (!success) {
+                return { success: false, msg }
+            }
+            return { success: true }
         },
     },
 })

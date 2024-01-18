@@ -71,6 +71,9 @@ export const themeOverrides = {
         optionTextColorHover: '#FFF',
         optionHeightMedium: '28px',
     },
+    Divider: {
+        color: '#AAAAAB',
+    },
 }
 
 /**

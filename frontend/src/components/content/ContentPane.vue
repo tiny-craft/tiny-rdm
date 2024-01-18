@@ -124,7 +124,9 @@ watch(
                         <span>{{ $t('interface.sub_tab.status') }}</span>
                     </n-space>
                 </template>
-                <content-server-status :server="props.server" />
+                <content-server-status
+                    :pause="selectedSubTab !== BrowserTabType.Status.toString()"
+                    :server="props.server" />
             </n-tab-pane>
 
             <!-- key detail pane -->

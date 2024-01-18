@@ -277,10 +277,6 @@ const usePreferencesStore = defineStore('preferences', {
             return false
         },
 
-        setAsideWidth(width) {
-            this.behavior.asideWidth = Math.max(width, 300)
-        },
-
         async checkForUpdate(manual = false) {
             let msgRef = null
             if (manual) {
