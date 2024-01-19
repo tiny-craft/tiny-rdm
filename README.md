@@ -49,11 +49,12 @@ Linux.</strong>
 * Integrate with Monaco Editor
 * Support real-time commands monitoring.
 * Support import/export data.
+* Support publish/subscribe.
+* support import/export connection profile
 
 ## Roadmap
 
-- [ ] Pub/Sub operations
-- [ ] Import/export connection profile
+- [ ] Custom data encoder and decoder for value display
 
 ## Installation
 
