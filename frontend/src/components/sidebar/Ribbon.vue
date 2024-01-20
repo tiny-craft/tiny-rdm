@@ -109,6 +109,10 @@ const onSelectPreferenceMenu = (key) => {
     }
 }
 
+const openX = () => {
+    BrowserOpenURL('https://twitter.com/LykinHuang')
+}
+
 const openGithub = () => {
     BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm')
 }
@@ -149,20 +153,30 @@ const exThemeVars = computed(() => {
                 :render-icon="({ icon }) => render.renderIcon(icon)"
                 :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
                 trigger="click"
+                content-class="nav-menu-button"
                 @select="onSelectPreferenceMenu">
-                <icon-button :icon="Config" :size="iconSize" :stroke-width="3" class="nav-menu-button" />
+                <icon-button :icon="Config" :size="iconSize" :stroke-width="3" />
             </n-dropdown>
             <icon-button
                 v-if="prefStore.currentLanguage === 'zh'"
                 :icon="QRCode"
                 :size="iconSize"
-                :tooltip="$t('ribbon.wechat_official')"
+                t-tooltip="ribbon.wechat_official"
                 class="nav-menu-button"
                 @click="showWechat = true" />
             <icon-button
+                v-else
+                :border="false"
+                :size="iconSize"
+                class="nav-menu-button"
+                t-tooltip="ribbon.follow_x"
+                @click="openX">
+                <span style="font-weight: bold; font-size: 24px">𝕏</span>
+            </icon-button>
+            <icon-button
                 :icon="Github"
                 :size="iconSize"
-                :tooltip="$t('ribbon.github')"
+                t-tooltip="ribbon.github"
                 class="nav-menu-button"
                 @click="openGithub" />
         </div>
