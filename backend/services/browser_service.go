@@ -319,6 +319,9 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	var connConfig = selConn.ConnectionConfig
 	connConfig.LastDB = db
 	client, err = b.createRedisClient(connConfig)
+	if err != nil {
+		return
+	}
 	ctx, cancelFunc := context.WithCancel(b.ctx)
 	item = &connectionItem{
 		client:      client,
