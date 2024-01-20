@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { computed, nextTick, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, onUnmounted, reactive, watch } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
@@ -107,11 +107,7 @@ const onToggleRefresh = (on) => {
     }
 }
 
-const blockCopy = ref(false)
 const onCopyKey = () => {
-    if (blockCopy.value) {
-        return
-    }
     ClipboardSetText(props.keyPath)
         .then((succ) => {
             if (succ) {
@@ -121,17 +117,6 @@ const onCopyKey = () => {
         .catch((e) => {
             $message.error(e.message)
         })
-}
-
-const onReload = () => {
-    blockCopy.value = true
-    emit('reload')
-
-    nextTick(() => {
-        setTimeout(() => {
-            blockCopy.value = false
-        }, 300)
-    })
 }
 
 const onTTL = () => {
@@ -152,7 +137,11 @@ const onTTL = () => {
                 <template #suffix>
                     <n-popover :delay="500" keep-alive-on-hover placement="bottom" trigger="hover">
                         <template #trigger>
-                            <icon-button :loading="props.loading" size="18" @click="onReload">
+                            <icon-button
+                                :loading="props.loading"
+                                size="18"
+                                @click="emit('reload')"
+                                @dblclick.stop="() => {}">
                                 <n-icon :size="props.size">
                                     <refresh
                                         :class="{ 'auto-rotate': autoRefresh.on }"
