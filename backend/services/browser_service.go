@@ -177,12 +177,12 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 		queryDB := func(idx int) types.ConnectionDB {
 			dbName := "db" + strconv.Itoa(idx)
 			dbInfoStr := info["Keyspace"][dbName]
+			var alias string
+			if selConn.Alias != nil {
+				alias = selConn.Alias[idx]
+			}
 			if len(dbInfoStr) > 0 {
 				dbInfo := b.parseDBItemInfo(dbInfoStr)
-				var alias string
-				if selConn.Alias != nil {
-					alias = selConn.Alias[idx]
-				}
 				return types.ConnectionDB{
 					Name:    dbName,
 					Alias:   alias,
@@ -194,6 +194,7 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 			} else {
 				return types.ConnectionDB{
 					Name:  dbName,
+					Alias: alias,
 					Index: idx,
 				}
 			}
