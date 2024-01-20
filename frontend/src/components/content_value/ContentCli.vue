@@ -51,6 +51,7 @@ const newTerm = () => {
     term.loadAddon(fitAddon)
 
     term.onData(onTermData)
+    term.attachCustomKeyEventHandler(onTermKey)
     return { term, fitAddon }
 }
 
@@ -178,6 +179,70 @@ const onTermData = (data) => {
 }
 
 /**
+ *
+ * @param e
+ * @return {boolean}
+ */
+const onTermKey = (e) => {
+    if (e.type === 'keydown') {
+        if (e.ctrlKey) {
+            switch (e.key) {
+                case 'a': // move to head of line
+                    moveInputCursorTo(0)
+                    return false
+
+                case 'e': // move to tail of line
+                    moveInputCursorTo(Number.MAX_VALUE)
+                    return false
+
+                case 'f': // move forward
+                    moveInputCursor(1)
+                    return false
+
+                case 'b': // move backward
+                    moveInputCursor(-1)
+                    return false
+
+                case 'd': // delete char
+                    deleteInput(false)
+                    return false
+
+                case 'h': // back delete
+                    deleteInput(true)
+                    return false
+
+                case 'u': // delete all text before cursor
+                    deleteInput2(false)
+                    return false
+
+                case 'k': // delete all text after cursor
+                    deleteInput2(true)
+                    return false
+
+                case 'w': // delete word before cursor
+                    deleteWord(false)
+                    return false
+
+                case 'p': // previous history
+                    changeHistory(true)
+                    return false
+
+                case 'n': // next history
+                    changeHistory(false)
+                    return false
+
+                case 'l': // clear screen
+                    termInst.clear()
+                    replaceTermInput()
+                    newInputLine()
+                    return false
+            }
+        }
+    }
+    return true
+}
+
+/**
  * move input cursor by step
  * @param {number} step above 0 indicate move right; 0 indicate move to last
  */
@@ -276,6 +341,85 @@ const deleteInput = (back = false) => {
             currentLine = currentLine.slice(0, -1)
             inputCursor -= 1
         }
+    }
+
+    replaceTermInput(currentLine)
+    updateCurrentInput(currentLine)
+    moveInputCursorTo(inputCursor)
+}
+
+/**
+ * delete to the end
+ * @param back
+ */
+const deleteInput2 = (back = false) => {
+    if (termInst == null) {
+        return
+    }
+
+    let currentLine = getCurrentInput()
+    if (back) {
+        // delete until tail
+        currentLine = currentLine.substring(0, inputCursor - 1)
+        inputCursor = currentLine.length
+    } else {
+        // delete until head
+        currentLine = currentLine.substring(inputCursor)
+        inputCursor = 0
+    }
+
+    replaceTermInput(currentLine)
+    updateCurrentInput(currentLine)
+    moveInputCursorTo(inputCursor)
+}
+
+/**
+ * delete one word
+ * @param back
+ */
+const deleteWord = (back = false) => {
+    if (termInst == null) {
+        return
+    }
+
+    let currentLine = getCurrentInput()
+    if (back) {
+        const prefix = currentLine.substring(0, inputCursor)
+        let firstNonChar = false
+        let cursor = inputCursor
+        while (cursor < currentLine.length) {
+            const isChar =
+                (currentLine[cursor] >= 'a' && currentLine[cursor] <= 'z') ||
+                (currentLine[cursor] >= 'A' && currentLine[cursor] <= 'Z') ||
+                (currentLine[cursor] >= '0' && currentLine[cursor] <= '9')
+            if (!firstNonChar || isChar) {
+                if (!isChar) {
+                    firstNonChar = true
+                }
+                cursor++
+            } else {
+                break
+            }
+        }
+        currentLine = prefix + currentLine.substring(cursor)
+    } else {
+        const suffix = currentLine.substring(inputCursor)
+        let firstNonChar = false
+        while (inputCursor >= 0) {
+            const isChar =
+                (currentLine[inputCursor] >= 'a' && currentLine[inputCursor] <= 'z') ||
+                (currentLine[inputCursor] >= 'A' && currentLine[inputCursor] <= 'Z') ||
+                (currentLine[inputCursor] >= '0' && currentLine[inputCursor] <= '9')
+            if (!firstNonChar || isChar) {
+                if (!isChar) {
+                    firstNonChar = true
+                }
+                inputCursor--
+            } else {
+                break
+            }
+        }
+        currentLine = currentLine.substring(0, inputCursor) + suffix
     }
 
     replaceTermInput(currentLine)
