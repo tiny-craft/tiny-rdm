@@ -287,7 +287,7 @@ const onClose = () => {
                 animated
                 pane-style="min-height: 50vh;"
                 placement="left"
-                tab-style="justify-content: right;"
+                tab-style="justify-content: right; font-weight: 420;"
                 type="line">
                 <!-- General pane -->
                 <n-tab-pane :tab="$t('dialogue.connection.general')" display-directive="show:lazy" name="general">
@@ -526,7 +526,7 @@ const onClose = () => {
                                 :disabled="!generalForm.ssl.enable"
                                 :placeholder="$t('dialogue.connection.ssl.key_file_tip')" />
                         </n-form-item>
-                        <n-form-item :label="$t('dialogue.connection.ssl.ca_file')">
+                        <n-form-item :label="$t('dialogue.connection.ssl.ca_file')" :show-feedback="false">
                             <file-open-input
                                 v-model:value="generalForm.ssl.caFile"
                                 :disabled="!generalForm.ssl.enable"

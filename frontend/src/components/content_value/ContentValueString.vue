@@ -151,6 +151,7 @@ const onSave = async () => {
             decode: viewAs.decode,
         })
         if (success) {
+            viewAs.value = editingContent.value
             $message.success(i18n.t('interface.save_value_succ'))
         } else {
             $message.error(msg)
