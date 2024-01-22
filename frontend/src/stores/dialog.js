@@ -183,9 +183,9 @@ const useDialogStore = defineStore('dialog', {
          *
          * @param {string} server
          * @param {number} db
-         * @param {string|string[]} key
+         * @param {string|string[]} [key]
          */
-        openDeleteKeyDialog(server, db, key) {
+        openDeleteKeyDialog(server, db, key = '*') {
             this.deleteKeyParam.server = server
             this.deleteKeyParam.db = db
             this.deleteKeyParam.key = key

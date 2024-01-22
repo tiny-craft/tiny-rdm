@@ -72,8 +72,10 @@ const dbSelectOptions = computed(() => {
 
 const moreOptions = [
     { key: 'import', label: 'interface.import_key', icon: Import },
+    { key: 'divider1', type: 'divider' },
+    { key: 'delete', label: 'interface.batch_delete_key', icon: Delete },
     { key: 'flush', label: 'interface.flush_db', icon: Delete },
-    { key: 'divider', type: 'divider' },
+    { key: 'divider2', type: 'divider' },
     { key: 'disconnect', label: 'interface.disconnect', icon: Unlink },
 ]
 
@@ -229,6 +231,21 @@ const onSelectOptions = (select) => {
     switch (select) {
         case 'import':
             onImportData()
+            break
+        case 'delete':
+            let key = '*'
+            const selectedKey = get(browserTreeRef.value?.getSelectedKey(), 0)
+            if (selectedKey != null) {
+                const node = browserStore.getNode(selectedKey)
+                if (node != null) {
+                    const { type = ConnectionType.RedisValue, redisKey } = node
+                    if (type === ConnectionType.RedisKey) {
+                        // has prefix
+                        key = redisKey + browserStore.getSeparator(props.server) + '*'
+                    }
+                }
+            }
+            dialogStore.openDeleteKeyDialog(props.server, props.db, key)
             break
         case 'flush':
             onFlush()
