@@ -214,6 +214,16 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.font_size')" :span="24">
                             <n-input-number v-model:value="prefStore.cli.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
+                        <n-form-item-gi :label="$t('preferences.cli.cursor_style')" :span="24">
+                            <n-radio-group v-model:value="prefStore.cli.cursorStyle" name="theme" size="medium">
+                                <n-radio-button
+                                    v-for="opt in prefStore.cliCursorStyleOption"
+                                    :key="opt.value"
+                                    :value="opt.value">
+                                    {{ $t(opt.label) }}
+                                </n-radio-button>
+                            </n-radio-group>
+                        </n-form-item-gi>
                     </n-grid>
                 </n-form>
             </n-tab-pane>

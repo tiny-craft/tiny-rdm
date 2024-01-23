@@ -56,7 +56,11 @@
       "show_folding": "Enable Code Folding"
     },
     "cli": {
-      "name": "Command Line"
+      "name": "Command Line",
+      "cursor_style": "Cursor Style",
+      "cursor_style_block": "Block",
+      "cursor_style_underline": "Underline",
+      "cursor_style_bar": "Bar"
     }
   },
   "interface": {

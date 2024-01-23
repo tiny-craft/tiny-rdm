@@ -56,7 +56,11 @@
       "show_folding": "启用代码折叠"
     },
     "cli": {
-      "name": "命令行"
+      "name": "命令行",
+      "cursor_style": "光标样式",
+      "cursor_style_block": "方块",
+      "cursor_style_underline": "下划线",
+      "cursor_style_bar": "竖线"
     }
   },
   "interface": {

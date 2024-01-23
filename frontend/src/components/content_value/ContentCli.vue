@@ -37,6 +37,7 @@ const newTerm = () => {
         allowProposedApi: true,
         fontFamily,
         fontSize,
+        cursorStyle: prefStore.cli.cursorStyle || 'block',
         cursorBlink: true,
         disableStdin: false,
         screenReaderMode: true,
@@ -97,6 +98,16 @@ watch(
         if (termInst != null) {
             termInst.options.fontSize = fontSize
             termInst.options.fontFamily = fontFamily
+        }
+        resizeTerm()
+    },
+)
+
+watch(
+    () => prefStore.cli.cursorStyle,
+    (style) => {
+        if (termInst != null) {
+            termInst.options.cursorStyle = style || 'block'
         }
         resizeTerm()
     },

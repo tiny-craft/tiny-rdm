@@ -30,7 +30,8 @@ func NewPreferences() Preferences {
 			ShowFolding: true,
 		},
 		Cli: PreferencesCli{
-			FontSize: consts.DEFAULT_FONT_SIZE,
+			FontSize:    consts.DEFAULT_FONT_SIZE,
+			CursorStyle: "block",
 		},
 	}
 }
@@ -67,6 +68,7 @@ type PreferencesEditor struct {
 }
 
 type PreferencesCli struct {
-	FontFamily []string `json:"fontFamily" yaml:"font_family,omitempty"`
-	FontSize   int      `json:"fontSize" yaml:"font_size"`
+	FontFamily  []string `json:"fontFamily" yaml:"font_family,omitempty"`
+	FontSize    int      `json:"fontSize" yaml:"font_size"`
+	CursorStyle string   `json:"cursorStyle" yaml:"cursor_style,omitempty"`
 }

@@ -62,6 +62,7 @@ const usePreferencesStore = defineStore('preferences', {
         cli: {
             fontFamily: [],
             fontSize: 14,
+            cursorStyle: 'block',
         },
         lastPref: {},
         fontList: [],
@@ -189,6 +190,23 @@ const usePreferencesStore = defineStore('preferences', {
                 fontStyle['fontFamily'] = ['Courier New']
             }
             return fontStyle
+        },
+
+        cliCursorStyleOption() {
+            return [
+                {
+                    value: 'block',
+                    label: 'preferences.cli.cursor_style_block',
+                },
+                {
+                    value: 'underline',
+                    label: 'preferences.cli.cursor_style_underline',
+                },
+                {
+                    value: 'bar',
+                    label: 'preferences.cli.cursor_style_bar',
+                },
+            ]
         },
 
         /**
