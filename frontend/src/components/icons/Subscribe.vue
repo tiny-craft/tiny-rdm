@@ -14,9 +14,9 @@ const props = defineProps({
 <template>
     <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <path
+            :fill="props.inverse ? 'currentColor' : 'none'"
             :stroke-width="props.strokeWidth"
             d="M24 28.6292C26.5104 28.6292 28.5455 26.6004 28.5455 24.0979C28.5455 21.5954 26.5104 19.5667 24 19.5667C21.4897 19.5667 19.4546 21.5954 19.4546 24.0979C19.4546 26.6004 21.4897 28.6292 24 28.6292Z"
-            :fill="props.inverse ? 'currentColor' : 'none'"
             stroke="currentColor"
             stroke-linejoin="round" />
         <path

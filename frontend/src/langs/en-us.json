@@ -27,6 +27,7 @@
   "preferences": {
     "name": "Preferences",
     "restore_defaults": "Restore Defaults",
+    "font_tip": "Supports multiple selection. You can manually input the font name if it is not list below.",
     "general": {
       "name": "General",
       "theme": "Theme",
@@ -35,7 +36,6 @@
       "theme_auto": "Auto",
       "language": "Language",
       "system_lang": "Use System Language",
-      "default": "Default",
       "font": "Font",
       "font_size": "Font Size",
       "scan_size": "Default Size for SCAN Command",

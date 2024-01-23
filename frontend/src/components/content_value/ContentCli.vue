@@ -34,6 +34,7 @@ let fitAddonInst = null
 const newTerm = () => {
     const term = new Terminal({
         allowProposedApi: true,
+        fontFamily: prefStore.general.fontFamily,
         fontSize: prefStore.general.fontSize || 14,
         cursorBlink: true,
         disableStdin: false,
@@ -88,6 +89,16 @@ const resizeTerm = () => {
 defineExpose({
     resizeTerm,
 })
+
+// watch(
+//     () => prefStore.general.font,
+//     (font = undefined) => {
+//         if (termInst != null) {
+//             termInst.options.fontFamily = font || 'Courier New'
+//         }
+//         resizeTerm()
+//     },
+// )
 
 watch(
     () => prefStore.general.fontSize,

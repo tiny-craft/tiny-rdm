@@ -58,7 +58,7 @@ const readonlyValue = computed(() => {
 const pref = usePreferencesStore()
 onMounted(async () => {
     if (editorRef.value != null) {
-        const { fontSize, fontFamily = undefined } = pref.editorFont
+        const { fontSize, fontFamily = ['monaco'] } = pref.editorFont
         editorNode = monaco.editor.create(editorRef.value, {
             // value: props.content,
             theme: pref.isDark ? 'rdm-dark' : 'rdm-light',
@@ -151,21 +151,11 @@ watch(
 )
 
 watch(
-    () => pref.editorFont.fontSize,
-    (fontSize) => {
+    () => pref.editorFont,
+    ({ fontSize, fontFamily }) => {
         if (editorNode != null) {
             editorNode.updateOptions({
                 fontSize,
-            })
-        }
-    },
-)
-
-watch(
-    () => pref.editorFont.fontFamily,
-    (fontFamily = undefined) => {
-        if (editorNode != null) {
-            editorNode.updateOptions({
                 fontFamily,
             })
         }

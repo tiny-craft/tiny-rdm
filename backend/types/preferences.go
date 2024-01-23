@@ -41,21 +41,23 @@ type PreferencesBehavior struct {
 }
 
 type PreferencesGeneral struct {
-	Theme           string `json:"theme" yaml:"theme"`
-	Language        string `json:"language" yaml:"language"`
-	Font            string `json:"font" yaml:"font,omitempty"`
-	FontSize        int    `json:"fontSize" yaml:"font_size"`
-	ScanSize        int    `json:"scanSize" yaml:"scan_size"`
-	KeyIconStyle    int    `json:"keyIconStyle" yaml:"key_icon_style"`
-	UseSysProxy     bool   `json:"useSysProxy" yaml:"use_sys_proxy,omitempty"`
-	UseSysProxyHttp bool   `json:"useSysProxyHttp" yaml:"use_sys_proxy_http,omitempty"`
-	CheckUpdate     bool   `json:"checkUpdate" yaml:"check_update"`
-	SkipVersion     string `json:"skipVersion" yaml:"skip_version,omitempty"`
+	Theme           string   `json:"theme" yaml:"theme"`
+	Language        string   `json:"language" yaml:"language"`
+	Font            string   `json:"font" yaml:"font,omitempty"`
+	FontFamily      []string `json:"fontFamily" yaml:"font_family,omitempty"`
+	FontSize        int      `json:"fontSize" yaml:"font_size"`
+	ScanSize        int      `json:"scanSize" yaml:"scan_size"`
+	KeyIconStyle    int      `json:"keyIconStyle" yaml:"key_icon_style"`
+	UseSysProxy     bool     `json:"useSysProxy" yaml:"use_sys_proxy,omitempty"`
+	UseSysProxyHttp bool     `json:"useSysProxyHttp" yaml:"use_sys_proxy_http,omitempty"`
+	CheckUpdate     bool     `json:"checkUpdate" yaml:"check_update"`
+	SkipVersion     string   `json:"skipVersion" yaml:"skip_version,omitempty"`
 }
 
 type PreferencesEditor struct {
-	Font        string `json:"font" yaml:"font,omitempty"`
-	FontSize    int    `json:"fontSize" yaml:"font_size"`
-	ShowLineNum bool   `json:"showLineNum" yaml:"show_line_num"`
-	ShowFolding bool   `json:"showFolding" yaml:"show_folding"`
+	Font        string   `json:"font" yaml:"font,omitempty"`
+	FontFamily  []string `json:"fontFamily" yaml:"font_family,omitempty"`
+	FontSize    int      `json:"fontSize" yaml:"font_size"`
+	ShowLineNum bool     `json:"showLineNum" yaml:"show_line_num"`
+	ShowFolding bool     `json:"showFolding" yaml:"show_folding"`
 }

@@ -152,8 +152,8 @@ const exThemeVars = computed(() => {
                 :options="preferencesOptions"
                 :render-icon="({ icon }) => render.renderIcon(icon)"
                 :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
-                trigger="click"
                 content-class="nav-menu-button"
+                trigger="click"
                 @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" :stroke-width="3" />
             </n-dropdown>
@@ -161,8 +161,8 @@ const exThemeVars = computed(() => {
                 v-if="prefStore.currentLanguage === 'zh'"
                 :icon="QRCode"
                 :size="iconSize"
-                t-tooltip="ribbon.wechat_official"
                 class="nav-menu-button"
+                t-tooltip="ribbon.wechat_official"
                 @click="showWechat = true" />
             <icon-button
                 v-else
@@ -176,8 +176,8 @@ const exThemeVars = computed(() => {
             <icon-button
                 :icon="Github"
                 :size="iconSize"
-                t-tooltip="ribbon.github"
                 class="nav-menu-button"
+                t-tooltip="ribbon.github"
                 @click="openGithub" />
         </div>
 

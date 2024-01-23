@@ -46,15 +46,15 @@ const onSelectOptions = async (select) => {
             <icon-button
                 :button-class="['nav-pane-func-btn']"
                 :icon="AddLink"
-                size="20"
                 :stroke-width="3.5"
+                size="20"
                 t-tooltip="interface.new_conn"
                 @click="dialogStore.openNewDialog()" />
             <icon-button
                 :button-class="['nav-pane-func-btn']"
                 :icon="AddGroup"
-                size="20"
                 :stroke-width="3.5"
+                size="20"
                 t-tooltip="interface.new_group"
                 @click="dialogStore.openNewGroupDialog()" />
             <n-divider vertical />

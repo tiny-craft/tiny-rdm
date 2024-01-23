@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
-import { cloneDeep, find, get, isEmpty, map, pick, set, split } from 'lodash'
+import { cloneDeep, get, isEmpty, join, map, pick, set, split } from 'lodash'
 import {
     CheckForUpdate,
     GetFontList,
@@ -43,6 +43,7 @@ const usePreferencesStore = defineStore('preferences', {
             theme: 'auto',
             language: 'auto',
             font: '',
+            fontFamily: [],
             fontSize: 14,
             scanSize: 3000,
             keyIconStyle: 0,
@@ -53,6 +54,7 @@ const usePreferencesStore = defineStore('preferences', {
         },
         editor: {
             font: '',
+            fontFamily: [],
             fontSize: 14,
             showLineNum: true,
             showFolding: true,
@@ -103,17 +105,11 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {{path: string, label: string, value: string}[]}
          */
         fontOption() {
-            const option = map(this.fontList, (font) => ({
+            return map(this.fontList, (font) => ({
                 value: font.name,
                 label: font.name,
                 path: font.path,
             }))
-            option.splice(0, 0, {
-                value: '',
-                label: 'preferences.general.default',
-                path: '',
-            })
-            return option
         },
 
         /**
@@ -124,12 +120,21 @@ const usePreferencesStore = defineStore('preferences', {
             const fontStyle = {
                 fontSize: this.general.fontSize + 'px',
             }
-            if (!isEmpty(this.general.font) && this.general.font !== 'none') {
-                const font = find(this.fontList, { name: this.general.font })
-                if (font != null) {
-                    fontStyle['fontFamily'] = `${font.name}`
-                }
+            if (!isEmpty(this.general.fontFamily)) {
+                fontStyle['fontFamily'] = join(
+                    map(this.general.fontFamily, (f) => `"${f}"`),
+                    ',',
+                )
             }
+            // compatible with old preferences
+            // if (isEmpty(fontStyle['fontFamily'])) {
+            //     if (!isEmpty(this.general.font) && this.general.font !== 'none') {
+            //         const font = find(this.fontList, { name: this.general.font })
+            //         if (font != null) {
+            //             fontStyle['fontFamily'] = `${font.name}`
+            //         }
+            //     }
+            // }
             return fontStyle
         },
 
@@ -141,13 +146,24 @@ const usePreferencesStore = defineStore('preferences', {
             const fontStyle = {
                 fontSize: (this.editor.fontSize || 14) + 'px',
             }
-            if (!isEmpty(this.editor.font) && this.editor.font !== 'none') {
-                const font = find(this.fontList, { name: this.editor.font })
-                if (font != null) {
-                    fontStyle['fontFamily'] = `${font.name}`
-                }
+            if (!isEmpty(this.editor.fontFamily)) {
+                fontStyle['fontFamily'] = join(
+                    map(this.editor.fontFamily, (f) => `"${f}"`),
+                    ',',
+                )
             }
-            fontStyle['fontFamily'] = fontStyle['fontFamily'] || 'monaco'
+            // compatible with old preferences
+            // if (isEmpty(fontStyle['fontFamily'])) {
+            //     if (!isEmpty(this.editor.font) && this.editor.font !== 'none') {
+            //         const font = find(this.fontList, { name: this.editor.font })
+            //         if (font != null) {
+            //             fontStyle['fontFamily'] = `${font.name}`
+            //         }
+            //     }
+            // }
+            if (isEmpty(fontStyle['fontFamily'])) {
+                fontStyle['fontFamily'] = ['monaco']
+            }
             return fontStyle
         },
 

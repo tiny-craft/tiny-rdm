@@ -5,6 +5,7 @@ import useDialog from 'stores/dialog'
 import usePreferencesStore from 'stores/preferences.js'
 import { map, sortBy } from 'lodash'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
+import Help from '@/components/icons/Help.vue'
 
 const prefStore = usePreferencesStore()
 
@@ -92,14 +93,27 @@ const onClose = () => {
                                 :render-label="({ label, value }) => (value === 'auto' ? $t(label) : label)"
                                 filterable />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
+                        <n-form-item-gi :span="24" required>
+                            <template #label>
+                                {{ $t('preferences.general.font') }}
+                                <n-tooltip trigger="hover">
+                                    <template #trigger>
+                                        <n-icon :component="Help" />
+                                    </template>
+                                    <div class="text-block">
+                                        {{ $t('preferences.font_tip') }}
+                                    </div>
+                                </n-tooltip>
+                            </template>
                             <n-select
-                                v-model:value="prefStore.general.font"
+                                v-model:value="prefStore.general.fontFamily"
                                 :options="prefStore.fontOption"
                                 :render-label="({ label, value }) => (value === '' ? $t(label) : label)"
-                                filterable />
+                                filterable
+                                multiple
+                                tag />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="12">
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="24">
                             <n-input-number v-model:value="prefStore.general.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :label="$t('preferences.general.scan_size')" :span="12">
@@ -115,16 +129,16 @@ const onClose = () => {
                                 :options="keyOptions"
                                 :render-label="({ label }) => $t(label)" />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">
-                            <n-space>
-                                <n-checkbox v-model:checked="prefStore.general.useSysProxy">
-                                    {{ $t('preferences.general.use_system_proxy') }}
-                                </n-checkbox>
-                                <n-checkbox v-model:checked="prefStore.general.useSysProxyHttp">
-                                    {{ $t('preferences.general.use_system_proxy_http') }}
-                                </n-checkbox>
-                            </n-space>
-                        </n-form-item-gi>
+                        <!--                        <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">-->
+                        <!--                            <n-space>-->
+                        <!--                                <n-checkbox v-model:checked="prefStore.general.useSysProxy">-->
+                        <!--                                    {{ $t('preferences.general.use_system_proxy') }}-->
+                        <!--                                </n-checkbox>-->
+                        <!--                                <n-checkbox v-model:checked="prefStore.general.useSysProxyHttp">-->
+                        <!--                                    {{ $t('preferences.general.use_system_proxy_http') }}-->
+                        <!--                                </n-checkbox>-->
+                        <!--                            </n-space>-->
+                        <!--                        </n-form-item-gi>-->
                         <n-form-item-gi :label="$t('preferences.general.update')" :span="24">
                             <n-checkbox v-model:checked="prefStore.general.checkUpdate">
                                 {{ $t('preferences.general.auto_check_update') }}
@@ -137,14 +151,27 @@ const onClose = () => {
             <n-tab-pane :tab="$t('preferences.editor.name')" display-directive="show" name="editor">
                 <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
-                        <n-form-item-gi :label="$t('preferences.general.font')" :span="12" required>
+                        <n-form-item-gi :span="24" required>
+                            <template #label>
+                                {{ $t('preferences.general.font') }}
+                                <n-tooltip trigger="hover">
+                                    <template #trigger>
+                                        <n-icon :component="Help" />
+                                    </template>
+                                    <div class="text-block">
+                                        {{ $t('preferences.font_tip') }}
+                                    </div>
+                                </n-tooltip>
+                            </template>
                             <n-select
-                                v-model:value="prefStore.editor.font"
+                                v-model:value="prefStore.editor.fontFamily"
                                 :options="prefStore.fontOption"
                                 :render-label="({ label, value }) => value || $t(label)"
-                                filterable />
+                                filterable
+                                multiple
+                                tag />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="12">
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="24">
                             <n-input-number v-model:value="prefStore.editor.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
                         <n-form-item-gi :show-feedback="false" :show-label="false" :span="24">

@@ -27,6 +27,7 @@
   "preferences": {
     "name": "偏好设置",
     "restore_defaults": "重置为默认",
+    "font_tip": "支持多选，如列表没有已安装的字体，可自行手动输入",
     "general": {
       "name": "常规配置",
       "theme": "主题",
@@ -35,7 +36,6 @@
       "theme_auto": "自动",
       "language": "语言",
       "system_lang": "使用系统语言",
-      "default": "默认",
       "font": "字体",
       "font_size": "字体尺寸",
       "scan_size": "SCAN命令默认数量",
