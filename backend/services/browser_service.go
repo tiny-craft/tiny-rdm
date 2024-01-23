@@ -2073,7 +2073,7 @@ func (b *browserService) DeleteOneKey(server string, db int, k any) (resp types.
 }
 
 // DeleteKeys delete keys sync with notification
-func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo string) (resp types.JSResp) {
+func (b *browserService) DeleteKeys(server string, db int, ks []any, notice bool, serialNo string) (resp types.JSResp) {
 	// connect a new connection to export keys
 	conf := Connection().getConnection(server)
 	if conf == nil {
@@ -2093,7 +2093,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	defer cancelFunc()
 
 	cancelEvent := "delete:stop:" + serialNo
-	runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	cancelStopEvent := runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
 		cancelFunc()
 	})
 	processEvent := "deleting:" + serialNo
@@ -2104,29 +2104,41 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	var mutex sync.Mutex
 	del := func(ctx context.Context, cli redis.UniversalClient) error {
 		startTime := time.Now().Add(-10 * time.Second)
+		supportUnlink := true
 		for i, k := range ks {
 			// emit progress per second
-			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
+			if notice && (i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100) {
 				startTime = time.Now()
 				param := map[string]any{
 					"total":      total,
 					"progress":   i + 1,
 					"processing": k,
 				}
-				runtime.EventsEmit(b.ctx, processEvent, param)
+				runtime.EventsEmit(ctx, processEvent, param)
 				// do some sleep to prevent blocking the Redis server
 				time.Sleep(10 * time.Millisecond)
 			}
 
 			key := strutil.DecodeRedisKey(k)
-			delErr := cli.Del(ctx, key).Err()
-			if err != nil {
-				failed.Add(1)
-			} else {
-				// save deleted key
-				mutex.Lock()
-				deletedKeys = append(deletedKeys, k)
-				mutex.Unlock()
+			var delErr error
+			if supportUnlink {
+				if delErr = cli.Unlink(ctx, key).Err(); delErr != nil {
+					supportUnlink = false
+					delErr = nil
+				}
+			}
+			if !supportUnlink {
+				delErr = cli.Del(ctx, key).Err()
+			}
+			if notice {
+				if delErr != nil {
+					failed.Add(1)
+				} else {
+					// save deleted key
+					mutex.Lock()
+					deletedKeys = append(deletedKeys, k)
+					mutex.Unlock()
+				}
 			}
 			if errors.Is(delErr, context.Canceled) || canceled {
 				canceled = true
@@ -2145,7 +2157,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 		err = del(ctx, client)
 	}
 
-	runtime.EventsOff(ctx, cancelEvent)
+	cancelStopEvent()
 	resp.Success = true
 	resp.Data = struct {
 		Canceled bool  `json:"canceled"`
@@ -2189,8 +2201,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	cancelEvent := "export:stop:" + path
-	runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	cancelStopEvent := runtime.EventsOnce(ctx, "export:stop:"+path, func(data ...any) {
 		cancelFunc()
 	})
 	processEvent := "exporting:" + path
@@ -2206,7 +2217,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 				"progress":   i + 1,
 				"processing": k,
 			}
-			runtime.EventsEmit(b.ctx, processEvent, param)
+			runtime.EventsEmit(ctx, processEvent, param)
 		}
 
 		key := strutil.DecodeRedisKey(k)
@@ -2230,7 +2241,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 		}
 	}
 
-	runtime.EventsOff(ctx, cancelEvent)
+	cancelStopEvent()
 	resp.Success = true
 	resp.Data = struct {
 		Canceled bool  `json:"canceled"`
@@ -2274,7 +2285,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 	reader := csv.NewReader(file)
 
 	cancelEvent := "import:stop:" + path
-	runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	cancelStopEvent := runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
 		cancelFunc()
 	})
 	processEvent := "importing:" + path
@@ -2349,7 +2360,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 		}
 	}
 
-	runtime.EventsOff(ctx, cancelEvent)
+	cancelStopEvent()
 	resp.Success = true
 	resp.Data = struct {
 		Canceled bool  `json:"canceled"`

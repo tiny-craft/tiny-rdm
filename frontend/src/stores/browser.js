@@ -44,7 +44,7 @@ import useConnectionStore from 'stores/connections.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { isRedisGlob } from '@/utils/glob_pattern.js'
 import { i18nGlobal } from '@/utils/i18n.js'
-import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
+import { EventsEmit, EventsOn } from 'wailsjs/runtime/runtime.js'
 import { RedisNodeItem } from '@/objects/redisNodeItem.js'
 import { RedisServerState } from '@/objects/redisServerState.js'
 import { RedisDatabaseItem } from '@/objects/redisDatabaseItem.js'
@@ -1614,34 +1614,33 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string[]|number[][]} keys
+         * @param {boolean} notice
          * @return {Promise<void>}
          */
-        async deleteKeys(server, db, keys) {
-            const msgRef = $message.loading('', { duration: 0, closable: true })
+        async deleteKeys(server, db, keys, notice) {
+            const msgRef = $message.loading(i18nGlobal.t('dialogue.delete.deleting'), { duration: 0, closable: true })
             let deleted = []
             let failCount = 0
             let canceled = false
             const serialNo = Date.now().valueOf().toString()
-            const eventName = 'deleting:' + serialNo
-            const cancelEvent = 'delete:stop:' + serialNo
-            try {
-                let maxProgress = 0
-                EventsOn(eventName, ({ total, progress, processing }) => {
-                    // update delete progress
-                    if (progress > maxProgress) {
-                        maxProgress = progress
-                    }
-                    const k = decodeRedisKey(processing)
-                    msgRef.content = i18nGlobal.t('dialogue.delete.doing', {
-                        key: k,
-                        index: maxProgress,
-                        count: total,
-                    })
-                })
-                msgRef.onClose = () => {
-                    EventsEmit(cancelEvent)
+            let maxProgress = 0
+            const cancelEventFn = EventsOn('deleting:' + serialNo, ({ total, progress, processing }) => {
+                // update delete progress
+                if (progress > maxProgress) {
+                    maxProgress = progress
                 }
-                const { data, success, msg } = await DeleteKeys(server, db, keys, serialNo)
+                const k = decodeRedisKey(processing)
+                msgRef.content = i18nGlobal.t('dialogue.delete.doing', {
+                    key: k,
+                    index: maxProgress,
+                    count: total,
+                })
+            })
+            msgRef.onClose = () => {
+                EventsEmit('delete:stop:' + serialNo)
+            }
+            try {
+                const { data, success, msg } = await DeleteKeys(server, db, keys, notice, serialNo)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     deleted = get(data, 'deleted', [])
@@ -1650,8 +1649,8 @@ const useBrowserStore = defineStore('browser', {
                     $message.error(msg)
                 }
             } finally {
+                cancelEventFn()
                 msgRef.destroy()
-                EventsOff(eventName)
                 // clear checked keys
                 const tab = useTabStore()
                 tab.setCheckedKeys(server)
@@ -1662,13 +1661,40 @@ const useBrowserStore = defineStore('browser', {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else if (failCount <= 0) {
                 // no fail
-                $message.success(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+                let msg = i18nGlobal.t('dialogue.delete.completed')
+                if (notice) {
+                    msg +=
+                        '\n' +
+                        i18nGlobal.t('dialogue.delete.completed_status', {
+                            success: deletedCount,
+                            fail: failCount,
+                        })
+                }
+                $message.success(msg)
             } else if (failCount >= deletedCount) {
                 // all fail
-                $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+                let msg = i18nGlobal.t('dialogue.delete.completed')
+                if (notice) {
+                    msg +=
+                        '\n' +
+                        i18nGlobal.t('dialogue.delete.completed_status', {
+                            success: deletedCount,
+                            fail: failCount,
+                        })
+                }
+                $message.error(msg)
             } else {
                 // some fail
-                $message.warn(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+                let msg = i18nGlobal.t('dialogue.delete.completed')
+                if (notice) {
+                    msg +=
+                        '\n' +
+                        i18nGlobal.t('dialogue.delete.completed_status', {
+                            success: deletedCount,
+                            fail: failCount,
+                        })
+                }
+                $message.warn(msg)
             }
             // update ui
             timeout(100).then(async () => {
@@ -1703,19 +1729,18 @@ const useBrowserStore = defineStore('browser', {
             let exported = 0
             let failCount = 0
             let canceled = false
-            const eventName = 'exporting:' + path
-            try {
-                EventsOn(eventName, ({ total, progress, processing }) => {
-                    // update export progress
-                    msgRef.content = i18nGlobal.t('dialogue.export.exporting', {
-                        // key: decodeRedisKey(processing),
-                        index: progress,
-                        count: total,
-                    })
+            const cancelEventFn = EventsOn('exporting:' + path, ({ total, progress, processing }) => {
+                // update export progress
+                msgRef.content = i18nGlobal.t('dialogue.export.exporting', {
+                    // key: decodeRedisKey(processing),
+                    index: progress,
+                    count: total,
                 })
-                msgRef.onClose = () => {
-                    EventsEmit('export:stop:' + path)
-                }
+            })
+            msgRef.onClose = () => {
+                EventsEmit('export:stop:' + path)
+            }
+            try {
                 const { data, success, msg } = await ExportKey(server, db, keys, path, expire)
                 if (success) {
                     canceled = get(data, 'canceled', false)
@@ -1726,7 +1751,7 @@ const useBrowserStore = defineStore('browser', {
                 }
             } finally {
                 msgRef.destroy()
-                EventsOff(eventName)
+                cancelEventFn()
             }
             if (canceled) {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
@@ -1759,19 +1784,18 @@ const useBrowserStore = defineStore('browser', {
             let imported = 0
             let ignored = 0
             let canceled = false
-            const eventName = 'importing:' + path
-            try {
-                EventsOn(eventName, ({ imported = 0, ignored = 0 }) => {
-                    // update export progress
-                    msgRef.content = i18nGlobal.t('dialogue.import.importing', {
-                        // key: decodeRedisKey(processing),
-                        imported,
-                        conflict: ignored,
-                    })
+            const cancelEventFn = EventsOn('importing:' + path, ({ imported = 0, ignored = 0 }) => {
+                // update export progress
+                msgRef.content = i18nGlobal.t('dialogue.import.importing', {
+                    // key: decodeRedisKey(processing),
+                    imported,
+                    conflict: ignored,
                 })
-                msgRef.onClose = () => {
-                    EventsEmit('import:stop:' + path)
-                }
+            })
+            msgRef.onClose = () => {
+                EventsEmit('import:stop:' + path)
+            }
+            try {
                 const { data, success, msg } = await ImportCSV(server, db, path, conflict, ttl)
                 if (success) {
                     canceled = get(data, 'canceled', false)
@@ -1781,8 +1805,8 @@ const useBrowserStore = defineStore('browser', {
                     $message.error(msg)
                 }
             } finally {
+                cancelEventFn()
                 msgRef.destroy()
-                EventsOff(eventName)
             }
             if (canceled) {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))

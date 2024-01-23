@@ -263,13 +263,16 @@
       "confirm_delete_key": "确认删除{num}个键",
       "async_delete": "异步执行",
       "async_delete_title": "不等待操作结果",
+      "silent": "不实时显示删除状态",
       "confirm_flush": "我知道我正在执行的操作！",
       "confirm_flush_db": "确认清空数据库"
     },
     "delete": {
       "success": "{key} 已被删除",
+      "deleting": "正在删除",
       "doing": "正在删除键({index}/{count})",
-      "completed": "已完成删除操作，成功{success}个，失败{fail}个"
+      "completed": "已完成删除操作",
+      "completed_status": "成功{success}个，失败{fail}个"
     },
     "field": {
       "new": "添加新字段",
