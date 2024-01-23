@@ -6,6 +6,7 @@ type Preferences struct {
 	Behavior PreferencesBehavior `json:"behavior" yaml:"behavior"`
 	General  PreferencesGeneral  `json:"general" yaml:"general"`
 	Editor   PreferencesEditor   `json:"editor" yaml:"editor"`
+	Cli      PreferencesCli      `json:"cli" yaml:"cli"`
 }
 
 func NewPreferences() Preferences {
@@ -27,6 +28,9 @@ func NewPreferences() Preferences {
 			FontSize:    consts.DEFAULT_FONT_SIZE,
 			ShowLineNum: true,
 			ShowFolding: true,
+		},
+		Cli: PreferencesCli{
+			FontSize: consts.DEFAULT_FONT_SIZE,
 		},
 	}
 }
@@ -60,4 +64,9 @@ type PreferencesEditor struct {
 	FontSize    int      `json:"fontSize" yaml:"font_size"`
 	ShowLineNum bool     `json:"showLineNum" yaml:"show_line_num"`
 	ShowFolding bool     `json:"showFolding" yaml:"show_folding"`
+}
+
+type PreferencesCli struct {
+	FontFamily []string `json:"fontFamily" yaml:"font_family,omitempty"`
+	FontSize   int      `json:"fontSize" yaml:"font_size"`
 }

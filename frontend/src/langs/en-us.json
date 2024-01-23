@@ -54,6 +54,9 @@
       "name": "Editor",
       "show_linenum": "Show Line Numbers",
       "show_folding": "Enable Code Folding"
+    },
+    "cli": {
+      "name": "Command Line"
     }
   },
   "interface": {

@@ -54,6 +54,9 @@
       "name": "编辑器",
       "show_linenum": "显示行号",
       "show_folding": "启用代码折叠"
+    },
+    "cli": {
+      "name": "命令行"
     }
   },
   "interface": {

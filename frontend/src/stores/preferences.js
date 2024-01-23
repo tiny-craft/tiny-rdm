@@ -59,6 +59,10 @@ const usePreferencesStore = defineStore('preferences', {
             showLineNum: true,
             showFolding: true,
         },
+        cli: {
+            fontFamily: [],
+            fontSize: 14,
+        },
         lastPref: {},
         fontList: [],
     }),
@@ -168,6 +172,26 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         /**
+         * current cli font
+         * @return {{fontSize: string, fontFamily?: string}}
+         */
+        cliFont() {
+            const fontStyle = {
+                fontSize: this.cli.fontSize || 14,
+            }
+            if (!isEmpty(this.cli.fontFamily)) {
+                fontStyle['fontFamily'] = join(
+                    map(this.cli.fontFamily, (f) => `"${f}"`),
+                    ',',
+                )
+            }
+            if (isEmpty(fontStyle['fontFamily'])) {
+                fontStyle['fontFamily'] = ['Courier New']
+            }
+            return fontStyle
+        },
+
+        /**
          * get current language setting
          * @return {string}
          */
@@ -264,7 +288,7 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {Promise<boolean>}
          */
         async savePreferences() {
-            const pf = pick(this, ['behavior', 'general', 'editor'])
+            const pf = pick(this, ['behavior', 'general', 'editor', 'cli'])
             const { success, msg } = await SetPreferences(pf)
             return success === true
         },

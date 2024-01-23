@@ -187,6 +187,36 @@ const onClose = () => {
                     </n-grid>
                 </n-form>
             </n-tab-pane>
+
+            <n-tab-pane :tab="$t('preferences.cli.name')" display-directive="show" name="cli">
+                <n-form :disabled="loading" :model="prefStore.cli" :show-require-mark="false" label-placement="top">
+                    <n-grid :x-gap="10">
+                        <n-form-item-gi :span="24" required>
+                            <template #label>
+                                {{ $t('preferences.general.font') }}
+                                <n-tooltip trigger="hover">
+                                    <template #trigger>
+                                        <n-icon :component="Help" />
+                                    </template>
+                                    <div class="text-block">
+                                        {{ $t('preferences.font_tip') }}
+                                    </div>
+                                </n-tooltip>
+                            </template>
+                            <n-select
+                                v-model:value="prefStore.cli.fontFamily"
+                                :options="prefStore.fontOption"
+                                :render-label="({ label, value }) => value || $t(label)"
+                                filterable
+                                multiple
+                                tag />
+                        </n-form-item-gi>
+                        <n-form-item-gi :label="$t('preferences.general.font_size')" :span="24">
+                            <n-input-number v-model:value="prefStore.cli.fontSize" :max="65535" :min="1" />
+                        </n-form-item-gi>
+                    </n-grid>
+                </n-form>
+            </n-tab-pane>
         </n-tabs>
         <!-- </n-spin> -->
 

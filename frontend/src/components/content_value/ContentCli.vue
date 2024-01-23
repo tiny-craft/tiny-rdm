@@ -32,10 +32,11 @@ let fitAddonInst = null
  * @return {{fitAddon: xterm-addon-fit.FitAddon, term: Terminal}}
  */
 const newTerm = () => {
+    const { fontSize = 14, fontFamily = 'Courier New' } = prefStore.cliFont
     const term = new Terminal({
         allowProposedApi: true,
-        fontFamily: prefStore.general.fontFamily,
-        fontSize: prefStore.general.fontSize || 14,
+        fontFamily,
+        fontSize,
         cursorBlink: true,
         disableStdin: false,
         screenReaderMode: true,
@@ -90,21 +91,12 @@ defineExpose({
     resizeTerm,
 })
 
-// watch(
-//     () => prefStore.general.font,
-//     (font = undefined) => {
-//         if (termInst != null) {
-//             termInst.options.fontFamily = font || 'Courier New'
-//         }
-//         resizeTerm()
-//     },
-// )
-
 watch(
-    () => prefStore.general.fontSize,
-    (fontSize) => {
+    () => prefStore.cliFont,
+    ({ fontSize = 14, fontFamily = 'Courier New' }) => {
         if (termInst != null) {
             termInst.options.fontSize = fontSize
+            termInst.options.fontFamily = fontFamily
         }
         resizeTerm()
     },
