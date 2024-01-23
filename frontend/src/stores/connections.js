@@ -105,7 +105,7 @@ const useConnectionStore = defineStore('connections', {
                             defaultFilter: item.defaultFilter,
                             keySeparator: item.keySeparator,
                             markColor: item.markColor,
-                            refreshInterval: conn.refreshInterval,
+                            refreshInterval: item.refreshInterval,
                         }
                     }
                     conns.push({

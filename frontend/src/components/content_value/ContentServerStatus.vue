@@ -237,7 +237,7 @@ onMounted(() => {
         pageState.refreshInterval = interval === 0 ? 5 : interval
         onToggleRefresh(true)
     } else {
-        setTimeout(refreshInfo, 5000)
+        setTimeout(refreshInfo, 3000)
         // setTimeout(_mockChart, 1000)
     }
     refreshInfo()
