@@ -150,6 +150,50 @@ watch(
     },
 )
 
+watch(
+    () => pref.editorFont.fontSize,
+    (fontSize) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                fontSize,
+            })
+        }
+    },
+)
+
+watch(
+    () => pref.editorFont.fontFamily,
+    (fontFamily = undefined) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                fontFamily,
+            })
+        }
+    },
+)
+
+watch(
+    () => pref.showLineNum,
+    (showLineNum) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                lineNumbers: showLineNum ? 'on' : 'off',
+            })
+        }
+    },
+)
+
+watch(
+    () => pref.showFolding,
+    (showFolding) => {
+        if (editorNode != null) {
+            editorNode.updateOptions({
+                folding: showFolding !== false,
+            })
+        }
+    },
+)
+
 onUnmounted(() => {
     destroyEditor()
 })
