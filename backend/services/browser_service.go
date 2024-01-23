@@ -2073,7 +2073,7 @@ func (b *browserService) DeleteOneKey(server string, db int, k any) (resp types.
 }
 
 // DeleteKeys delete keys sync with notification
-func (b *browserService) DeleteKeys(server string, db int, ks []any, notice bool, serialNo string) (resp types.JSResp) {
+func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo string) (resp types.JSResp) {
 	// connect a new connection to export keys
 	conf := Connection().getConnection(server)
 	if conf == nil {
@@ -2096,47 +2096,28 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, notice bool
 	cancelStopEvent := runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
 		cancelFunc()
 	})
-	processEvent := "deleting:" + serialNo
 	total := len(ks)
 	var failed atomic.Int64
 	var canceled bool
 	var deletedKeys = make([]any, 0, total)
 	var mutex sync.Mutex
 	del := func(ctx context.Context, cli redis.UniversalClient) error {
-		startTime := time.Now().Add(-10 * time.Second)
-		supportUnlink := true
-		for i, k := range ks {
-			// emit progress per second
-			if notice && (i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100) {
-				startTime = time.Now()
-				param := map[string]any{
-					"total":      total,
-					"progress":   i + 1,
-					"processing": k,
-				}
-				runtime.EventsEmit(ctx, processEvent, param)
-				// do some sleep to prevent blocking the Redis server
-				time.Sleep(10 * time.Millisecond)
-			}
-
-			key := strutil.DecodeRedisKey(k)
-			var delErr error
-			if supportUnlink {
-				if delErr = cli.Unlink(ctx, key).Err(); delErr != nil {
-					supportUnlink = false
-					delErr = nil
+		const batchSize = 1000
+		for i := 0; i < total; i += batchSize {
+			pipe := cli.Pipeline()
+			for j := 0; j < batchSize; j++ {
+				if i+j < total {
+					pipe.Del(ctx, strutil.DecodeRedisKey(ks[i+j]))
 				}
 			}
-			if !supportUnlink {
-				delErr = cli.Del(ctx, key).Err()
-			}
-			if notice {
-				if delErr != nil {
+			cmders, delErr := pipe.Exec(ctx)
+			for j, cmder := range cmders {
+				if cmder.(*redis.IntCmd).Val() != 1 {
 					failed.Add(1)
 				} else {
 					// save deleted key
 					mutex.Lock()
-					deletedKeys = append(deletedKeys, k)
+					deletedKeys = append(deletedKeys, ks[i+j])
 					mutex.Unlock()
 				}
 			}

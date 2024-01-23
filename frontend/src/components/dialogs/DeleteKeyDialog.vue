@@ -74,7 +74,7 @@ const onConfirmDelete = async () => {
         deleting.value = true
         const { server, db, key, affectedKeys } = deleteForm
         await nextTick()
-        browserStore.deleteKeys(server, db, affectedKeys, !deleteForm.async).catch((e) => {})
+        browserStore.deleteKeys(server, db, affectedKeys).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -115,9 +115,9 @@ const onClose = () => {
                     required>
                     <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
                 </n-form-item>
-                <n-checkbox v-model:checked="deleteForm.async">
-                    {{ $t('dialogue.key.silent') }}
-                </n-checkbox>
+                <!--                <n-checkbox v-model:checked="deleteForm.async">-->
+                <!--                    {{ $t('dialogue.key.silent') }}-->
+                <!--                </n-checkbox>-->
                 <n-card
                     v-if="deleteForm.showAffected"
                     :title="$t('dialogue.key.affected_key') + `(${size(deleteForm.affectedKeys)})`"

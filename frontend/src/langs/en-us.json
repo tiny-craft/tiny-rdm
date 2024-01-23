@@ -263,7 +263,6 @@
       "confirm_delete_key": "Confirm Delete {num} Key(s)",
       "async_delete": "Asynchronously Execute",
       "async_delete_title": "Do not waiting for the operation's result",
-      "silent": "Do not display deletion status in real time",
       "confirm_flush": "I know what I'm doing!",
       "confirm_flush_db": "Confirm Flush Database"
     },
@@ -271,8 +270,7 @@
       "success": "\"{key}\" has been deleted",
       "deleting": "Deleting",
       "doing": "Deleting key({index}/{count})",
-      "completed": "Deletion process has been completed",
-      "completed_status": "{success} successed, {fail} failed"
+      "completed": "Deletion process has been completed, {success} successed, {fail} failed"
     },
     "field": {
       "new": "Add New Field",

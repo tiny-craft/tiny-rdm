@@ -36,7 +36,7 @@ import {
     UpdateZSetValue,
 } from 'wailsjs/go/services/browserService.js'
 import useTabStore from 'stores/tab.js'
-import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
+import { nativeRedisKey } from '@/utils/key_convert.js'
 import { BrowserTabType } from '@/consts/browser_tab_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import { ConnectionType } from '@/consts/connection_type.js'
@@ -1568,7 +1568,7 @@ const useBrowserStore = defineStore('browser', {
             //     $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             // } else {
             //     // some fail
-            //     $message.warn(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            //     $message.warning(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             // }
         },
 
@@ -1614,33 +1614,19 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string[]|number[][]} keys
-         * @param {boolean} notice
          * @return {Promise<void>}
          */
-        async deleteKeys(server, db, keys, notice) {
+        async deleteKeys(server, db, keys) {
             const msgRef = $message.loading(i18nGlobal.t('dialogue.delete.deleting'), { duration: 0, closable: true })
             let deleted = []
             let failCount = 0
             let canceled = false
             const serialNo = Date.now().valueOf().toString()
-            let maxProgress = 0
-            const cancelEventFn = EventsOn('deleting:' + serialNo, ({ total, progress, processing }) => {
-                // update delete progress
-                if (progress > maxProgress) {
-                    maxProgress = progress
-                }
-                const k = decodeRedisKey(processing)
-                msgRef.content = i18nGlobal.t('dialogue.delete.doing', {
-                    key: k,
-                    index: maxProgress,
-                    count: total,
-                })
-            })
             msgRef.onClose = () => {
                 EventsEmit('delete:stop:' + serialNo)
             }
             try {
-                const { data, success, msg } = await DeleteKeys(server, db, keys, notice, serialNo)
+                const { success, msg, data } = await DeleteKeys(server, db, keys, serialNo)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     deleted = get(data, 'deleted', [])
@@ -1649,7 +1635,6 @@ const useBrowserStore = defineStore('browser', {
                     $message.error(msg)
                 }
             } finally {
-                cancelEventFn()
                 msgRef.destroy()
                 // clear checked keys
                 const tab = useTabStore()
@@ -1661,40 +1646,13 @@ const useBrowserStore = defineStore('browser', {
                 $message.info(i18nGlobal.t('dialogue.handle_cancel'))
             } else if (failCount <= 0) {
                 // no fail
-                let msg = i18nGlobal.t('dialogue.delete.completed')
-                if (notice) {
-                    msg +=
-                        '\n' +
-                        i18nGlobal.t('dialogue.delete.completed_status', {
-                            success: deletedCount,
-                            fail: failCount,
-                        })
-                }
-                $message.success(msg)
+                $message.success(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             } else if (failCount >= deletedCount) {
                 // all fail
-                let msg = i18nGlobal.t('dialogue.delete.completed')
-                if (notice) {
-                    msg +=
-                        '\n' +
-                        i18nGlobal.t('dialogue.delete.completed_status', {
-                            success: deletedCount,
-                            fail: failCount,
-                        })
-                }
-                $message.error(msg)
+                $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             } else {
                 // some fail
-                let msg = i18nGlobal.t('dialogue.delete.completed')
-                if (notice) {
-                    msg +=
-                        '\n' +
-                        i18nGlobal.t('dialogue.delete.completed_status', {
-                            success: deletedCount,
-                            fail: failCount,
-                        })
-                }
-                $message.warn(msg)
+                $message.warning(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
             }
             // update ui
             timeout(100).then(async () => {
@@ -1765,7 +1723,12 @@ const useBrowserStore = defineStore('browser', {
                 $message.error(i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }))
             } else {
                 // some fail
-                $message.warn(i18nGlobal.t('dialogue.export.export_completed', { success: exported, fail: failCount }))
+                $message.warning(
+                    i18nGlobal.t('dialogue.export.export_completed', {
+                        success: exported,
+                        fail: failCount,
+                    }),
+                )
             }
         },
 
