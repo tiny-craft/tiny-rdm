@@ -479,67 +479,74 @@ const onCancelOpen = () => {
 </script>
 
 <template>
-    <n-empty
-        v-if="isEmpty(connectionStore.connections)"
-        :description="$t('interface.empty_server_list')"
-        class="empty-content" />
-    <n-tree
-        v-else
-        :animated="false"
-        :block-line="true"
-        :block-node="true"
-        :cancelable="false"
-        :data="connectionStore.connections"
-        :draggable="true"
-        :expanded-keys="expandedKeys"
-        :node-props="nodeProps"
-        :pattern="props.filterPattern"
-        :render-label="renderLabel"
-        :render-prefix="renderPrefix"
-        :render-suffix="renderSuffix"
-        :selected-keys="selectedKeys"
-        class="fill-height"
-        virtual-scroll
-        @drop="handleDrop"
-        @update:selected-keys="onUpdateSelectedKeys"
-        @update:expanded-keys="onUpdateExpandedKeys" />
+    <div class="connection-tree-wrapper" @keydown.esc="contextMenuParam.show = false">
+        <n-empty
+            v-if="isEmpty(connectionStore.connections)"
+            :description="$t('interface.empty_server_list')"
+            class="empty-content" />
+        <n-tree
+            v-else
+            :animated="false"
+            :block-line="true"
+            :block-node="true"
+            :cancelable="false"
+            :data="connectionStore.connections"
+            :draggable="true"
+            :expanded-keys="expandedKeys"
+            :node-props="nodeProps"
+            :pattern="props.filterPattern"
+            :render-label="renderLabel"
+            :render-prefix="renderPrefix"
+            :render-suffix="renderSuffix"
+            :selected-keys="selectedKeys"
+            class="fill-height"
+            virtual-scroll
+            @drop="handleDrop"
+            @update:selected-keys="onUpdateSelectedKeys"
+            @update:expanded-keys="onUpdateExpandedKeys" />
 
-    <!-- status display modal -->
-    <n-modal :show="connectingServer !== ''" transform-origin="center">
-        <n-card
-            :bordered="false"
-            :content-style="{ textAlign: 'center' }"
-            aria-model="true"
-            role="dialog"
-            style="width: 400px">
-            <n-spin>
-                <template #description>
-                    <n-space vertical>
-                        <n-text strong>{{ $t('dialogue.opening_connection') }}</n-text>
-                        <n-button :focusable="false" secondary size="small" @click="onCancelOpen">
-                            {{ $t('dialogue.interrupt_connection') }}
-                        </n-button>
-                    </n-space>
-                </template>
-            </n-spin>
-        </n-card>
-    </n-modal>
+        <!-- status display modal -->
+        <n-modal :show="connectingServer !== ''" transform-origin="center">
+            <n-card
+                :bordered="false"
+                :content-style="{ textAlign: 'center' }"
+                aria-model="true"
+                role="dialog"
+                style="width: 400px">
+                <n-spin>
+                    <template #description>
+                        <n-space vertical>
+                            <n-text strong>{{ $t('dialogue.opening_connection') }}</n-text>
+                            <n-button :focusable="false" secondary size="small" @click="onCancelOpen">
+                                {{ $t('dialogue.interrupt_connection') }}
+                            </n-button>
+                        </n-space>
+                    </template>
+                </n-spin>
+            </n-card>
+        </n-modal>
 
-    <!-- context menu -->
-    <n-dropdown
-        :keyboard="true"
-        :options="contextMenuParam.options"
-        :render-icon="({ icon }) => render.renderIcon(icon)"
-        :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
-        :show="contextMenuParam.show"
-        :x="contextMenuParam.x"
-        :y="contextMenuParam.y"
-        placement="bottom-start"
-        trigger="manual"
-        @clickoutside="contextMenuParam.show = false"
-        @select="handleSelectContextMenu" />
+        <!-- context menu -->
+        <n-dropdown
+            :keyboard="true"
+            :options="contextMenuParam.options"
+            :render-icon="({ icon }) => render.renderIcon(icon)"
+            :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
+            :show="contextMenuParam.show"
+            :x="contextMenuParam.x"
+            :y="contextMenuParam.y"
+            placement="bottom-start"
+            trigger="manual"
+            @clickoutside="contextMenuParam.show = false"
+            @select="handleSelectContextMenu" />
+    </div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/content';
+
+.connection-tree-wrapper {
+    height: 100%;
+    overflow: hidden;
+}
 </style>

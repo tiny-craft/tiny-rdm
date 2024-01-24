@@ -567,7 +567,11 @@ defineExpose({
 </script>
 
 <template>
-    <div :style="{ backgroundColor }" class="flex-box-v browser-tree-wrapper" @contextmenu="(e) => e.preventDefault()">
+    <div
+        :style="{ backgroundColor }"
+        class="flex-box-v browser-tree-wrapper"
+        @contextmenu="(e) => e.preventDefault()"
+        @keydown.esc="contextMenuParam.show = false">
         <n-spin v-if="props.loading" class="fill-height" />
         <n-empty v-else-if="!props.loading && isEmpty(data)" class="empty-content" />
         <n-tree
