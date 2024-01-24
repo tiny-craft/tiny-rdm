@@ -379,7 +379,14 @@
     "activity_status": "活动状态",
     "act_cmd": "命令执行数/秒",
     "act_network_input": "网络输入",
-    "act_network_output": "网络输出"
+    "act_network_output": "网络输出",
+    "client": {
+      "title": "所有客户端列表",
+      "addr": "客户端地址",
+      "age": "连接时长(秒)",
+      "idle": "空闲时长(秒)",
+      "db": "数据库"
+    }
   },
   "slog": {
     "title": "慢日志",

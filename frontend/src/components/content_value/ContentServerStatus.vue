@@ -14,20 +14,21 @@ import {
     toArray,
     toNumber,
 } from 'lodash'
-import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
+import { computed, h, onMounted, onUnmounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import Refresh from '@/components/icons/Refresh.vue'
 import useBrowserStore from 'stores/browser.js'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
-import { NIcon, useThemeVars } from 'naive-ui'
+import { NButton, NIcon, NSpace, useThemeVars } from 'naive-ui'
 import { Line } from 'vue-chartjs'
 import dayjs from 'dayjs'
 import { convertBytes, formatBytes } from '@/utils/byte_convert.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { useI18n } from 'vue-i18n'
 import useConnectionStore from 'stores/connections.js'
+import { toHumanReadable } from '@/utils/date.js'
 
 const props = defineProps({
     server: String,
@@ -501,6 +502,87 @@ const byteChartOption = computed(() => {
         },
     }
 })
+
+const clientInfo = reactive({
+    loading: false,
+    content: [],
+})
+const onShowClients = async (show) => {
+    if (show) {
+        try {
+            clientInfo.loading = true
+            clientInfo.content = await browserStore.getClientList(props.server)
+        } finally {
+            clientInfo.loading = false
+        }
+    }
+}
+
+const clientTableColumns = computed(() => {
+    return [
+        {
+            key: 'title',
+            title: () => {
+                return h(NSpace, { wrap: false, wrapItem: false, justify: 'center' }, () => [
+                    h('span', { style: { fontWeight: '550', fontSize: '15px' } }, i18n.t('status.client.title')),
+                    h(IconButton, {
+                        icon: Refresh,
+                        size: 16,
+                        onClick: () => onShowClients(true),
+                    }),
+                ])
+            },
+            align: 'center',
+            titleAlign: 'center',
+            children: [
+                {
+                    key: 'no',
+                    title: '#',
+                    width: 60,
+                    align: 'center',
+                    titleAlign: 'center',
+                    render: (row, index) => {
+                        return index + 1
+                    },
+                },
+                {
+                    key: 'addr',
+                    title: () => i18n.t('status.client.addr'),
+                    sorter: 'default',
+                    align: 'center',
+                    titleAlign: 'center',
+                },
+                {
+                    key: 'db',
+                    title: () => i18n.t('status.client.db'),
+                    align: 'center',
+                    titleAlign: 'center',
+                },
+                {
+                    key: 'age',
+                    title: () => i18n.t('status.client.age'),
+                    sorter: (row1, row2) => row1.age - row2.age,
+                    defaultSortOrder: 'descend',
+                    align: 'center',
+                    titleAlign: 'center',
+                    render: ({ age }, index) => {
+                        return toHumanReadable(age)
+                    },
+                },
+                {
+                    key: 'idle',
+                    title: () => i18n.t('status.client.idle'),
+                    sorter: (row1, row2) => row1.age - row2.age,
+                    align: 'center',
+                    titleAlign: 'center',
+                    render: ({ idle }, index) => {
+                        return toHumanReadable(idle)
+                    },
+                },
+            ],
+        },
+    ]
+})
 </script>
 
 <template>
@@ -568,7 +650,24 @@ const byteChartOption = computed(() => {
                 <n-gi :span="6">
                     <n-statistic
                         :label="$t('status.connected_clients')"
-                        :value="get(serverInfo, 'Clients.connected_clients', '0')" />
+                        :value="get(serverInfo, 'Clients.connected_clients', '0')">
+                        <template #suffix>
+                            <n-tooltip trigger="click" width="70vw" @update-show="onShowClients">
+                                <template #trigger>
+                                    <n-button :bordered="false" size="small">&LowerRightArrow;</n-button>
+                                </template>
+                                <n-data-table
+                                    :columns="clientTableColumns"
+                                    :data="clientInfo.content"
+                                    :loading="clientInfo.loading"
+                                    :single-column="false"
+                                    :single-line="false"
+                                    max-height="50vh"
+                                    size="small"
+                                    striped />
+                            </n-tooltip>
+                        </template>
+                    </n-statistic>
                 </n-gi>
                 <n-gi :span="6">
                     <n-statistic :value="totalKeys">

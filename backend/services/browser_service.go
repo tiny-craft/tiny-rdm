@@ -2513,3 +2513,52 @@ func (b *browserService) GetSlowLogs(server string, num int64) (resp types.JSRes
 	}
 	return
 }
+
+// GetClientList get all connected client info
+func (b *browserService) GetClientList(server string) (resp types.JSResp) {
+	item, err := b.getRedisClient(server, -1)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	parseContent := func(content string) []map[string]string {
+		lines := strings.Split(content, "\n")
+		list := make([]map[string]string, 0, len(lines))
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if len(line) > 0 {
+				items := strings.Split(line, " ")
+				itemKV := map[string]string{}
+				for _, it := range items {
+					kv := strings.SplitN(it, "=", 2)
+					if len(kv) > 1 {
+						itemKV[kv[0]] = kv[1]
+					}
+				}
+				list = append(list, itemKV)
+			}
+		}
+		return list
+	}
+
+	client, ctx := item.client, item.ctx
+	var fullList []map[string]string
+	var mutex sync.Mutex
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			mutex.Lock()
+			defer mutex.Unlock()
+			fullList = append(fullList, parseContent(cli.ClientList(ctx).Val())...)
+			return nil
+		})
+	} else {
+		fullList = append(fullList, parseContent(client.ClientList(ctx).Val())...)
+	}
+
+	resp.Success = true
+	resp.Data = map[string]any{
+		"list": fullList,
+	}
+	return
+}

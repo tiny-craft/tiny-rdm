@@ -14,7 +14,7 @@ import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
-import dayjs from 'dayjs'
+import { toHumanReadable } from '@/utils/date.js'
 
 const props = defineProps({
     server: String,
@@ -61,13 +61,7 @@ const binaryKey = computed(() => {
 
 const ttlString = computed(() => {
     if (ttl.value > 0) {
-        const dur = dayjs.duration(ttl.value, 'seconds')
-        const days = dur.days()
-        if (days > 0) {
-            return days + i18n.t('common.unit_day') + ' ' + dur.format('HH:mm:ss')
-        } else {
-            return dur.format('HH:mm:ss')
-        }
+        return toHumanReadable(ttl.value)
     } else if (ttl.value < 0) {
         return i18n.t('interface.forever')
     } else {

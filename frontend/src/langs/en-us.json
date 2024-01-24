@@ -379,7 +379,14 @@
     "activity_status": "Activity",
     "act_cmd": "Commands Per Second",
     "act_network_input": "Network Input",
-    "act_network_output": "Network Output"
+    "act_network_output": "Network Output",
+    "client": {
+      "title": "Connected Client List",
+      "addr": "Client Address",
+      "age": "Age (sec)",
+      "idle": "Idle (sec)",
+      "db": "Database"
+    }
   },
   "slog": {
     "title": "Slow Log",

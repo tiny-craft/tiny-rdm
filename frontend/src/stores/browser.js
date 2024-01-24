@@ -13,6 +13,7 @@ import {
     DeleteKeys,
     ExportKey,
     FlushDB,
+    GetClientList,
     GetCmdHistory,
     GetKeyDetail,
     GetKeySummary,
@@ -1867,6 +1868,26 @@ const useBrowserStore = defineStore('browser', {
             } catch {
                 return false
             }
+        },
+
+        /**
+         * get client list info
+         * @param {string} server
+         * @return {Promise<{idle: number, name: string, addr: string, age: number, db: number}[]>}
+         */
+        async getClientList(server) {
+            const { success, msg, data } = await GetClientList(server)
+            if (success) {
+                const { list = [] } = data
+                return map(list, (item) => ({
+                    addr: item['addr'],
+                    name: item['name'],
+                    age: item['age'] || 0,
+                    idle: item['idle'] || 0,
+                    db: item['db'] || 0,
+                }))
+            }
+            return []
         },
 
         /**
