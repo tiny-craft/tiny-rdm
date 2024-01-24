@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
-import { computed, onUnmounted, reactive, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
@@ -45,6 +45,12 @@ const autoRefresh = reactive({
     interval: 2,
 })
 
+const ttl = reactive({
+    value: 0,
+    expire: 0,
+    intervalID: 0,
+})
+
 const themeVars = useThemeVars()
 const dialogStore = useDialog()
 const i18n = useI18n()
@@ -54,15 +60,15 @@ const binaryKey = computed(() => {
 })
 
 const ttlString = computed(() => {
-    if (props.ttl > 0) {
-        const dur = dayjs.duration(props.ttl, 'seconds')
+    if (ttl.value > 0) {
+        const dur = dayjs.duration(ttl.value, 'seconds')
         const days = dur.days()
         if (days > 0) {
             return days + i18n.t('common.unit_day') + ' ' + dur.format('HH:mm:ss')
         } else {
             return dur.format('HH:mm:ss')
         }
-    } else if (props.ttl < 0) {
+    } else if (ttl.value < 0) {
         return i18n.t('interface.forever')
     } else {
         return '00:00:00'
@@ -89,15 +95,46 @@ const stopAutoRefresh = () => {
     autoRefresh.on = false
 }
 
+const syncTTL = (seconds) => {
+    ttl.value = seconds
+    if (seconds >= 0) {
+        ttl.expire = Math.floor(Date.now() / 1000 + seconds)
+    } else {
+        ttl.expire = 0
+    }
+}
+
 watch(
     () => props.keyPath,
     () => {
         stopAutoRefresh()
-        autoRefresh.interval = props.interval
     },
 )
 
-onUnmounted(() => stopAutoRefresh())
+watch(
+    () => props.ttl,
+    (seconds) => syncTTL(seconds),
+)
+
+onMounted(() => {
+    syncTTL(props.ttl)
+    ttl.intervalID = setInterval(() => {
+        if (ttl.expire > 0) {
+            const nowSeconds = Math.floor(Date.now() / 1000)
+            ttl.value = Math.max(0, ttl.expire - nowSeconds)
+        } else {
+            ttl.value = -1
+        }
+    }, 1000)
+})
+
+onUnmounted(() => {
+    stopAutoRefresh()
+    if (ttl.intervalID > 0) {
+        clearInterval(ttl.intervalID)
+        ttl.intervalID = 0
+    }
+})
 
 const onToggleRefresh = (on) => {
     if (on) {
@@ -168,7 +205,7 @@ const onTTL = () => {
                         <template #icon>
                             <n-icon :component="Timer" size="18" />
                         </template>
-                        {{ ttlString }}
+                        <span style="font-variant-numeric: tabular-nums">{{ ttlString }}</span>
                     </n-button>
                 </template>
                 TTL{{ `${ttl > 0 ? ': ' + ttl + $t('common.second') : ''}` }}
