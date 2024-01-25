@@ -206,7 +206,7 @@ const onTermKey = (e) => {
                     return false
 
                 case 'e': // move to tail of line
-                    moveInputCursorTo(Number.MAX_VALUE)
+                    moveInputCursorTo(Number.MAX_SAFE_INTEGER)
                     return false
 
                 case 'f': // move forward
@@ -251,6 +251,8 @@ const onTermKey = (e) => {
                     newInputLine()
                     return false
             }
+            // block all ctrl key combinations input
+            return false
         }
     }
     return true
@@ -290,7 +292,7 @@ const moveInputCursor = (step) => {
  * move cursor to the end of current line
  */
 const moveInputCursorToEnd = () => {
-    moveInputCursorTo(Number.MAX_VALUE)
+    moveInputCursorTo(Number.MAX_SAFE_INTEGER)
 }
 
 /**
