@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	runtime2 "runtime"
 	"sync"
 	"time"
 	"tinyrdm/backend/consts"
@@ -11,7 +12,8 @@ import (
 )
 
 type systemService struct {
-	ctx context.Context
+	ctx        context.Context
+	appVersion string
 }
 
 var system *systemService
@@ -20,15 +22,18 @@ var onceSystem sync.Once
 func System() *systemService {
 	if system == nil {
 		onceSystem.Do(func() {
-			system = &systemService{}
+			system = &systemService{
+				appVersion: "0.0.0",
+			}
 			go system.loopWindowEvent()
 		})
 	}
 	return system
 }
 
-func (s *systemService) Start(ctx context.Context) {
+func (s *systemService) Start(ctx context.Context, version string) {
 	s.ctx = ctx
+	s.appVersion = version
 
 	// maximize the window if screen size is lower than the minimum window size
 	if screen, err := runtime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
@@ -41,6 +46,20 @@ func (s *systemService) Start(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func (s *systemService) Info() (resp types.JSResp) {
+	resp.Success = true
+	resp.Data = struct {
+		OS      string `json:"os"`
+		Arch    string `json:"arch"`
+		Version string `json:"version"`
+	}{
+		OS:      runtime2.GOOS,
+		Arch:    runtime2.GOARCH,
+		Version: s.appVersion,
+	}
+	return
 }
 
 // SelectFile open file dialog to select a file

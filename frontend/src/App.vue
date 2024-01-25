@@ -20,6 +20,7 @@ import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
 import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
 import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
+import { Info } from 'wailsjs/go/services/systemService.js'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -33,6 +34,10 @@ onMounted(async () => {
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
         }
+        Info().then(({ data }) => {
+            // const {os, arch, version} = data
+            umami && umami.track('startup', data)
+        })
     } finally {
         initializing.value = false
     }

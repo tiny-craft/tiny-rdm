@@ -109,11 +109,18 @@ const onSelectPreferenceMenu = (key) => {
     }
 }
 
+const openWechatOfficial = () => {
+    umami && umami.track('open', { target: 'wechat_official' })
+    showWechat.value = true
+}
+
 const openX = () => {
+    umami && umami.track('open', { target: 'x' })
     BrowserOpenURL('https://twitter.com/LykinHuang')
 }
 
 const openGithub = () => {
+    umami && umami.track('open', { target: 'github' })
     BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm')
 }
 
@@ -163,7 +170,7 @@ const exThemeVars = computed(() => {
                 :size="iconSize"
                 class="nav-menu-button"
                 t-tooltip="ribbon.wechat_official"
-                @click="showWechat = true" />
+                @click="openWechatOfficial" />
             <icon-button
                 v-else
                 :border="false"

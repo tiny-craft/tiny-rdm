@@ -66,7 +66,7 @@ func main() {
 		BackgroundColour: options.NewRGBA(27, 38, 54, 0),
 		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
-			sysSvc.Start(ctx)
+			sysSvc.Start(ctx, version)
 			connSvc.Start(ctx)
 			browserSvc.Start(ctx)
 			cliSvc.Start(ctx)
