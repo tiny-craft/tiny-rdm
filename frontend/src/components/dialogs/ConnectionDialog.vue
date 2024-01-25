@@ -267,6 +267,29 @@ const onTestConnection = async () => {
 const onClose = () => {
     dialogStore.closeConnDialog()
 }
+
+const pasteFromClipboard = async () => {
+    // url example:
+    // redis://user:password@localhost:6789/3?dial_timeout=3&db=1&read_timeout=6s&max_retries=2
+    let opt = {}
+    try {
+        opt = await connectionStore.parseUrlFromClipboard()
+    } catch (e) {
+        $message.error(i18n.t('dialogue.connection.parse_fail', { reason: e.message }))
+        return
+    }
+    generalForm.value.name = generalForm.value.addr = opt.addr
+    generalForm.value.port = opt.port
+    generalForm.value.username = opt.username
+    generalForm.value.password = opt.password
+    if (opt.connTimeout > 0) {
+        generalForm.value.connTimeout = opt.connTimeout
+    }
+    if (opt.execTimeout > 0) {
+        generalForm.value.execTimeout = opt.execTimeout
+    }
+    $message.success(i18n.t('dialogue.connection.parse_pass', { url: opt.url }))
+}
 </script>
 
 <template>
@@ -685,6 +708,9 @@ const onClose = () => {
                 </n-button>
             </div>
             <div class="flex-item n-dialog__action">
+                <n-button :disabled="closingConnection" :focusable="false" @click="pasteFromClipboard">
+                    {{ $t('dialogue.connection.parse_url_clipboard') }}
+                </n-button>
                 <n-button :disabled="closingConnection" :focusable="false" @click="onClose">
                     {{ $t('common.cancel') }}
                 </n-button>

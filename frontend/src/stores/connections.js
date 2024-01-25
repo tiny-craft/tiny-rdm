@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { get, isEmpty, uniq } from 'lodash'
+import { get, isEmpty, isObject, uniq } from 'lodash'
 import {
     CreateGroup,
     DeleteConnection,
@@ -8,6 +8,7 @@ import {
     GetConnection,
     ImportConnections,
     ListConnection,
+    ParseConnectURL,
     RenameGroup,
     SaveConnection,
     SaveLastDB,
@@ -18,6 +19,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import useBrowserStore from 'stores/browser.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { ClipboardGetText } from 'wailsjs/runtime/runtime.js'
 
 const useConnectionStore = defineStore('connections', {
     /**
@@ -404,6 +406,10 @@ const useConnectionStore = defineStore('connections', {
             return { success: true }
         },
 
+        /**
+         * export connections to zip
+         * @return {Promise<void>}
+         */
         async exportConnections() {
             const {
                 success,
@@ -420,6 +426,10 @@ const useConnectionStore = defineStore('connections', {
             $message.success(i18nGlobal.t('dialogue.handle_succ'))
         },
 
+        /**
+         * import connections from zip
+         * @return {Promise<void>}
+         */
         async importConnections() {
             const { success, msg } = await ImportConnections()
             if (!success) {
@@ -430,6 +440,25 @@ const useConnectionStore = defineStore('connections', {
             }
 
             $message.success(i18nGlobal.t('dialogue.handle_succ'))
+        },
+
+        /**
+         * parse redis url from text in clipboard
+         * @return {Promise<{}>}
+         */
+        async parseUrlFromClipboard() {
+            const urlString = await ClipboardGetText()
+            if (isEmpty(urlString)) {
+                throw new Error('no text in clipboard')
+            }
+
+            const { success, msg, data } = await ParseConnectURL(urlString)
+            if (!success || !isObject(data)) {
+                throw new Error(msg || 'unknown')
+            }
+
+            data.url = urlString
+            return data
         },
     },
 })

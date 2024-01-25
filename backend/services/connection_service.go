@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -510,5 +511,38 @@ func (c *connectionService) ImportConnections() (resp types.JSResp) {
 	}
 
 	resp.Success = true
+	return
+}
+
+// ParseConnectURL parse connection url string
+func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
+	urlOpt, err := redis.ParseURL(url)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	addrPart := strings.Split(urlOpt.Addr, ":")
+	addr := addrPart[0]
+	port := 6379
+	if len(addrPart) > 1 {
+		port, _ = strconv.Atoi(addrPart[1])
+	}
+	resp.Success = true
+	resp.Data = struct {
+		Addr        string `json:"addr"`
+		Port        int    `json:"port"`
+		Username    string `json:"username"`
+		Password    string `json:"password"`
+		ConnTimeout int64  `json:"connTimeout"`
+		ExecTimeout int64  `json:"execTimeout"`
+	}{
+		Addr:        addr,
+		Port:        port,
+		Username:    urlOpt.Username,
+		Password:    urlOpt.Password,
+		ConnTimeout: int64(urlOpt.DialTimeout.Seconds()),
+		ExecTimeout: int64(urlOpt.ReadTimeout.Seconds()),
+	}
 	return
 }

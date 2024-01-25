@@ -187,6 +187,9 @@
       "test": "Test Connection",
       "test_succ": "Successful connection to redis-server",
       "test_fail": "Fail Connection",
+      "parse_url_clipboard": "Parse URL from Clipboard",
+      "parse_pass": "Redis URL Parsed {url}",
+      "parse_fail": "Parse Redis URL failed: {reason}",
       "advn": {
         "title": "Advanced",
         "filter": "Default Key Filter Pattern",

@@ -187,6 +187,9 @@
       "test": "测试连接",
       "test_succ": "成功连接到Redis服务器",
       "test_fail": "连接失败",
+      "parse_url_clipboard": "解析剪切板中的URL",
+      "parse_pass": "解析Redis URL完成: {url}",
+      "parse_fail": "解析Redis URL失败: {reason}",
       "advn": {
         "title": "高级配置",
         "filter": "默认键过滤表达式",
