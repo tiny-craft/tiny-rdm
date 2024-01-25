@@ -8,7 +8,7 @@ import { i18nGlobal } from '@/utils/i18n.js'
  */
 export const toHumanReadable = (duration) => {
     const dur = dayjs.duration(duration, 'seconds')
-    const days = dur.days()
+    const days = Math.floor(dur.asDays())
     if (days > 0) {
         return days + i18nGlobal.t('common.unit_day') + ' ' + dur.format('HH:mm:ss')
     } else {

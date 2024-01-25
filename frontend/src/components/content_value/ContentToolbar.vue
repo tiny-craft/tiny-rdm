@@ -155,7 +155,7 @@ const onTTL = () => {
         server: props.server,
         db: props.db,
         key: binaryKey.value ? props.keyCode : props.keyPath,
-        ttl: props.ttl,
+        ttl: ttl.value,
     })
 }
 </script>
