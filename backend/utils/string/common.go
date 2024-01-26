@@ -15,6 +15,9 @@ func containsBinary(str string) bool {
 	//}
 	rs := []rune(str)
 	for _, r := range rs {
+		if r == unicode.ReplacementChar {
+			return true
+		}
 		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
 			return true
 		}

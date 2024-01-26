@@ -22,6 +22,7 @@ export const decodeTypes = {
     DEFLATE: 'Deflate',
     ZSTD: 'ZStd',
     BROTLI: 'Brotli',
+    MSGPACK: 'Msgpack',
     // PHP: 'PHP',
     // Java: 'Java',
 }

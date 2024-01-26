@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watchEffect } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Copy from '@/components/icons/Copy.vue'
 import Save from '@/components/icons/Save.vue'
@@ -82,13 +82,13 @@ const showMemoryUsage = computed(() => {
     return !isNaN(props.size) && props.size > 0
 })
 
-watchEffect(
-    () => {
-        if (props.value !== undefined) {
+watch(
+    () => props.value,
+    (val) => {
+        if (!isEmpty(val)) {
             onFormatChanged(viewAs.decode, viewAs.format)
         }
     },
-    { flush: 'post' },
 )
 
 const converting = ref(false)

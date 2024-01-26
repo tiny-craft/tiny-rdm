@@ -58,7 +58,7 @@ const onSelectOptions = async (select) => {
                 t-tooltip="interface.new_group"
                 @click="dialogStore.openNewGroupDialog()" />
             <n-divider vertical />
-            <n-input v-model:value="filterPattern" :placeholder="$t('interface.filter')" clearable>
+            <n-input v-model:value="filterPattern" :autofocus="false" :placeholder="$t('interface.filter')" clearable>
                 <template #prefix>
                     <n-icon :component="Filter" size="20" />
                 </template>

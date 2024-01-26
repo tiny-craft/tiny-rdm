@@ -11,6 +11,7 @@ import (
 	"github.com/klauspost/compress/flate"
 	"github.com/klauspost/compress/gzip"
 	"github.com/klauspost/compress/zstd"
+	"github.com/vmihailenco/msgpack/v5"
 	"io"
 	"regexp"
 	"strconv"
@@ -137,6 +138,11 @@ func autoDecode(str string) (value, resultDecode string) {
 			//	resultDecode = types.DECODE_BROTLI
 			//	return
 			//}
+
+			if value, ok = decodeMsgpack(str); ok {
+				resultDecode = types.DECODE_MSGPACK
+				return
+			}
 		}
 	}
 
@@ -242,7 +248,7 @@ func decodeToHex(str string) (string, bool) {
 	var resultStr strings.Builder
 	for i := 0; i < len(decodeStr); i += 2 {
 		resultStr.WriteString("\\x")
-		resultStr.WriteString(decodeStr[i : i+2])
+		resultStr.WriteString(strings.ToUpper(decodeStr[i : i+2]))
 	}
 	return resultStr.String(), true
 }
@@ -282,6 +288,22 @@ func decodeBrotli(str string) (string, bool) {
 	if decompressed, err := io.ReadAll(reader); err == nil {
 		return string(decompressed), true
 	}
+	return str, false
+}
+
+func decodeMsgpack(str string) (string, bool) {
+	var decodedStr string
+	if err := msgpack.Unmarshal([]byte(str), &decodedStr); err == nil {
+		return decodedStr, true
+	}
+
+	var decodedObj map[string]any
+	if err := msgpack.Unmarshal([]byte(str), &decodedObj); err == nil {
+		if b, err := json.Marshal(decodedObj); err == nil {
+			return string(b), true
+		}
+	}
+
 	return str, false
 }
 
@@ -350,6 +372,14 @@ func SaveAs(str, format, decode string) (value string, err error) {
 			value = brotliStr
 		} else {
 			err = errors.New("fail to build brotli")
+		}
+		return
+
+	case types.DECODE_MSGPACK:
+		if msgpackStr, ok := encodeMsgpack(str); ok {
+			value = msgpackStr
+		} else {
+			err = errors.New("fail to build msgpack")
 		}
 		return
 	}
@@ -460,5 +490,16 @@ func encodeBrotli(str string) (string, bool) {
 	if brotliStr, err := compress([]byte(str)); err == nil {
 		return brotliStr, true
 	}
+	return str, false
+}
+
+func encodeMsgpack(str string) (string, bool) {
+	var err error
+	var buf bytes.Buffer
+	enc := msgpack.NewEncoder(&buf)
+	if err = enc.EncodeString(str); err == nil {
+		return buf.String(), true
+	}
+
 	return str, false
 }
