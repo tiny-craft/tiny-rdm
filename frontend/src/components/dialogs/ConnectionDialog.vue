@@ -270,7 +270,7 @@ const onClose = () => {
 
 const pasteFromClipboard = async () => {
     // url example:
-    // redis://user:password@localhost:6789/3?dial_timeout=3&db=1&read_timeout=6s&max_retries=2
+    // rediss://user:password@localhost:6789/3?dial_timeout=3&db=1&read_timeout=6s&max_retries=2
     let opt = {}
     try {
         opt = await connectionStore.parseUrlFromClipboard()
@@ -287,6 +287,13 @@ const pasteFromClipboard = async () => {
     }
     if (opt.execTimeout > 0) {
         generalForm.value.execTimeout = opt.execTimeout
+    }
+    const { sslServerName = null } = opt
+    if (sslServerName != null) {
+        generalForm.value.ssl.enable = true
+        if (!isEmpty(sslServerName)) {
+            generalForm.value.ssl.sni = sslServerName
+        }
     }
     $message.success(i18n.t('dialogue.connection.parse_pass', { url: opt.url }))
 }

@@ -528,21 +528,27 @@ func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
 	if len(addrPart) > 1 {
 		port, _ = strconv.Atoi(addrPart[1])
 	}
+	var sslServerName string
+	if urlOpt.TLSConfig != nil {
+		sslServerName = urlOpt.TLSConfig.ServerName
+	}
 	resp.Success = true
 	resp.Data = struct {
-		Addr        string `json:"addr"`
-		Port        int    `json:"port"`
-		Username    string `json:"username"`
-		Password    string `json:"password"`
-		ConnTimeout int64  `json:"connTimeout"`
-		ExecTimeout int64  `json:"execTimeout"`
+		Addr          string `json:"addr"`
+		Port          int    `json:"port"`
+		Username      string `json:"username"`
+		Password      string `json:"password"`
+		ConnTimeout   int64  `json:"connTimeout"`
+		ExecTimeout   int64  `json:"execTimeout"`
+		SSLServerName string `json:"sslServerName,omitempty"`
 	}{
-		Addr:        addr,
-		Port:        port,
-		Username:    urlOpt.Username,
-		Password:    urlOpt.Password,
-		ConnTimeout: int64(urlOpt.DialTimeout.Seconds()),
-		ExecTimeout: int64(urlOpt.ReadTimeout.Seconds()),
+		Addr:          addr,
+		Port:          port,
+		Username:      urlOpt.Username,
+		Password:      urlOpt.Password,
+		ConnTimeout:   int64(urlOpt.DialTimeout.Seconds()),
+		ExecTimeout:   int64(urlOpt.ReadTimeout.Seconds()),
+		SSLServerName: sslServerName,
 	}
 	return
 }
