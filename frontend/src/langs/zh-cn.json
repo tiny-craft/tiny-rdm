@@ -139,6 +139,7 @@
     "action": "操作",
     "type": "类型",
     "cli_welcome": "欢迎使用Tiny RDM的Redis命令行控制台",
+    "retrieving_version": "正在检索新版本",
     "sub_tab": {
       "status": "状态",
       "key_detail": "键详情",
@@ -153,7 +154,7 @@
     "browser": "数据浏览",
     "log": "日志",
     "wechat_official": "微信公众号",
-    "follow_x": "关注的我\uD835\uDD4F",
+    "follow_x": "关注我的\uD835\uDD4F",
     "github": "Github"
   },
   "dialogue": {

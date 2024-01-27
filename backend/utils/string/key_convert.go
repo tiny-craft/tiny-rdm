@@ -8,7 +8,7 @@ import (
 // EncodeRedisKey encode the redis key to integer array
 // if key contains binary which could not display on ui, convert the key to char array
 func EncodeRedisKey(key string) any {
-	if containsBinary(key) {
+	if ContainsBinary(key) {
 		b := []byte(key)
 		arr := make([]int, len(b))
 		for i, bb := range b {

@@ -4,7 +4,7 @@ import (
 	"unicode"
 )
 
-func containsBinary(str string) bool {
+func ContainsBinary(str string) bool {
 	//buf := []byte(str)
 	//size := 0
 	//for start := 0; start < len(buf); start += size {
@@ -25,7 +25,7 @@ func containsBinary(str string) bool {
 	return false
 }
 
-func isSameChar(str string) bool {
+func IsSameChar(str string) bool {
 	if len(str) <= 0 {
 		return false
 	}

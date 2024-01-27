@@ -21,6 +21,7 @@ import (
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
+	convutil "tinyrdm/backend/utils/convert"
 	redis2 "tinyrdm/backend/utils/redis"
 	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
@@ -781,7 +782,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					Value: val,
 				})
 				if doConvert {
-					if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+					if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format); dv != val {
 						items[len(items)-1].DisplayValue = dv
 					}
 				}
@@ -828,7 +829,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 							Value: strutil.EncodeRedisKey(loadedVal[i+1]),
 						})
 						if doConvert {
-							if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
+							if dv, _, _ := convutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
 								items[len(items)-1].DisplayValue = dv
 							}
 						}
@@ -853,7 +854,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					items[i/2].Key = loadedVal[i]
 					items[i/2].Value = strutil.EncodeRedisKey(loadedVal[i+1])
 					if doConvert {
-						if dv, _, _ := strutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
+						if dv, _, _ := convutil.ConvertTo(loadedVal[i+1], param.Decode, param.Format); dv != loadedVal[i+1] {
 							items[i/2].DisplayValue = dv
 						}
 					}
@@ -898,7 +899,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 							Value: val,
 						})
 						if doConvert {
-							if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+							if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format); dv != val {
 								items[len(items)-1].DisplayValue = dv
 							}
 						}
@@ -918,7 +919,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				for i, val := range loadedKey {
 					items[i].Value = val
 					if doConvert {
-						if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+						if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format); dv != val {
 							items[i].DisplayValue = dv
 						}
 					}
@@ -966,7 +967,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 								Score: score,
 							})
 							if doConvert {
-								if dv, _, _ := strutil.ConvertTo(loadedVal[i], param.Decode, param.Format); dv != loadedVal[i] {
+								if dv, _, _ := convutil.ConvertTo(loadedVal[i], param.Decode, param.Format); dv != loadedVal[i] {
 									items[len(items)-1].DisplayValue = dv
 								}
 							}
@@ -1000,7 +1001,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 						Value: val,
 					})
 					if doConvert {
-						if dv, _, _ := strutil.ConvertTo(val, param.Decode, param.Format); dv != val {
+						if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format); dv != val {
 							items[len(items)-1].DisplayValue = dv
 						}
 					}
@@ -1061,7 +1062,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				if vb, merr := json.Marshal(msg.Values); merr != nil {
 					it.DisplayValue = "{}"
 				} else {
-					it.DisplayValue, _, _ = strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+					it.DisplayValue, _, _ = convutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
 				}
 				if doFilter && !strings.Contains(it.DisplayValue, param.MatchPattern) {
 					continue
@@ -1095,7 +1096,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 // blank format indicate auto format
 func (b *browserService) ConvertValue(value any, decode, format string) (resp types.JSResp) {
 	str := strutil.DecodeRedisKey(value)
-	value, decode, format = strutil.ConvertTo(str, decode, format)
+	value, decode, format = convutil.ConvertTo(str, decode, format)
 	resp.Success = true
 	resp.Data = map[string]any{
 		"value":  value,
@@ -1138,7 +1139,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 			return
 		} else {
 			var saveStr string
-			if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+			if saveStr, err = convutil.SaveAs(str, param.Format, param.Decode); err != nil {
 				resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 				return
 			}
@@ -1249,12 +1250,12 @@ func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSRe
 	key := strutil.DecodeRedisKey(param.Key)
 	str := strutil.DecodeRedisKey(param.Value)
 	var saveStr, displayStr string
-	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+	if saveStr, err = convutil.SaveAs(str, param.Format, param.Decode); err != nil {
 		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
 	if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
-		displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+		displayStr, _, _ = convutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
 	}
 	var updated, added, removed []types.HashEntryItem
 	var replaced []types.HashReplaceItem
@@ -1472,7 +1473,7 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 	} else {
 		// replace index value
 		var saveStr string
-		if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+		if saveStr, err = convutil.SaveAs(str, param.Format, param.Decode); err != nil {
 			resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 			return
 		}
@@ -1483,7 +1484,7 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 		}
 		var displayStr string
 		if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
-			displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+			displayStr, _, _ = convutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
 		}
 		replaced = append(replaced, types.ListReplaceItem{
 			Index:        param.Index,
@@ -1574,7 +1575,7 @@ func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSRe
 	// insert new value
 	str = strutil.DecodeRedisKey(param.NewValue)
 	var saveStr string
-	if saveStr, err = strutil.SaveAs(str, param.Format, param.Decode); err != nil {
+	if saveStr, err = convutil.SaveAs(str, param.Format, param.Decode); err != nil {
 		resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 		return
 	}
@@ -1582,7 +1583,7 @@ func (b *browserService) UpdateSetItem(param types.SetSetParam) (resp types.JSRe
 		// add new item
 		var displayStr string
 		if len(param.RetDecode) > 0 && len(param.RetFormat) > 0 {
-			displayStr, _, _ = strutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
+			displayStr, _, _ = convutil.ConvertTo(saveStr, param.RetDecode, param.RetFormat)
 		}
 		added = append(added, types.SetEntryItem{
 			Value:        saveStr,
@@ -1629,7 +1630,7 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 		}
 	} else {
 		var saveVal string
-		if saveVal, err = strutil.SaveAs(newVal, param.Format, param.Decode); err != nil {
+		if saveVal, err = convutil.SaveAs(newVal, param.Format, param.Decode); err != nil {
 			resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 			return
 		}
@@ -1639,7 +1640,7 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 				Score:  param.Score,
 				Member: saveVal,
 			}).Result()
-			displayValue, _, _ := strutil.ConvertTo(val, param.RetDecode, param.RetFormat)
+			displayValue, _, _ := convutil.ConvertTo(val, param.RetDecode, param.RetFormat)
 			if affect > 0 {
 				// add new item
 				added = append(added, types.ZSetEntryItem{
@@ -1667,7 +1668,7 @@ func (b *browserService) UpdateZSetValue(param types.SetZSetParam) (resp types.J
 				Score:  param.Score,
 				Member: saveVal,
 			}).Result()
-			displayValue, _, _ := strutil.ConvertTo(saveVal, param.RetDecode, param.RetFormat)
+			displayValue, _, _ := convutil.ConvertTo(saveVal, param.RetDecode, param.RetFormat)
 			if affect <= 0 {
 				// no new value added, just update exists item
 				removed = append(removed, types.ZSetEntryItem{
@@ -1793,7 +1794,7 @@ func (b *browserService) AddStreamValue(server string, db int, k any, ID string,
 		updateValues[fieldItems[i].(string)] = fieldItems[i+1]
 	}
 	vb, _ := json.Marshal(updateValues)
-	displayValue, _, _ := strutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
+	displayValue, _, _ := convutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON)
 
 	resp.Success = true
 	resp.Data = struct {

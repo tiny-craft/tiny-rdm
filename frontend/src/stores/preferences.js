@@ -338,7 +338,7 @@ const usePreferencesStore = defineStore('preferences', {
         async checkForUpdate(manual = false) {
             let msgRef = null
             if (manual) {
-                msgRef = $message.loading('Retrieving for new version', { duration: 0 })
+                msgRef = $message.loading(i18nGlobal.t('interface.retrieving_version'), { duration: 0 })
             }
             try {
                 const { success, data = {} } = await CheckForUpdate()

@@ -139,6 +139,7 @@
     "action": "Action",
     "type": "Type",
     "cli_welcome": "Welcome to Tiny RDM Redis Console",
+    "retrieving_version": "Retrieving for new version",
     "sub_tab": {
       "status": "Status",
       "key_detail": "Key Detail",
