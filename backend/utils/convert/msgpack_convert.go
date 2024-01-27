@@ -1,7 +1,6 @@
 package convutil
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/vmihailenco/msgpack/v5"
 )
@@ -9,11 +8,15 @@ import (
 type MsgpackConvert struct{}
 
 func (MsgpackConvert) Encode(str string) (string, bool) {
-	var err error
-	var buf bytes.Buffer
-	enc := msgpack.NewEncoder(&buf)
-	if err = enc.EncodeString(str); err == nil {
-		return buf.String(), true
+	var obj map[string]any
+	if err := json.Unmarshal([]byte(str), &obj); err == nil {
+		if b, err := msgpack.Marshal(obj); err == nil {
+			return string(b), true
+		}
+	}
+
+	if b, err := msgpack.Marshal(str); err != nil {
+		return string(b), true
 	}
 
 	return str, false
@@ -25,9 +28,9 @@ func (MsgpackConvert) Decode(str string) (string, bool) {
 		return decodedStr, true
 	}
 
-	var decodedObj map[string]any
-	if err := msgpack.Unmarshal([]byte(str), &decodedObj); err == nil {
-		if b, err := json.Marshal(decodedObj); err == nil {
+	var obj map[string]any
+	if err := msgpack.Unmarshal([]byte(str), &obj); err == nil {
+		if b, err := json.Marshal(obj); err == nil {
 			return string(b), true
 		}
 	}
