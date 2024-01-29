@@ -37,6 +37,7 @@
       "language": "Language",
       "system_lang": "Use System Language",
       "font": "Font",
+      "font_tip": "Please Select or Input Font Name",
       "font_size": "Font Size",
       "scan_size": "Default Size for SCAN Command",
       "key_icon_style": "Key Icon Style",

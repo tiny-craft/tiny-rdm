@@ -108,6 +108,7 @@ const onClose = () => {
                             <n-select
                                 v-model:value="prefStore.general.fontFamily"
                                 :options="prefStore.fontOption"
+                                :placeholder="$t('preferences.general.font_tip')"
                                 :render-label="({ label, value }) => (value === '' ? $t(label) : label)"
                                 filterable
                                 multiple
@@ -166,6 +167,7 @@ const onClose = () => {
                             <n-select
                                 v-model:value="prefStore.editor.fontFamily"
                                 :options="prefStore.fontOption"
+                                :placeholder="$t('preferences.general.font_tip')"
                                 :render-label="({ label, value }) => value || $t(label)"
                                 filterable
                                 multiple
@@ -206,6 +208,7 @@ const onClose = () => {
                             <n-select
                                 v-model:value="prefStore.cli.fontFamily"
                                 :options="prefStore.fontOption"
+                                :placeholder="$t('preferences.general.font_tip')"
                                 :render-label="({ label, value }) => value || $t(label)"
                                 filterable
                                 multiple

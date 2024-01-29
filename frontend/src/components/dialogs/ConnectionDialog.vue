@@ -498,6 +498,7 @@ const pasteFromClipboard = async () => {
                     </n-form>
                 </n-tab-pane>
 
+                <!-- Alias pane -->
                 <n-tab-pane :tab="$t('dialogue.connection.alias.title')" display-directive="show:lazy" name="alias">
                     <n-form
                         :model="generalForm.alias"
