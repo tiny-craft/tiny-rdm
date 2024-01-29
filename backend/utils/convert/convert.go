@@ -14,6 +14,8 @@ type DataConvert interface {
 
 var (
 	jsonConv    JsonConvert
+	yamlConv    YamlConvert
+	xmlConv     XmlConvert
 	base64Conv  Base64Convert
 	binaryConv  BinaryConvert
 	hexConv     HexConvert
@@ -194,6 +196,16 @@ func autoViewAs(str string) (value, resultFormat string) {
 		var ok bool
 		if value, ok = jsonConv.Decode(str); ok {
 			resultFormat = types.FORMAT_JSON
+			return
+		}
+
+		if value, ok = yamlConv.Decode(str); ok {
+			resultFormat = types.FORMAT_YAML
+			return
+		}
+
+		if value, ok = xmlConv.Decode(str); ok {
+			resultFormat = types.FORMAT_XML
 			return
 		}
 
