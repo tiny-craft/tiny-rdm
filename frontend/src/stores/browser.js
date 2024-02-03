@@ -601,9 +601,8 @@ const useBrowserStore = defineStore('browser', {
             if (isEmpty(match)) {
                 match = '*'
             } else if (!isRedisGlob(match)) {
-                const separator = this.getSeparator(server)
-                if (!endsWith(prefix, separator + '*')) {
-                    match = prefix + separator + '*'
+                if (!endsWith(prefix, '*')) {
+                    match = prefix + '*'
                 }
             }
             return this.scanKeys({ server, db, match, matchType, loadType: all ? 1 : 0 })
