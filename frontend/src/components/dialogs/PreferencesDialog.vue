@@ -181,6 +181,7 @@ const onClose = () => {
             placement="left"
             tab-style="justify-content: right; font-weight: 420;"
             type="line">
+            <!-- general pane -->
             <n-tab-pane :tab="$t('preferences.general.name')" display-directive="show" name="general">
                 <n-form :disabled="loading" :model="prefStore.general" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
@@ -257,6 +258,7 @@ const onClose = () => {
                 </n-form>
             </n-tab-pane>
 
+            <!-- editor pane -->
             <n-tab-pane :tab="$t('preferences.editor.name')" display-directive="show" name="editor">
                 <n-form :disabled="loading" :model="prefStore.editor" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
@@ -294,10 +296,16 @@ const onClose = () => {
                                 {{ $t('preferences.editor.show_folding') }}
                             </n-checkbox>
                         </n-form-item-gi>
+                        <n-form-item-gi :show-feedback="false" :show-label="false" :span="24">
+                            <n-checkbox v-model:checked="prefStore.editor.dropText">
+                                {{ $t('preferences.editor.drop_text') }}
+                            </n-checkbox>
+                        </n-form-item-gi>
                     </n-grid>
                 </n-form>
             </n-tab-pane>
 
+            <!-- cli pane -->
             <n-tab-pane :tab="$t('preferences.cli.name')" display-directive="show" name="cli">
                 <n-form :disabled="loading" :model="prefStore.cli" :show-require-mark="false" label-placement="top">
                     <n-grid :x-gap="10">
@@ -339,7 +347,7 @@ const onClose = () => {
                 </n-form>
             </n-tab-pane>
 
-            <!-- Custom decoder pane -->
+            <!-- custom decoder pane -->
             <n-tab-pane :tab="$t('preferences.decoder.name')" display-directive="show:lazy" name="decoder">
                 <n-space>
                     <n-button @click="dialogStore.openDecoderDialog()">

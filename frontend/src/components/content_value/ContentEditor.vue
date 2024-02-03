@@ -18,14 +18,6 @@ const props = defineProps({
     loading: {
         type: Boolean,
     },
-    showLineNum: {
-        type: Boolean,
-        default: true,
-    },
-    showFolding: {
-        type: Boolean,
-        default: true,
-    },
     border: {
         type: Boolean,
         default: false,
@@ -63,13 +55,14 @@ onMounted(async () => {
             // value: props.content,
             theme: pref.isDark ? 'rdm-dark' : 'rdm-light',
             language: props.language,
-            lineNumbers: props.showLineNum ? 'on' : 'off',
+            lineNumbers: pref.showLineNum ? 'on' : 'off',
             readOnly: readonlyValue.value,
             colorDecorators: true,
             accessibilitySupport: 'off',
             wordWrap: 'on',
             tabSize: 2,
-            folding: props.showFolding !== false,
+            folding: pref.showFolding,
+            dragAndDrop: pref.dropText,
             fontFamily,
             fontSize,
             scrollBeyondLastLine: false,
@@ -151,37 +144,20 @@ watch(
 )
 
 watch(
-    () => pref.editorFont,
-    ({ fontSize, fontFamily }) => {
+    () => pref.editor,
+    ({ showLineNum = true, showFolding = true, dropText = true }) => {
         if (editorNode != null) {
+            const { fontSize, fontFamily } = pref.editorFont
             editorNode.updateOptions({
                 fontSize,
                 fontFamily,
-            })
-        }
-    },
-)
-
-watch(
-    () => pref.showLineNum,
-    (showLineNum) => {
-        if (editorNode != null) {
-            editorNode.updateOptions({
                 lineNumbers: showLineNum ? 'on' : 'off',
+                folding: showFolding,
+                dragAndDrop: dropText,
             })
         }
     },
-)
-
-watch(
-    () => pref.showFolding,
-    (showFolding) => {
-        if (editorNode != null) {
-            editorNode.updateOptions({
-                folding: showFolding !== false,
-            })
-        }
-    },
+    { deep: true },
 )
 
 onUnmounted(() => {

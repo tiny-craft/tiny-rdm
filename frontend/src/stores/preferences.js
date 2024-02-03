@@ -58,6 +58,7 @@ const usePreferencesStore = defineStore('preferences', {
             fontSize: 14,
             showLineNum: true,
             showFolding: true,
+            dropText: true,
         },
         cli: {
             fontFamily: [],
@@ -254,6 +255,10 @@ const usePreferencesStore = defineStore('preferences', {
             return get(this.editor, 'showFolding', true)
         },
 
+        dropText() {
+            return get(this.editor, 'dropText', true)
+        },
+
         keyIconType() {
             return get(this.general, 'keyIconStyle', typesIconStyle.SHORT)
         },
@@ -282,6 +287,10 @@ const usePreferencesStore = defineStore('preferences', {
                 const showFolding = get(data, 'editor.showFolding')
                 if (showFolding === undefined) {
                     set(data, 'editor.showFolding', true)
+                }
+                const dropText = get(data, 'editor.dropText')
+                if (dropText === undefined) {
+                    set(data, 'editor.dropText', true)
                 }
                 i18nGlobal.locale.value = this.currentLanguage
             }
