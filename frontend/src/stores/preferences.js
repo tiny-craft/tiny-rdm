@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
-import { cloneDeep, get, isEmpty, join, map, pick, set, split } from 'lodash'
+import { cloneDeep, findIndex, get, isEmpty, join, map, merge, pick, set, some, split } from 'lodash'
 import {
     CheckForUpdate,
     GetFontList,
@@ -64,6 +64,7 @@ const usePreferencesStore = defineStore('preferences', {
             fontSize: 14,
             cursorStyle: 'block',
         },
+        decoder: [],
         lastPref: {},
         fontList: [],
     }),
@@ -306,7 +307,7 @@ const usePreferencesStore = defineStore('preferences', {
          * @returns {Promise<boolean>}
          */
         async savePreferences() {
-            const pf = pick(this, ['behavior', 'general', 'editor', 'cli'])
+            const pf = pick(this, ['behavior', 'general', 'editor', 'cli', 'decoder'])
             const { success, msg } = await SetPreferences(pf)
             return success === true
         },
@@ -333,6 +334,81 @@ const usePreferencesStore = defineStore('preferences', {
                 return true
             }
             return false
+        },
+
+        /**
+         * add a new custom decoder
+         * @param {string} name
+         * @param {boolean} enable
+         * @param {boolean} auto
+         * @param {string} encodePath
+         * @param {string[]} encodeArgs
+         * @param {string} decodePath
+         * @param {string[]} decodeArgs
+         */
+        addCustomDecoder({ name, enable = true, auto = true, encodePath, encodeArgs, decodePath, decodeArgs }) {
+            if (some(this.decoder, { name })) {
+                return false
+            }
+            this.decoder = this.decoder || []
+            this.decoder.push({ name, enable, auto, encodePath, encodeArgs, decodePath, decodeArgs })
+            return true
+        },
+
+        /**
+         * update an existing custom decoder
+         * @param {string} newName
+         * @param {boolean} enable
+         * @param {boolean} auto
+         * @param {string} name
+         * @param {string} encodePath
+         * @param {string[]} encodeArgs
+         * @param {string} decodePath
+         * @param {string[]} decodeArgs
+         */
+        updateCustomDecoder({
+            newName,
+            enable = true,
+            auto = true,
+            name,
+            encodePath,
+            encodeArgs,
+            decodePath,
+            decodeArgs,
+        }) {
+            const idx = findIndex(this.decoder, { name })
+            if (idx === -1) {
+                return false
+            }
+            // conflicted
+            if (newName !== name && some(this.decoder, { name: newName })) {
+                return false
+            }
+
+            this.decoder[idx] = merge(this.decoder[idx], {
+                name: newName || name,
+                enable,
+                auto,
+                encodePath,
+                encodeArgs,
+                decodePath,
+                decodeArgs,
+            })
+            return true
+        },
+
+        /**
+         * remove an existing custom decoder
+         * @param {string} name
+         * @return {boolean}
+         */
+        removeCustomDecoder(name) {
+            const idx = findIndex(this.decoder, { name })
+            if (idx === -1) {
+                return false
+            }
+            this.decoder.splice(idx, 1)
+            return true
         },
 
         async checkForUpdate(manual = false) {

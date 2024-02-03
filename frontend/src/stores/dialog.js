@@ -91,6 +91,16 @@ const useDialogStore = defineStore('dialog', {
             ttl: 0,
         },
 
+        decodeDialogVisible: false,
+        decodeParam: {
+            name: '',
+            auto: true,
+            decodePath: '',
+            decodeArgs: [],
+            encodePath: '',
+            encodeArgs: [],
+        },
+
         preferencesDialogVisible: false,
         aboutDialogVisible: false,
     }),
@@ -288,6 +298,36 @@ const useDialogStore = defineStore('dialog', {
         },
         closeTTLDialog() {
             this.ttlDialogVisible = false
+        },
+
+        /**
+         *
+         * @param {string} name
+         * @param {boolean} auto
+         * @param {string} decodePath
+         * @param {string[]} decodeArgs
+         * @param {string} encodePath
+         * @param {string[]} encodeArgs
+         */
+        openDecoderDialog({
+            name = '',
+            auto = true,
+            decodePath = '',
+            decodeArgs = [],
+            encodePath = '',
+            encodeArgs = [],
+        } = {}) {
+            this.decodeDialogVisible = true
+            this.decodeParam.name = name
+            this.decodeParam.auto = auto !== false
+            this.decodeParam.decodePath = decodePath
+            this.decodeParam.decodeArgs = decodeArgs || []
+            this.decodeParam.encodePath = encodePath
+            this.decodeParam.encodeArgs = encodeArgs || []
+        },
+
+        closeDecoderDialog() {
+            this.decodeDialogVisible = false
         },
 
         openPreferencesDialog() {

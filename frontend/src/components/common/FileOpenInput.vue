@@ -35,6 +35,7 @@ const handleSelectFile = async () => {
         <n-input
             :disabled="props.disabled"
             :placeholder="placeholder"
+            :title="props.value"
             :value="props.value"
             clearable
             @clear="onClear"

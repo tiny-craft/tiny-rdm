@@ -21,6 +21,7 @@ import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
 import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
 import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
 import { Info } from 'wailsjs/go/services/systemService.js'
+import DecoderDialog from '@/components/dialogs/DecoderDialog.vue'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -79,6 +80,7 @@ watch(
             <flush-db-dialog />
             <set-ttl-dialog />
             <preferences-dialog />
+            <decoder-dialog />
             <about-dialog />
         </n-dialog-provider>
     </n-config-provider>

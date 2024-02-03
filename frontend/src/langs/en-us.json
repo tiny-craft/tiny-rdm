@@ -62,6 +62,14 @@
       "cursor_style_block": "Block",
       "cursor_style_underline": "Underline",
       "cursor_style_bar": "Bar"
+    },
+    "decoder": {
+      "name": "Custom Decoder",
+      "new": "New Decoder",
+      "decoder_name": "Name",
+      "cmd_preview": "Preview",
+      "status": "Status",
+      "path": "Decoder Execution Path"
     }
   },
   "interface": {
@@ -338,6 +346,20 @@
       "title_batch": "Batch Update TTL({count})",
       "quick_set": "Quick Settings",
       "success": "All TTL of keys have been updated"
+    },
+    "decoder": {
+      "name": "New Decoder/Encoder",
+      "edit_name": "Edit Decoder/Encoder",
+      "new": "New",
+      "decoder": "Decoder",
+      "encoder": "Encoder",
+      "decoder_name": "Name",
+      "auto": "Automatic Decoding",
+      "decode_path": "Decoder Execution Path",
+      "encode_path": "Encoder Execution Path",
+      "path_help": "The path of executable file, any cli alias like 'sh/php/python' are also supported.",
+      "args": "Arguments",
+      "args_help": "Use [VALUE] as a placeholder for encoding/decoding content. The content will be appended to the end if no placeholder is provided."
     },
     "upgrade": {
       "title": "New Version Available",

@@ -3,7 +3,9 @@ import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import Code from '@/components/icons/Code.vue'
 import Conversion from '@/components/icons/Conversion.vue'
 import DropdownSelector from '@/components/common/DropdownSelector.vue'
-import { some } from 'lodash'
+import { isEmpty, map, some } from 'lodash'
+import { computed } from 'vue'
+import usePreferencesStore from 'stores/preferences.js'
 
 const props = defineProps({
     decode: {
@@ -17,13 +19,35 @@ const props = defineProps({
     disabled: Boolean,
 })
 
+const prefStore = usePreferencesStore()
+
+const formatTypeOption = computed(() => {
+    return map(formatTypes, (t) => t)
+})
+
+const decodeTypeOption = computed(() => {
+    const customTypes = []
+    // has custom decoder
+    if (!isEmpty(prefStore.decoder)) {
+        for (const decoder of prefStore.decoder) {
+            // types[decoder.name] = types[decoder.name] || decoder.name
+            if (!decodeTypes.hasOwnProperty(decoder.name)) {
+                customTypes.push(decoder.name)
+            }
+        }
+    }
+    return [map(decodeTypes, (t) => t), customTypes]
+})
+
 const emit = defineEmits(['formatChanged', 'update:decode', 'update:format'])
 const onFormatChanged = (selDecode, selFormat) => {
-    if (!some(decodeTypes, (val) => val === selDecode)) {
+    const [buildin, external] = decodeTypeOption.value
+    if (!some([...buildin, ...external], (val) => val === selDecode)) {
         selDecode = decodeTypes.NONE
     }
     if (!some(formatTypes, (val) => val === selFormat)) {
-        selFormat = formatTypes.RAW
+        // set to auto chose format
+        selFormat = ''
     }
     emit('formatChanged', selDecode, selFormat)
     if (selDecode !== props.decode) {
@@ -41,7 +65,7 @@ const onFormatChanged = (selDecode, selFormat) => {
             :default="formatTypes.RAW"
             :disabled="props.disabled"
             :icon="Code"
-            :options="formatTypes"
+            :options="formatTypeOption"
             :tooltip="$t('interface.view_as')"
             :value="props.format"
             @update:value="(f) => onFormatChanged(props.decode, f)" />
@@ -50,10 +74,10 @@ const onFormatChanged = (selDecode, selFormat) => {
             :default="decodeTypes.NONE"
             :disabled="props.disabled"
             :icon="Conversion"
-            :options="decodeTypes"
+            :options="decodeTypeOption"
             :tooltip="$t('interface.decode_with')"
             :value="props.decode"
-            @update:value="(d) => onFormatChanged(d, props.format)" />
+            @update:value="(d) => onFormatChanged(d, '')" />
     </n-space>
 </template>
 

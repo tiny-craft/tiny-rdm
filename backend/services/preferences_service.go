@@ -13,11 +13,14 @@ import (
 	storage2 "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
+	convutil "tinyrdm/backend/utils/convert"
+	sliceutil "tinyrdm/backend/utils/slice"
 )
 
 type preferencesService struct {
 	pref          *storage2.PreferencesStorage
 	clientVersion string
+	customDecoder []convutil.CmdConvert
 }
 
 var preferences *preferencesService
@@ -180,6 +183,23 @@ func (p *preferencesService) GetScanSize() int {
 		size = consts.DEFAULT_SCAN_SIZE
 	}
 	return size
+}
+
+func (p *preferencesService) GetDecoder() []convutil.CmdConvert {
+	data := p.pref.GetPreferences()
+	return sliceutil.FilterMap(data.Decoder, func(i int) (convutil.CmdConvert, bool) {
+		//if !data.Decoder[i].Enable {
+		//	return convutil.CmdConvert{}, false
+		//}
+		return convutil.CmdConvert{
+			Name:       data.Decoder[i].Name,
+			Auto:       data.Decoder[i].Auto,
+			DecodePath: data.Decoder[i].DecodePath,
+			DecodeArgs: data.Decoder[i].DecodeArgs,
+			EncodePath: data.Decoder[i].EncodePath,
+			EncodeArgs: data.Decoder[i].EncodeArgs,
+		}, true
+	})
 }
 
 type latestRelease struct {

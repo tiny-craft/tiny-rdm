@@ -269,7 +269,7 @@ const exThemeVars = computed(() => {
     .nav-menu-item {
         align-items: center;
         padding: 10px 0 15px;
-        gap: 18px;
+        gap: 20px;
         --wails-draggable: none;
 
         .nav-menu-button {

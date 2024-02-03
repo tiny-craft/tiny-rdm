@@ -62,6 +62,14 @@
       "cursor_style_block": "方块",
       "cursor_style_underline": "下划线",
       "cursor_style_bar": "竖线"
+    },
+    "decoder": {
+      "name": "自定义解码",
+      "new": "新增自定义解码",
+      "decoder_name": "解码器名称",
+      "cmd_preview": "命令预览",
+      "status": "状态",
+      "auto_enabled": "已加入自动解码"
     }
   },
   "interface": {
@@ -338,6 +346,20 @@
       "title_batch": "批量设置键存活时间({count})",
       "quick_set": "快捷设置",
       "success": "已全部更新TTL"
+    },
+    "decoder": {
+      "name": "新增解码/编码器",
+      "edit_name": "编辑解码/编码器",
+      "new": "新增",
+      "decoder": "解码器",
+      "encoder": "编码器",
+      "decoder_name": "解码器名称",
+      "auto": "自动解码",
+      "decode_path": "解码器执行路径",
+      "encode_path": "编码器执行路径",
+      "path_help": "执行文件路径，也可以直接填写命令行接口，如sh/php/python",
+      "args": "运行参数",
+      "args_help": "使用[VALUE]代替编码/解码内容占位符，如果不填内容占位则默认放最后"
     },
     "upgrade": {
       "title": "有可用新版本",

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, h, ref } from 'vue'
-import { get, map } from 'lodash'
+import { get, isEmpty } from 'lodash'
 import { NIcon, NText } from 'naive-ui'
 import { useRender } from '@/utils/render.js'
 
@@ -10,8 +10,8 @@ const props = defineProps({
         value: '',
     },
     options: {
-        type: Object,
-        value: {},
+        type: Array,
+        value: () => [],
     },
     tooltip: {
         type: String,
@@ -40,15 +40,32 @@ const dropdownOption = computed(() => {
             type: 'divider',
         },
     ]
-    return [
-        ...options,
-        ...map(props.options, (t) => {
-            return {
-                key: t,
-                label: t,
+    if (get(props.options, 0) instanceof Array) {
+        // multiple group
+        for (let i = 0; i < props.options.length; i++) {
+            if (i !== 0 && !isEmpty(props.options[i])) {
+                // add divider
+                options.push({
+                    key: 'header-divider' + (i + 1),
+                    type: 'divider',
+                })
             }
-        }),
-    ]
+            for (const option of props.options[i]) {
+                options.push({
+                    key: option,
+                    label: option,
+                })
+            }
+        }
+    } else {
+        for (const option of props.options) {
+            options.push({
+                key: option,
+                label: option,
+            })
+        }
+    }
+    return options
 })
 
 const onDropdownSelect = (key) => {

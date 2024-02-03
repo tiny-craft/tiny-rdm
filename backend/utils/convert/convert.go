@@ -29,7 +29,8 @@ var (
 // ConvertTo convert string to specified type
 // @param decodeType empty string indicates automatic detection
 // @param formatType empty string indicates automatic detection
-func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultFormat string) {
+// @param custom decoder if any
+func ConvertTo(str, decodeType, formatType string, customDecoder []CmdConvert) (value, resultDecode, resultFormat string) {
 	if len(str) <= 0 {
 		// empty content
 		if len(formatType) <= 0 {
@@ -46,13 +47,17 @@ func ConvertTo(str, decodeType, formatType string) (value, resultDecode, resultF
 	}
 
 	// decode first
-	value, resultDecode = decodeWith(str, decodeType)
+	value, resultDecode = decodeWith(str, decodeType, customDecoder)
 	// then format content
-	value, resultFormat = viewAs(value, formatType)
+	if len(formatType) <= 0 {
+		value, resultFormat = autoViewAs(value)
+	} else {
+		value, resultFormat = viewAs(value, formatType)
+	}
 	return
 }
 
-func decodeWith(str, decodeType string) (value, resultDecode string) {
+func decodeWith(str, decodeType string, customDecoder []CmdConvert) (value, resultDecode string) {
 	if len(decodeType) > 0 {
 		switch decodeType {
 		case types.DECODE_NONE:
@@ -99,17 +104,31 @@ func decodeWith(str, decodeType string) (value, resultDecode string) {
 			} else {
 				value = str
 			}
+
+		default:
+			for _, decoder := range customDecoder {
+				if decoder.Name == decodeType {
+					if decodedStr, ok := decoder.Decode(str); ok {
+						value = decodedStr
+					} else {
+						value = str
+					}
+					break
+				}
+			}
 		}
+
 		resultDecode = decodeType
 		return
 	}
 
-	return autoDecode(str)
+	value, resultDecode = autoDecode(str, customDecoder)
+	return
 }
 
 // attempt try possible decode method
 // if no decode is possible, it will return the origin string value and "none" decode type
-func autoDecode(str string) (value, resultDecode string) {
+func autoDecode(str string, customDecoder []CmdConvert) (value, resultDecode string) {
 	if len(str) > 0 {
 		// pure digit content may incorrect regard as some encoded type, skip decode
 		if match, _ := regexp.MatchString(`^\d+$`, str); !match {
@@ -147,6 +166,16 @@ func autoDecode(str string) (value, resultDecode string) {
 				resultDecode = types.DECODE_MSGPACK
 				return
 			}
+
+			// try decode with custom decoder
+			for _, decoder := range customDecoder {
+				if decoder.Auto {
+					if value, ok = decoder.Decode(str); ok {
+						resultDecode = decoder.Name
+						return
+					}
+				}
+			}
 		}
 	}
 
@@ -158,6 +187,8 @@ func autoDecode(str string) (value, resultDecode string) {
 func viewAs(str, formatType string) (value, resultFormat string) {
 	if len(formatType) > 0 {
 		switch formatType {
+		default:
+			fallthrough
 		case types.FORMAT_RAW, types.FORMAT_YAML, types.FORMAT_XML:
 			value = str
 
@@ -185,8 +216,7 @@ func viewAs(str, formatType string) (value, resultFormat string) {
 		resultFormat = formatType
 		return
 	}
-
-	return autoViewAs(str)
+	return
 }
 
 // attempt automatic convert to possible types
@@ -222,7 +252,7 @@ func autoViewAs(str string) (value, resultFormat string) {
 	return
 }
 
-func SaveAs(str, format, decode string) (value string, err error) {
+func SaveAs(str, format, decode string, customDecoder []CmdConvert) (value string, err error) {
 	value = str
 	switch format {
 	case types.FORMAT_JSON:
@@ -297,6 +327,18 @@ func SaveAs(str, format, decode string) (value string, err error) {
 			err = errors.New("fail to build msgpack")
 		}
 		return
+
+	default:
+		for _, decoder := range customDecoder {
+			if decoder.Name == decode {
+				if encodedStr, ok := decoder.Encode(str); ok {
+					value = encodedStr
+				} else {
+					value = str
+				}
+				return
+			}
+		}
 	}
 	return str, nil
 }
