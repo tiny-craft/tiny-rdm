@@ -68,6 +68,11 @@ const onClearFilter = () => {
     onClearMatch()
 }
 
+const onUpdateMatch = () => {
+    inputData.filter = inputData.match
+    onClearMatch()
+}
+
 const onClearMatch = () => {
     const changed = !isEmpty(inputData.match)
     inputData.match = ''
@@ -97,9 +102,9 @@ defineExpose({
             @keyup.enter="onKeyup">
             <template #prefix>
                 <slot name="prefix" />
-                <n-tooltip v-if="hasMatch">
+                <n-tooltip v-if="hasMatch" placement="bottom">
                     <template #trigger>
-                        <n-tag closable size="small" @close="onClearMatch">
+                        <n-tag closable size="small" @close="onClearMatch" @dblclick="onUpdateMatch">
                             {{ inputData.match }}
                         </n-tag>
                     </template>
@@ -141,4 +146,11 @@ defineExpose({
     </n-input-group>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+//:deep(.n-input__prefix) {
+//    max-width: 50%;
+//}
+//:deep(.n-tag__content) {
+//    overflow: hidden;
+//}
+</style>
