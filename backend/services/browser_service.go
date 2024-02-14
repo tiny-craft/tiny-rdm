@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"math"
 	"net/url"
 	"os"
 	"slices"
@@ -998,10 +999,17 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					if doFilter && !strings.Contains(val, param.MatchPattern) {
 						continue
 					}
-					items = append(items, types.ZSetEntryItem{
-						Score: z.Score,
+					entry := types.ZSetEntryItem{
 						Value: val,
-					})
+					}
+					if math.IsInf(z.Score, 1) {
+						entry.ScoreStr = "+inf"
+					} else if math.IsInf(z.Score, -1) {
+						entry.ScoreStr = "-inf"
+					} else {
+						entry.Score = z.Score
+					}
+					items = append(items, entry)
 					if doConvert {
 						if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format, decoder); dv != val {
 							items[len(items)-1].DisplayValue = dv

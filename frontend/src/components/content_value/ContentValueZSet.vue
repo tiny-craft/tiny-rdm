@@ -120,7 +120,7 @@ const scoreColumn = computed(() => ({
     //     return true
     // },
     render: (row) => {
-        return row.s
+        return row.ss || row.s
     },
 }))
 

@@ -31,6 +31,7 @@ type SetEntryItem struct {
 
 type ZSetEntryItem struct {
 	Score        float64 `json:"s"`
+	ScoreStr     string  `json:"ss,omitempty"`
 	Value        string  `json:"v"`
 	DisplayValue string  `json:"dv,omitempty"`
 }
