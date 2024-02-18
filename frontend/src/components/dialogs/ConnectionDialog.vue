@@ -164,6 +164,16 @@ const onSaveConnection = async () => {
         }
     })
 
+    // trim addr by network type
+    if (get(generalForm.value, 'network', 'tcp') === 'unix') {
+        generalForm.value.network = 'unix'
+        generalForm.value.addr = ''
+        generalForm.value.port = 0
+    } else {
+        generalForm.value.network = ''
+        generalForm.value.sock = ''
+    }
+
     // trim advance data
     if (get(generalForm.value, 'dbFilterType', 'none') === 'none') {
         generalForm.value.dbFilterList = []
