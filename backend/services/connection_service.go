@@ -144,9 +144,6 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			option.Addr = fmt.Sprintf("%s:%d", config.Addr, config.Port)
 		}
 	}
-	if config.LastDB > 0 {
-		option.DB = config.LastDB
-	}
 	if sshClient != nil {
 		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return sshClient.Dial(network, addr)
@@ -179,6 +176,10 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 		option.Addr = fmt.Sprintf("%s:%s", addr[0], addr[1])
 		option.Username = config.Sentinel.Username
 		option.Password = config.Sentinel.Password
+	}
+
+	if config.LastDB > 0 {
+		option.DB = config.LastDB
 	}
 
 	rdb := redis.NewClient(option)
