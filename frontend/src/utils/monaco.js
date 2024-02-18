@@ -3,6 +3,7 @@ import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
+import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 
 export const setupMonaco = () => {
     window.MonacoEnvironment = {
@@ -39,5 +40,13 @@ export const setupMonaco = () => {
         inherit: true,
         rules: [],
         colors: {},
+    })
+
+    // register default link opening behavior
+    monaco.editor.registerLinkOpener({
+        open(resource) {
+            BrowserOpenURL(resource.toString())
+            return true
+        },
     })
 }
