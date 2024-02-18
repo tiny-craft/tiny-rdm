@@ -348,16 +348,33 @@ const pasteFromClipboard = async () => {
                                     :render-label="({ label, value }) => (value === '' ? $t(label) : label)" />
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
-                                <n-input
-                                    v-model:value="generalForm.addr"
-                                    :placeholder="$t('dialogue.connection.addr_tip')" />
-                                <n-text style="width: 40px; text-align: center">:</n-text>
-                                <n-input-number
-                                    v-model:value="generalForm.port"
-                                    :max="65535"
-                                    :min="1"
-                                    :show-button="false"
-                                    style="width: 200px" />
+                                <n-input-group>
+                                    <n-select
+                                        v-model:value="generalForm.network"
+                                        :options="[
+                                            { value: 'tcp', label: 'TCP' },
+                                            { value: 'unix', label: 'UNIX' },
+                                        ]"
+                                        style="max-width: 100px" />
+                                    <template v-if="generalForm.network === 'unix'">
+                                        <n-input
+                                            v-model:value="generalForm.sock"
+                                            :placeholder="$t('dialogue.connection.sock_tip')" />
+                                    </template>
+                                    <template v-else>
+                                        <n-input
+                                            v-model:value="generalForm.addr"
+                                            :placeholder="$t('dialogue.connection.addr_tip')" />
+                                        <n-text style="width: 40px; text-align: center">:</n-text>
+                                        <n-input-number
+                                            v-model:value="generalForm.port"
+                                            :max="65535"
+                                            :min="1"
+                                            :show-button="false"
+                                            placeholder="6379"
+                                            style="width: 200px" />
+                                    </template>
+                                </n-input-group>
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.pwd')" :span="12" path="password">
                                 <n-input

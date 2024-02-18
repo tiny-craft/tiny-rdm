@@ -153,6 +153,8 @@ const useConnectionStore = defineStore('connections', {
             return {
                 group: '',
                 name: name || '',
+                network: 'tcp',
+                sock: '/tmp/redis.sock',
                 addr: '127.0.0.1',
                 port: 6379,
                 username: '',

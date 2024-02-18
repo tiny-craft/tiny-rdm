@@ -193,6 +193,7 @@
       "pwd": "密码",
       "name_tip": "连接名",
       "addr_tip": "Redis服务地址",
+      "sock_tip": "Redis套接字文件",
       "usr_tip": "(可选)Redis服务授权用户名",
       "pwd_tip": "(可选)Redis服务授权密码 (Redis > 6.0)",
       "test": "测试连接",

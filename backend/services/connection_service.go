@@ -122,13 +122,27 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	}
 
 	option := &redis.Options{
-		Addr:         fmt.Sprintf("%s:%d", config.Addr, config.Port),
 		Username:     config.Username,
 		Password:     config.Password,
 		DialTimeout:  time.Duration(config.ConnTimeout) * time.Second,
 		ReadTimeout:  time.Duration(config.ExecTimeout) * time.Second,
 		WriteTimeout: time.Duration(config.ExecTimeout) * time.Second,
 		TLSConfig:    tlsConfig,
+	}
+	if config.Network == "unix" {
+		option.Network = "unix"
+		if len(config.Sock) <= 0 {
+			option.Addr = "/tmp/redis.sock"
+		} else {
+			option.Addr = config.Sock
+		}
+	} else {
+		option.Network = "tcp"
+		if len(config.Addr) <= 0 {
+			option.Addr = fmt.Sprintf("127.0.0.1:%d", config.Port)
+		} else {
+			option.Addr = fmt.Sprintf("%s:%d", config.Addr, config.Port)
+		}
 	}
 	if config.LastDB > 0 {
 		option.DB = config.LastDB

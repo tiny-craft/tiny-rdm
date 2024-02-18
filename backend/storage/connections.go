@@ -27,6 +27,7 @@ func (c *ConnectionsStorage) defaultConnections() types.Connections {
 func (c *ConnectionsStorage) defaultConnectionItem() types.ConnectionConfig {
 	return types.ConnectionConfig{
 		Name:            "",
+		Network:         "tcp",
 		Addr:            "127.0.0.1",
 		Port:            6379,
 		Username:        "",

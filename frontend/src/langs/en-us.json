@@ -193,6 +193,7 @@
       "pwd": "Password",
       "name_tip": "Connection name",
       "addr_tip": "Redis server host",
+      "sock_tip": "Redis server unix socket file",
       "usr_tip": "(Optional) Authentication username",
       "pwd_tip": "(Optional) Authentication password (Redis > 6.0)",
       "test": "Test Connection",
