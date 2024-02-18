@@ -21,7 +21,7 @@ type ConnectionConfig struct {
 	KeyView         int                `json:"keyView,omitempty" yaml:"key_view,omitempty"`
 	LoadSize        int                `json:"loadSize,omitempty" yaml:"load_size,omitempty"`
 	MarkColor       string             `json:"markColor,omitempty" yaml:"mark_color,omitempty"`
-	RefreshInterval int                `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	RefreshInterval int                `json:"refreshInterval,omitempty" yaml:"refresh_interval,omitempty"`
 	Alias           map[int]string     `json:"alias,omitempty" yaml:"alias,omitempty"`
 	SSL             ConnectionSSL      `json:"ssl,omitempty" yaml:"ssl,omitempty"`
 	SSH             ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
@@ -48,10 +48,10 @@ type ConnectionDB struct {
 
 type ConnectionSSL struct {
 	Enable        bool   `json:"enable,omitempty" yaml:"enable,omitempty"`
-	KeyFile       string `json:"keyFile,omitempty" yaml:"keyFile,omitempty"`
-	CertFile      string `json:"certFile,omitempty" yaml:"certFile,omitempty"`
-	CAFile        string `json:"caFile,omitempty" yaml:"caFile,omitempty"`
-	AllowInsecure bool   `json:"allowInsecure,omitempty" yaml:"allowInsecure,omitempty"`
+	KeyFile       string `json:"keyFile,omitempty" yaml:"keyfile,omitempty"`
+	CertFile      string `json:"certFile,omitempty" yaml:"certfile,omitempty"`
+	CAFile        string `json:"caFile,omitempty" yaml:"cafile,omitempty"`
+	AllowInsecure bool   `json:"allowInsecure,omitempty" yaml:"allow_insecure,omitempty"`
 	SNI           string `json:"sni,omitempty" yaml:"sni,omitempty"`
 }
 
