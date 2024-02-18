@@ -55,7 +55,8 @@
       "name": "Editor",
       "show_linenum": "Show Line Numbers",
       "show_folding": "Enable Code Folding",
-      "drop_text": "Allow Drag and Drop Text"
+      "drop_text": "Allow Drag and Drop Text",
+      "links": "Support links"
     },
     "cli": {
       "name": "Command Line",

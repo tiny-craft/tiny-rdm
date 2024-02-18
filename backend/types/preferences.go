@@ -30,6 +30,7 @@ func NewPreferences() Preferences {
 			ShowLineNum: true,
 			ShowFolding: true,
 			DropText:    true,
+			Links:       true,
 		},
 		Cli: PreferencesCli{
 			FontSize:    consts.DEFAULT_FONT_SIZE,
@@ -69,6 +70,7 @@ type PreferencesEditor struct {
 	ShowLineNum bool     `json:"showLineNum" yaml:"show_line_num"`
 	ShowFolding bool     `json:"showFolding" yaml:"show_folding"`
 	DropText    bool     `json:"dropText" yaml:"drop_text"`
+	Links       bool     `json:"links" yaml:"links"`
 }
 
 type PreferencesCli struct {

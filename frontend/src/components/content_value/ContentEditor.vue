@@ -56,6 +56,7 @@ onMounted(async () => {
             theme: pref.isDark ? 'rdm-dark' : 'rdm-light',
             language: props.language,
             lineNumbers: pref.showLineNum ? 'on' : 'off',
+            links: pref.editorLinks,
             readOnly: readonlyValue.value,
             colorDecorators: true,
             accessibilitySupport: 'off',
@@ -145,7 +146,7 @@ watch(
 
 watch(
     () => pref.editor,
-    ({ showLineNum = true, showFolding = true, dropText = true }) => {
+    ({ showLineNum = true, showFolding = true, dropText = true, links = true }) => {
         if (editorNode != null) {
             const { fontSize, fontFamily } = pref.editorFont
             editorNode.updateOptions({
@@ -154,6 +155,7 @@ watch(
                 lineNumbers: showLineNum ? 'on' : 'off',
                 folding: showFolding,
                 dragAndDrop: dropText,
+                links,
             })
         }
     },

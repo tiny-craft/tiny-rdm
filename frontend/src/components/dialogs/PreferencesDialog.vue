@@ -301,6 +301,11 @@ const onClose = () => {
                                 {{ $t('preferences.editor.drop_text') }}
                             </n-checkbox>
                         </n-form-item-gi>
+                        <n-form-item-gi :show-feedback="false" :show-label="false" :span="24">
+                            <n-checkbox v-model:checked="prefStore.editor.links">
+                                {{ $t('preferences.editor.links') }}
+                            </n-checkbox>
+                        </n-form-item-gi>
                     </n-grid>
                 </n-form>
             </n-tab-pane>

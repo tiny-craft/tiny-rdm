@@ -59,6 +59,7 @@ const usePreferencesStore = defineStore('preferences', {
             showLineNum: true,
             showFolding: true,
             dropText: true,
+            links: true,
         },
         cli: {
             fontFamily: [],
@@ -259,6 +260,10 @@ const usePreferencesStore = defineStore('preferences', {
             return get(this.editor, 'dropText', true)
         },
 
+        editorLinks() {
+            return get(this.editor, 'links', true)
+        },
+
         keyIconType() {
             return get(this.general, 'keyIconStyle', typesIconStyle.SHORT)
         },
@@ -291,6 +296,10 @@ const usePreferencesStore = defineStore('preferences', {
                 const dropText = get(data, 'editor.dropText')
                 if (dropText === undefined) {
                     set(data, 'editor.dropText', true)
+                }
+                const links = get(data, 'editor.links')
+                if (links === undefined) {
+                    set(data, 'editor.links', true)
                 }
                 i18nGlobal.locale.value = this.currentLanguage
             }
