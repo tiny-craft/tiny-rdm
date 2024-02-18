@@ -124,13 +124,29 @@ const useDialogStore = defineStore('dialog', {
 
         async openDuplicateDialog(name) {
             const connStore = useConnectionStore()
-            const profile = await connStore.getConnectionProfile(name)
-            if (profile != null) {
-                profile.name += '2'
-                this.connParam = profile
-            } else {
-                this.connParam = connStore.newDefaultConnection(name)
-            }
+            this.connParam = {}
+            let profile
+            let suffix = 1
+            do {
+                let profileName = name
+                if (suffix > 1) {
+                    profileName += suffix
+                }
+                profile = await connStore.getConnectionProfile(profileName)
+                if (profile != null) {
+                    suffix += 1
+                    if (profileName === name) {
+                        this.connParam = profile
+                    }
+                } else {
+                    this.connParam = connStore.mergeConnectionProfile(
+                        connStore.newDefaultConnection(profileName),
+                        this.connParam,
+                    )
+                    this.connParam.name = profileName
+                    break
+                }
+            } while (true)
             this.connType = ConnDialogType.NEW
             this.connDialogVisible = true
         },
