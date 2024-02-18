@@ -278,6 +278,7 @@ const pasteFromClipboard = async () => {
         $message.error(i18n.t('dialogue.connection.parse_fail', { reason: e.message }))
         return
     }
+    generalForm.value.network = opt.network || 'tcp'
     generalForm.value.name = generalForm.value.addr = opt.addr
     generalForm.value.port = opt.port
     generalForm.value.username = opt.username

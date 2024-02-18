@@ -536,11 +536,19 @@ func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
 		return
 	}
 
-	addrPart := strings.Split(urlOpt.Addr, ":")
-	addr := addrPart[0]
-	port := 6379
-	if len(addrPart) > 1 {
-		port, _ = strconv.Atoi(addrPart[1])
+	var network, addr string
+	var port int
+	if urlOpt.Network == "unix" {
+		network = urlOpt.Network
+		addr = urlOpt.Addr
+	} else {
+		network = "tcp"
+		addrPart := strings.Split(urlOpt.Addr, ":")
+		addr = addrPart[0]
+		port = 6379
+		if len(addrPart) > 1 {
+			port, _ = strconv.Atoi(addrPart[1])
+		}
 	}
 	var sslServerName string
 	if urlOpt.TLSConfig != nil {
@@ -548,6 +556,8 @@ func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
 	}
 	resp.Success = true
 	resp.Data = struct {
+		Network       string `json:"network"`
+		Sock          string `json:"sock"`
 		Addr          string `json:"addr"`
 		Port          int    `json:"port"`
 		Username      string `json:"username"`
@@ -556,6 +566,7 @@ func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
 		ExecTimeout   int64  `json:"execTimeout"`
 		SSLServerName string `json:"sslServerName,omitempty"`
 	}{
+		Network:       network,
 		Addr:          addr,
 		Port:          port,
 		Username:      urlOpt.Username,
