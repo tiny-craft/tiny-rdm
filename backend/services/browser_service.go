@@ -591,7 +591,12 @@ func (b *browserService) GetKeyType(param types.KeySummaryParam) (resp types.JSR
 	}
 
 	var data types.KeySummary
-	data.Type = strings.ToLower(keyType)
+	switch keyType {
+	case "ReJSON-RL":
+		data.Type = "JSON"
+	default:
+		data.Type = strings.ToLower(keyType)
+	}
 
 	resp.Success = true
 	resp.Data = data
@@ -624,7 +629,7 @@ func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.
 	}
 	size, _ := client.MemoryUsage(ctx, key, 0).Result()
 	data := types.KeySummary{
-		Type: strings.ToLower(typeVal.Val()),
+		Type: typeVal.Val(),
 		Size: size,
 	}
 	if data.Type == "none" {
@@ -655,6 +660,9 @@ func (b *browserService) GetKeySummary(param types.KeySummaryParam) (resp types.
 		data.Length, err = client.ZCard(ctx, key).Result()
 	case "stream":
 		data.Length, err = client.XLen(ctx, key).Result()
+	case "ReJSON-RL":
+		data.Type = "JSON"
+		data.Length = 0
 	default:
 		err = errors.New("unknown key type")
 	}
@@ -1091,6 +1099,12 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 			resp.Msg = err.Error()
 			return
 		}
+
+	case "rejson-rl":
+		var jsonStr string
+		data.KeyType = "JSON"
+		jsonStr, err = client.JSONGet(ctx, key).Result()
+		data.Value, data.Decode, data.Format = convutil.ConvertTo(jsonStr, types.DECODE_NONE, types.FORMAT_JSON, nil)
 	}
 	if err != nil {
 		resp.Msg = err.Error()
@@ -1234,6 +1248,11 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 					client.Expire(ctx, key, expiration)
 				}
 			}
+		}
+	case "json":
+		err = client.JSONSet(ctx, key, ".", param.Value).Err()
+		if err == nil && expiration > 0 {
+			client.Expire(ctx, key, expiration)
 		}
 	}
 

@@ -14,6 +14,7 @@ import useTabStore from 'stores/tab.js'
 import NewStreamValue from '@/components/new_value/NewStreamValue.vue'
 import useBrowserStore from 'stores/browser.js'
 import Import from '@/components/icons/Import.vue'
+import NewJsonValue from '@/components/new_value/NewJsonValue.vue'
 
 const i18n = useI18n()
 const newForm = reactive({
@@ -54,6 +55,7 @@ const newValueComponent = {
     [types.SET]: NewSetValue,
     [types.ZSET]: NewZSetValue,
     [types.STREAM]: NewStreamValue,
+    [types.JSON]: NewJsonValue,
 }
 const defaultValue = {
     [types.STRING]: '',
@@ -62,6 +64,7 @@ const defaultValue = {
     [types.SET]: [],
     [types.ZSET]: [],
     [types.STREAM]: [],
+    [types.JSON]: '{}',
 }
 
 const dialogStore = useDialog()

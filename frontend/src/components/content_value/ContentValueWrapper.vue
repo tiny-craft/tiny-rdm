@@ -14,6 +14,7 @@ import useDialogStore from 'stores/dialog.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from '@/components/content_value/ContentToolbar.vue'
+import ContentValueJson from '@/components/content_value/ContentValueJson.vue'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -66,6 +67,7 @@ const valueComponents = {
     [redisTypes.SET]: ContentValueSet,
     [redisTypes.ZSET]: ContentValueZset,
     [redisTypes.STREAM]: ContentValueStream,
+    [redisTypes.JSON]: ContentValueJson,
 }
 
 const keyName = computed(() => {
