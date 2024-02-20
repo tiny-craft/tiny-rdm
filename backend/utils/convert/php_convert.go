@@ -1,9 +1,5 @@
 package convutil
 
-import (
-	"os/exec"
-)
-
 type PhpConvert struct {
 	CmdConvert
 }
@@ -51,12 +47,12 @@ func NewPhpConvert() *PhpConvert {
 	}
 
 	var err error
-	if err = exec.Command(c.DecodePath, "-v").Err; err != nil {
+	if _, err = runCommand(c.DecodePath, "-v"); err != nil {
 		return nil
 	}
 
 	var filepath string
-	if filepath, err = c.writeExecuteFile([]byte(phpDecodeCode), "php_decoder.php"); err != nil {
+	if filepath, err = writeExecuteFile([]byte(phpDecodeCode), "php_decoder.php"); err != nil {
 		return nil
 	}
 	c.DecodeArgs = []string{filepath, "decode"}

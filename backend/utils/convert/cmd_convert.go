@@ -2,10 +2,6 @@ package convutil
 
 import (
 	"encoding/base64"
-	"github.com/vrischmann/userdir"
-	"os"
-	"os/exec"
-	"path"
 	"strings"
 	sliceutil "tinyrdm/backend/utils/slice"
 )
@@ -39,8 +35,7 @@ func (c CmdConvert) Encode(str string) (string, bool) {
 	if len(args) <= 0 || !containHolder {
 		args = append(args, base64Content)
 	}
-	cmd := exec.Command(c.EncodePath, args...)
-	output, err := cmd.Output()
+	output, err := runCommand(c.EncodePath, args...)
 	if err != nil || len(output) <= 0 || string(output) == "[RDM-ERROR]" {
 		return str, false
 	}
@@ -67,8 +62,7 @@ func (c CmdConvert) Decode(str string) (string, bool) {
 	if len(args) <= 0 || !containHolder {
 		args = append(args, base64Content)
 	}
-	cmd := exec.Command(c.DecodePath, args...)
-	output, err := cmd.Output()
+	output, err := runCommand(c.DecodePath, args...)
 	if err != nil || len(output) <= 0 || string(output) == "[RDM-ERROR]" {
 		return str, false
 	}
@@ -79,14 +73,4 @@ func (c CmdConvert) Decode(str string) (string, bool) {
 		return str, false
 	}
 	return string(outputContent[:n]), true
-}
-
-func (c CmdConvert) writeExecuteFile(content []byte, filename string) (string, error) {
-	filepath := path.Join(userdir.GetConfigHome(), "TinyRDM", "decoder", filename)
-	_ = os.Mkdir(path.Dir(filepath), 0777)
-	err := os.WriteFile(filepath, content, 0777)
-	if err != nil {
-		return "", err
-	}
-	return filepath, nil
 }

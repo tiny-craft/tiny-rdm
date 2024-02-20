@@ -1,7 +1,5 @@
 package convutil
 
-import "os/exec"
-
 type PickleConvert struct {
 	CmdConvert
 }
@@ -42,18 +40,18 @@ func NewPickleConvert() *PickleConvert {
 	}
 	c.DecodePath, c.EncodePath = "python3", "python3"
 	var err error
-	if err = exec.Command(c.DecodePath, "--version").Err; err != nil {
+	if _, err = runCommand(c.DecodePath, "--version"); err != nil {
 		c.DecodePath, c.EncodePath = "python", "python"
-		if err = exec.Command(c.DecodePath, "--version").Err; err != nil {
+		if _, err = runCommand(c.DecodePath, "--version"); err != nil {
 			return nil
 		}
 	}
 	// check if pickle available
-	if err = exec.Command(c.DecodePath, "-c", "import pickle").Err; err != nil {
+	if _, err = runCommand(c.DecodePath, "-c", "import pickle"); err != nil {
 		return nil
 	}
 	var filepath string
-	if filepath, err = c.writeExecuteFile([]byte(pickleDecodeCode), "pickle_decoder.py"); err != nil {
+	if filepath, err = writeExecuteFile([]byte(pickleDecodeCode), "pickle_decoder.py"); err != nil {
 		return nil
 	}
 	c.DecodeArgs = []string{filepath, "decode"}

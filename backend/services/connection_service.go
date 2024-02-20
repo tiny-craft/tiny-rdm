@@ -122,12 +122,14 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	}
 
 	option := &redis.Options{
-		Username:     config.Username,
-		Password:     config.Password,
-		DialTimeout:  time.Duration(config.ConnTimeout) * time.Second,
-		ReadTimeout:  time.Duration(config.ExecTimeout) * time.Second,
-		WriteTimeout: time.Duration(config.ExecTimeout) * time.Second,
-		TLSConfig:    tlsConfig,
+		Username:         config.Username,
+		Password:         config.Password,
+		DialTimeout:      time.Duration(config.ConnTimeout) * time.Second,
+		ReadTimeout:      time.Duration(config.ExecTimeout) * time.Second,
+		WriteTimeout:     time.Duration(config.ExecTimeout) * time.Second,
+		TLSConfig:        tlsConfig,
+		DisableIndentity: true,
+		IdentitySuffix:   "tinyrdm_",
 	}
 	if config.Network == "unix" {
 		option.Network = "unix"
@@ -138,10 +140,14 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		}
 	} else {
 		option.Network = "tcp"
+		port := 6379
+		if config.Port > 0 {
+			port = config.Port
+		}
 		if len(config.Addr) <= 0 {
-			option.Addr = fmt.Sprintf("127.0.0.1:%d", config.Port)
+			option.Addr = fmt.Sprintf("127.0.0.1:%d", port)
 		} else {
-			option.Addr = fmt.Sprintf("%s:%d", config.Addr, config.Port)
+			option.Addr = fmt.Sprintf("%s:%d", config.Addr, port)
 		}
 	}
 	if sshClient != nil {

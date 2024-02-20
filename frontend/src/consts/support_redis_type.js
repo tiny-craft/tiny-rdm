@@ -33,7 +33,7 @@ export const typesColor = {
     [types.SET]: '#F59E0B',
     [types.ZSET]: '#EF4444',
     [types.STREAM]: '#EC4899',
-    [types.JSON]: '#374254',
+    [types.JSON]: '#828766',
 }
 
 /**
@@ -47,7 +47,7 @@ export const typesBgColor = {
     [types.SET]: '#FDF1DF',
     [types.ZSET]: '#FAEAED',
     [types.STREAM]: '#FDE6F1',
-    [types.JSON]: '#C1C1D3',
+    [types.JSON]: '#ECECD9',
 }
 
 // export const typesName = Object.fromEntries(Object.entries(types).map(([key, value]) => [key, value.name]))
