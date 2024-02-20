@@ -8,6 +8,10 @@ import (
 
 type BinaryConvert struct{}
 
+func (BinaryConvert) Enable() bool {
+	return true
+}
+
 func (BinaryConvert) Encode(str string) (string, bool) {
 	var result strings.Builder
 	total := len(str)

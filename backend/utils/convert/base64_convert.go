@@ -7,6 +7,10 @@ import (
 
 type Base64Convert struct{}
 
+func (Base64Convert) Enable() bool {
+	return true
+}
+
 func (Base64Convert) Encode(str string) (string, bool) {
 	return base64.StdEncoding.EncodeToString([]byte(str)), true
 }

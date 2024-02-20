@@ -2,7 +2,10 @@ package convutil
 
 import (
 	"encoding/base64"
+	"github.com/vrischmann/userdir"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
 	sliceutil "tinyrdm/backend/utils/slice"
 )
@@ -17,6 +20,10 @@ type CmdConvert struct {
 }
 
 const replaceholder = "{VALUE}"
+
+func (c CmdConvert) Enable() bool {
+	return true
+}
 
 func (c CmdConvert) Encode(str string) (string, bool) {
 	base64Content := base64.StdEncoding.EncodeToString([]byte(str))
@@ -72,4 +79,14 @@ func (c CmdConvert) Decode(str string) (string, bool) {
 		return str, false
 	}
 	return string(outputContent[:n]), true
+}
+
+func (c CmdConvert) writeExecuteFile(content []byte, filename string) (string, error) {
+	filepath := path.Join(userdir.GetConfigHome(), "TinyRDM", "decoder", filename)
+	_ = os.Mkdir(path.Dir(filepath), 0777)
+	err := os.WriteFile(filepath, content, 0777)
+	if err != nil {
+		return "", err
+	}
+	return filepath, nil
 }

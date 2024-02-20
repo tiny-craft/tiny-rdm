@@ -23,6 +23,7 @@ export const decodeTypes = {
     ZSTD: 'ZStd',
     BROTLI: 'Brotli',
     MSGPACK: 'Msgpack',
-    // PHP: 'PHP',
+    PHP: 'PHP',
+    PICKLE: 'Pickle',
     // Java: 'Java',
 }

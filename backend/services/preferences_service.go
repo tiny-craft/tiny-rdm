@@ -20,7 +20,6 @@ import (
 type preferencesService struct {
 	pref          *storage2.PreferencesStorage
 	clientVersion string
-	customDecoder []convutil.CmdConvert
 }
 
 var preferences *preferencesService
@@ -96,6 +95,20 @@ func (p *preferencesService) GetFontList() (resp types.JSResp) {
 	})
 	resp.Data = map[string]any{
 		"fonts": fontList,
+	}
+	resp.Success = true
+	return
+}
+
+func (p *preferencesService) GetBuildInDecoder() (resp types.JSResp) {
+	buildinDecoder := make([]string, 0, len(convutil.BuildInDecoders))
+	for name, convert := range convutil.BuildInDecoders {
+		if convert.Enable() {
+			buildinDecoder = append(buildinDecoder, name)
+		}
+	}
+	resp.Data = map[string]any{
+		"decoder": buildinDecoder,
 	}
 	resp.Success = true
 	return

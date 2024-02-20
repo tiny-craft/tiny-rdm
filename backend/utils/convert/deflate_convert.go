@@ -9,6 +9,10 @@ import (
 
 type DeflateConvert struct{}
 
+func (d DeflateConvert) Enable() bool {
+	return true
+}
+
 func (d DeflateConvert) Encode(str string) (string, bool) {
 	var compress = func(b []byte) (string, error) {
 		var buf bytes.Buffer

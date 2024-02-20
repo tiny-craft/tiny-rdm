@@ -8,6 +8,10 @@ import (
 
 type JsonConvert struct{}
 
+func (JsonConvert) Enable() bool {
+	return true
+}
+
 func (JsonConvert) Decode(str string) (string, bool) {
 	trimedStr := strings.TrimSpace(str)
 	if (strings.HasPrefix(trimedStr, "{") && strings.HasSuffix(trimedStr, "}")) ||

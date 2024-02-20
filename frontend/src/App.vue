@@ -31,6 +31,7 @@ onMounted(async () => {
     try {
         initializing.value = true
         await prefStore.loadFontList()
+        await prefStore.loadBuildInDecoder()
         await connectionStore.initConnections()
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()

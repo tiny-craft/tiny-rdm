@@ -8,6 +8,7 @@ import (
 )
 
 type DataConvert interface {
+	Enable() bool
 	Encode(string) (string, bool)
 	Decode(string) (string, bool)
 }
@@ -24,7 +25,28 @@ var (
 	zstdConv    ZStdConvert
 	brotliConv  BrotliConvert
 	msgpackConv MsgpackConvert
+	phpConv     = NewPhpConvert()
+	pickleConv  = NewPickleConvert()
 )
+
+var BuildInFormatters = map[string]DataConvert{
+	types.FORMAT_JSON:   jsonConv,
+	types.FORMAT_YAML:   yamlConv,
+	types.FORMAT_XML:    xmlConv,
+	types.FORMAT_HEX:    hexConv,
+	types.FORMAT_BINARY: binaryConv,
+}
+
+var BuildInDecoders = map[string]DataConvert{
+	types.DECODE_BASE64:  base64Conv,
+	types.DECODE_GZIP:    gzipConv,
+	types.DECODE_DEFLATE: deflateConv,
+	types.DECODE_ZSTD:    zstdConv,
+	types.DECODE_BROTLI:  brotliConv,
+	types.DECODE_MSGPACK: msgpackConv,
+	types.DECODE_PHP:     phpConv,
+	types.DECODE_PICKLE:  pickleConv,
+}
 
 // ConvertTo convert string to specified type
 // @param decodeType empty string indicates automatic detection
@@ -59,59 +81,17 @@ func ConvertTo(str, decodeType, formatType string, customDecoder []CmdConvert) (
 
 func decodeWith(str, decodeType string, customDecoder []CmdConvert) (value, resultDecode string) {
 	if len(decodeType) > 0 {
-		switch decodeType {
-		case types.DECODE_NONE:
-			value = str
+		value = str
 
-		case types.DECODE_BASE64:
-			if base64Str, ok := base64Conv.Decode(str); ok {
-				value = base64Str
-			} else {
-				value = str
+		if buildinDecoder, ok := BuildInDecoders[decodeType]; ok {
+			if decodedStr, ok := buildinDecoder.Decode(str); ok {
+				value = decodedStr
 			}
-
-		case types.DECODE_GZIP:
-			if gzipStr, ok := gzipConv.Decode(str); ok {
-				value = gzipStr
-			} else {
-				value = str
-			}
-
-		case types.DECODE_DEFLATE:
-			if falteStr, ok := deflateConv.Decode(str); ok {
-				value = falteStr
-			} else {
-				value = str
-			}
-
-		case types.DECODE_ZSTD:
-			if zstdStr, ok := zstdConv.Decode(str); ok {
-				value = zstdStr
-			} else {
-				value = str
-			}
-
-		case types.DECODE_BROTLI:
-			if brotliStr, ok := brotliConv.Decode(str); ok {
-				value = brotliStr
-			} else {
-				value = str
-			}
-
-		case types.DECODE_MSGPACK:
-			if msgpackStr, ok := msgpackConv.Decode(str); ok {
-				value = msgpackStr
-			} else {
-				value = str
-			}
-
-		default:
+		} else if decodeType != types.DECODE_NONE {
 			for _, decoder := range customDecoder {
 				if decoder.Name == decodeType {
 					if decodedStr, ok := decoder.Decode(str); ok {
 						value = decodedStr
-					} else {
-						value = str
 					}
 					break
 				}
@@ -167,6 +147,16 @@ func autoDecode(str string, customDecoder []CmdConvert) (value, resultDecode str
 				return
 			}
 
+			if value, ok = phpConv.Decode(str); ok {
+				resultDecode = types.DECODE_PHP
+				return
+			}
+
+			if value, ok = pickleConv.Decode(str); ok {
+				resultDecode = types.DECODE_PICKLE
+				return
+			}
+
 			// try decode with custom decoder
 			for _, decoder := range customDecoder {
 				if decoder.Auto {
@@ -186,31 +176,10 @@ func autoDecode(str string, customDecoder []CmdConvert) (value, resultDecode str
 
 func viewAs(str, formatType string) (value, resultFormat string) {
 	if len(formatType) > 0 {
-		switch formatType {
-		default:
-			fallthrough
-		case types.FORMAT_RAW, types.FORMAT_YAML, types.FORMAT_XML:
-			value = str
-
-		case types.FORMAT_JSON:
-			if jsonStr, ok := jsonConv.Decode(str); ok {
-				value = jsonStr
-			} else {
-				value = str
-			}
-
-		case types.FORMAT_HEX:
-			if hexStr, ok := hexConv.Decode(str); ok {
-				value = hexStr
-			} else {
-				value = str
-			}
-
-		case types.FORMAT_BINARY:
-			if binStr, ok := binaryConv.Decode(str); ok {
-				value = binStr
-			} else {
-				value = str
+		value = str
+		if buildinFormatter, ok := BuildInFormatters[formatType]; ok {
+			if formattedStr, ok := buildinFormatter.Decode(str); ok {
+				value = formattedStr
 			}
 		}
 		resultFormat = formatType
@@ -254,87 +223,29 @@ func autoViewAs(str string) (value, resultFormat string) {
 
 func SaveAs(str, format, decode string, customDecoder []CmdConvert) (value string, err error) {
 	value = str
-	switch format {
-	case types.FORMAT_JSON:
-		if jsonStr, ok := jsonConv.Encode(str); ok {
-			value = jsonStr
+	if buildingFormatter, ok := BuildInFormatters[format]; ok {
+		if formattedStr, ok := buildingFormatter.Encode(str); ok {
+			value = formattedStr
 		} else {
-			err = errors.New("invalid json data")
-			return
-		}
-
-	case types.FORMAT_HEX:
-		if hexStr, ok := hexConv.Encode(str); ok {
-			value = hexStr
-		} else {
-			err = errors.New("invalid hex data")
-			return
-		}
-
-	case types.FORMAT_BINARY:
-		if binStr, ok := binaryConv.Encode(str); ok {
-			value = binStr
-		} else {
-			err = errors.New("invalid binary data")
+			err = errors.New("invalid " + format + " data")
 			return
 		}
 	}
 
-	switch decode {
-	case types.DECODE_NONE:
-		return
-
-	case types.DECODE_BASE64:
-		value, _ = base64Conv.Encode(value)
-		return
-
-	case types.DECODE_GZIP:
-		if gzipStr, ok := gzipConv.Encode(str); ok {
-			value = gzipStr
+	if buildinDecoder, ok := BuildInDecoders[decode]; ok {
+		if encodedValue, ok := buildinDecoder.Encode(str); ok {
+			value = encodedValue
 		} else {
-			err = errors.New("fail to build gzip")
+			err = errors.New("fail to build " + decode)
 		}
 		return
-
-	case types.DECODE_DEFLATE:
-		if deflateStr, ok := deflateConv.Encode(str); ok {
-			value = deflateStr
-		} else {
-			err = errors.New("fail to build deflate")
-		}
-		return
-
-	case types.DECODE_ZSTD:
-		if zstdStr, ok := zstdConv.Encode(str); ok {
-			value = zstdStr
-		} else {
-			err = errors.New("fail to build zstd")
-		}
-		return
-
-	case types.DECODE_BROTLI:
-		if brotliStr, ok := brotliConv.Encode(str); ok {
-			value = brotliStr
-		} else {
-			err = errors.New("fail to build brotli")
-		}
-		return
-
-	case types.DECODE_MSGPACK:
-		if msgpackStr, ok := msgpackConv.Encode(str); ok {
-			value = msgpackStr
-		} else {
-			err = errors.New("fail to build msgpack")
-		}
-		return
-
-	default:
+	} else if decode != types.DECODE_NONE {
 		for _, decoder := range customDecoder {
 			if decoder.Name == decode {
 				if encodedStr, ok := decoder.Encode(str); ok {
 					value = encodedStr
 				} else {
-					value = str
+					err = errors.New("fail to build " + decode)
 				}
 				return
 			}

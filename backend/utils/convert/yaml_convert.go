@@ -6,6 +6,10 @@ import (
 
 type YamlConvert struct{}
 
+func (YamlConvert) Enable() bool {
+	return true
+}
+
 func (YamlConvert) Encode(str string) (string, bool) {
 	return str, true
 }

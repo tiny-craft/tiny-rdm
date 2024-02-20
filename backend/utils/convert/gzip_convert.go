@@ -9,6 +9,10 @@ import (
 
 type GZipConvert struct{}
 
+func (GZipConvert) Enable() bool {
+	return true
+}
+
 func (GZipConvert) Encode(str string) (string, bool) {
 	var compress = func(b []byte) (string, error) {
 		var buf bytes.Buffer

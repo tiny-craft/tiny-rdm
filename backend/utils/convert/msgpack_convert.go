@@ -7,6 +7,10 @@ import (
 
 type MsgpackConvert struct{}
 
+func (MsgpackConvert) Enable() bool {
+	return true
+}
+
 func (MsgpackConvert) Encode(str string) (string, bool) {
 	var obj map[string]any
 	if err := json.Unmarshal([]byte(str), &obj); err == nil {
@@ -31,7 +35,9 @@ func (MsgpackConvert) Decode(str string) (string, bool) {
 	var obj map[string]any
 	if err := msgpack.Unmarshal([]byte(str), &obj); err == nil {
 		if b, err := json.Marshal(obj); err == nil {
-			return string(b), true
+			if len(b) >= 10 {
+				return string(b), true
+			}
 		}
 	}
 

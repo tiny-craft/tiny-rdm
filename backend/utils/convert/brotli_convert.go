@@ -9,6 +9,10 @@ import (
 
 type BrotliConvert struct{}
 
+func (BrotliConvert) Enable() bool {
+	return true
+}
+
 func (BrotliConvert) Encode(str string) (string, bool) {
 	var compress = func(b []byte) (string, error) {
 		var buf bytes.Buffer

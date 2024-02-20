@@ -3,6 +3,7 @@ import { lang } from '@/langs/index.js'
 import { cloneDeep, findIndex, get, isEmpty, join, map, merge, pick, set, some, split } from 'lodash'
 import {
     CheckForUpdate,
+    GetBuildInDecoder,
     GetFontList,
     GetPreferences,
     RestorePreferences,
@@ -66,6 +67,7 @@ const usePreferencesStore = defineStore('preferences', {
             fontSize: 14,
             cursorStyle: 'block',
         },
+        buildInDecoder: [],
         decoder: [],
         lastPref: {},
         fontList: [],
@@ -318,6 +320,20 @@ const usePreferencesStore = defineStore('preferences', {
                 this.fontList = []
             }
             return this.fontList
+        },
+
+        /**
+         * get all available build-in decoder
+         * @return {Promise<void>}
+         */
+        async loadBuildInDecoder() {
+            const { success, data } = await GetBuildInDecoder()
+            if (success) {
+                const { decoder = [] } = data
+                this.buildInDecoder = decoder
+            } else {
+                this.buildInDecoder = []
+            }
         },
 
         /**

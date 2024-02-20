@@ -3,7 +3,7 @@ import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import Code from '@/components/icons/Code.vue'
 import Conversion from '@/components/icons/Conversion.vue'
 import DropdownSelector from '@/components/common/DropdownSelector.vue'
-import { isEmpty, map, some } from 'lodash'
+import { includes, isEmpty, map, pull, some, values } from 'lodash'
 import { computed } from 'vue'
 import usePreferencesStore from 'stores/preferences.js'
 
@@ -26,17 +26,24 @@ const formatTypeOption = computed(() => {
 })
 
 const decodeTypeOption = computed(() => {
-    const customTypes = []
-    // has custom decoder
-    if (!isEmpty(prefStore.decoder)) {
-        for (const decoder of prefStore.decoder) {
-            // types[decoder.name] = types[decoder.name] || decoder.name
-            if (!decodeTypes.hasOwnProperty(decoder.name)) {
-                customTypes.push(decoder.name)
-            }
+    const buildinTypes = [decodeTypes.NONE],
+        customTypes = []
+    const typs = values(decodeTypes)
+    // build-in decoder
+    for (const typ of typs) {
+        if (includes(prefStore.buildInDecoder, typ)) {
+            buildinTypes.push(typ)
         }
     }
-    return [map(decodeTypes, (t) => t), customTypes]
+    // custom decoder
+    if (!isEmpty(prefStore.decoder)) {
+        for (const decoder of prefStore.decoder) {
+            // replace build-in decoder if name conflicted
+            pull(buildinTypes, decoder.name)
+            customTypes.push(decoder.name)
+        }
+    }
+    return [buildinTypes, customTypes]
 })
 
 const emit = defineEmits(['formatChanged', 'update:decode', 'update:format'])
