@@ -15,7 +15,7 @@ if ($action === 'decode') {
     if ($decoded !== false) {
         $obj = unserialize($decoded);
         if ($obj !== false) {
-            $unserialized = json_encode($obj, JSON_UNESCAPED_UNICODE);
+            $unserialized = json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             if ($unserialized !== false) {
                 echo base64_encode($unserialized);
                 return;
