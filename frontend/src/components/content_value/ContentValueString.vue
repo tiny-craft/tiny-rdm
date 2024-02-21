@@ -47,6 +47,7 @@ const keyType = redisTypes.STRING
 const viewLanguage = computed(() => {
     switch (viewAs.format) {
         case formatTypes.JSON:
+        case formatTypes.UNICODE_JSON:
             return 'json'
         case formatTypes.YAML:
             return 'yaml'

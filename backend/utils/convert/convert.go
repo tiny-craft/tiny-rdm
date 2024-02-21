@@ -15,6 +15,7 @@ type DataConvert interface {
 
 var (
 	jsonConv    JsonConvert
+	uniJsonConv UnicodeJsonConvert
 	yamlConv    YamlConvert
 	xmlConv     XmlConvert
 	base64Conv  Base64Convert
@@ -30,11 +31,12 @@ var (
 )
 
 var BuildInFormatters = map[string]DataConvert{
-	types.FORMAT_JSON:   jsonConv,
-	types.FORMAT_YAML:   yamlConv,
-	types.FORMAT_XML:    xmlConv,
-	types.FORMAT_HEX:    hexConv,
-	types.FORMAT_BINARY: binaryConv,
+	types.FORMAT_JSON:         jsonConv,
+	types.FORMAT_UNICODE_JSON: uniJsonConv,
+	types.FORMAT_YAML:         yamlConv,
+	types.FORMAT_XML:          xmlConv,
+	types.FORMAT_HEX:          hexConv,
+	types.FORMAT_BINARY:       binaryConv,
 }
 
 var BuildInDecoders = map[string]DataConvert{

@@ -107,17 +107,17 @@ const fieldColumn = computed(() => ({
     },
 }))
 
-const displayCode = computed(() => {
-    return props.format === formatTypes.JSON
+const isCode = computed(() => {
+    return props.format === formatTypes.JSON || props.format === formatTypes.UNICODE_JSON
 })
 // const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
     title: () => i18n.t('common.value'),
-    align: displayCode.value ? 'left' : 'center',
+    align: isCode.value ? 'left' : 'center',
     titleAlign: 'center',
     resizable: true,
-    ellipsis: displayCode.value
+    ellipsis: isCode.value
         ? false
         : {
               tooltip: {
@@ -137,7 +137,7 @@ const valueColumn = computed(() => ({
     //     return !!~row.v.indexOf(value.toString())
     // },
     render: (row) => {
-        if (displayCode.value) {
+        if (isCode.value) {
             return h('pre', {}, row.dv || row.v)
         }
         return row.dv || row.v
