@@ -109,11 +109,12 @@ jobs:
             "bin/TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg" \
             "bin"
 
+      - name: Rename dmg
+        working-directory: ./build/bin
+        run: mv "TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg" "TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.dmg"
+
       - name: Upload release asset (DMG Package)
-        shell: bash
-        working-directory: ./build/bin/
-        run: |
-          filepath="TinyRDM-${{ steps.normalise_platform.outputs.tag }}.dmg"
-          filename="TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.dmg"
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/x-apple-diskimage" --data-binary @$filepath "$upload_url?name=$filename"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/bin/TinyRDM_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.dmg
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -12,6 +12,7 @@ jobs:
       matrix:
         platform:
           - windows/amd64
+          - windows/arm64
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -20,7 +21,7 @@ jobs:
         id: normalise_platform
         shell: bash
         run: |
-          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g' -e 's/amd64/x64/g')
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Normalise version tag
@@ -64,25 +65,26 @@ jobs:
         shell: bash
         run: |
           CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} \
-          -upx -webview2 embed \
+          -webview2 embed \
           -ldflags "-X main.version=${{ github.event.release.tag_name }} -X main.gaMeasurementID=${{ secrets.GA_MEASUREMENT_ID }} -X main.gaSecretKey=${{ secrets.WINDOWS_GA_SECRET }}"
 
       - name: Compress portable binary
         working-directory: ./build/bin
         run: Compress-Archive "Tiny RDM.exe" tiny-rdm.zip
 
-      - name: Upload release asset (Portable)
-        shell: bash
+      - name: Rename zip package
         working-directory: ./build/bin
-        run: |
-          filepath="tiny-rdm.zip"
-          filename="TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @$filepath "$upload_url?name=$filename"
+        run: Rename-Item -Path  "tiny-rdm.zip" -NewName "TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
+
+      - name: Upload release asset (Portable)
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/bin/TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Windows NSIS installer
         shell: bash
-        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -upx -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Codesign Windows NSIS installer
         working-directory: ./build/bin
@@ -92,13 +94,14 @@ jobs:
           Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_SIGNING_CERT }}'
           certutil -decode certificate\certificate.txt certificate\certificate.pfx
           echo "Signing TinyRDM installer"
-          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' TinyRDM-amd64-installer.exe
+          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' TinyRDM-${{ steps.normalise_platform.outputs.tag }}-installer.exe
+
+      - name: Rename installer
+        working-directory: ./build/bin
+        run: Rename-Item -Path "TinyRDM-${{ steps.normalise_platform.outputs.tag }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
 
       - name: Upload release asset (Installer)
-        shell: bash
-        working-directory: ./build/bin/
-        run: |
-          filepath="TinyRDM-amd64-installer.exe"
-          filename="TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/bin/TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe
+          token: ${{ secrets.GITHUB_TOKEN }}

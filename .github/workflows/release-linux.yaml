@@ -98,11 +98,12 @@ jobs:
           sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
           dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
 
+      - name: Rename deb
+        working-directory: ./build/linux
+        run: mv "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb" "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
+
       - name: Upload release asset
-        shell: bash
-        working-directory: ./build/linux/
-        run: |
-          filepath="tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb"
-          filename="tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${{ github.event.release.id }}/assets"
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/octet-stream" --data-binary @$filepath "$upload_url?name=$filename"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb
+          token: ${{ secrets.GITHUB_TOKEN }}
