@@ -16,6 +16,7 @@ import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
 import wechatUrl from '@/assets/images/wechat_official.png'
 import QRCode from '@/components/icons/QRCode.vue'
+import Twitter from '@/components/icons/Twitter.vue'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -173,13 +174,12 @@ const exThemeVars = computed(() => {
                 @click="openWechatOfficial" />
             <icon-button
                 v-else
+                :icon="Twitter"
                 :border="false"
                 :size="iconSize"
                 class="nav-menu-button"
                 t-tooltip="ribbon.follow_x"
-                @click="openX">
-                <span style="font-weight: bold; font-size: 24px">𝕏</span>
-            </icon-button>
+                @click="openX" />
             <icon-button
                 :icon="Github"
                 :size="iconSize"
