@@ -73,7 +73,6 @@ onMounted(async () => {
             scrollbar: {
                 useShadows: false,
                 verticalScrollbarSize: '10px',
-                alwaysConsumeMouseWheel: true,
             },
             // formatOnType: true,
             contextmenu: false,
