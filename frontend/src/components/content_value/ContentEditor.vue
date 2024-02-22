@@ -24,7 +24,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['reset', 'input', 'save', 'scroll'])
+const emit = defineEmits(['reset', 'input', 'save'])
 
 const scrollTop = ref(0)
 
@@ -116,9 +116,8 @@ watch(
         if (editorNode != null) {
             editorNode.setValue(content) 
             editorNode.onDidLayoutChange(() => {
-            if (scrollTop.value > 0) {
-                    console.log(scrollTop.value);
-                    editorNode.setScrollTop(scrollTop.value);
+                if (scrollTop.value > 0) {
+                    editorNode.setScrollTop(scrollTop.value)
                 }
             })
             await nextTick(() => emit('reset', content))
