@@ -127,6 +127,7 @@
     "memory_usage": "内存占用",
     "view_as": "查看方式",
     "decode_with": "解码/解压方式",
+    "custom_decoder": "添加自定义解码",
     "reload": "重新载入",
     "reload_disable": "全量加载后可重新载入",
     "auto_refresh": "自动刷新",

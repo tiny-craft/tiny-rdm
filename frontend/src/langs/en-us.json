@@ -127,6 +127,7 @@
     "memory_usage": "Memory Usage",
     "view_as": "View As",
     "decode_with": "Decode / Decompression",
+    "custom_decoder": "New Custom Decoder",
     "reload": "Reload",
     "reload_disable": "Reload will enable after full loaded",
     "auto_refresh": "Auto Refresh",

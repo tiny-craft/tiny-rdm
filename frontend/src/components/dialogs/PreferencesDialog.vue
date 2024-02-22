@@ -25,7 +25,7 @@ const loading = ref(false)
 const initPreferences = async () => {
     try {
         loading.value = true
-        tab.value = 'general'
+        tab.value = dialogStore.preferencesTag || 'general'
         await prefStore.loadPreferences()
         prevPreferences.value = {
             general: prefStore.general,

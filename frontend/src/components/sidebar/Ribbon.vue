@@ -169,20 +169,23 @@ const exThemeVars = computed(() => {
                 v-if="prefStore.currentLanguage === 'zh'"
                 :icon="QRCode"
                 :size="iconSize"
+                :tooltip-delay="100"
                 class="nav-menu-button"
                 t-tooltip="ribbon.wechat_official"
                 @click="openWechatOfficial" />
             <icon-button
                 v-else
-                :icon="Twitter"
                 :border="false"
+                :icon="Twitter"
                 :size="iconSize"
+                :tooltip-delay="100"
                 class="nav-menu-button"
                 t-tooltip="ribbon.follow_x"
                 @click="openX" />
             <icon-button
                 :icon="Github"
                 :size="iconSize"
+                :tooltip-delay="100"
                 class="nav-menu-button"
                 t-tooltip="ribbon.github"
                 @click="openGithub" />

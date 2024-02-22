@@ -1,8 +1,9 @@
 <script setup>
 import { computed, h, ref } from 'vue'
-import { get, isEmpty } from 'lodash'
+import { get, isEmpty, some } from 'lodash'
 import { NIcon, NText } from 'naive-ui'
 import { useRender } from '@/utils/render.js'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
     value: {
@@ -10,6 +11,10 @@ const props = defineProps({
         value: '',
     },
     options: {
+        type: Array,
+        value: () => [],
+    },
+    menuOption: {
         type: Array,
         value: () => [],
     },
@@ -21,7 +26,8 @@ const props = defineProps({
     disabled: Boolean,
 })
 
-const emit = defineEmits(['update:value'])
+const emit = defineEmits(['update:value', 'menu'])
+const i18n = useI18n()
 const render = useRender()
 
 const renderHeader = () => {
@@ -65,11 +71,28 @@ const dropdownOption = computed(() => {
             })
         }
     }
+
+    if (!isEmpty(props.menuOption)) {
+        options.push({
+            key: 'header-divider',
+            type: 'divider',
+        })
+        for (const { key, label } of props.menuOption) {
+            options.push({
+                key,
+                label: i18n.t(label),
+            })
+        }
+    }
     return options
 })
 
 const onDropdownSelect = (key) => {
-    emit('update:value', key)
+    if (some(props.menuOption, { key })) {
+        emit('menu', key)
+    } else {
+        emit('update:value', key)
+    }
 }
 
 const buttonText = computed(() => {
@@ -88,7 +111,6 @@ const onDropdownShow = (show) => {
         :options="dropdownOption"
         :render-label="({ label }) => render.renderLabel(label, { class: 'type-selector-item' })"
         :show-arrow="true"
-        :title="props.tooltip"
         :value="props.value"
         trigger="click"
         @select="onDropdownSelect"
