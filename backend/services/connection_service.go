@@ -11,8 +11,10 @@ import (
 	"github.com/vrischmann/userdir"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/net/proxy"
 	"io"
 	"net"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -21,6 +23,7 @@ import (
 	"time"
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
+	_ "tinyrdm/backend/utils/proxy"
 )
 
 type cmdHistoryItem struct {
@@ -54,9 +57,34 @@ func (c *connectionService) Start(ctx context.Context) {
 }
 
 func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.Options, error) {
-	var sshClient *ssh.Client
+	var dialer proxy.Dialer
+	var dialerErr error
+	if config.Proxy.Type == 1 {
+		// use system proxy
+		dialer = proxy.FromEnvironment()
+	} else if config.Proxy.Type == 2 {
+		// use custom proxy
+		proxyUrl := url.URL{
+			Host: fmt.Sprintf("%s:%d", config.Proxy.Addr, config.Proxy.Port),
+		}
+		if len(config.Proxy.Username) > 0 {
+			proxyUrl.User = url.UserPassword(config.Proxy.Username, config.Proxy.Password)
+		}
+		switch config.Proxy.Schema {
+		case "socks5", "socks5h", "http", "https":
+			proxyUrl.Scheme = config.Proxy.Schema
+		default:
+			proxyUrl.Scheme = "http"
+		}
+		if dialer, dialerErr = proxy.FromURL(&proxyUrl, proxy.Direct); dialerErr != nil {
+			return nil, dialerErr
+		}
+	}
+
+	var sshConfig *ssh.ClientConfig
+	var sshAddr string
 	if config.SSH.Enable {
-		sshConfig := &ssh.ClientConfig{
+		sshConfig = &ssh.ClientConfig{
 			User:            config.SSH.Username,
 			Auth:            []ssh.AuthMethod{ssh.Password(config.SSH.Password)},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
@@ -84,11 +112,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			return nil, errors.New("invalid login type")
 		}
 
-		var err error
-		sshClient, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", config.SSH.Addr, config.SSH.Port), sshConfig)
-		if err != nil {
-			return nil, err
-		}
+		sshAddr = fmt.Sprintf("%s:%d", config.SSH.Addr, config.SSH.Port)
 	}
 
 	var tlsConfig *tls.Config
@@ -150,9 +174,31 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			option.Addr = fmt.Sprintf("%s:%d", config.Addr, port)
 		}
 	}
-	if sshClient != nil {
+
+	if len(sshAddr) > 0 {
+		if dialer != nil {
+			// ssh with proxy
+			conn, err := dialer.Dial("tcp", sshAddr)
+			if err != nil {
+				return nil, err
+			}
+			sc, chans, reqs, err := ssh.NewClientConn(conn, sshAddr, sshConfig)
+			if err != nil {
+				return nil, err
+			}
+			dialer = ssh.NewClient(sc, chans, reqs)
+		} else {
+			// ssh without proxy
+			sshClient, err := ssh.Dial("tcp", sshAddr, sshConfig)
+			if err != nil {
+				return nil, err
+			}
+			dialer = sshClient
+		}
+	}
+	if dialer != nil {
 		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return sshClient.Dial(network, addr)
+			return dialer.Dial(network, addr)
 		}
 		option.ReadTimeout = -2
 		option.WriteTimeout = -2

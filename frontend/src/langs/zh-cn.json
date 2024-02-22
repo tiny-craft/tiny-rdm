@@ -269,6 +269,16 @@
       "cluster": {
         "title": "集群模式",
         "enable": "当前为集群节点"
+      },
+      "proxy": {
+        "title": "网络代理",
+        "type_none": "不使用代理",
+        "type_system": "使用系统代理设置",
+        "type_custom": "手动配置代理",
+        "host": "主机名",
+        "auth": "使用身份验证",
+        "usr_tip": "代理授权用户名",
+        "pwd_tip": "代理授权密码"
       }
     },
     "group": {

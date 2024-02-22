@@ -27,6 +27,7 @@ type ConnectionConfig struct {
 	SSH             ConnectionSSH      `json:"ssh,omitempty" yaml:"ssh,omitempty"`
 	Sentinel        ConnectionSentinel `json:"sentinel,omitempty" yaml:"sentinel,omitempty"`
 	Cluster         ConnectionCluster  `json:"cluster,omitempty" yaml:"cluster,omitempty"`
+	Proxy           ConnectionProxy    `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 }
 
 type Connection struct {
@@ -75,4 +76,13 @@ type ConnectionSentinel struct {
 
 type ConnectionCluster struct {
 	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
+}
+
+type ConnectionProxy struct {
+	Type     int    `json:"type,omitempty" yaml:"type,omitempty"`
+	Schema   string `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Addr     string `json:"addr,omitempty" yaml:"addr,omitempty"`
+	Port     int    `json:"port,omitempty" yaml:"port,omitempty"`
+	Username string `json:"username,omitempty" yaml:"username,omitempty"`
+	Password string `json:"password,omitempty" yaml:"password,omitempty"`
 }

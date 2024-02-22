@@ -196,6 +196,15 @@ const useConnectionStore = defineStore('connections', {
                 cluster: {
                     enable: false,
                 },
+                proxy: {
+                    type: 0,
+                    schema: 'http',
+                    addr: '',
+                    port: 0,
+                    auth: false,
+                    username: '',
+                    password: '',
+                },
             }
         },
 
