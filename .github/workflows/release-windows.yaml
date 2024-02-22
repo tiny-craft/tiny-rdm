@@ -84,7 +84,7 @@ jobs:
 
       - name: Build Windows NSIS installer
         shell: bash
-        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -webview2 embed -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -upx -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Codesign Windows NSIS installer
         working-directory: ./build/bin
