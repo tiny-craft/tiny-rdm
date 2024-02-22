@@ -24,7 +24,9 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['reset', 'input', 'save'])
+const emit = defineEmits(['reset', 'input', 'save', 'scroll'])
+
+const scrollTop = ref(0)
 
 const themeVars = useThemeVars()
 /** @type {HTMLElement|null} */
@@ -71,6 +73,7 @@ onMounted(async () => {
             scrollbar: {
                 useShadows: false,
                 verticalScrollbarSize: '10px',
+                alwaysConsumeMouseWheel: true,
             },
             // formatOnType: true,
             contextmenu: false,
@@ -86,6 +89,13 @@ onMounted(async () => {
         // add shortcut for save
         editorNode.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (event) => {
             emit('save')
+        });
+
+        editorNode.onDidScrollChange((event) => {
+            // 防止刷新时改变滚动距离
+            if (!event.scrollHeightChanged) {
+                scrollTop.value = event.scrollTop;
+            }
         })
 
         // editorNode.onDidChangeModelLanguageConfiguration(() => {
@@ -104,7 +114,13 @@ watch(
     () => props.content,
     async (content) => {
         if (editorNode != null) {
-            editorNode.setValue(content)
+            editorNode.setValue(content) 
+            editorNode.onDidLayoutChange(() => {
+            if (scrollTop.value > 0) {
+                    console.log(scrollTop.value);
+                    editorNode.setScrollTop(scrollTop.value);
+                }
+            })
             await nextTick(() => emit('reset', content))
         }
     },
