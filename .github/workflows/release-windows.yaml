@@ -39,7 +39,7 @@ jobs:
       - name: Install chocolatey
         uses: crazy-max/ghaction-chocolatey@v2
         with:
-          args: install nsis jq upx
+          args: install nsis jq
 
       - name: Install wails
         shell: bash
@@ -70,11 +70,7 @@ jobs:
 
       - name: Compress portable binary
         working-directory: ./build/bin
-        run: Compress-Archive "Tiny RDM.exe" tiny-rdm.zip
-
-      - name: Rename zip package
-        working-directory: ./build/bin
-        run: Rename-Item -Path  "tiny-rdm.zip" -NewName "TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
+        run: Compress-Archive "Tiny RDM.exe" "TinyRDM_Portable_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.zip"
 
       - name: Upload release asset (Portable)
         uses: softprops/action-gh-release@v1
@@ -84,7 +80,10 @@ jobs:
 
       - name: Build Windows NSIS installer
         shell: bash
-        run: CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} -nsis -webview2 embed -ldflags "-X main.version=${{ github.event.release.tag_name }}"
+        run: |
+          CGO_ENABLED=1 wails build -clean -platform ${{ matrix.platform }} \
+          -nsis -webview2 embed \
+          -ldflags "-X main.version=${{ github.event.release.tag_name }}"
 
       - name: Codesign Windows NSIS installer
         working-directory: ./build/bin
@@ -94,11 +93,11 @@ jobs:
           Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_SIGNING_CERT }}'
           certutil -decode certificate\certificate.txt certificate\certificate.pfx
           echo "Signing TinyRDM installer"
-          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' 'Tiny RDM.exe'
+          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' TinyRDM-${{ matrix.platform }}-installer.exe
 
       - name: Rename installer
         working-directory: ./build/bin
-        run: Rename-Item -Path "Tiny RDM.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
+        run: Rename-Item -Path "TinyRDM-${{ matrix.platform }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
 
       - name: Upload release asset (Installer)
         uses: softprops/action-gh-release@v1
