@@ -102,6 +102,8 @@ const useDialogStore = defineStore('dialog', {
         },
 
         preferencesDialogVisible: false,
+        preferencesTag: '',
+
         aboutDialogVisible: false,
     }),
     actions: {
@@ -346,11 +348,13 @@ const useDialogStore = defineStore('dialog', {
             this.decodeDialogVisible = false
         },
 
-        openPreferencesDialog() {
+        openPreferencesDialog(tag = '') {
             this.preferencesDialogVisible = true
+            this.preferencesTag = tag
         },
         closePreferencesDialog() {
             this.preferencesDialogVisible = false
+            this.preferencesTag = ''
         },
 
         openAboutDialog() {

@@ -37,7 +37,7 @@ Linux.</strong>
 * Provides visually and user-friendly UI, light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
   and [IconPark](https://iconpark.oceanengine.com)).
 * Multi-language support ([Need more languages ? Click here to contribute](.github/CONTRIBUTING.md)).
-* Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode.
+* Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode/HTTP proxy/SOCKS5 proxy.
 * Visualize key value operations, CRUD support for Lists, Hashes, Strings, Sets, Sorted Sets, and Streams.
 * Support multiple data viewing format and decode/decompression methods.
 * Use SCAN for segmented loading, making it easy to list millions of keys.
@@ -50,11 +50,8 @@ Linux.</strong>
 * Support real-time commands monitoring.
 * Support import/export data.
 * Support publish/subscribe.
-* support import/export connection profile
-
-## Roadmap
-
-- [ ] Custom data encoder and decoder for value display
+* Support import/export connection profile.
+* Custom data encoder and decoder for value display.
 
 ## Installation
 

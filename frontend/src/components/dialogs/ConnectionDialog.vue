@@ -205,8 +205,22 @@ const onSaveConnection = async () => {
         generalForm.value.sentinel = {}
     }
 
+    // trim cluster data
     if (!!!generalForm.value.cluster.enable) {
         generalForm.value.cluster = {}
+    }
+
+    // trim proxy data
+    if (generalForm.value.proxy.type !== 2) {
+        generalForm.value.proxy.schema = ''
+        generalForm.value.proxy.addr = ''
+        generalForm.value.proxy.port = 0
+        generalForm.value.proxy.auth = false
+        generalForm.value.proxy.username = ''
+        generalForm.value.proxy.password = ''
+    } else if (!generalForm.value.proxy.auth) {
+        generalForm.value.proxy.username = ''
+        generalForm.value.proxy.password = ''
     }
 
     // store new connection
@@ -248,6 +262,7 @@ watch(
                 pairs.push({ db: parseInt(db), alias: alias[db] })
             }
             aliasPair.value = pairs
+            generalForm.value.proxy.auth = !isEmpty(generalForm.value.proxy.username)
         }
     },
 )
@@ -722,6 +737,69 @@ const pasteFromClipboard = async () => {
                     <!--                        :disabled="!generalForm.cluster.enable"-->
                     <!--                        label-placement="top">-->
                     <!--                    </n-form>-->
+                </n-tab-pane>
+
+                <!-- Proxy pane -->
+                <n-tab-pane :tab="$t('dialogue.connection.proxy.title')" display-directive="show:lazy" name="proxy">
+                    <n-radio-group v-model:value="generalForm.proxy.type" name="radiogroup">
+                        <n-space size="large" vertical>
+                            <n-radio :label="$t('dialogue.connection.proxy.type_none')" :value="0" />
+                            <n-radio :label="$t('dialogue.connection.proxy.type_system')" :value="1" />
+                            <n-radio :label="$t('dialogue.connection.proxy.type_custom')" :value="2" />
+                            <n-form
+                                :disabled="generalForm.proxy.type !== 2"
+                                :model="generalForm.proxy"
+                                :show-require-mark="false"
+                                label-placement="top">
+                                <n-grid :x-gap="10">
+                                    <n-form-item-gi :show-label="false" :span="24" path="addr" required>
+                                        <n-input-group>
+                                            <n-select
+                                                v-model:value="generalForm.proxy.schema"
+                                                :consistent-menu-width="false"
+                                                :options="[
+                                                    { value: 'http', label: 'HTTP' },
+                                                    { value: 'https', label: 'HTTPS' },
+                                                    { value: 'socks5', label: 'SOCKS5' },
+                                                    { value: 'socks5h', label: 'SOCKS5H' },
+                                                ]"
+                                                default-value="http"
+                                                style="max-width: 100px" />
+                                            <n-input
+                                                v-model:value="generalForm.proxy.addr"
+                                                :placeholder="$t('dialogue.connection.proxy.host')" />
+                                            <n-text style="width: 40px; text-align: center">:</n-text>
+                                            <n-input-number
+                                                v-model:value="generalForm.proxy.port"
+                                                :max="65535"
+                                                :min="0"
+                                                :show-button="false"
+                                                style="width: 200px" />
+                                        </n-input-group>
+                                    </n-form-item-gi>
+                                    <n-form-item-gi :show-label="false" :span="24" path="auth">
+                                        <n-checkbox v-model:checked="generalForm.proxy.auth" size="medium">
+                                            {{ $t('dialogue.connection.proxy.auth') }}
+                                        </n-checkbox>
+                                    </n-form-item-gi>
+                                    <n-form-item-gi :label="$t('dialogue.connection.usr')" :span="12" path="username">
+                                        <n-input
+                                            v-model:value="generalForm.proxy.username"
+                                            :disabled="!!!generalForm.proxy.auth"
+                                            :placeholder="$t('dialogue.connection.proxy.usr_tip')" />
+                                    </n-form-item-gi>
+                                    <n-form-item-gi :label="$t('dialogue.connection.pwd')" :span="12" path="password">
+                                        <n-input
+                                            v-model:value="generalForm.proxy.password"
+                                            :disabled="!!!generalForm.proxy.auth"
+                                            :placeholder="$t('dialogue.connection.proxy.pwd_tip')"
+                                            show-password-on="click"
+                                            type="password" />
+                                    </n-form-item-gi>
+                                </n-grid>
+                            </n-form>
+                        </n-space>
+                    </n-radio-group>
                 </n-tab-pane>
             </n-tabs>
 

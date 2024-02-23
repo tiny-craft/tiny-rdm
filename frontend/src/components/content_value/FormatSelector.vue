@@ -6,6 +6,7 @@ import DropdownSelector from '@/components/common/DropdownSelector.vue'
 import { includes, isEmpty, map, pull, some, values } from 'lodash'
 import { computed } from 'vue'
 import usePreferencesStore from 'stores/preferences.js'
+import useDialogStore from 'stores/dialog.js'
 
 const props = defineProps({
     decode: {
@@ -20,6 +21,7 @@ const props = defineProps({
 })
 
 const prefStore = usePreferencesStore()
+const dialogStore = useDialogStore()
 
 const formatTypeOption = computed(() => {
     return map(formatTypes, (t) => t)
@@ -46,6 +48,15 @@ const decodeTypeOption = computed(() => {
     return [buildinTypes, customTypes]
 })
 
+const decodeMenuOption = computed(() => {
+    return [
+        {
+            key: 'new_rdm_decoder',
+            label: 'interface.custom_decoder',
+        },
+    ]
+})
+
 const emit = defineEmits(['formatChanged', 'update:decode', 'update:format'])
 const onFormatChanged = (selDecode, selFormat) => {
     const [buildin, external] = decodeTypeOption.value
@@ -62,6 +73,14 @@ const onFormatChanged = (selDecode, selFormat) => {
     }
     if (selFormat !== props.format) {
         emit('update:format', selFormat)
+    }
+}
+
+const onDecodeMenu = (key) => {
+    switch (key) {
+        case 'new_rdm_decoder':
+            dialogStore.openPreferencesDialog('decoder')
+            break
     }
 }
 </script>
@@ -81,9 +100,11 @@ const onFormatChanged = (selDecode, selFormat) => {
             :default="decodeTypes.NONE"
             :disabled="props.disabled"
             :icon="Conversion"
+            :menu-option="decodeMenuOption"
             :options="decodeTypeOption"
             :tooltip="$t('interface.decode_with')"
             :value="props.decode"
+            @menu="onDecodeMenu"
             @update:value="(d) => onFormatChanged(d, '')" />
     </n-space>
 </template>

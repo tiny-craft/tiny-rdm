@@ -127,6 +127,7 @@
     "memory_usage": "Memory Usage",
     "view_as": "View As",
     "decode_with": "Decode / Decompression",
+    "custom_decoder": "New Custom Decoder",
     "reload": "Reload",
     "reload_disable": "Reload will enable after full loaded",
     "auto_refresh": "Auto Refresh",
@@ -268,6 +269,16 @@
       "cluster": {
         "title": "Cluster",
         "enable": "Serve as Cluster Node"
+      },
+      "proxy": {
+        "title": "Proxy",
+        "type_none": "No Proxy",
+        "type_system": "System Proxy Configuration",
+        "type_custom": "Manual Proxy Configuration",
+        "host": "Host name",
+        "auth": "Proxy authentication",
+        "usr_tip": "Username for proxy authentication",
+        "pwd_tip": "Password for proxy authentication"
       }
     },
     "group": {
