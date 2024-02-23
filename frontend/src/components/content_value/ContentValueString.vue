@@ -204,7 +204,7 @@ defineExpose({
                 :content="displayValue"
                 :language="viewLanguage"
                 :loading="props.loading"
-                :keyPath="props.keyPath"
+                :key-path="props.keyPath"
                 class="flex-item-expand"
                 style="height: 100%"
                 @input="onInput"
