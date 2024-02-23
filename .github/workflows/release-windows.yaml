@@ -24,6 +24,11 @@ jobs:
           tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g' -e 's/amd64/x64/g')
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
+      - name: Normalise platform name
+        id: platform_name
+        shell: bash
+        run: tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+
       - name: Normalise version tag
         id: normalise_version
         shell: bash
@@ -97,7 +102,7 @@ jobs:
 
       - name: Rename installer
         working-directory: ./build/bin
-        run: Rename-Item -Path "TinyRDM-${{ matrix.platform }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
+        run: Rename-Item -Path "TinyRDM-${{ matrix.platform }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.platform_name.outputs.tag }}.exe"
 
       - name: Upload release asset (Installer)
         uses: softprops/action-gh-release@v1
