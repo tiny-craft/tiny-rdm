@@ -96,13 +96,13 @@ onMounted(async () => {
         // add shortcut for save
         editorNode.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, (event) => {
             emit('save')
-        });
+        })
 
         if (props.rememberScroll) {
             editorNode.onDidScrollChange((event) => {
                 // Update scrolltop when scroll height changes, ie. content changes
                 if (!event.scrollHeightChanged) {
-                    scrollTop.value = event.scrollTop;
+                    scrollTop.value = event.scrollTop
                 }
             })
         }
