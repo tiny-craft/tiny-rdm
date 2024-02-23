@@ -103,9 +103,15 @@ const renderTypeLabel = (option) => {
                         width: '13px',
                         height: '13px',
                         border: '2px solid white',
+                        position: 'relative',
+                        top: '-0.5px',
                     },
                 }),
-                option.value,
+                h('div', {
+                    style: {
+                        'line-height': '32px',
+                    }
+                }, option.value),
             ],
         },
     )
