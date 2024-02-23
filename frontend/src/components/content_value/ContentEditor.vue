@@ -22,6 +22,14 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    keyPath: {
+        type: String,
+        default: "",
+    },
+    rememberScroll: {
+        type: Boolean,
+        default: true,
+    }
 })
 
 const emit = defineEmits(['reset', 'input', 'save'])
@@ -90,12 +98,14 @@ onMounted(async () => {
             emit('save')
         });
 
-        editorNode.onDidScrollChange((event) => {
-            // 防止刷新时改变滚动距离
-            if (!event.scrollHeightChanged) {
-                scrollTop.value = event.scrollTop;
-            }
-        })
+        if (props.rememberScroll) {
+            editorNode.onDidScrollChange((event) => {
+                // Update scrolltop when scroll height changes, ie. content changes
+                if (!event.scrollHeightChanged) {
+                    scrollTop.value = event.scrollTop;
+                }
+            })
+        }
 
         // editorNode.onDidChangeModelLanguageConfiguration(() => {
         //     editorNode?.getAction('editor.action.formatDocument')?.run()
@@ -111,17 +121,31 @@ onMounted(async () => {
 
 watch(
     () => props.content,
-    async (content) => {
+    async (content, oldContent, onCleanup) => {
         if (editorNode != null) {
-            editorNode.setValue(content) 
-            editorNode.onDidLayoutChange(() => {
-                if (scrollTop.value > 0) {
+            editorNode.setValue(content)
+
+            const disposable = editorNode.onDidLayoutChange(() => {
+                if (props.rememberScroll && scrollTop.value > 0) {
                     editorNode.setScrollTop(scrollTop.value)
                 }
-            })
+            }); 
+
+            onCleanup(() => disposable.dispose())
+
             await nextTick(() => emit('reset', content))
         }
     },
+)
+
+watch(
+    () => props.keyPath,
+    () => {
+        if (editorNode != null) {
+            scrollTop.value = 0
+            editorNode.setScrollTop(0)
+        }
+    }
 )
 
 watch(
