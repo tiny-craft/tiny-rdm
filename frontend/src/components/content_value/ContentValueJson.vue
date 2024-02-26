@@ -149,6 +149,7 @@ defineExpose({
                 v-show="!props.loading"
                 :content="displayValue"
                 :loading="props.loading"
+                :key-path="props.keyPath"
                 class="flex-item-expand"
                 language="json"
                 style="height: 100%"

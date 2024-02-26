@@ -175,6 +175,7 @@ const onSave = () => {
                         :border="true"
                         :content="displayValue"
                         :language="viewLanguage"
+                        :key-path="viewAs.field"
                         class="flex-item-expand"
                         @input="onInput"
                         @reset="onInput"
