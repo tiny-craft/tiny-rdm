@@ -93,7 +93,14 @@ watchEffect(() => {
 const renderTypeLabel = (option) => {
     return h(
         NSpace,
-        { align: 'center', inline: true, size: 3 },
+        {
+            align: 'center',
+            inline: true,
+            size: 3,
+            itemStyle: {
+                lineHeight: 'var(--n-blank-height)',
+            },
+        },
         {
             default: () => [
                 h('div', {
