@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import * as monaco from 'monaco-editor'
 import usePreferencesStore from 'stores/preferences.js'
 import { useThemeVars } from 'naive-ui'
+import { isEmpty } from 'lodash'
 
 const props = defineProps({
     content: {
@@ -22,25 +23,35 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    keyPath: {
+    offsetKey: {
         type: String,
-        default: "",
+        default: '',
     },
-    rememberScroll: {
+    keepOffset: {
         type: Boolean,
-        default: true,
-    }
+        default: false,
+    },
 })
 
 const emit = defineEmits(['reset', 'input', 'save'])
-
-const scrollTop = ref(0)
 
 const themeVars = useThemeVars()
 /** @type {HTMLElement|null} */
 const editorRef = ref(null)
 /** @type monaco.editor.IStandaloneCodeEditor */
 let editorNode = null
+const scrollOffset = { top: 0, left: 0 }
+
+const updateScroll = () => {
+    if (editorNode != null) {
+        if (props.keepOffset && !isEmpty(props.offsetKey)) {
+            editorNode.setScrollPosition({ scrollTop: scrollOffset.top, scrollLeft: scrollOffset.left })
+        } else {
+            // reset offset if not needed
+            editorNode.setScrollPosition({ scrollTop: 0, scrollLeft: 0 })
+        }
+    }
+}
 
 const destroyEditor = () => {
     if (editorNode != null && editorNode.dispose != null) {
@@ -98,14 +109,17 @@ onMounted(async () => {
             emit('save')
         })
 
-        if (props.rememberScroll) {
-            editorNode.onDidScrollChange((event) => {
-                // Update scrolltop when scroll height changes, ie. content changes
-                if (!event.scrollHeightChanged) {
-                    scrollTop.value = event.scrollTop
-                }
-            })
-        }
+        editorNode.onDidScrollChange((event) => {
+            // save scroll offset when changes, ie. content changes
+            if (props.keepOffset && !event.scrollHeightChanged) {
+                scrollOffset.top = event.scrollTop
+                scrollOffset.left = event.scrollLeft
+            }
+        })
+
+        editorNode.onDidLayoutChange((event) => {
+            updateScroll()
+        })
 
         // editorNode.onDidChangeModelLanguageConfiguration(() => {
         //     editorNode?.getAction('editor.action.formatDocument')?.run()
@@ -121,31 +135,25 @@ onMounted(async () => {
 
 watch(
     () => props.content,
-    async (content, oldContent, onCleanup) => {
+    async (content) => {
         if (editorNode != null) {
             editorNode.setValue(content)
-
-            const disposable = editorNode.onDidLayoutChange(() => {
-                if (props.rememberScroll && scrollTop.value > 0) {
-                    editorNode.setScrollTop(scrollTop.value)
-                }
-            }); 
-
-            onCleanup(() => disposable.dispose())
-
             await nextTick(() => emit('reset', content))
+            updateScroll()
         }
     },
 )
 
 watch(
-    () => props.keyPath,
+    () => props.offsetKey,
     () => {
+        // reset scroll offset when key changed
         if (editorNode != null) {
-            scrollTop.value = 0
-            editorNode.setScrollTop(0)
+            scrollOffset.top = 0
+            scrollOffset.left = 0
+            editorNode.setScrollPosition({ scrollTop: 0, scrollLeft: 0 })
         }
-    }
+    },
 )
 
 watch(
