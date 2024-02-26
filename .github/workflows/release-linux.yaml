@@ -3,6 +3,12 @@ name: Release Linux App
 on:
   release:
     types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag'
+        required: true
+        default: '1.0.0'
 
 jobs:
   release:
@@ -27,8 +33,13 @@ jobs:
         id: normalise_version
         shell: bash
         run: |
-          version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event.release.tag_name }}" == "" ]; then
+            version=$(echo ${{ github.event.inputs.tag }} | sed -e 's/v//g')
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          else
+            version=$(echo ${{ github.event.release.tag_name }} | sed -e 's/v//g')
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -65,7 +76,7 @@ jobs:
         shell: bash
         run: |
           CGO_ENABLED=1 wails build -platform ${{ matrix.platform }} \
-          -ldflags "-X main.version=${{ github.event.release.tag_name }} -X main.gaMeasurementID=${{ secrets.GA_MEASUREMENT_ID }} -X main.gaSecretKey=${{ secrets.LINUX_GA_SECRET }}" \
+          -ldflags "-X main.version=v${{ steps.normalise_version.outputs.version }} -X main.gaMeasurementID=${{ secrets.GA_MEASUREMENT_ID }} -X main.gaSecretKey=${{ secrets.LINUX_GA_SECRET }}" \
           -o tiny-rdm
 
       - name: Setup control template
@@ -105,5 +116,6 @@ jobs:
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ steps.normalise_version.outputs.version }}
           files: ./build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb
           token: ${{ secrets.GITHUB_TOKEN }}
