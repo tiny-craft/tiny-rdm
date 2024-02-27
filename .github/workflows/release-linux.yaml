@@ -121,7 +121,7 @@ jobs:
 
       - name: Package up appimage file
         run: |
-           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage -O linuxdeploy -L
+           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage -o linuxdeploy -L
            chmod u+x linuxdeploy
 
            ./linuxdeploy --appdir AppDir
