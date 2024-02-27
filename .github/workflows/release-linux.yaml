@@ -18,6 +18,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
+          - linux/aarch64
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
@@ -28,6 +29,15 @@ jobs:
         run: |
           tag=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Normalise platform arch
+        id: normalise_platform_arch
+        run: |
+           if [ "${{ matrix.platform }}" == "linux/amd64" ]; then
+             echo "arch=x86_64" >> "$GITHUB_OUTPUT"
+           else if [ "${{ matrix.platform }}" == "linux/aarch64" ]; then
+             echo "arch=aarch64" >> "$GITHUB_OUTPUT"
+           fi
 
       - name: Normalise version tag
         id: normalise_version
@@ -108,11 +118,13 @@ jobs:
           mv tiny-rdm_0.0.0_amd64 "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
           sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
           dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+
       - name: Package up appimage file
         run: |
-           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-x86_64.AppImage -O -L
-           chmod u+x linuxdeploy-x86_64.AppImage
-           ./linuxdeploy-x86_64.AppImage --appdir AppDir
+           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage -O linuxdeploy -L
+           chmod u+x linuxdeploy
+
+           ./linuxdeploy --appdir AppDir
            mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
            build_dir="build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
 
@@ -120,7 +132,7 @@ jobs:
            cp $build_dir/usr/local/bin/tiny-rdm AppDir/usr/bin/
 
            sed -i 's#/usr/local/bin/tiny-rdm#tiny-rdm#g' $build_dir/usr/share/applications/tiny-rdm.desktop
-           ./linuxdeploy-x86_64.AppImage --appdir AppDir \
+           ./linuxdeploy --appdir AppDir \
               --output=appimage \
               -e $build_dir/usr/local/bin/tiny-rdm \
               -d $build_dir/usr/share/applications/tiny-rdm.desktop
@@ -130,7 +142,7 @@ jobs:
         run: mv "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb" "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
 
       - name: Rename appimage
-        run: mv Tiny_RDM-x86_64.AppImage "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.AppImage"
+        run: mv Tiny_RDM-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.AppImage"
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
