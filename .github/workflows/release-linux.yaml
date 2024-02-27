@@ -108,6 +108,17 @@ jobs:
           mv tiny-rdm_0.0.0_amd64 "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
           sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
           dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+      - name: Package up appimage file
+        run: |
+           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-x86_64.AppImage -O -L
+           chmod u+x linuxdeploy-x86_64.AppImage
+           ./linuxdeploy-x86_64.AppImage --appdir AppDir \
+              --output=appimage \
+              -e build/linux/tiny-rdm_0.0.0_amd64/usr/local/bin/tiny-rdm \
+              -d build/linux/tiny-rdm_0.0.0_amd64/usr/share/applications/tiny-rdm.desktop
+              -i build/linux/tiny-rdm_0.0.0_amd64/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png
+            ls -l
+           
 
       - name: Rename deb
         working-directory: ./build/linux
