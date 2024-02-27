@@ -119,6 +119,7 @@ jobs:
            cp -r $build_dir/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png AppDir/usr/share/icons/hicolor/512x512/apps/
            cp $build_dir/usr/local/bin/tiny-rdm AppDir/usr/bin/
 
+           sed -i 's#/usr/local/bin/tiny-rdm#tiny-rdm' $build_dir/usr/share/applications/tiny-rdm.desktop
            ./linuxdeploy-x86_64.AppImage --appdir AppDir \
               --output=appimage \
               -e $build_dir/usr/local/bin/tiny-rdm \
