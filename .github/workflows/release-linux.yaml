@@ -130,7 +130,6 @@ jobs:
         run: mv "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb" "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
 
       - name: Rename appimage
-        working-directory: ./build/linux
         run: mv Tiny_RDM-x86_64.AppImage "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.AppImage"
 
       - name: Upload release asset
