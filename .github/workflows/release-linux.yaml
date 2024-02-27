@@ -124,17 +124,20 @@ jobs:
               --output=appimage \
               -e $build_dir/usr/local/bin/tiny-rdm \
               -d $build_dir/usr/share/applications/tiny-rdm.desktop
-              -i $build_dir/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png
-            ls -l
-           
 
       - name: Rename deb
         working-directory: ./build/linux
         run: mv "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64.deb" "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb"
 
+      - name: Rename appimage
+        working-directory: ./build/linux
+        run: mv Tiny_RDM-x86_64.AppImage "tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.AppImage"
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.normalise_version.outputs.version }}
-          files: ./build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb
+          files: |
+            ./build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.deb
+            tiny-rdm_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.AppImage
           token: ${{ secrets.GITHUB_TOKEN }}
