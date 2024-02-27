@@ -113,13 +113,17 @@ jobs:
            curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-x86_64.AppImage -O -L
            chmod u+x linuxdeploy-x86_64.AppImage
            ./linuxdeploy-x86_64.AppImage --appdir AppDir
-           mkdir -p AppDir/usr/share/icons/512x512/apps
-           cp -r build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png AppDir/usr/share/icons/512x512/apps/
+           mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
+           build_dir="build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+
+           cp -r $build_dir/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png AppDir/usr/share/icons/hicolor/512x512/apps/
+           cp $build_dir/usr/local/bin/tiny-rdm AppDir/usr/bin/
+
            ./linuxdeploy-x86_64.AppImage --appdir AppDir \
               --output=appimage \
-              -e build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/usr/local/bin/tiny-rdm \
-              -d build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/usr/share/applications/tiny-rdm.desktop
-              -i build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png
+              -e $build_dir/usr/local/bin/tiny-rdm \
+              -d $build_dir/usr/share/applications/tiny-rdm.desktop
+              -i $build_dir/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png
             ls -l
            
 
