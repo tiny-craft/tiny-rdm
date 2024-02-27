@@ -35,7 +35,7 @@ jobs:
         run: |
            if [ "${{ matrix.platform }}" == "linux/amd64" ]; then
              echo "arch=x86_64" >> "$GITHUB_OUTPUT"
-           else if [ "${{ matrix.platform }}" == "linux/aarch64" ]; then
+           elif [ "${{ matrix.platform }}" == "linux/aarch64" ]; then
              echo "arch=aarch64" >> "$GITHUB_OUTPUT"
            fi
 
