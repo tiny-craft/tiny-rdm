@@ -253,5 +253,5 @@ func SaveAs(str, format, decode string, customDecoder []CmdConvert) (value strin
 			}
 		}
 	}
-	return str, nil
+	return
 }
