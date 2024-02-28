@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libfuse3-dev libfuse3-3
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libfuse-dev libfuse2
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -117,7 +117,7 @@ jobs:
           cd build/linux
           mv tiny-rdm_0.0.0_amd64 "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
           sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
-          dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+          # dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
 
       - name: Package up appimage file
         run: |
