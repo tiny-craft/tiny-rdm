@@ -652,7 +652,11 @@ const clientTableColumns = computed(() => {
                         :label="$t('status.connected_clients')"
                         :value="get(serverInfo, 'Clients.connected_clients', '0')">
                         <template #suffix>
-                            <n-tooltip trigger="click" width="70vw" @update-show="onShowClients">
+                            <n-tooltip
+                                :content-style="{ backgroundColor: themeVars.tableColor }"
+                                trigger="click"
+                                width="70vw"
+                                @update-show="onShowClients">
                                 <template #trigger>
                                     <n-button :bordered="false" size="small">&LowerRightArrow;</n-button>
                                 </template>
