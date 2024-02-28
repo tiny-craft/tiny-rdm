@@ -117,7 +117,7 @@ jobs:
           cd build/linux
           mv tiny-rdm_0.0.0_amd64 "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
           sed -i 's/0.0.0/${{ steps.normalise_version.outputs.version }}/g' "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64/DEBIAN/control"
-          # dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
+          dpkg-deb --build -Zxz "tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
 
       - name: Package up appimage file
         run: |
