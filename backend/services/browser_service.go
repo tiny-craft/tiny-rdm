@@ -1156,18 +1156,18 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 	if len(param.Format) <= 0 {
 		param.Format = types.FORMAT_RAW
 	}
+	var savedValue any
 	switch strings.ToLower(param.KeyType) {
 	case "string":
 		if str, ok := param.Value.(string); !ok {
 			resp.Msg = "invalid string value"
 			return
 		} else {
-			var saveStr string
-			if saveStr, err = convutil.SaveAs(str, param.Format, param.Decode, Preferences().GetDecoder()); err != nil {
+			if savedValue, err = convutil.SaveAs(str, param.Format, param.Decode, Preferences().GetDecoder()); err != nil {
 				resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 				return
 			}
-			_, err = client.Set(ctx, key, saveStr, 0).Result()
+			_, err = client.Set(ctx, key, savedValue, 0).Result()
 			// set expiration lonely, not "keepttl"
 			if err == nil && expiration > 0 {
 				client.Expire(ctx, key, expiration)
@@ -1254,6 +1254,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		if err == nil && expiration > 0 {
 			client.Expire(ctx, key, expiration)
 		}
+		savedValue = param.Value
 	}
 
 	if err != nil {
@@ -1261,9 +1262,9 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		return
 	}
 	resp.Success = true
-	//resp.Data = map[string]any{
-	//	"value": param.Value,
-	//}
+	resp.Data = map[string]any{
+		"value": savedValue,
+	}
 	return
 }
 

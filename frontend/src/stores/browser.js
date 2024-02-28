@@ -769,9 +769,11 @@ const useBrowserStore = defineStore('browser', {
                             serverInst.updateDBKeyCount(db, newKey)
                         }
                     }
-                    // const tab = useTabStore()
-                    // tab.updateValue({ server, db, key, value })
-
+                    const { value: updatedValue } = data
+                    if (updatedValue != null) {
+                        const tab = useTabStore()
+                        tab.updateValue({ server, db, key, value: updatedValue })
+                    }
                     // this.loadKeySummary({ server, db, key })
                     return {
                         success,
