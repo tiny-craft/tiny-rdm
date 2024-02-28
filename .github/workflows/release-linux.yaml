@@ -13,7 +13,7 @@ on:
 jobs:
   release:
     name: Release Linux App
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         platform:
@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libfuse3-dev
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -121,7 +121,9 @@ jobs:
 
       - name: Package up appimage file
         run: |
-           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage -o linuxdeploy -L
+           curl https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-${{ steps.normalise_platform_arch.outputs.arch }}.AppImage \//_/g'
+                -o linuxdeploy \
+                -L
            chmod u+x linuxdeploy
 
            ./linuxdeploy --appdir AppDir
