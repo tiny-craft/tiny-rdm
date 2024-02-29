@@ -149,6 +149,8 @@ jobs:
           sed '/XDG_DATA_DIRS/a export WEBKIT_DISABLE_COMPOSITING_MODE=1'
           chmod +x linuxdeploy-plugin-gtk.sh
 
+          curl -o AppDir/AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-${{ steps.normalise_platform_arch.outputs.arch }} -L
+
           ./linuxdeploy --appdir AppDir \
              --output=appimage \
              --plugin=gtk \
