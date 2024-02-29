@@ -137,7 +137,8 @@ jobs:
            ./linuxdeploy --appdir AppDir \
               --output=appimage \
               -e $build_dir/usr/local/bin/tiny-rdm \
-              -d $build_dir/usr/share/applications/tiny-rdm.desktop
+              -d $build_dir/usr/share/applications/tiny-rdm.desktop \
+              -l /lib/x86_64-linux-gnu/libwebkit2gtk-4.0.so.37
 
       - name: Rename deb
         working-directory: ./build/linux
