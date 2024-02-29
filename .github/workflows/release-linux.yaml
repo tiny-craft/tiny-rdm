@@ -137,6 +137,8 @@ jobs:
            sed -i 's#/usr/local/bin/tiny-rdm#tiny-rdm#g' $build_dir/usr/share/applications/tiny-rdm.desktop
 
            curl -o linuxdeploy-plugin-gtk.sh "https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
+           chmod +x linuxdeploy-plugin-gtk.sh
+
            ./linuxdeploy --appdir AppDir \
               --output=appimage \
               --plugin=gtk \
