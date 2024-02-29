@@ -3,6 +3,7 @@ package convutil
 import (
 	"bytes"
 	"encoding/json"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf16"
@@ -21,7 +22,7 @@ func (UnicodeJsonConvert) Decode(str string) (string, bool) {
 		(strings.HasPrefix(trimedStr, "[") && strings.HasSuffix(trimedStr, "]")) {
 		var out bytes.Buffer
 		if err := json.Indent(&out, []byte(trimedStr), "", "  "); err == nil {
-			if quoteStr, ok := UnquoteUnicodeJson([]byte(trimedStr)); ok {
+			if quoteStr, ok := UnquoteUnicodeJson(out.Bytes()); ok {
 				return string(quoteStr), true
 			}
 		}
@@ -50,9 +51,7 @@ func UnquoteUnicodeJson(s []byte) ([]byte, bool) {
 				if s[r+offset] == '"' && s[r+offset-1] != '\\' {
 					offset += 1
 					if ub, ok := unquoteBytes(s[r : r+offset]); ok {
-						unquoted.WriteByte('"')
-						unquoted.Write(ub)
-						unquoted.WriteByte('"')
+						unquoted.WriteString(strconv.Quote(string(ub)))
 					} else {
 						return nil, false
 					}
