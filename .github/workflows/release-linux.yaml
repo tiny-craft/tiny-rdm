@@ -127,6 +127,15 @@ jobs:
            chmod u+x linuxdeploy
 
            ./linuxdeploy --appdir AppDir
+
+           pushd AppDir
+           # Copy WebKit files.
+           find /usr/lib* -name WebKitNetworkProcess -exec mkdir -p $(dirname '{}') \; -exec cp --parents '{}' "." \; || true
+           find /usr/lib* -name WebKitWebProcess -exec mkdir -p $(dirname '{}') \; -exec cp --parents '{}' "." \; || true
+           find /usr/lib* -name libwebkit2gtkinjectedbundle.so -exec mkdir -p $(dirname '{}') \; -exec cp --parents '{}' "." \; || true
+           popd
+
+
            mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
            build_dir="build/linux/tiny-rdm_${{ steps.normalise_version.outputs.version }}_amd64"
 
