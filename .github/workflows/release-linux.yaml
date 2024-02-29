@@ -147,7 +147,6 @@ jobs:
 
            curl -o linuxdeploy-plugin-gtk.sh "https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
            chmod +x linuxdeploy-plugin-gtk.sh
-           sed -i 's#././#..#g' linuxdeploy-plugin-gtk.sh
 
            ./linuxdeploy --appdir AppDir \
               --output=appimage \
