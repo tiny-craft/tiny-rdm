@@ -133,12 +133,15 @@ jobs:
            cp -r $build_dir/usr/share/icons/hicolor/512x512/apps/tiny-rdm.png AppDir/usr/share/icons/hicolor/512x512/apps/
            cp $build_dir/usr/local/bin/tiny-rdm AppDir/usr/bin/
 
+
            sed -i 's#/usr/local/bin/tiny-rdm#tiny-rdm#g' $build_dir/usr/share/applications/tiny-rdm.desktop
+
+           curl -o linuxdeploy-plugin-gtk.sh "https://raw.githubusercontent.com/tauri-apps/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh"
            ./linuxdeploy --appdir AppDir \
               --output=appimage \
+              --plugin=gtk \
               -e $build_dir/usr/local/bin/tiny-rdm \
-              -d $build_dir/usr/share/applications/tiny-rdm.desktop \
-              -l /lib/x86_64-linux-gnu/libwebkit2gtk-4.0.so.37
+              -d $build_dir/usr/share/applications/tiny-rdm.desktop
 
       - name: Rename deb
         working-directory: ./build/linux
