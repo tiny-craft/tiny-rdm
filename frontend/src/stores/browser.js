@@ -422,7 +422,7 @@ const useBrowserStore = defineStore('browser', {
                     clearValue,
                 })
             } catch (e) {
-                $message.error('')
+                $message.error(e.message || 'unknown error')
             } finally {
             }
         },
@@ -495,14 +495,19 @@ const useBrowserStore = defineStore('browser', {
          */
         async loadKeyDetail({ server, db, key, format, decode, matchPattern, reset, full }) {
             const tab = useTabStore()
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return
+            }
             try {
                 tab.updateLoading({ server, db, loading: true })
+                const [storeFormat, storeDecode] = serverInst.getDecodeHistory(key, db)
                 const { data, success, msg } = await GetKeyDetail({
                     server,
                     db,
                     key,
-                    format,
-                    decode,
+                    format: isEmpty(format) ? storeFormat : format,
+                    decode: isEmpty(decode) ? storeDecode : decode,
                     matchPattern,
                     full: full === true,
                     reset,
@@ -523,8 +528,8 @@ const useBrowserStore = defineStore('browser', {
                         db,
                         key: nativeRedisKey(key),
                         value,
-                        decode: retDecode,
-                        format: retFormat,
+                        decode: retDecode || storeDecode,
+                        format: retFormat || storeFormat,
                         reset: retReset,
                         matchPattern: retMatch || '',
                         end,
@@ -1934,6 +1939,22 @@ const useBrowserStore = defineStore('browser', {
             if (serverInst != null) {
                 serverInst.setFilter({ pattern, type })
             }
+        },
+
+        /**
+         *
+         * @param {string} server
+         * @param {string} key
+         * @param {number} db
+         * @param {string} format
+         * @param {string} decode
+         */
+        setSelectedFormat(server, key, db, format, decode) {
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return
+            }
+            serverInst.addDecodeHistory(key, db, format, decode)
         },
     },
 })

@@ -27,6 +27,12 @@ const props = defineProps({
         default: -1,
     },
     value: [String, Array],
+    format: {
+        type: String,
+    },
+    decode: {
+        type: String,
+    },
     size: Number,
     length: Number,
     loading: Boolean,
@@ -100,12 +106,13 @@ const onFormatChanged = async (decode = '', format = '') => {
             format: retFormat,
         } = await browserStore.convertValue({
             value: props.value,
-            decode,
-            format,
+            decode: decode || props.decode,
+            format: format || props.format,
         })
         editingContent.value = viewAs.value = value
         viewAs.decode = decode || retDecode
         viewAs.format = format || retFormat
+        browserStore.setSelectedFormat(props.name, props.keyPath, props.db, viewAs.format, viewAs.decode)
     } finally {
         converting.value = false
     }
@@ -205,8 +212,8 @@ defineExpose({
                 :language="viewLanguage"
                 :loading="props.loading"
                 :offset-key="props.keyPath"
-                keep-offset
                 class="flex-item-expand"
+                keep-offset
                 style="height: 100%"
                 @input="onInput"
                 @reset="onInput"

@@ -756,7 +756,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 		var str string
 		str, err = client.Get(ctx, key).Result()
 		data.Value = strutil.EncodeRedisKey(str)
-		//data.Value, data.Decode, data.Format = strutil.ConvertTo(str, param.Decode, param.Format)
+		//data.Value, data.Decode, data.Format = convutil.ConvertTo(str, param.Decode, param.Format, decoder)
 
 	case "list":
 		loadListHandle := func() ([]types.ListEntryItem, bool, bool, error) {

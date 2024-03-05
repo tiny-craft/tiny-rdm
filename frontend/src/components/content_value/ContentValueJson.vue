@@ -150,8 +150,8 @@ defineExpose({
                 :content="displayValue"
                 :loading="props.loading"
                 :offset-key="props.keyPath"
-                keep-offset
                 class="flex-item-expand"
+                keep-offset
                 language="json"
                 style="height: 100%"
                 @input="onInput"

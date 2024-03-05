@@ -11,7 +11,6 @@ import useBrowserStore from 'stores/browser.js'
 import { computed, onMounted, ref, watch } from 'vue'
 import { isEmpty } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
-import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from '@/components/content_value/ContentToolbar.vue'
 import ContentValueJson from '@/components/content_value/ContentValueJson.vue'
@@ -86,15 +85,15 @@ const loadData = async (reset, full, selMatch) => {
         if (!!props.blank) {
             return
         }
-        const { name, db, matchPattern, decode, format } = data.value
+        const { name, db, matchPattern } = data.value
         reset = reset === true
         await browserStore.loadKeyDetail({
             server: name,
             db: db,
             key: keyName.value,
             matchPattern: selMatch === undefined ? matchPattern : selMatch,
-            decode: reset ? decodeTypes.NONE : decode,
-            format: reset ? formatTypes.RAW : format,
+            decode: '',
+            format: '',
             reset,
             full: full === true,
         })
@@ -111,12 +110,15 @@ const loadData = async (reset, full, selMatch) => {
 const onReload = async (selDecode, selFormat) => {
     try {
         const { name, db, keyCode, keyPath, decode, format, matchPattern } = data.value
+        const targetFormat = selFormat || format
+        const targetDecode = selDecode || decode
+        browserStore.setSelectedFormat(name, keyPath, db, targetFormat, targetDecode)
         await browserStore.reloadKey({
             server: name,
             db,
             key: keyCode || keyPath,
-            decode: selDecode || decode,
-            format: selFormat || format,
+            decode: targetDecode,
+            format: targetFormat,
             matchPattern,
         })
     } finally {

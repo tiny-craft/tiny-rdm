@@ -174,8 +174,8 @@ const onSave = () => {
                     <content-editor
                         :border="true"
                         :content="displayValue"
-                        :language="viewLanguage"
                         :key-path="viewAs.field"
+                        :language="viewLanguage"
                         class="flex-item-expand"
                         @input="onInput"
                         @reset="onInput"

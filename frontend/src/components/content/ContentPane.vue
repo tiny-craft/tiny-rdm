@@ -13,7 +13,6 @@ import ContentValueWrapper from '@/components/content_value/ContentValueWrapper.
 import ContentCli from '@/components/content_value/ContentCli.vue'
 import Monitor from '@/components/icons/Monitor.vue'
 import ContentSlog from '@/components/content_value/ContentSlog.vue'
-import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import ContentMonitor from '@/components/content_value/ContentMonitor.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentPubsub from '@/components/content_value/ContentPubsub.vue'
@@ -58,8 +57,8 @@ const tabContent = computed(() => {
         value: tab.value,
         size: tab.size || 0,
         length: tab.length || 0,
-        decode: tab.decode || decodeTypes.NONE,
-        format: tab.format || formatTypes.RAW,
+        decode: tab.decode,
+        format: tab.format,
         matchPattern: tab.matchPattern || '',
         end: tab.end === true,
         loading: tab.loading === true,

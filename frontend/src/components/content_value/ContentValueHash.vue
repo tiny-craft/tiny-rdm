@@ -41,14 +41,8 @@ const props = defineProps({
     },
     size: Number,
     length: Number,
-    format: {
-        type: String,
-        default: formatTypes.RAW,
-    },
-    decode: {
-        type: String,
-        default: decodeTypes.NONE,
-    },
+    format: String,
+    decode: String,
     end: Boolean,
     loading: Boolean,
 })

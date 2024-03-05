@@ -145,9 +145,25 @@ const useTabStore = defineStore('tab', {
          * @param {number} [length]
          * @param {string} [matchPattern]
          * @param {boolean} [clearValue]
+         * @param {string} format
+         * @param {string} decode
          * @param {*} [value]
          */
-        upsertTab({ subTab, server, db, type, ttl, key, keyCode, size, length, matchPattern = '', clearValue }) {
+        upsertTab({
+            subTab,
+            server,
+            db,
+            type,
+            ttl,
+            key,
+            keyCode,
+            size,
+            length,
+            matchPattern = '',
+            clearValue,
+            format = '',
+            decode = '',
+        }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
                 const tabItem = new TabItem({
@@ -164,6 +180,8 @@ const useTabStore = defineStore('tab', {
                     length,
                     matchPattern,
                     value: undefined,
+                    format,
+                    decode,
                 })
                 this.tabList.push(tabItem)
                 tabIndex = this.tabList.length - 1
@@ -182,6 +200,8 @@ const useTabStore = defineStore('tab', {
                 tab.size = size
                 tab.length = length
                 tab.matchPattern = matchPattern
+                tab.format = format
+                tab.decode = decode
                 if (clearValue === true) {
                     tab.value = undefined
                 }

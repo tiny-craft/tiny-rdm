@@ -1,4 +1,4 @@
-import { initial, isEmpty, join, last, mapValues, size, slice, sortBy, split, toUpper } from 'lodash'
+import { get, initial, isEmpty, join, last, mapValues, size, slice, sortBy, split, toUpper } from 'lodash'
 import useConnectionStore from 'stores/connections.js'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { RedisDatabaseItem } from '@/objects/redisDatabaseItem.js'
@@ -49,6 +49,8 @@ export class RedisServerState {
         this.loadingState = loadingState
         this.viewType = viewType
         this.nodeMap = nodeMap
+        this.decodeHistory = new Map()
+        this.decodeHistoryLimit = 100
         this.getRoot()
 
         const connStore = useConnectionStore()
@@ -456,5 +458,38 @@ export class RedisServerState {
     setFilter({ pattern, type }) {
         this.patternFilter = pattern === null ? this.patternFilter : pattern
         this.typeFilter = type === null ? this.typeFilter : type
+    }
+
+    /**
+     * add manually selected decode type to history
+     * @param {string} key
+     * @param {number} db
+     * @param {string} format
+     * @param {string} decode
+     */
+    addDecodeHistory(key, db, format = '', decode = '') {
+        const decodeKey = `${key}#${db}`
+        this.decodeHistory.delete(decodeKey)
+        if (isEmpty(format) && isEmpty(decode)) {
+            // reset to default, remove from history
+            return
+        }
+
+        this.decodeHistory.set(decodeKey, [format, decode])
+        while (this.decodeHistory.size > this.decodeHistoryLimit) {
+            const k = this.decodeHistory.keys().next().value
+            this.decodeHistory.delete(k)
+        }
+    }
+
+    /**
+     * get manually selected decode type from history
+     * @param {string|number[]} key
+     * @param {number} db
+     * @return {[]}
+     */
+    getDecodeHistory(key, db) {
+        const h = this.decodeHistory.get(`${nativeRedisKey(key)}#${db}`) || []
+        return [get(h, 0, ''), get(h, 1, '')]
     }
 }
