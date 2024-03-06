@@ -71,7 +71,8 @@
       "decoder_name": "解码器名称",
       "cmd_preview": "命令预览",
       "status": "状态",
-      "auto_enabled": "已加入自动解码"
+      "auto_enabled": "已加入自动解码",
+      "help": "帮助"
     }
   },
   "interface": {
@@ -395,6 +396,7 @@
     "close": "关闭",
     "preferences": "偏好设置",
     "help": "帮助",
+    "user_guide": "使用指南",
     "check_update": "检查更新...",
     "report_bug": "报告错误",
     "about": "关于"

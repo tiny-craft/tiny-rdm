@@ -77,6 +77,10 @@ const preferencesOptions = computed(() => {
             key: 'report',
         },
         {
+            label: 'menu.user_guide',
+            key: 'help',
+        },
+        {
             label: 'menu.check_update',
             key: 'update',
         },
@@ -103,6 +107,13 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'report':
             BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm/issues')
+            break
+        case 'help':
+            if (prefStore.currentLanguage === 'zh') {
+                BrowserOpenURL('https://redis.tinycraft.cc/zh/guide/intro.html')
+            } else {
+                BrowserOpenURL('https://redis.tinycraft.cc/guide/intro.html')
+            }
             break
         case 'about':
             dialogStore.openAboutDialog()

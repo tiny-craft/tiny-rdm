@@ -71,7 +71,8 @@
       "decoder_name": "Name",
       "cmd_preview": "Preview",
       "status": "Status",
-      "path": "Decoder Execution Path"
+      "auto_enabled": "Automatic Decoding Enabled",
+      "help": "Help"
     }
   },
   "interface": {
@@ -395,6 +396,7 @@
     "close": "Close",
     "preferences": "Preferences",
     "help": "Help",
+    "user_guide": "User Guide",
     "check_update": "Check for Updates...",
     "report_bug": "Report a Bug",
     "about": "About"

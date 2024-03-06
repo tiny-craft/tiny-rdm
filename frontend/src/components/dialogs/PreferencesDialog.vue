@@ -13,6 +13,7 @@ import Edit from '@/components/icons/Edit.vue'
 import { joinCommand } from '@/utils/decoder_cmd.js'
 import AddLink from '@/components/icons/AddLink.vue'
 import Checked from '@/components/icons/Checked.vue'
+import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 
 const prefStore = usePreferencesStore()
 
@@ -144,6 +145,19 @@ const decoderColumns = computed(() => {
         },
     ]
 })
+
+const openDecodeHelp = () => {
+    let helpUrl = ''
+    switch (prefStore.currentLanguage) {
+        case 'zh':
+            helpUrl = 'https://redis.tinycraft.cc/zh/guide/custom-decoder.html'
+            break
+        default:
+            helpUrl = 'https://redis.tinycraft.cc/guide/custom-decoder.html'
+            break
+    }
+    BrowserOpenURL(helpUrl)
+}
 
 const onSavePreferences = async () => {
     const success = await prefStore.savePreferences()
@@ -354,13 +368,21 @@ const onClose = () => {
 
             <!-- custom decoder pane -->
             <n-tab-pane :tab="$t('preferences.decoder.name')" display-directive="show:lazy" name="decoder">
-                <n-space>
-                    <n-button @click="dialogStore.openDecoderDialog()">
-                        <template #icon>
-                            <n-icon :component="AddLink" size="18" />
-                        </template>
-                        {{ $t('preferences.decoder.new') }}
-                    </n-button>
+                <n-space vertical>
+                    <n-space justify="space-between">
+                        <n-button @click="dialogStore.openDecoderDialog()">
+                            <template #icon>
+                                <n-icon :component="AddLink" size="18" />
+                            </template>
+                            {{ $t('preferences.decoder.new') }}
+                        </n-button>
+                        <n-button @click="openDecodeHelp">
+                            <template #icon>
+                                <n-icon :component="Help" size="18" />
+                            </template>
+                            {{ $t('preferences.decoder.help') }}
+                        </n-button>
+                    </n-space>
                     <n-data-table
                         :columns="decoderColumns"
                         :data="decoderList"
