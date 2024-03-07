@@ -34,9 +34,6 @@
       "font": "Fonte",
       "font_size": "Tamanho da Fonte",
       "scan_size": "Tamanho Padrão para Comando SCAN",
-      "proxy": "Proxy",
-      "use_system_proxy": "Usar proxy do sistema",
-      "use_system_proxy_http": "Usar proxy do sistema apenas para solicitações HTTP(S)",
       "update": "Atualizar",
       "auto_check_update": "Verificar atualizações automaticamente"
     },

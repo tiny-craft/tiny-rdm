@@ -45,9 +45,6 @@
       "key_icon_style1": "全称类型",
       "key_icon_style2": "圆点类型",
       "key_icon_style3": "通用图标",
-      "proxy": "代理",
-      "use_system_proxy": "使用系统代理",
-      "use_system_proxy_http": "仅在HTTP请求时使用系统代理",
       "update": "更新",
       "auto_check_update": "自动检查更新"
     },
@@ -146,7 +143,7 @@
     "load_more_entries": "加载更多",
     "load_all_entries": "加载全部",
     "more_action": "更多操作",
-    "nonexist_tab_content": "所选键不存在或未选中任何键，请尝试刷新重试",
+    "nonexist_tab_content": "所选键不存在或未选中任何键，请尝试刷新后重试",
     "empty_server_content": "可以从左边选择并打开连接",
     "empty_server_list": "还没添加Redis服务器",
     "action": "操作",

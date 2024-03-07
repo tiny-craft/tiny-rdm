@@ -253,16 +253,6 @@ const onClose = () => {
                                 :options="keyOptions"
                                 :render-label="({ label }) => $t(label)" />
                         </n-form-item-gi>
-                        <!--                        <n-form-item-gi :label="$t('preferences.general.proxy')" :span="24">-->
-                        <!--                            <n-space>-->
-                        <!--                                <n-checkbox v-model:checked="prefStore.general.useSysProxy">-->
-                        <!--                                    {{ $t('preferences.general.use_system_proxy') }}-->
-                        <!--                                </n-checkbox>-->
-                        <!--                                <n-checkbox v-model:checked="prefStore.general.useSysProxyHttp">-->
-                        <!--                                    {{ $t('preferences.general.use_system_proxy_http') }}-->
-                        <!--                                </n-checkbox>-->
-                        <!--                            </n-space>-->
-                        <!--                        </n-form-item-gi>-->
                         <n-form-item-gi :label="$t('preferences.general.update')" :span="24">
                             <n-checkbox v-model:checked="prefStore.general.checkUpdate">
                                 {{ $t('preferences.general.auto_check_update') }}
