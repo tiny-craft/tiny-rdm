@@ -69,6 +69,7 @@ const onSelectOptions = async (select) => {
                 :render-label="({ label }) => $t(label)"
                 placement="top-end"
                 style="min-width: 130px"
+                trigger="click"
                 @select="onSelectOptions">
                 <icon-button :button-class="['nav-pane-func-btn']" :icon="More" :stroke-width="3.5" size="20" />
             </n-dropdown>
