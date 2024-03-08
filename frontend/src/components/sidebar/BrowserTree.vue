@@ -168,8 +168,8 @@ const handleSelectContextMenu = (action) => {
             dialogStore.openNewKeyDialog(redisKey, props.server, db)
             break
         case 'db_filter':
-            const { match: pattern, type } = browserStore.getKeyFilter(props.server)
-            dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
+            // const { match: pattern, type } = browserStore.getKeyFilter(props.server)
+            // dialogStore.openKeyFilterDialog(props.server, db, pattern, type)
             break
         case 'key_reload':
             if (node != null && !!!node.loading) {

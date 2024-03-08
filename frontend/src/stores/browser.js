@@ -293,8 +293,7 @@ const useBrowserStore = defineStore('browser', {
          * @returns {Promise<void>}
          */
         async openDatabase(server, db) {
-            const { match: filterPattern, type: filterType } = this.getKeyFilter(server)
-            const { data, success, msg } = await OpenDatabase(server, db, filterPattern, filterType)
+            const { data, success, msg } = await OpenDatabase(server, db)
             if (!success) {
                 throw new Error(msg)
             }
@@ -565,22 +564,23 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {number} db
          * @param {string} match
+         * @param {boolean} exact
          * @param {string} [matchType]
          * @param {number} [loadType] 0.load next; 1.load next full; 2.reload load all
          * @returns {Promise<{keys: string[], maxKeys: number, end: boolean}>}
          */
-        async scanKeys({ server, db, match = '*', matchType = '', loadType = 0 }) {
+        async scanKeys({ server, db, match = '*', exact = false, matchType = '', loadType = 0 }) {
             let resp
             switch (loadType) {
                 case 0:
                 default:
-                    resp = await LoadNextKeys(server, db, match, matchType)
+                    resp = await LoadNextKeys(server, db, match, matchType, exact)
                     break
                 case 1:
-                    resp = await LoadNextAllKeys(server, db, match, matchType)
+                    resp = await LoadNextAllKeys(server, db, match, matchType, exact)
                     break
                 case 2:
-                    resp = await LoadAllKeys(server, db, match, matchType)
+                    resp = await LoadAllKeys(server, db, match, matchType, exact)
                     break
             }
             const { data, success, msg } = resp || {}
@@ -595,22 +595,24 @@ const useBrowserStore = defineStore('browser', {
          *
          * @param {string} server
          * @param {number} db
-         * @param {string|null} prefix
+         * @param {string|null} match
+         * @param {boolean} exact
          * @param {string|null} matchType
          * @param {boolean} [all]
          * @return {Promise<{keys: Array<string|number[]>, maxKeys: number, end: boolean}>}
          * @private
          */
-        async _loadKeys(server, db, prefix, matchType, all) {
-            let match = prefix
+        async _loadKeys({ server, db, match, exact, matchType, all }) {
             if (isEmpty(match)) {
                 match = '*'
-            } else if (!isRedisGlob(match)) {
-                if (!endsWith(prefix, '*')) {
-                    match = prefix + '*'
+            }
+
+            if (!isRedisGlob(match) && !exact) {
+                if (!endsWith(match, '*')) {
+                    match = match + '*'
                 }
             }
-            return this.scanKeys({ server, db, match, matchType, loadType: all ? 1 : 0 })
+            return this.scanKeys({ server, db, match, exact, matchType, loadType: all ? 1 : 0 })
         },
 
         /**
@@ -620,8 +622,15 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<boolean>}
          */
         async loadMoreKeys(server, db) {
-            const { match, type: keyType } = this.getKeyFilter(server)
-            const { keys, maxKeys, end } = await this._loadKeys(server, db, match, keyType, false)
+            const { match, type: keyType, exact } = this.getKeyFilter(server)
+            const { keys, maxKeys, end } = await this._loadKeys({
+                server,
+                db,
+                match,
+                exact,
+                matchType: keyType,
+                all: false,
+            })
             /** @type RedisServerState **/
             const serverInst = this.servers[server]
             if (serverInst != null) {
@@ -640,8 +649,8 @@ const useBrowserStore = defineStore('browser', {
          * @return {Promise<void>}
          */
         async loadAllKeys(server, db) {
-            const { match, type: keyType } = this.getKeyFilter(server)
-            const { keys, maxKeys } = await this._loadKeys(server, db, match, keyType, true)
+            const { match, type: keyType, exact } = this.getKeyFilter(server)
+            const { keys, maxKeys } = await this._loadKeys({ server, db, match, exact, matchType: keyType, all: true })
             /** @type RedisServerState **/
             const serverInst = this.servers[server]
             if (serverInst != null) {
@@ -670,8 +679,15 @@ const useBrowserStore = defineStore('browser', {
                 match += '*'
             }
             // FIXME: ignore original match pattern due to redis not support combination matching
-            const { match: originMatch, type: keyType } = this.getKeyFilter(server)
-            const { keys, maxKeys, success } = await this._loadKeys(server, db, match, keyType, true)
+            const { match: originMatch, type: keyType, exact } = this.getKeyFilter(server)
+            const { keys, maxKeys, success } = await this._loadKeys({
+                server,
+                db,
+                match: originMatch,
+                exact: false,
+                matchType: keyType,
+                all: true,
+            })
             if (!success) {
                 return
             }
@@ -1915,7 +1931,7 @@ const useBrowserStore = defineStore('browser', {
         /**
          * get key filter pattern and filter type
          * @param {string} server
-         * @returns {{match: string, type: string}}
+         * @returns {{match: string, type: string, exact: boolean}}
          */
         getKeyFilter(server) {
             let serverInst = this.servers[server]
@@ -1933,11 +1949,12 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} server
          * @param {string} [pattern]
          * @param {string} [type]
+         * @param {boolean} [exact]
          */
-        setKeyFilter(server, { pattern, type }) {
+        setKeyFilter(server, { pattern, type, exact = false }) {
             const serverInst = this.servers[server]
             if (serverInst != null) {
-                serverInst.setFilter({ pattern, type })
+                serverInst.setFilter({ pattern, type, exact })
             }
         },
 

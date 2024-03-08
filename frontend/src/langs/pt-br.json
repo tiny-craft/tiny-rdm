@@ -325,7 +325,8 @@
     "filter": {
       "set_key_filter": "Definir Filtro de Chave",
       "filter_pattern": "Padrão",
-      "filter_pattern_tip": "* corresponde a 0 ou mais caracteres, ex: 'chave*'\n? corresponde a um único caractere, ex: 'chave?'\n[] corresponde a um intervalo, ex: 'chave[1-3]'\n\\ escapa caracteres especiais"
+      "filter_pattern_tip": "* corresponde a 0 ou mais caracteres, ex: 'chave*'\n? corresponde a um único caractere, ex: 'chave?'\n[] corresponde a um intervalo, ex: 'chave[1-3]'\n\\ escapa caracteres especiais",
+      "exact_match_tip": "Correspondência Exata"
     },
     "export": {
       "name": "Exportar Dados",

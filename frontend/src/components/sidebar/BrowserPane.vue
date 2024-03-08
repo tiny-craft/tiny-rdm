@@ -50,7 +50,10 @@ const inCheckState = ref(false)
 
 const dbSelectOptions = computed(() => {
     const dblist = browserStore.getDBList(props.server)
+    const hasPattern = !isEmpty(filterForm.pattern)
     return map(dblist, ({ db, alias, keyCount, maxKeys }) => {
+        keyCount = Math.max(0, keyCount)
+        maxKeys = Math.max(keyCount, maxKeys)
         let label
         if (!isEmpty(alias)) {
             // has alias
@@ -59,7 +62,11 @@ const dbSelectOptions = computed(() => {
             label = `db${db}`
         }
         if (props.db === db) {
-            label += ` (${keyCount}/${maxKeys})`
+            if (hasPattern) {
+                label += ` (${keyCount})`
+            } else {
+                label += ` (${keyCount}/${maxKeys})`
+            }
         } else {
             label += ` (${maxKeys})`
         }
@@ -80,6 +87,11 @@ const moreOptions = [
 ]
 
 const loadProgress = computed(() => {
+    const hasPattern = !isEmpty(filterForm.pattern)
+    if (hasPattern) {
+        return 100
+    }
+
     const db = browserStore.getDatabase(props.server, props.db)
     if (db.maxKeys <= 0) {
         return 100
@@ -111,6 +123,7 @@ const onReload = async () => {
         browserStore.setKeyFilter(props.server, {
             type: matchType,
             pattern: unref(filterForm.pattern),
+            exact: unref(filterForm.exact) === true,
         })
         await browserStore.openDatabase(props.server, db)
         fullyLoaded.value = await browserStore.loadMoreKeys(props.server, db)
@@ -210,6 +223,7 @@ const handleSelectDB = async (db) => {
 
 const filterForm = reactive({
     type: '',
+    exact: false,
     pattern: '',
     filter: '',
 })
@@ -217,13 +231,15 @@ const onSelectFilterType = (select) => {
     onReload()
 }
 
-const onFilterInput = (val) => {
+const onFilterInput = (val, exact) => {
     filterForm.filter = val
+    filterForm.exact = exact
 }
 
-const onMatchInput = (matchVal, filterVal) => {
+const onMatchInput = (matchVal, filterVal, exact) => {
     filterForm.pattern = matchVal
     filterForm.filter = filterVal
+    filterForm.exact = exact
     onReload()
 }
 

@@ -86,7 +86,6 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	if config.SSH.Enable {
 		sshConfig = &ssh.ClientConfig{
 			User:            config.SSH.Username,
-			Auth:            []ssh.AuthMethod{ssh.Password(config.SSH.Password)},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			Timeout:         time.Duration(config.ConnTimeout) * time.Second,
 		}

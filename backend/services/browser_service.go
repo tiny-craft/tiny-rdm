@@ -494,27 +494,68 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 	return keys, cursor, nil
 }
 
+// check if key exists
+func (b *browserService) existsKey(ctx context.Context, client redis.UniversalClient, key, keyType string) bool {
+	var keyExists atomic.Bool
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			if n := cli.Exists(ctx, key).Val(); n > 0 {
+				if len(keyType) <= 0 || strings.ToLower(keyType) == cli.Type(ctx, key).Val() {
+					keyExists.Store(true)
+				}
+			}
+			return nil
+		})
+	} else {
+		if n := client.Exists(ctx, key).Val(); n > 0 {
+			if len(keyType) <= 0 || strings.ToLower(keyType) == client.Type(ctx, key).Val() {
+				keyExists.Store(true)
+			}
+		}
+	}
+	return keyExists.Load()
+}
+
 // LoadNextKeys load next key from saved cursor
-func (b *browserService) LoadNextKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+func (b *browserService) LoadNextKeys(server string, db int, match, keyType string, exactMatch bool) (resp types.JSResp) {
 	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	if match == "*" {
+		exactMatch = false
+	}
 
 	client, ctx, count := item.client, item.ctx, item.stepSize
+	var matchKeys []any
+	var maxKeys int64
 	cursor := item.cursor[db]
-	keys, cursor, err := b.scanKeys(ctx, client, match, keyType, cursor, count)
-	if err != nil {
-		resp.Msg = err.Error()
-		return
+	fullScan := match == "*" || match == ""
+	if exactMatch && !fullScan {
+		if b.existsKey(ctx, client, match, keyType) {
+			matchKeys = []any{match}
+			maxKeys = 1
+		}
+		b.setClientCursor(server, db, 0)
+	} else {
+		matchKeys, cursor, err = b.scanKeys(ctx, client, match, keyType, cursor, count)
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		b.setClientCursor(server, db, cursor)
+		if fullScan {
+			maxKeys = b.loadDBSize(ctx, client)
+		} else {
+			maxKeys = int64(len(matchKeys))
+		}
 	}
-	b.setClientCursor(server, db, cursor)
-	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"keys":    keys,
+		"keys":    matchKeys,
 		"end":     cursor == 0,
 		"maxKeys": maxKeys,
 	}
@@ -522,7 +563,7 @@ func (b *browserService) LoadNextKeys(server string, db int, match, keyType stri
 }
 
 // LoadNextAllKeys load next all keys
-func (b *browserService) LoadNextAllKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+func (b *browserService) LoadNextAllKeys(server string, db int, match, keyType string, exactMatch bool) (resp types.JSResp) {
 	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -530,25 +571,39 @@ func (b *browserService) LoadNextAllKeys(server string, db int, match, keyType s
 	}
 
 	client, ctx := item.client, item.ctx
-	cursor := item.cursor[db]
-	keys, _, err := b.scanKeys(ctx, client, match, keyType, cursor, 0)
-	if err != nil {
-		resp.Msg = err.Error()
-		return
+	var matchKeys []any
+	var maxKeys int64
+	fullScan := match == "*" || match == ""
+	if exactMatch && !fullScan {
+		if b.existsKey(ctx, client, match, keyType) {
+			matchKeys = []any{match}
+			maxKeys = 1
+		}
+	} else {
+		cursor := item.cursor[db]
+		matchKeys, _, err = b.scanKeys(ctx, client, match, keyType, cursor, 0)
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
+		b.setClientCursor(server, db, 0)
+		if fullScan {
+			maxKeys = b.loadDBSize(ctx, client)
+		} else {
+			maxKeys = int64(len(matchKeys))
+		}
 	}
-	b.setClientCursor(server, db, 0)
-	maxKeys := b.loadDBSize(ctx, client)
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"keys":    keys,
+		"keys":    matchKeys,
 		"maxKeys": maxKeys,
 	}
 	return
 }
 
 // LoadAllKeys load all keys
-func (b *browserService) LoadAllKeys(server string, db int, match, keyType string) (resp types.JSResp) {
+func (b *browserService) LoadAllKeys(server string, db int, match, keyType string, exactMatch bool) (resp types.JSResp) {
 	item, err := b.getRedisClient(server, db)
 	if err != nil {
 		resp.Msg = err.Error()
@@ -556,15 +611,23 @@ func (b *browserService) LoadAllKeys(server string, db int, match, keyType strin
 	}
 
 	client, ctx := item.client, item.ctx
-	keys, _, err := b.scanKeys(ctx, client, match, keyType, 0, 0)
-	if err != nil {
-		resp.Msg = err.Error()
-		return
+	var matchKeys []any
+	fullScan := match == "*" || match == ""
+	if exactMatch && !fullScan {
+		if b.existsKey(ctx, client, match, keyType) {
+			matchKeys = []any{match}
+		}
+	} else {
+		matchKeys, _, err = b.scanKeys(ctx, client, match, keyType, 0, 0)
+		if err != nil {
+			resp.Msg = err.Error()
+			return
+		}
 	}
 
 	resp.Success = true
 	resp.Data = map[string]any{
-		"keys": keys,
+		"keys": matchKeys,
 	}
 	return
 }

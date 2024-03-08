@@ -24,6 +24,7 @@ export class RedisServerState {
      * @param {Object.<number, RedisDatabaseItem>} databases database list
      * @param {string|null} patternFilter pattern filter
      * @param {string|null} typeFilter redis type filter
+     * @param {boolean} exactFilter exact match filter keyword
      * @param {LoadingState} loadingState all loading state in opened connections map by server and LoadingState
      * @param {KeyViewType} viewType view type selection for all opened connections group by 'server'
      * @param {Map<string, RedisNodeItem>} nodeMap map nodes by "type#key"
@@ -35,6 +36,7 @@ export class RedisServerState {
         databases = {},
         patternFilter = null,
         typeFilter = null,
+        exactFilter = false,
         loadingState = {},
         viewType = KeyViewType.Tree,
         nodeMap = new Map(),
@@ -46,6 +48,7 @@ export class RedisServerState {
         this.databases = databases
         this.patternFilter = patternFilter
         this.typeFilter = typeFilter
+        this.exactFilter = exactFilter
         this.loadingState = loadingState
         this.viewType = viewType
         this.nodeMap = nodeMap
@@ -62,6 +65,7 @@ export class RedisServerState {
         this.stats = {}
         this.patternFilter = null
         this.typeFilter = null
+        this.exactFilter = false
         this.nodeMap.clear()
     }
 
@@ -447,6 +451,7 @@ export class RedisServerState {
         return {
             match: pattern,
             type: toUpper(this.typeFilter),
+            exact: this.exactFilter === true,
         }
     }
 
@@ -454,10 +459,12 @@ export class RedisServerState {
      * set key filter
      * @param {string} [pattern]
      * @param {string} [type]
+     * @param {boolean} [exact]
      */
-    setFilter({ pattern, type }) {
+    setFilter({ pattern, type, exact = false }) {
         this.patternFilter = pattern === null ? this.patternFilter : pattern
         this.typeFilter = type === null ? this.typeFilter : type
+        this.exactFilter = exact === true
     }
 
     /**

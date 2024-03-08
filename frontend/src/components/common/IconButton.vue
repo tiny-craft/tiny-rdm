@@ -1,8 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 import { NIcon } from 'naive-ui'
-
-const emit = defineEmits(['click'])
 
 const props = defineProps({
     tooltip: String,
@@ -35,8 +33,12 @@ const props = defineProps({
     tertiary: Boolean,
 })
 
+const emit = defineEmits(['click'])
+
+const slots = useSlots()
+
 const hasTooltip = computed(() => {
-    return props.tooltip || props.tTooltip
+    return props.tooltip || props.tTooltip || slots.tooltip
 })
 </script>
 
@@ -65,7 +67,9 @@ const hasTooltip = computed(() => {
                 </template>
             </n-button>
         </template>
-        {{ props.tTooltip ? $t(props.tTooltip) : props.tooltip }}
+        <slot name="tooltip">
+            {{ props.tTooltip ? $t(props.tTooltip) : props.tooltip }}
+        </slot>
     </n-tooltip>
     <n-button
         v-else

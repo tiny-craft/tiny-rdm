@@ -1,9 +1,9 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, nextTick, reactive } from 'vue'
 import { debounce, isEmpty, trim } from 'lodash'
 import { NButton, NInput } from 'naive-ui'
 import IconButton from '@/components/common/IconButton.vue'
-import Help from '@/components/icons/Help.vue'
+import SpellCheck from '@/components/icons/SpellCheck.vue'
 
 const props = defineProps({
     fullSearchIcon: {
@@ -22,17 +22,22 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    exact: {
+        type: Boolean,
+        default: false,
+    },
 })
 
-const emit = defineEmits(['filterChanged', 'matchChanged'])
+const emit = defineEmits(['filterChanged', 'matchChanged', 'exactChanged'])
 
 /**
  *
- * @type {UnwrapNestedRefs<{filter: string, match: string}>}
+ * @type {UnwrapNestedRefs<{filter: string, match: string, exact: boolean}>}
  */
 const inputData = reactive({
     match: '',
     filter: '',
+    exact: false,
 })
 
 const hasMatch = computed(() => {
@@ -43,25 +48,31 @@ const hasFilter = computed(() => {
     return !isEmpty(trim(inputData.filter))
 })
 
+const onExactChecked = () => {
+    // update search search result
+    if (hasMatch.value) {
+        nextTick(() => onForceFullSearch())
+    }
+}
+
 const onFullSearch = () => {
     inputData.filter = trim(inputData.filter)
     if (!isEmpty(inputData.filter)) {
         inputData.match = inputData.filter
         inputData.filter = ''
-        emit('matchChanged', inputData.match, inputData.filter)
+        emit('matchChanged', inputData.match, inputData.filter, inputData.exact)
     }
+}
+
+const onForceFullSearch = () => {
+    inputData.filter = trim(inputData.filter)
+    emit('matchChanged', inputData.match, inputData.filter, inputData.exact)
 }
 
 const _onInput = () => {
-    emit('filterChanged', inputData.filter)
+    emit('filterChanged', inputData.filter, inputData.exact)
 }
 const onInput = debounce(_onInput, props.debounceWait, { leading: true, trailing: true })
-
-const onKeyup = (evt) => {
-    if (evt.key === 'Enter') {
-        onFullSearch()
-    }
-}
 
 const onClearFilter = () => {
     inputData.filter = ''
@@ -77,9 +88,9 @@ const onClearMatch = () => {
     const changed = !isEmpty(inputData.match)
     inputData.match = ''
     if (changed) {
-        emit('matchChanged', inputData.match, inputData.filter)
+        emit('matchChanged', inputData.match, inputData.filter, inputData.exact)
     } else {
-        emit('filterChanged', inputData.filter)
+        emit('filterChanged', inputData.filter, inputData.exact)
     }
 }
 
@@ -99,7 +110,7 @@ defineExpose({
             clearable
             @clear="onClearFilter"
             @input="onInput"
-            @keyup.enter="onKeyup">
+            @keyup.enter="onFullSearch">
             <template #prefix>
                 <slot name="prefix" />
                 <n-tooltip v-if="hasMatch" placement="bottom">
@@ -117,12 +128,23 @@ defineExpose({
             </template>
             <template #suffix>
                 <template v-if="props.useGlob">
-                    <n-tooltip trigger="hover">
+                    <n-tooltip placement="bottom" trigger="hover">
                         <template #trigger>
-                            <n-icon :component="Help" />
+                            <n-tag
+                                v-model:checked="inputData.exact"
+                                :checkable="true"
+                                :type="props.exact ? 'primary' : 'default'"
+                                size="small"
+                                strong
+                                style="padding: 0 5px"
+                                @updateChecked="onExactChecked">
+                                <n-icon :size="14">
+                                    <spell-check :stroke-width="2" />
+                                </n-icon>
+                            </n-tag>
                         </template>
                         <div class="text-block" style="max-width: 600px">
-                            {{ $t('dialogue.filter.filter_pattern_tip') }}
+                            {{ $t('dialogue.filter.exact_match_tip') }}
                         </div>
                     </n-tooltip>
                 </template>
@@ -134,11 +156,17 @@ defineExpose({
             :disabled="hasMatch && !hasFilter"
             :icon="props.fullSearchIcon"
             :size="small ? 16 : 20"
+            :tooltip-delay="1"
             border
             small
             stroke-width="4"
-            t-tooltip="interface.full_search"
-            @click="onFullSearch" />
+            @click="onFullSearch">
+            <template #tooltip>
+                <div class="text-block" style="max-width: 600px">
+                    {{ $t('dialogue.filter.filter_pattern_tip') }}
+                </div>
+            </template>
+        </icon-button>
         <n-button v-else :disabled="hasMatch && !hasFilter" :focusable="false" @click="onFullSearch">
             {{ $t('interface.full_search') }}
         </n-button>
