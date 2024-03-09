@@ -9,25 +9,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "chart.js": "^4.4.1",
+    "chart.js": "^4.4.2",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.46.0",
     "pinia": "^2.1.7",
     "sass": "^1.71.1",
-    "vue": "^3.4.19",
+    "vue": "^3.4.21",
     "vue-chartjs": "^5.3.0",
-    "vue-i18n": "^9.9.1",
+    "vue-i18n": "^9.10.1",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "naive-ui": "^2.37.3",
+    "naive-ui": "^2.38.1",
     "prettier": "^3.2.5",
     "unplugin-auto-import": "^0.17.5",
     "unplugin-icons": "^0.18.5",
     "unplugin-vue-components": "^0.26.0",
-    "vite": "^5.1.4"
+    "vite": "^5.1.5"
   }
 }
