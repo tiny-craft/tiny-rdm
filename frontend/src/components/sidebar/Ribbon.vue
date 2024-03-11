@@ -110,9 +110,9 @@ const onSelectPreferenceMenu = (key) => {
             break
         case 'help':
             if (prefStore.currentLanguage === 'zh') {
-                BrowserOpenURL('https://redis.tinycraft.cc/zh/guide/intro.html')
+                BrowserOpenURL('https://redis.tinycraft.cc/zh/guide/')
             } else {
-                BrowserOpenURL('https://redis.tinycraft.cc/guide/intro.html')
+                BrowserOpenURL('https://redis.tinycraft.cc/guide/')
             }
             break
         case 'about':
