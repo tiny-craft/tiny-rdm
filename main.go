@@ -105,7 +105,7 @@ func main() {
 			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{
 				Title:   "Tiny RDM " + version,
-				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2023",
+				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2024",
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,

@@ -37,7 +37,7 @@ const onOpenWebsite = () => {
                 <n-text class="about-link" @click="onOpenWebsite">{{ $t('dialogue.about.website') }}</n-text>
             </n-space>
             <div :style="{ color: themeVars.textColor3 }" class="about-copyright">
-                Copyright © 2023 Tinycraft.cc All rights reserved
+                Copyright © 2024 Tinycraft.cc All rights reserved
             </div>
         </n-space>
     </n-modal>
