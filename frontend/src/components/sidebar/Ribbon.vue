@@ -17,6 +17,7 @@ import { useRender } from '@/utils/render.js'
 import wechatUrl from '@/assets/images/wechat_official.png'
 import QRCode from '@/components/icons/QRCode.vue'
 import Twitter from '@/components/icons/Twitter.vue'
+import { trackEvent } from '@/utils/analytics.js'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -122,17 +123,17 @@ const onSelectPreferenceMenu = (key) => {
 }
 
 const openWechatOfficial = () => {
-    umami && umami.track('open', { target: 'wechat_official' })
+    trackEvent('open', { target: 'wechat_official' })
     showWechat.value = true
 }
 
 const openX = () => {
-    umami && umami.track('open', { target: 'x' })
+    trackEvent('open', { target: 'x' })
     BrowserOpenURL('https://twitter.com/LykinHuang')
 }
 
 const openGithub = () => {
-    umami && umami.track('open', { target: 'github' })
+    trackEvent('open', { target: 'github' })
     BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm')
 }
 

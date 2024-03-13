@@ -27,8 +27,8 @@ func (p *PreferencesStorage) DefaultPreferences() types.Preferences {
 }
 
 func (p *PreferencesStorage) getPreferences() (ret types.Preferences) {
-	b, err := p.storage.Load()
 	ret = p.DefaultPreferences()
+	b, err := p.storage.Load()
 	if err != nil {
 		return
 	}

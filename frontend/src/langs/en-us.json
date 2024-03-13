@@ -46,7 +46,10 @@
       "key_icon_style2": "Dot",
       "key_icon_style3": "Common",
       "update": "Update",
-      "auto_check_update": "Auto check for updates"
+      "auto_check_update": "Auto check for updates",
+      "privacy": "Privacy",
+      "allow_track": "Allows anonymous data to be collected",
+      "track_tip": "In order to provide a better user experience, Tiny RDM collects some anonymous data to help optimize the software and improve the user experience, please rest assured that this does not involve your personal privacy information."
     },
     "editor": {
       "name": "Editor",
@@ -381,6 +384,12 @@
       "download_now": "Download Now",
       "later": "Later",
       "skip": "Skip This Version"
+    },
+    "welcome": {
+      "title": "Welcome to Tiny RDM！",
+      "content": "If you have any concerns, you can turn off this data collection feature at any time by going to Preferences. If you have any questions, feel free to contact the developer. I hope Tiny RDM can become your helpful assistant!",
+      "accept": "Help Improve",
+      "reject": "Reject"
     },
     "about": {
       "source": "Source Code",

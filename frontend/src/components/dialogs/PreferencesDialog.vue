@@ -258,6 +258,19 @@ const onClose = () => {
                                 {{ $t('preferences.general.auto_check_update') }}
                             </n-checkbox>
                         </n-form-item-gi>
+                        <n-form-item-gi :label="$t('preferences.general.privacy')" :span="24">
+                            <n-checkbox v-model:checked="prefStore.general.allowTrack">
+                                {{ $t('preferences.general.allow_track') }}
+                                <n-tooltip trigger="hover">
+                                    <template #trigger>
+                                        <n-icon :component="Help" />
+                                    </template>
+                                    <div class="text-block">
+                                        {{ $t('preferences.general.track_tip') }}
+                                    </div>
+                                </n-tooltip>
+                            </n-checkbox>
+                        </n-form-item-gi>
                     </n-grid>
                 </n-form>
             </n-tab-pane>

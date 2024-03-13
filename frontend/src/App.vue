@@ -8,11 +8,11 @@ import AddFieldsDialog from './components/dialogs/AddFieldsDialog.vue'
 import AppContent from './AppContent.vue'
 import GroupDialog from './components/dialogs/GroupDialog.vue'
 import DeleteKeyDialog from './components/dialogs/DeleteKeyDialog.vue'
-import { onMounted, ref, watch } from 'vue'
+import { h, onMounted, ref, watch } from 'vue'
 import usePreferencesStore from './stores/preferences.js'
 import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
-import { darkTheme } from 'naive-ui'
+import { darkTheme, NButton, NSpace } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
 import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
@@ -22,6 +22,8 @@ import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
 import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
 import { Info } from 'wailsjs/go/services/systemService.js'
 import DecoderDialog from '@/components/dialogs/DecoderDialog.vue'
+import { enableTrack, loadModule, trackEvent } from '@/utils/analytics.js'
+import { endsWith } from 'lodash'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -36,10 +38,64 @@ onMounted(async () => {
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
         }
-        Info().then(({ data }) => {
-            // const {os, arch, version} = data
-            umami && umami.track('startup', data)
+        loadModule(prefStore.general.allowTrack !== false).then(() => {
+            Info().then(({ data }) => {
+                if (endsWith(data.version, 'dev')) {
+                    enableTrack(false)
+                } else {
+                    trackEvent('startup', data, true)
+                }
+            })
         })
+
+        // show greetings and user behavior tracking statements
+        if (!!!prefStore.behavior.welcomed) {
+            const n = $notification.show({
+                title: i18n.t('dialogue.welcome.title'),
+                content: i18n.t('preferences.general.track_tip') + '\n\n' + i18n.t('dialogue.welcome.content'),
+                // duration: 5000,
+                keepAliveOnHover: true,
+                closable: false,
+                meta: ' ',
+                action: () =>
+                    h(
+                        NSpace,
+                        {},
+                        {
+                            default: () => [
+                                h(
+                                    NButton,
+                                    {
+                                        secondary: true,
+                                        type: 'tertiary',
+                                        onClick: () => {
+                                            prefStore.setAsWelcomed(false)
+                                            n.destroy()
+                                        },
+                                    },
+                                    {
+                                        default: () => i18n.t('dialogue.welcome.reject'),
+                                    },
+                                ),
+                                h(
+                                    NButton,
+                                    {
+                                        secondary: true,
+                                        type: 'primary',
+                                        onClick: () => {
+                                            prefStore.setAsWelcomed(true)
+                                            n.destroy()
+                                        },
+                                    },
+                                    {
+                                        default: () => i18n.t('dialogue.welcome.accept'),
+                                    },
+                                ),
+                            ],
+                        },
+                    ),
+            })
+        }
     } finally {
         initializing.value = false
     }

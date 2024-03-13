@@ -46,7 +46,10 @@
       "key_icon_style2": "점",
       "key_icon_style3": "일반",
       "update": "업데이트",
-      "auto_check_update": "자동 업데이트 확인"
+      "auto_check_update": "자동 업데이트 확인",
+      "privacy": "개인정보 보호정책",
+      "allow_track":"익명 데이터 수집을 허용합니다",
+      "track_tip":"Tiny RDM은 사용자 경험을 개선하기 위해 일부 익명 데이터를 수집하여 소프트웨어를 최적화하고 사용자 경험을 향상시키는 데 도움을 줍니다. 이는 귀하의 개인 정보와는 무관함을 안심하셔도 됩니다."
     },
     "editor": {
       "name": "편집기",
@@ -380,6 +383,12 @@
         "download_now": "지금 다운로드",
         "later": "나중에",
         "skip": "이 버전 건너뛰기"
+      },
+      "welcome": {
+        "title": "Tiny RDM을 사용해 주셔서 감사합니다!",
+        "content": "걱정되는 부분이 있다면 언제든지 '설정'에서 이 기능을 끌 수 있습니다. 궁금한 점이 있으면 개발자에게 문의하세요. Tiny RDM이 여러분께 좋은 도우미가 되기를 바랍니다!",
+        "accept":"개선 지원",
+        "reject":"거절"
       },
       "about": {
         "source": "소스 코드",

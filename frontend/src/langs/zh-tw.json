@@ -46,7 +46,10 @@
       "key_icon_style2": "點類型",
       "key_icon_style3": "通用圖示",
       "update": "更新",
-      "auto_check_update": "自動檢查更新"
+      "auto_check_update": "自動檢查更新",
+      "privacy": "隱私權政策",
+      "allow_track":"允許收集匿名數據",
+      "track_tip":"為了提供更好的使用者體驗，Tiny RDM 會收集一些匿名的數據，以幫助最佳化軟體和改進使用者體驗，請放心這不會涉及到您的個人隱私資訊。"
     },
     "editor": {
       "name": "編輯器",
@@ -381,6 +384,12 @@
       "download_now": "立即下載",
       "later": "稍後提醒我",
       "skip": "忽略本次更新"
+    },
+    "welcome": {
+      "title": "歡迎使用Tiny RDM！",
+      "content": "如果您對此有任何顧慮，可以隨時前往\"偏好設定\"中關閉此項數據收集功能。有任何問題可聯繫開發者，希望Tiny RDM可以成為您的好幫手！",
+      "accept": "幫助改進",
+      "reject": "不接受"
     },
     "about": {
       "source": "源碼地址",
