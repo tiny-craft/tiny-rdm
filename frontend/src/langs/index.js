@@ -6,6 +6,7 @@ import ko from './ko-kr'
 import ja from './ja-jp'
 import es from './es-es'
 import fr from './fr-fr'
+import ru from './ru-ru'
 
 export const lang = {
     en,
@@ -14,6 +15,7 @@ export const lang = {
     ja,
     ko,
     pt,
+    ru,
     zh,
     tw,
 }
