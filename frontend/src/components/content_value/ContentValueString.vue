@@ -77,10 +77,7 @@ const enableSave = computed(() => {
 })
 
 const displayValue = computed(() => {
-    if (props.loading) {
-        return ''
-    }
-    return viewAs.value || decodeRedisKey(props.value)
+    return viewAs.value || decodeRedisKey(props.value) || ''
 })
 
 const showMemoryUsage = computed(() => {
@@ -205,9 +202,7 @@ defineExpose({
             </n-button-group>
         </div>
         <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
-            <n-spin :show="props.loading || converting" />
             <content-editor
-                v-show="!(props.loading || converting)"
                 :content="displayValue"
                 :language="viewLanguage"
                 :loading="props.loading"
@@ -218,6 +213,7 @@ defineExpose({
                 @input="onInput"
                 @reset="onInput"
                 @save="onSave" />
+            <n-spin v-show="props.loading || converting" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="!isNaN(props.length)">{{ $t('interface.length') }}: {{ props.length }}</n-text>

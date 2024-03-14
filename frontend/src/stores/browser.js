@@ -467,16 +467,30 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} [decode]
          * @param {string} [format]
          * @param {string} [matchPattern]
+         * @param {boolean} [showLoading]
          * @return {Promise<void>}
          */
-        async reloadKey({ server, db, key, decode, format, matchPattern }) {
+        async reloadKey({ server, db, key, decode, format, matchPattern, showLoading = true }) {
             const tab = useTabStore()
             try {
-                tab.updateLoading({ server, db, loading: true })
+                if (showLoading) {
+                    tab.updateLoading({ server, db, loading: true })
+                }
                 await this.loadKeySummary({ server, db, key, clearValue: true })
-                await this.loadKeyDetail({ server, db, key, decode, format, matchPattern, reset: true })
+                await this.loadKeyDetail({
+                    server,
+                    db,
+                    key,
+                    decode,
+                    format,
+                    matchPattern,
+                    reset: true,
+                    showLoading: false,
+                })
             } finally {
-                tab.updateLoading({ server, db, loading: false })
+                if (showLoading) {
+                    tab.updateLoading({ server, db, loading: false })
+                }
             }
         },
 
@@ -490,16 +504,19 @@ const useBrowserStore = defineStore('browser', {
          * @param {string} [matchPattern]
          * @param {boolean} [reset]
          * @param {boolean} [full]
+         * @param {boolean} [showLoading]
          * @return {Promise<void>}
          */
-        async loadKeyDetail({ server, db, key, format, decode, matchPattern, reset, full }) {
+        async loadKeyDetail({ server, db, key, format, decode, matchPattern, reset, full, showLoading = true }) {
             const tab = useTabStore()
             const serverInst = this.servers[server]
             if (serverInst == null) {
                 return
             }
             try {
-                tab.updateLoading({ server, db, loading: true })
+                if (showLoading) {
+                    tab.updateLoading({ server, db, loading: true })
+                }
                 const [storeFormat, storeDecode] = serverInst.getDecodeHistory(key, db)
                 const { data, success, msg } = await GetKeyDetail({
                     server,
@@ -537,7 +554,9 @@ const useBrowserStore = defineStore('browser', {
                     $message.error('load key detail fail:' + msg)
                 }
             } finally {
-                tab.updateLoading({ server, db, loading: false })
+                if (showLoading) {
+                    tab.updateLoading({ server, db, loading: false })
+                }
             }
         },
 

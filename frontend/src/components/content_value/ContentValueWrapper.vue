@@ -120,6 +120,7 @@ const onReload = async (selDecode, selFormat) => {
             decode: targetDecode,
             format: targetFormat,
             matchPattern,
+            showLoading: false,
         })
     } finally {
     }

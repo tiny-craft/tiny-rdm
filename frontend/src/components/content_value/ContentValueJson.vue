@@ -47,10 +47,7 @@ const keyType = redisTypes.JSON
 const editingContent = ref('')
 
 const displayValue = computed(() => {
-    if (props.loading) {
-        return ''
-    }
-    return decodeRedisKey(props.value)
+    return decodeRedisKey(props.value) || ''
 })
 
 const enableSave = computed(() => {
@@ -144,9 +141,7 @@ defineExpose({
             </n-button-group>
         </div>
         <div class="value-wrapper value-item-part flex-item-expand flex-box-v">
-            <n-spin :show="props.loading" />
             <content-editor
-                v-show="!props.loading"
                 :content="displayValue"
                 :loading="props.loading"
                 :offset-key="props.keyPath"
@@ -157,6 +152,7 @@ defineExpose({
                 @input="onInput"
                 @reset="onInput"
                 @save="onSave" />
+            <n-spin v-show="props.loading" />
         </div>
         <div class="value-footer flex-box-h">
             <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ formatBytes(props.size) }}</n-text>
