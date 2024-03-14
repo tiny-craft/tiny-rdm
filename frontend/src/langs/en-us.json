@@ -48,8 +48,7 @@
       "update": "Update",
       "auto_check_update": "Auto check for updates",
       "privacy": "Privacy",
-      "allow_track": "Allows anonymous data to be collected",
-      "track_tip": "In order to provide a better user experience, Tiny RDM collects some anonymous data to help optimize the software and improve the user experience, please rest assured that this does not involve your personal privacy information."
+      "allow_track": "Allows anonymous data to be collected"
     },
     "editor": {
       "name": "Editor",
@@ -387,7 +386,7 @@
     },
     "welcome": {
       "title": "Welcome to Tiny RDM！",
-      "content": "If you have any concerns, you can turn off this data collection feature at any time by going to Preferences. If you have any questions, feel free to contact the developer. I hope Tiny RDM can become your helpful assistant!",
+      "content": "In order to provide a better user experience, Tiny RDM collects some anonymous data to help optimize the software and improve the user experience, please rest assured that this does not involve your personal privacy information.\n\nIf you have any concerns, you can turn off this data collection feature at any time by going to Preferences. If you have any questions, feel free to contact the developer. I hope Tiny RDM can become your helpful assistant!",
       "accept": "Help Improve",
       "reject": "Reject"
     },

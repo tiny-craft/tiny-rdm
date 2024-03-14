@@ -146,6 +146,19 @@ const decoderColumns = computed(() => {
     ]
 })
 
+const onOpenPrivacy = () => {
+    let helpUrl = ''
+    switch (prefStore.currentLanguage) {
+        case 'zh':
+            helpUrl = 'https://redis.tinycraft.cc/zh/guide/privacy.html'
+            break
+        default:
+            helpUrl = 'https://redis.tinycraft.cc/guide/privacy.html'
+            break
+    }
+    BrowserOpenURL(helpUrl)
+}
+
 const openDecodeHelp = () => {
     let helpUrl = ''
     switch (prefStore.currentLanguage) {
@@ -261,14 +274,9 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.privacy')" :span="24">
                             <n-checkbox v-model:checked="prefStore.general.allowTrack">
                                 {{ $t('preferences.general.allow_track') }}
-                                <n-tooltip trigger="hover">
-                                    <template #trigger>
-                                        <n-icon :component="Help" />
-                                    </template>
-                                    <div class="text-block">
-                                        {{ $t('preferences.general.track_tip') }}
-                                    </div>
-                                </n-tooltip>
+                                <n-button style="text-decoration: underline" text type="primary" @click="onOpenPrivacy">
+                                    {{ $t('preferences.general.privacy') }}
+                                </n-button>
                             </n-checkbox>
                         </n-form-item-gi>
                     </n-grid>

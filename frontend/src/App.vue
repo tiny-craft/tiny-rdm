@@ -51,8 +51,8 @@ onMounted(async () => {
         // show greetings and user behavior tracking statements
         if (!!!prefStore.behavior.welcomed) {
             const n = $notification.show({
-                title: i18n.t('dialogue.welcome.title'),
-                content: i18n.t('preferences.general.track_tip') + '\n\n' + i18n.t('dialogue.welcome.content'),
+                title: () => i18n.t('dialogue.welcome.title'),
+                content: () => i18n.t('dialogue.welcome.content'),
                 // duration: 5000,
                 keepAliveOnHover: true,
                 closable: false,

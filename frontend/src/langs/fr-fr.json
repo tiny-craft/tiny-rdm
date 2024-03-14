@@ -48,8 +48,7 @@
       "update": "Mise à jour",
       "auto_check_update": "Vérifier automatiquement les mises à jour",
       "privacy": "Politique de confidentialité",
-      "allow_track":"Autoriser la collecte de données anonymes",
-      "track_tip":"Afin d'offrir une meilleure expérience utilisateur, Tiny RDM collecte certaines données anonymes pour aider à optimiser le logiciel et améliorer l'expérience utilisateur. Soyez assuré que cela n'implique pas vos informations personnelles et privées."
+      "allow_track": "Autoriser la collecte de données anonymes"
     },
     "editor": {
       "name": "Éditeur",
@@ -387,9 +386,9 @@
     },
     "welcome": {
       "title": "Bienvenue dans Tiny RDM!",
-      "content": "Si vous avez des inquiétudes, vous pouvez désactiver cette fonction de collecte de données à tout moment en allant dans les Préférences. Si vous avez des questions, n'hésitez pas à contacter le développeur. J'espère que Tiny RDM pourra être un bon assistant pour vous!",
-      "accept":"Aider à Améliorer",
-      "reject":"Rejeter"
+      "content": "Afin d'offrir une meilleure expérience utilisateur, Tiny RDM collecte certaines données anonymes pour aider à optimiser le logiciel et améliorer l'expérience utilisateur. Soyez assuré que cela n'implique pas vos informations personnelles et privées.\n\nSi vous avez des inquiétudes, vous pouvez désactiver cette fonction de collecte de données à tout moment en allant dans les Préférences. Si vous avez des questions, n'hésitez pas à contacter le développeur. J'espère que Tiny RDM pourra être un bon assistant pour vous!",
+      "accept": "Aider à Améliorer",
+      "reject": "Rejeter"
     },
     "about": {
       "source": "Code source",
