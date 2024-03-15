@@ -70,25 +70,25 @@ Available to download for free from [here](https://github.com/tiny-craft/tiny-rd
 * Node.js >= 16
 * NPM >= 9
 
-### Install wails
+### Install Wails
 
 ```bash
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ```
 
-### Clone the code
+### Pull the Code
 
 ```bash
 git clone https://github.com/tiny-craft/tiny-rdm --depth=1
 ```
 
-### Build frontend
+### Build Frontend
 
 ```bash
 npm install --prefix ./frontend
 ```
 
-### Compile and run
+### Compile and Run
 
 ```bash
 wails dev
