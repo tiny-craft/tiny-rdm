@@ -14,7 +14,7 @@ import useConnectionStore from './stores/connections.js'
 import { useI18n } from 'vue-i18n'
 import { darkTheme, NButton, NSpace } from 'naive-ui'
 import KeyFilterDialog from './components/dialogs/KeyFilterDialog.vue'
-import { WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
+import { Environment, WindowSetDarkTheme, WindowSetLightTheme } from 'wailsjs/runtime/runtime.js'
 import { darkThemeOverrides, themeOverrides } from '@/utils/theme.js'
 import AboutDialog from '@/components/dialogs/AboutDialog.vue'
 import FlushDbDialog from '@/components/dialogs/FlushDbDialog.vue'
@@ -22,8 +22,7 @@ import ExportKeyDialog from '@/components/dialogs/ExportKeyDialog.vue'
 import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
 import { Info } from 'wailsjs/go/services/systemService.js'
 import DecoderDialog from '@/components/dialogs/DecoderDialog.vue'
-import { enableTrack, loadModule, trackEvent } from '@/utils/analytics.js'
-import { endsWith } from 'lodash'
+import { loadModule, trackEvent } from '@/utils/analytics.js'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -38,13 +37,10 @@ onMounted(async () => {
         if (prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
         }
-        loadModule(prefStore.general.allowTrack !== false).then(() => {
+        const env = await Environment()
+        loadModule(env.buildType !== 'dev' && prefStore.general.allowTrack !== false).then(() => {
             Info().then(({ data }) => {
-                if (endsWith(data.version, 'dev')) {
-                    enableTrack(false)
-                } else {
-                    trackEvent('startup', data, true)
-                }
+                trackEvent('startup', data, true)
             })
         })
 

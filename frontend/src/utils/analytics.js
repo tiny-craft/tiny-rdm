@@ -1,5 +1,4 @@
 let inited = false
-let allow = false
 
 /**
  * load umami analytics module
@@ -7,7 +6,6 @@ let allow = false
  * @return {Promise<void>}
  */
 export const loadModule = async (allowTrack = true) => {
-    allow = allowTrack !== false
     await new Promise((resolve, reject) => {
         const script = document.createElement('script')
         script.setAttribute('src', 'https://analytics.tinycraft.cc/script.js')
@@ -27,11 +25,7 @@ export const loadModule = async (allowTrack = true) => {
 }
 
 const enable = () => {
-    return inited && allow && umami
-}
-
-export const enableTrack = (enable) => {
-    allow = enable
+    return inited && umami
 }
 
 export const trackEvent = async (event, data) => {
