@@ -427,6 +427,7 @@ const networkRate = shallowRef({
 
 const chartOption = computed(() => {
     return {
+        animation: false,
         responsive: true,
         maintainAspectRatio: false,
         events: [],
@@ -464,6 +465,7 @@ const chartOption = computed(() => {
 
 const byteChartOption = computed(() => {
     return {
+        animation: false,
         responsive: true,
         maintainAspectRatio: false,
         events: [],
