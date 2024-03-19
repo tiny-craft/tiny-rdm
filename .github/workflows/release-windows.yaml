@@ -34,7 +34,7 @@ jobs:
         id: normalise_platform_name
         shell: bash
         run: |
-          pname=$(echo ${{ matrix.platform }} | sed -e 's/\//_/g')
+          pname=$(echo "${{ matrix.platform }}" | sed 's/windows\///g')
           echo "pname=$pname" >> "$GITHUB_OUTPUT"
 
       - name: Normalise version tag
