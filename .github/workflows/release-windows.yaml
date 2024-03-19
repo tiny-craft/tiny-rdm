@@ -116,7 +116,7 @@ jobs:
 
       - name: Rename installer
         working-directory: ./build/bin
-        run: Rename-Item -Path "TinyRDM-${{ steps.normalise_platform_name.outputs.pname }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.platform_name.outputs.tag }}.exe"
+        run: Rename-Item -Path "TinyRDM-${{ steps.normalise_platform_name.outputs.pname }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
 
       - name: Upload release asset (Installer)
         uses: softprops/action-gh-release@v1
