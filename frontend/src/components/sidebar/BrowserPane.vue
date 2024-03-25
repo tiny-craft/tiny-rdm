@@ -44,6 +44,7 @@ const browserStore = useBrowserStore()
 const connectionStore = useConnectionStore()
 const render = useRender()
 const browserTreeRef = ref(null)
+const filterInputRef = ref(null)
 const loading = ref(false)
 const fullyLoaded = ref(false)
 const inCheckState = ref(false)
@@ -207,6 +208,7 @@ const handleSelectDB = async (db) => {
         loading.value = true
         browserStore.setKeyFilter(props.server, {})
         browserStore.closeDatabase(props.server, props.db)
+        filterInputRef.value?.reset()
         await browserStore.openDatabase(props.server, db)
         await nextTick()
         await connectionStore.saveLastDB(props.server, db)
@@ -291,6 +293,7 @@ watch(
         <!-- top function bar -->
         <div class="flex-box-h nav-pane-func" style="height: 36px">
             <content-search-input
+                ref="filterInputRef"
                 :debounce-wait="1000"
                 :full-search-icon="Search"
                 small
