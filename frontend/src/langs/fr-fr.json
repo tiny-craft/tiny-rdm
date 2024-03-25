@@ -456,7 +456,7 @@
     "copy_log": "Copier le journal",
     "save_log": "Enregistrer le journal",
     "clean_log": "Nettoyer le journal",
-    "always_show_last": "Toujours afficher les dernières"
+    "always_show_last": "Défilement automatique vers le dernier message"
   },
   "pubsub": {
     "title": "Pub/Sub",
@@ -469,6 +469,6 @@
     "channel": "Canal",
     "message": "Message",
     "receive_message": "{total} messages reçus",
-    "always_show_last": "Toujours afficher les derniers"
+    "always_show_last": "Défilement automatique vers le dernier message"
   }
 }

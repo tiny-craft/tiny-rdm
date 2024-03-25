@@ -456,7 +456,7 @@
     "copy_log": "Copy Log",
     "save_log": "Save Log",
     "clean_log": "Clean Log",
-    "always_show_last": "Always Show Latest"
+    "always_show_last": "Auto Scroll to Latest"
   },
   "pubsub": {
     "title": "Pub/Sub",
@@ -469,6 +469,6 @@
     "channel": "Channel",
     "message": "Message",
     "receive_message": "Received {total} messages",
-    "always_show_last": "Always Show Latest"
+    "always_show_last": "Auto Scroll to Latest"
   }
 }

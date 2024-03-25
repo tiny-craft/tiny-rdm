@@ -456,7 +456,7 @@
     "copy_log": "複製日誌",
     "save_log": "儲存日誌",
     "clean_log": "清空日誌",
-    "always_show_last": "總是顯示最新"
+    "always_show_last": "自動捲動到最新"
   },
   "pubsub": {
     "title": "發佈訂閱",
@@ -469,6 +469,6 @@
     "channel": "頻道",
     "message": "訊息",
     "receive_message": "已接收訊息 {total} 條",
-    "always_show_last": "總是顯示最新"
+    "always_show_last": "自動捲動到最新"
   }
 }

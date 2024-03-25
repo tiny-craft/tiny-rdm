@@ -456,7 +456,7 @@
     "copy_log": "로그 복사",
     "save_log": "로그 저장",
     "clean_log": "로그 지우기",
-    "always_show_last": "최신 항목 계속 표시"
+    "always_show_last": "최신 내용으로 자동 스크롤"
   },
   "pubsub": {
     "title": "Pub/Sub",
@@ -469,6 +469,6 @@
     "channel": "채널",
     "message": "메시지",
     "receive_message": "{total}개의 메시지를 받았습니다",
-    "always_show_last": "최신 항목 계속 표시"
+    "always_show_last": "최신 내용으로 자동 스크롤"
   }
 }

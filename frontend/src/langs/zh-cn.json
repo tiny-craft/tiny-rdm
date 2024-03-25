@@ -456,7 +456,7 @@
     "copy_log": "复制日志",
     "save_log": "保存日志",
     "clean_log": "清空日志",
-    "always_show_last": "总是显示最新"
+    "always_show_last": "自动滚到最新"
   },
   "pubsub": {
     "title": "发布订阅",
@@ -469,6 +469,6 @@
     "channel": "频道",
     "message": "消息",
     "receive_message": "已接收消息 {total} 条",
-    "always_show_last": "总是显示最新"
+    "always_show_last": "自动滚到最新"
   }
 }

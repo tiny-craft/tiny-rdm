@@ -456,7 +456,7 @@
     "copy_log": "ログをコピー",
     "save_log": "ログを保存",
     "clean_log": "ログをクリア",
-    "always_show_last": "最新を常に表示"
+    "always_show_last": "最新に自動スクロール"
   },
   "pubsub": {
     "title": "パブ/サブ",
@@ -469,6 +469,6 @@
     "channel": "チャンネル",
     "message": "メッセージ",
     "receive_message": "{total}件のメッセージを受信しました",
-    "always_show_last": "最新を常に表示"
+    "always_show_last": "最新に自動スクロール"
   }
 }
