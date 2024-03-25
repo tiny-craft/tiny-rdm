@@ -1,4 +1,4 @@
-import { isEmpty, remove, size, sortedIndexBy, sumBy } from 'lodash'
+import { isEmpty, remove, size, sumBy } from 'lodash'
 import { ConnectionType } from '@/consts/connection_type.js'
 
 /**
@@ -69,6 +69,46 @@ export class RedisNodeItem {
     }
 
     /**
+     * compare two items to determine the sort order
+     * @param {*} a
+     * @param {*} b
+     * @return {number}
+     */
+    _sortingCompare(a, b) {
+        if (a.type !== b.type) {
+            return a.type - b.type
+        }
+        const isANum = isNaN(a.label)
+        const isBNum = isNaN(b.label)
+        if (!isANum && !isBNum) {
+            return parseInt(a.label, 10) - parseInt(b.label, 10)
+        } else if (!isANum) {
+            return -1
+        } else if (!isBNum) {
+            return 1
+        }
+        return a.label.localeCompare(b.label)
+    }
+
+    /**
+     * calculate insert sorted index
+     * @param {[]} arr
+     * @param {*} item
+     * @return {number}
+     */
+    _sortedIndex(arr, item) {
+        for (let i = 0; i < arr.length; i++) {
+            const cmpResult = this._sortingCompare(arr[i], item)
+            if (cmpResult > 0) {
+                return i
+            } else if (cmpResult === 0) {
+                return i + 1
+            }
+        }
+        return arr.length
+    }
+
+    /**
      * sort all node item's children and calculate keys count
      * @param skipSort skip sorting children
      * @returns {boolean} return whether key count changed
@@ -98,9 +138,7 @@ export class RedisNodeItem {
     }
 
     sortChildren() {
-        this.children.sort((a, b) => {
-            return a.key > b.key ? 1 : -1
-        })
+        this.children.sort(this._sortingCompare)
     }
 
     /**
@@ -112,7 +150,7 @@ export class RedisNodeItem {
         if (!!!sorted) {
             this.children.push(child)
         } else {
-            const idx = sortedIndexBy(this.children, child, 'key')
+            const idx = this._sortedIndex(this.children, child)
             this.children.splice(idx, 0, child)
         }
     }
