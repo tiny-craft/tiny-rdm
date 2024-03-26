@@ -2561,6 +2561,7 @@ func (b *browserService) GetSlowLogs(server string, num int64) (resp types.JSRes
 		resp.Msg = err.Error()
 		return
 	}
+	num = max(1, num)
 
 	client, ctx := item.client, item.ctx
 	var logs []redis.SlowLog

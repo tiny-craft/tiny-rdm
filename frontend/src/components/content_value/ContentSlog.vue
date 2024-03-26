@@ -178,6 +178,7 @@ const onListLimitChanged = (limit) => {
             <n-form-item :label="$t('slog.limit')">
                 <n-input-number
                     v-model:value="data.listLimit"
+                    :min="1"
                     :max="9999"
                     style="width: 120px"
                     @update:value="onListLimitChanged" />
