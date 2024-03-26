@@ -109,7 +109,7 @@ func main() {
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,
-			WindowIsTranslucent:  true,
+			WindowIsTranslucent:  false,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent:              true,
