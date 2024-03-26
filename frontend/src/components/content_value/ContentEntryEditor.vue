@@ -12,9 +12,10 @@ import WindowClose from '@/components/icons/WindowClose.vue'
 import Pin from '@/components/icons/Pin.vue'
 import OffScreen from '@/components/icons/OffScreen.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
-import { toString } from 'lodash'
+import { isEmpty, toString } from 'lodash'
 
 const props = defineProps({
+    keyPath: String,
     show: {
         type: Boolean,
     },
@@ -58,8 +59,8 @@ const emit = defineEmits([
 
 watchEffect(
     () => {
-        if (props.show && props.value != null) {
-            onFormatChanged()
+        if (props.show && !isEmpty(props.keyPath)) {
+            onFormatChanged(props.decode, props.format)
         } else {
             viewAs.value = ''
         }
@@ -127,6 +128,8 @@ const onFormatChanged = async (decode = null, format = null) => {
         editingContent.value = viewAs.value = value
         viewAs.decode = decode || retDecode
         viewAs.format = format || retFormat
+        emit('update:decode', viewAs.decode)
+        emit('update:format', viewAs.format)
     } finally {
         loading.value = false
     }

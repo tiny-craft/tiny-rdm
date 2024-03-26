@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, reactive, ref } from 'vue'
+import { computed, h, nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NIcon, useThemeVars } from 'naive-ui'
@@ -115,6 +115,8 @@ const valueColumn = computed(() => ({
 const startEdit = async (no, value) => {
     currentEditRow.no = no
     currentEditRow.value = value
+    currentEditRow.decode = props.decode
+    currentEditRow.format = props.format
 }
 
 /**
@@ -157,6 +159,9 @@ const saveEdit = async (pos, value, decode, format) => {
 const resetEdit = () => {
     currentEditRow.no = 0
     currentEditRow.value = null
+    if (currentEditRow.format !== props.format || currentEditRow.decode !== props.decode) {
+        nextTick(() => onFormatChanged(currentEditRow.decode, currentEditRow.format))
+    }
 }
 
 const actionColumn = {
@@ -367,12 +372,13 @@ defineExpose({
                 class="entry-editor-container flex-item-expand"
                 style="width: 100%">
                 <content-entry-editor
+                    v-model:decode="currentEditRow.decode"
+                    v-model:format="currentEditRow.format"
                     v-model:fullscreen="fullEdit"
-                    :decode="currentEditRow.decode"
                     :field="currentEditRow.no"
                     :field-label="$t('common.index')"
                     :field-readonly="true"
-                    :format="currentEditRow.format"
+                    :key-path="props.keyPath"
                     :show="inEdit"
                     :value="currentEditRow.value"
                     :value-label="$t('common.value')"

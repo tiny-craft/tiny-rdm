@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, reactive, ref } from 'vue'
+import { computed, h, nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NIcon, useThemeVars } from 'naive-ui'
@@ -166,6 +166,8 @@ const startEdit = async (no, score, value) => {
     currentEditRow.no = no
     currentEditRow.score = score
     currentEditRow.value = value
+    currentEditRow.decode = props.decode
+    currentEditRow.format = props.format
 }
 
 const saveEdit = async (field, value, decode, format) => {
@@ -204,8 +206,9 @@ const resetEdit = () => {
     currentEditRow.no = 0
     currentEditRow.score = 0
     currentEditRow.value = null
-    currentEditRow.format = formatTypes.RAW
-    currentEditRow.decode = decodeTypes.NONE
+    if (currentEditRow.format !== props.format || currentEditRow.decode !== props.decode) {
+        nextTick(() => onFormatChanged(currentEditRow.decode, currentEditRow.format))
+    }
 }
 
 const actionColumn = {
@@ -403,11 +406,12 @@ defineExpose({
                 class="entry-editor-container flex-item-expand"
                 style="width: 100%">
                 <content-entry-editor
+                    v-model:decode="currentEditRow.decode"
+                    v-model:format="currentEditRow.format"
                     v-model:fullscreen="fullEdit"
-                    :decode="currentEditRow.decode"
                     :field="currentEditRow.score"
                     :field-label="$t('common.score')"
-                    :format="currentEditRow.format"
+                    :key-path="props.keyPath"
                     :show="inEdit"
                     :value="currentEditRow.value"
                     :value-label="$t('common.value')"
