@@ -253,7 +253,18 @@ const onClose = () => {
                         <n-form-item-gi :label="$t('preferences.general.font_size')" :span="24">
                             <n-input-number v-model:value="prefStore.general.fontSize" :max="65535" :min="1" />
                         </n-form-item-gi>
-                        <n-form-item-gi :label="$t('preferences.general.scan_size')" :span="12">
+                        <n-form-item-gi :span="12">
+                            <template #label>
+                                {{ $t('preferences.general.scan_size') }}
+                                <n-tooltip trigger="hover">
+                                    <template #trigger>
+                                        <n-icon :component="Help" />
+                                    </template>
+                                    <div class="text-block">
+                                        {{ $t('preferences.general.scan_size_tip') }}
+                                    </div>
+                                </n-tooltip>
+                            </template>
                             <n-input-number
                                 v-model:value="prefStore.general.scanSize"
                                 :min="1"
