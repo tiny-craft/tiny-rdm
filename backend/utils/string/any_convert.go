@@ -2,7 +2,6 @@ package strutil
 
 import (
 	"encoding/json"
-	"regexp"
 	"strconv"
 	"strings"
 	sliceutil "tinyrdm/backend/utils/slice"
@@ -133,14 +132,32 @@ func AnyToString(value interface{}, prefix string, layer int) (s string) {
 //}
 
 func SplitCmd(cmd string) []string {
-	re := regexp.MustCompile(`'[^']+'|"[^"]+"|\S+`)
-	args := re.FindAllString(cmd, -1)
-	return sliceutil.FilterMap(args, func(i int) (string, bool) {
-		arg := strings.Trim(args[i], "\"")
-		arg = strings.Trim(arg, "'")
-		if len(arg) <= 0 {
-			return "", false
+	var result []string
+	var curStr strings.Builder
+	var preChar int32
+	inQuotes := false
+
+	for _, char := range cmd {
+		if char == '"' && preChar != '\\' {
+			inQuotes = !inQuotes
+		} else if char == ' ' && !inQuotes {
+			if curStr.Len() > 0 {
+				if part, e := strconv.Unquote(`"` + curStr.String() + `"`); e == nil {
+					result = append(result, part)
+				}
+				curStr.Reset()
+			}
+		} else {
+			curStr.WriteByte(byte(char))
 		}
-		return arg, true
-	})
+		preChar = char
+	}
+
+	if curStr.Len() > 0 {
+		if part, e := strconv.Unquote(`"` + curStr.String() + `"`); e == nil {
+			result = append(result, part)
+		}
+	}
+
+	return result
 }
