@@ -17,8 +17,10 @@ type PreferencesStorage struct {
 }
 
 func NewPreferences() *PreferencesStorage {
+	storage := NewLocalStore("preferences.yaml")
+	log.Printf("preferences path: %s\n", storage.ConfPath)
 	return &PreferencesStorage{
-		storage: NewLocalStore("preferences.yaml"),
+		storage: storage,
 	}
 }
 

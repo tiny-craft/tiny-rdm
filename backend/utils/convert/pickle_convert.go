@@ -1,5 +1,7 @@
 package convutil
 
+import "os/exec"
+
 type PickleConvert struct {
 	CmdConvert
 }
@@ -40,9 +42,9 @@ func NewPickleConvert() *PickleConvert {
 	}
 	c.DecodePath, c.EncodePath = "python3", "python3"
 	var err error
-	if _, err = runCommand(c.DecodePath, "--version"); err != nil {
+	if _, err = exec.LookPath(c.DecodePath); err != nil {
 		c.DecodePath, c.EncodePath = "python", "python"
-		if _, err = runCommand(c.DecodePath, "--version"); err != nil {
+		if _, err = exec.LookPath(c.DecodePath); err != nil {
 			return nil
 		}
 	}

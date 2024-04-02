@@ -1,5 +1,9 @@
 package convutil
 
+import (
+	"os/exec"
+)
+
 type PhpConvert struct {
 	CmdConvert
 }
@@ -47,7 +51,7 @@ func NewPhpConvert() *PhpConvert {
 	}
 
 	var err error
-	if _, err = runCommand(c.DecodePath, "-v"); err != nil {
+	if _, err = exec.LookPath(c.DecodePath); err != nil {
 		return nil
 	}
 

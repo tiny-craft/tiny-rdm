@@ -117,6 +117,7 @@ func main() {
 			DisableFramelessWindowDecorations: true,
 		},
 		Linux: &linux.Options{
+			ProgramName:         "Tiny RDM",
 			Icon:                icon,
 			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
 			WindowIsTranslucent: true,
