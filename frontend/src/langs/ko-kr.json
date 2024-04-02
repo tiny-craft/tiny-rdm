@@ -39,7 +39,7 @@
       "font": "폰트",
       "font_tip": "폰트 선택 또는 이름 입력",
       "font_size": "폰트 크기",
-      "scan_size": "한 번에 로드되는 요소 수",
+      "scan_size": "SCAN 기본 크기",
       "scan_size_tip": "SCAN/HSCAN/SSCAN/ZSCAN 명령에서 한 번에 반환되는 요소 수",
       "key_icon_style": "키 아이콘 스타일",
       "key_icon_style0": "간략한 타입",

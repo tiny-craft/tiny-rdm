@@ -39,7 +39,7 @@
       "font": "Font",
       "font_tip": "Select or input font name",
       "font_size": "Font Size",
-      "scan_size": "The Number of Elements per load",
+      "scan_size": "Default Size for SCAN",
       "scan_size_tip": "Default return number of elements for SCAN/HSCAN/SSCAN/ZSCAN",
       "key_icon_style": "Key Icon Style",
       "key_icon_style0": "Compact",

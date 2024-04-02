@@ -39,7 +39,7 @@
       "font": "Fuente",
       "font_tip": "Seleccione o ingrese el nombre de la fuente",
       "font_size": "Tamaño de fuente",
-      "scan_size": "Número de elementos por carga",
+      "scan_size": "Tamaño predeterminado para SCAN",
       "scan_size_tip": "Número de elementos devueltos por los comandos SCAN/HSCAN/SSCAN/ZSCAN",
       "key_icon_style": "Estilo de icono de clave",
       "key_icon_style0": "Compacto",

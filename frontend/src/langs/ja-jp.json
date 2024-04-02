@@ -39,7 +39,7 @@
       "font": "フォント",
       "font_tip": "フォント名を選択または入力してください",
       "font_size": "フォントサイズ",
-      "scan_size": "1回の読み込み数",
+      "scan_size": "SCANコマンドのデフォルトサイズ",
       "scan_size_tip": "SCAN/HSCAN/SSCAN/ZSCAN コマンドで1回に返される要素の数",
       "key_icon_style": "キーアイコンのスタイル",
       "key_icon_style0": "コンパクトタイプ",
