@@ -133,7 +133,7 @@ onMounted(async () => {
                     }">
                     <n-space :size="3" :wrap="false" :wrap-item="false" align="center">
                         <n-avatar :size="32" :src="iconUrl" color="#0000" style="min-width: 32px" />
-                        <div style="min-width: 68px; font-weight: 800">Tiny RDM</div>
+                        <div style="min-width: 68px; white-space: nowrap; font-weight: 800">Tiny RDM</div>
                         <transition name="fade">
                             <n-text v-if="tabStore.nav === 'browser'" class="ellipsis" strong style="font-size: 13px">
                                 - {{ tabStore.currentTabName }}
