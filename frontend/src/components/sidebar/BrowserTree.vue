@@ -496,8 +496,8 @@ const nodeProps = ({ option }) => {
                 return
             }
             contextMenuParam.show = false
-            contextMenuParam.options = markRaw(menuOptions[option.type] || [])
             nextTick().then(() => {
+                contextMenuParam.options = markRaw(menuOptions[option.type] || [])
                 contextMenuParam.x = e.clientX
                 contextMenuParam.y = e.clientY
                 contextMenuParam.show = true
