@@ -100,7 +100,7 @@ defineExpose({
 </script>
 
 <template>
-    <n-input-group>
+    <n-input-group style="overflow: hidden">
         <slot name="prepend" />
         <n-input
             v-model:value="inputData.filter"
@@ -175,10 +175,22 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-//:deep(.n-input__prefix) {
-//    max-width: 50%;
-//}
-//:deep(.n-tag__content) {
-//    overflow: hidden;
-//}
+:deep(.n-input) {
+    width: 100%;
+    overflow: hidden;
+}
+
+:deep(.n-input__prefix) {
+    max-width: 50%;
+
+    & > div {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+:deep(.n-tag__content) {
+    overflow: hidden;
+    max-width: 100%;
+}
 </style>

@@ -341,7 +341,7 @@ defineExpose({
     <div class="content-wrapper flex-box-v">
         <slot name="toolbar" />
         <div class="tb2 value-item-part flex-box-h">
-            <div class="flex-box-h">
+            <div class="flex-box-h" style="max-width: 50%">
                 <content-search-input
                     ref="searchInputRef"
                     @filter-changed="onFilterInput"
