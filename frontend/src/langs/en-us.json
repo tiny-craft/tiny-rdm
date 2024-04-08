@@ -264,8 +264,8 @@
         "auto_discover": "Auto Discover",
         "password": "Master Password",
         "username": "Master Username",
-        "pwd_tip": "(Optional) Master auth username",
-        "usr_tip": "(Optional) Master auth password (Redis > 6.0)"
+        "pwd_tip": "(Optional) Master auth password (Redis > 6.0)",
+        "usr_tip": "(Optional) Master auth username"
       },
       "cluster": {
         "title": "Cluster",

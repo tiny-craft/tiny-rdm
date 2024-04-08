@@ -264,8 +264,8 @@
         "auto_discover": "자동 탐색",
         "password": "마스터 비밀번호",
         "username": "마스터 사용자 이름",
-        "pwd_tip": "(선택) 마스터 인증 사용자 이름",
-        "usr_tip": "(선택) 마스터 인증 비밀번호 (Redis > 6.0)"
+        "pwd_tip": "(선택) 마스터 인증 비밀번호 (Redis > 6.0)",
+        "usr_tip": "(선택) 마스터 인증 사용자 이름"
       },
       "cluster": {
         "title": "클러스터 모드",

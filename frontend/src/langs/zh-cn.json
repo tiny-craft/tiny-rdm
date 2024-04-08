@@ -264,8 +264,8 @@
         "auto_discover": "自动查询组名",
         "password": "主节点密码",
         "username": "主节点用户名",
-        "pwd_tip": "(可选)主节点服务授权用户名",
-        "usr_tip": "(可选)主节点服务授权密码 (Redis > 6.0)"
+        "pwd_tip": "(可选)主节点服务授权密码 (Redis > 6.0)",
+        "usr_tip": "(可选)主节点服务授权用户名"
       },
       "cluster": {
         "title": "集群模式",

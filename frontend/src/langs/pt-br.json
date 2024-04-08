@@ -264,8 +264,8 @@
         "auto_discover": "Auto Descoberta",
         "password": "Senha para Nó Master",
         "username": "Nome de Usuário para Nó Master",
-        "pwd_tip": "(Opcional) Nome de usuário para autenticação no nó master",
-        "usr_tip": "(Opcional) Senha de autenticação no nó master (Redis > 6.0)"
+        "pwd_tip": "(Opcional) Senha de autenticação no nó master (Redis > 6.0)",
+        "usr_tip": "(Opcional) Nome de usuário para autenticação no nó master"
       },
       "cluster": {
         "title": "Cluster",

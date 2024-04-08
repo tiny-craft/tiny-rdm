@@ -264,8 +264,8 @@
         "auto_discover": "Descubrimiento automático",
         "password": "Contraseña del maestro",
         "username": "Usuario del maestro",
-        "pwd_tip": "(Opcional) Usuario de autenticación del maestro",
-        "usr_tip": "(Opcional) Contraseña de autenticación del maestro (Redis > 6.0)"
+        "pwd_tip": "(Opcional) Contraseña de autenticación del maestro (Redis > 6.0)",
+        "usr_tip": "(Opcional) Usuario de autenticación del maestro"
       },
       "cluster": {
         "title": "Clúster",

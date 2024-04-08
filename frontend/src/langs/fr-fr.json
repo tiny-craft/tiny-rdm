@@ -264,8 +264,8 @@
         "auto_discover": "Découverte automatique",
         "password": "Mot de passe principal",
         "username": "Nom d'utilisateur principal",
-        "pwd_tip": "(Optionnel) Nom d'utilisateur d'authentification principal",
-        "usr_tip": "(Optionnel) Mot de passe d'authentification principal (Redis > 6.0)"
+        "pwd_tip": "(Optionnel) Mot de passe d'authentification principal (Redis > 6.0)",
+        "usr_tip": "(Optionnel) Nom d'utilisateur d'authentification principal"
       },
       "cluster": {
         "title": "Cluster",
