@@ -170,7 +170,7 @@ const onSaveConnection = async () => {
         generalForm.value.addr = ''
         generalForm.value.port = 0
     } else {
-        generalForm.value.network = ''
+        generalForm.value.network = 'tcp'
         generalForm.value.sock = ''
     }
 
