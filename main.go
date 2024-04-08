@@ -50,7 +50,7 @@ func main() {
 	}
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	app := &options.App{
 		Title:                    "Tiny RDM",
 		Width:                    windowWidth,
 		Height:                   windowHeight,
@@ -122,9 +122,10 @@ func main() {
 			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
 			WindowIsTranslucent: true,
 		},
-	})
+	}
 
-	if err != nil {
+	// run application
+	if err := wails.Run(app); err != nil {
 		println("Error:", err.Error())
 	}
 }
