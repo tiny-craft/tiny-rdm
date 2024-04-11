@@ -3,6 +3,7 @@ Version: {{.Info.ProductVersion}}
 Section: base
 Priority: optional
 Architecture: amd64
+Depends: libwebkit2gtk-4.0-37
 Maintainer: {{.Author.Name}} <{{.Author.Email}}>
 Homepage: https://redis.tinycraft.cc/
 Description: {{.Info.Comments}}
