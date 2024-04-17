@@ -137,7 +137,7 @@ func SplitCmd(cmd string) []string {
 	var preChar int32
 	inQuotes := false
 
-	for _, char := range cmd {
+	for _, char := range []rune(cmd) {
 		if char == '"' && preChar != '\\' {
 			inQuotes = !inQuotes
 		} else if char == ' ' && !inQuotes {
@@ -148,7 +148,7 @@ func SplitCmd(cmd string) []string {
 				curStr.Reset()
 			}
 		} else {
-			curStr.WriteByte(byte(char))
+			curStr.WriteRune(char)
 		}
 		preChar = char
 	}
