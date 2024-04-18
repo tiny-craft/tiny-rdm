@@ -724,6 +724,7 @@ const useTabStore = defineStore('tab', {
                 if (keys == null) {
                     // select nothing
                     tab.selectedKeys = []
+                    tab.activatedKey = null
                 } else if (typeof keys === 'string') {
                     tab.selectedKeys = [keys]
                 } else {
