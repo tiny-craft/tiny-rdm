@@ -71,6 +71,7 @@ const viewAs = reactive({
 })
 
 const editingContent = ref('')
+const resetKey = ref('')
 
 const enableSave = computed(() => {
     return editingContent.value !== viewAs.value && !props.loading
@@ -110,6 +111,7 @@ const onFormatChanged = async (decode = '', format = '') => {
         viewAs.decode = decode || retDecode
         viewAs.format = format || retFormat
         browserStore.setSelectedFormat(props.name, props.keyPath, props.db, viewAs.format, viewAs.decode)
+        resetKey.value = Date.now().toString()
     } finally {
         converting.value = false
     }
@@ -207,6 +209,7 @@ defineExpose({
                 :language="viewLanguage"
                 :loading="props.loading"
                 :offset-key="props.keyPath"
+                :reset-key="resetKey"
                 class="flex-item-expand"
                 keep-offset
                 style="height: 100%"

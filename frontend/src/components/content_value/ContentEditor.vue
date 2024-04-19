@@ -23,6 +23,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    resetKey: {
+        type: String,
+        default: '',
+    },
     offsetKey: {
         type: String,
         default: '',
@@ -139,6 +143,17 @@ watch(
         if (editorNode != null) {
             editorNode.setValue(content)
             await nextTick(() => emit('reset', content))
+            updateScroll()
+        }
+    },
+)
+
+watch(
+    () => props.resetKey,
+    async () => {
+        if (editorNode != null) {
+            editorNode.setValue(props.content)
+            await nextTick(() => emit('reset', props.content))
             updateScroll()
         }
     },
