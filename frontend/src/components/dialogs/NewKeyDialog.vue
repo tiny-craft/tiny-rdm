@@ -191,13 +191,14 @@ const onImport = () => {
     <n-modal
         v-model:show="dialogStore.newKeyDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('dialogue.key.new')"
+        close-on-esc
         preset="dialog"
         style="width: 600px"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-scrollbar ref="scrollRef" style="max-height: 500px">
             <n-form
                 ref="newFormRef"

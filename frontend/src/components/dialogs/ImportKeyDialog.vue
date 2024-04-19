@@ -103,12 +103,13 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.importKeyDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('dialogue.import.name')"
+        close-on-esc
         preset="dialog"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-spin :show="loading">
             <n-form :model="importKeyForm" :show-require-mark="false" label-placement="top">
                 <n-grid :x-gap="10">

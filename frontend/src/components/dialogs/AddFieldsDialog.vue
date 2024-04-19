@@ -197,7 +197,6 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.addFieldsDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
         :negative-text="$t('common.cancel')"
@@ -205,9 +204,11 @@ const onClose = () => {
         :positive-text="$t('common.confirm')"
         :show-icon="false"
         :title="title ? $t(title) : ''"
+        close-on-esc
         preset="dialog"
         style="width: 600px"
         transform-origin="center"
+        @esc="onClose"
         @positive-click="onAdd"
         @negative-click="onClose">
         <n-scrollbar style="max-height: 500px">

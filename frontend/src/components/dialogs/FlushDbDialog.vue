@@ -54,12 +54,13 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.flushDBDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('interface.flush_db')"
+        close-on-esc
         preset="dialog"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-spin :show="loading">
             <n-form :model="flushForm" :show-require-mark="false" label-placement="top">
                 <n-form-item :label="$t('dialogue.key.server')">

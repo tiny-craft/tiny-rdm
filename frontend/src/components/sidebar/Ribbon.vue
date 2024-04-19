@@ -204,11 +204,7 @@ const exThemeVars = computed(() => {
         </div>
 
         <!-- wechat official modal -->
-        <n-modal
-            :show="showWechat"
-            transform-origin="center"
-            @close="showWechat = false"
-            @mask-click="showWechat = false">
+        <n-modal v-model:show="showWechat" close-on-esc mask-closable transform-origin="center">
             <n-image :src="wechatUrl" :width="400" preview-disabled />
         </n-modal>
     </div>

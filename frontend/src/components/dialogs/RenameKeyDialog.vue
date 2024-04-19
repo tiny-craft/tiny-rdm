@@ -53,7 +53,6 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.renameDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ focusable: false, size: 'medium' }"
         :negative-text="$t('common.cancel')"
@@ -61,8 +60,10 @@ const onClose = () => {
         :positive-text="$t('common.confirm')"
         :show-icon="false"
         :title="$t('interface.rename_key')"
+        close-on-esc
         preset="dialog"
         transform-origin="center"
+        @esc="onClose"
         @positive-click="onRename"
         @negative-click="onClose">
         <n-form

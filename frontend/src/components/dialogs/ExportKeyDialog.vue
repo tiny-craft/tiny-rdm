@@ -64,12 +64,13 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.exportKeyDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('dialogue.export.name')"
+        close-on-esc
         preset="dialog"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-spin :show="loading">
             <n-form :model="exportKeyForm" :show-require-mark="false" label-placement="top">
                 <n-grid :x-gap="10">

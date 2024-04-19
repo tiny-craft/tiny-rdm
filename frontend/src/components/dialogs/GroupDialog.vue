@@ -89,7 +89,6 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.groupDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ size: 'medium' }"
         :negative-text="$t('common.cancel')"
@@ -97,8 +96,10 @@ const onClose = () => {
         :positive-text="$t('common.confirm')"
         :show-icon="false"
         :title="isRenameMode ? $t('dialogue.group.rename') : $t('dialogue.group.new')"
+        close-on-esc
         preset="dialog"
         transform-origin="center"
+        @esc="onClose"
         @positive-click="onConfirm"
         @negative-click="onClose">
         <n-form

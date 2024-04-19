@@ -93,12 +93,13 @@ const onClose = () => {
     <n-modal
         v-model:show="dialogStore.deleteKeyDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('interface.batch_delete_key')"
+        close-on-esc
         preset="dialog"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-spin :show="loading">
             <n-form :model="deleteForm" :show-require-mark="false" label-placement="top">
                 <n-grid :x-gap="10">

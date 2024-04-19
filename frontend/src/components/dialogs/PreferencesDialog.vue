@@ -192,13 +192,14 @@ const onClose = () => {
         v-model:show="dialogStore.preferencesDialogVisible"
         :auto-focus="false"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :show-icon="false"
         :title="$t('preferences.name')"
+        close-on-esc
         preset="dialog"
         style="width: 640px"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <!-- FIXME: set loading will slow down appear animation of dialog in linux -->
         <!-- <n-spin :show="loading"> -->
         <n-tabs

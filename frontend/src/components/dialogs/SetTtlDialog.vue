@@ -93,7 +93,6 @@ const onConfirm = async () => {
     <n-modal
         v-model:show="dialogStore.ttlDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :negative-button-props="{ focusable: false, size: 'medium' }"
         :negative-text="$t('common.cancel')"
@@ -103,8 +102,10 @@ const onConfirm = async () => {
         :positive-text="$t('common.save')"
         :show-icon="false"
         :title="title"
+        close-on-esc
         preset="dialog"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-form :model="ttlForm" :show-require-mark="false" label-placement="top">
             <n-form-item v-if="!isBatchAction" :label="$t('common.key')">
                 <n-input :value="ttlForm.key" readonly />

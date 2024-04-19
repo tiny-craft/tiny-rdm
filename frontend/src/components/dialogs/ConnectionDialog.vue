@@ -329,14 +329,15 @@ const pasteFromClipboard = async () => {
     <n-modal
         v-model:show="dialogStore.connDialogVisible"
         :closable="false"
-        :close-on-esc="false"
         :mask-closable="false"
         :on-after-leave="resetForm"
         :show-icon="false"
         :title="isEditMode ? $t('dialogue.connection.edit_title') : $t('dialogue.connection.new_title')"
+        close-on-esc
         preset="dialog"
         style="width: 600px"
-        transform-origin="center">
+        transform-origin="center"
+        @esc="onClose">
         <n-spin :show="closingConnection">
             <n-tabs
                 v-model:value="tab"
