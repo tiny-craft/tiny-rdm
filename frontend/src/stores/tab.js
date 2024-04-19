@@ -244,7 +244,11 @@ const useTabStore = defineStore('tab', {
             if (!!!reset && typeof value === 'object') {
                 if (value instanceof Array) {
                     tabData.value = tabData.value || []
-                    tabData.value.push(...value)
+                    // direct deconstruction leads to 'Maximum call stack size exceeded'？
+                    // tabData.value.push(...value)
+                    for (let i = 0; i < value.length; i++) {
+                        tabData.value.push(value[i])
+                    }
                 } else {
                     tabData.value = assign(value, tabData.value || {})
                 }
