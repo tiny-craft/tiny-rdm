@@ -14,6 +14,7 @@ import useDialogStore from 'stores/dialog.js'
 import { useI18n } from 'vue-i18n'
 import ContentToolbar from '@/components/content_value/ContentToolbar.vue'
 import ContentValueJson from '@/components/content_value/ContentValueJson.vue'
+import { isMacOS } from '@/utils/platform.js'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -126,6 +127,35 @@ const onReload = async (selDecode, selFormat) => {
     }
 }
 
+const onKeyShortcut = (e) => {
+    // console.log(e)
+    switch (e.key) {
+        case 'Delete':
+            onDelete()
+            return
+
+        case 'd':
+            if (e.metaKey) {
+                onDelete()
+            }
+            return
+
+        case 'F5':
+            onReload()
+            return
+
+        case 'r':
+            if (e.metaKey && isMacOS()) {
+                onReload()
+            }
+            return
+
+        case 'F2':
+            onRename()
+            return
+    }
+}
+
 const onRename = () => {
     const { name, db, keyPath } = data.value
     if (binaryKey.value) {
@@ -189,6 +219,8 @@ watch(() => data.value?.keyPath, initContent)
     <!-- FIXME: keep alive may cause virtual list null value error. -->
     <!-- <keep-alive v-else> -->
     <component
+        tabindex="0"
+        @keydown="onKeyShortcut"
         :is="valueComponents[data.type]"
         v-else
         ref="contentRef"

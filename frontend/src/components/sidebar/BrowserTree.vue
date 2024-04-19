@@ -598,6 +598,7 @@ defineExpose({
             check-strategy="child"
             class="fill-height"
             virtual-scroll
+            @keydown.delete="handleSelectContextMenu('value_remove')"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
             @update:checked-keys="onUpdateCheckedKeys" />
