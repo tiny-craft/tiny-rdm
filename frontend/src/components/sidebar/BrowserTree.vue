@@ -601,7 +601,11 @@ defineExpose({
             @keydown.delete="handleSelectContextMenu('value_remove')"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
-            @update:checked-keys="onUpdateCheckedKeys" />
+            @update:checked-keys="onUpdateCheckedKeys">
+            <template #empty>
+                <n-empty class="empty-content" />
+            </template>
+        </n-tree>
 
         <!-- context menu -->
         <n-dropdown
