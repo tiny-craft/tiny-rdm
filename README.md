@@ -88,6 +88,13 @@ git clone https://github.com/tiny-craft/tiny-rdm --depth=1
 npm install --prefix ./frontend
 ```
 
+or
+
+```bash
+cd frontend
+npm install
+```
+
 ### Compile and Run
 
 ```bash

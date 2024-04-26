@@ -83,6 +83,13 @@ git clone https://github.com/tiny-craft/tiny-rdm --depth=1
 npm install --prefix ./frontend
 ```
 
+或者
+
+```bash
+cd frontend
+npm install
+```
+
 ### 编译运行开发版本
 
 ```bash
