@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -13,7 +12,7 @@ import (
 )
 
 type pubsubItem struct {
-	client    *redis.Client
+	client    redis.UniversalClient
 	pubsub    *redis.PubSub
 	mutex     sync.Mutex
 	closeCh   chan struct{}
@@ -62,12 +61,8 @@ func (p *pubsubService) getItem(server string) (*pubsubItem, error) {
 		if uniClient, err = Connection().createRedisClient(conf.ConnectionConfig); err != nil {
 			return nil, err
 		}
-		var client *redis.Client
-		if client, ok = uniClient.(*redis.Client); !ok {
-			return nil, errors.New("create redis client fail")
-		}
 		item = &pubsubItem{
-			client: client,
+			client: uniClient,
 		}
 		p.items[server] = item
 	}
