@@ -328,7 +328,7 @@
     "filter": {
       "set_key_filter": "Establecer filtro de clave",
       "filter_pattern": "Patrón",
-      "filter_pattern_tip": "* coincide con 0 o más caracteres, ej. 'key*'\n? coincide con un carácter, ej. 'key?'\n[] coincide con un rango, ej. 'key[1-3]'\n\\ escapa caracteres especiales",
+      "filter_pattern_tip": "Filtre la lista actual ingresando directamente, y escanee el servidor presionando 'Ingresar'.\n\n* coincide con 0 o más caracteres, ej. 'key*'\n? coincide con un carácter, ej. 'key?'\n[] coincide con un rango, ej. 'key[1-3]'\n\\ escapa caracteres especiales",
       "exact_match_tip": "Coincidencia exacta"
     },
     "export": {

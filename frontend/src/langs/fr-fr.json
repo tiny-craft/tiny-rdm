@@ -328,7 +328,7 @@
     "filter": {
       "set_key_filter": "Définir le filtre de clé",
       "filter_pattern": "Modèle",
-      "filter_pattern_tip": "* correspond à 0 ou plusieurs caractères, ex : 'key*'\n? correspond à un seul caractère, ex : 'key?'\n[] correspond à une plage, ex : 'key[1-3]' échappe les caractères spéciaux",
+      "filter_pattern_tip": "Filtrez la liste actuelle en saisissant directement, et scannez le serveur en appuyant sur 'Entrée'.\n\n* correspond à 0 ou plusieurs caractères, ex : 'key*'\n? correspond à un seul caractère, ex : 'key?'\n[] correspond à une plage, ex : 'key[1-3]' échappe les caractères spéciaux",
       "exact_match_tip": "Correspondance exacte"
     },
     "export": {
