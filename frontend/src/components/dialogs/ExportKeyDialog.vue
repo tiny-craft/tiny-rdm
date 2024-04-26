@@ -1,7 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
-import { useI18n } from 'vue-i18n'
 import useBrowserStore from 'stores/browser.js'
 import FileSaveInput from '@/components/common/FileSaveInput.vue'
 import { isEmpty, map, size } from 'lodash'
@@ -40,7 +39,6 @@ const exportEnable = computed(() => {
     return !isEmpty(exportKeyForm.keys) && !isEmpty(exportKeyForm.file)
 })
 
-const i18n = useI18n()
 const onConfirmExport = async () => {
     try {
         exporting.value = true
