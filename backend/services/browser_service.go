@@ -2070,8 +2070,8 @@ func (b *browserService) DeleteKey(server string, db int, k any, async bool) (re
 			handleDel := func(ks []string) error {
 				var delErr error
 				if async && supportUnlink {
-					supportUnlink = false
 					if delErr = cli.Unlink(ctx, ks...).Err(); delErr != nil {
+						supportUnlink = false
 						// not support unlink? try del command
 						delErr = cli.Del(ctx, ks...).Err()
 					}
@@ -2195,7 +2195,6 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 		cancelFunc()
 	})
 	total := len(ks)
-	var failed atomic.Int64
 	var canceled bool
 	var deletedKeys = make([]any, 0, total)
 	var mutex sync.Mutex
@@ -2210,9 +2209,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 			}
 			cmders, delErr := pipe.Exec(ctx)
 			for j, cmder := range cmders {
-				if cmder.(*redis.IntCmd).Val() != 1 {
-					failed.Add(1)
-				} else {
+				if cmder.(*redis.IntCmd).Val() == 1 {
 					// save deleted key
 					mutex.Lock()
 					deletedKeys = append(deletedKeys, ks[i+j])
@@ -2239,13 +2236,13 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	cancelStopEvent()
 	resp.Success = true
 	resp.Data = struct {
-		Canceled bool  `json:"canceled"`
-		Deleted  any   `json:"deleted"`
-		Failed   int64 `json:"failed"`
+		Canceled bool `json:"canceled"`
+		Deleted  any  `json:"deleted"`
+		Failed   int  `json:"failed"`
 	}{
 		Canceled: canceled,
 		Deleted:  deletedKeys,
-		Failed:   failed.Load(),
+		Failed:   len(ks) - len(deletedKeys),
 	}
 	return
 }
