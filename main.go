@@ -110,7 +110,6 @@ func main() {
 			},
 			WebviewIsTransparent: false,
 			WindowIsTranslucent:  false,
-			DisableZoom:          true,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent:              true,
