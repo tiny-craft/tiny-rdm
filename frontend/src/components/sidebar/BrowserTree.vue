@@ -356,7 +356,7 @@ const renderLabel = ({ option }) => {
             if (option.label === '') {
                 // blank label name
                 return h('div', [
-                    h(NText, { italic: true, depth: 3 }, () => '[Empty]'),
+                    h(NText, { italic: true, depth: 3 }, () => '[NO NAME]'),
                     h('span', () => ` (${option.keyCount || 0})`),
                 ])
             }
