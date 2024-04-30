@@ -172,7 +172,6 @@ const exThemeVars = computed(() => {
                 :options="preferencesOptions"
                 :render-icon="({ icon }) => render.renderIcon(icon)"
                 :render-label="({ label }) => render.renderLabel($t(label), { class: 'context-menu-item' })"
-                content-class="nav-menu-button"
                 trigger="click"
                 @select="onSelectPreferenceMenu">
                 <icon-button :icon="Config" :size="iconSize" :stroke-width="3" />
@@ -182,7 +181,6 @@ const exThemeVars = computed(() => {
                 :icon="QRCode"
                 :size="iconSize"
                 :tooltip-delay="100"
-                class="nav-menu-button"
                 t-tooltip="ribbon.wechat_official"
                 @click="openWechatOfficial" />
             <icon-button
@@ -191,14 +189,12 @@ const exThemeVars = computed(() => {
                 :icon="Twitter"
                 :size="iconSize"
                 :tooltip-delay="100"
-                class="nav-menu-button"
                 t-tooltip="ribbon.follow_x"
                 @click="openX" />
             <icon-button
                 :icon="Github"
                 :size="iconSize"
                 :tooltip-delay="100"
-                class="nav-menu-button"
                 t-tooltip="ribbon.github"
                 @click="openGithub" />
         </div>
@@ -280,15 +276,10 @@ const exThemeVars = computed(() => {
     .nav-menu-item {
         align-items: center;
         padding: 10px 0 15px;
-        gap: 20px;
         --wails-draggable: none;
 
-        .nav-menu-button {
-            margin-bottom: 6px;
-
-            :hover {
-                color: v-bind('themeVars.primaryColor');
-            }
+        button {
+            margin: 10px 0;
         }
     }
 }
