@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, nextTick, reactive, ref } from 'vue'
+import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NIcon, useThemeVars } from 'naive-ui'
@@ -95,6 +95,7 @@ const valueColumn = computed(() => ({
                   },
                   scrollable: true,
               },
+              lineClamp: 1,
           },
     filterOptionValue: valueFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
@@ -159,9 +160,9 @@ const saveEdit = async (pos, value, decode, format) => {
 const resetEdit = () => {
     currentEditRow.no = 0
     currentEditRow.value = null
-    if (currentEditRow.format !== props.format || currentEditRow.decode !== props.decode) {
-        nextTick(() => onFormatChanged(currentEditRow.decode, currentEditRow.format))
-    }
+    // if (currentEditRow.format !== props.format || currentEditRow.decode !== props.decode) {
+    //     nextTick(() => onFormatChanged(currentEditRow.decode, currentEditRow.format))
+    // }
 }
 
 const actionColumn = {
