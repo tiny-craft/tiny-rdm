@@ -1,6 +1,9 @@
 package convutil
 
-import "os/exec"
+import (
+	"os/exec"
+	"runtime"
+)
 
 type PickleConvert struct {
 	CmdConvert
@@ -49,6 +52,14 @@ func NewPickleConvert() *PickleConvert {
 		}
 	}
 	// check if pickle available
+	if runtime.GOOS == "darwin" {
+		// the xcode-select installation prompt may appear on macOS
+		// so check it manually in advance
+		if _, err = exec.LookPath("xcode-select"); err != nil {
+			return nil
+		}
+	}
+
 	if _, err = runCommand(c.DecodePath, "-c", "import pickle"); err != nil {
 		return nil
 	}
