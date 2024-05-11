@@ -240,29 +240,35 @@ const onUpdateSelectedKeys = (keys, options) => {
 }
 
 const onUpdateExpanded = (value, option, meta) => {
-    tabStore.setExpandedKeys(props.server, value)
-    if (!meta.node) {
+    const expand = meta.action === 'expand'
+    if (expand) {
+        tabStore.addExpandedKey(props.server, value)
+    } else {
+        tabStore.removeExpandedKey(props.server, value)
+    }
+    let node = meta.node
+    if (!node) {
         return
     }
 
     // keep expand or collapse children while they own more than 1 child
-    let node = meta.node
-    while (node != null && size(node.children) === 1) {
-        const key = node.children[0].key
-        switch (meta.action) {
-            case 'expand':
+    do {
+        const key = node.key
+        if (expand) {
+            if (node.type === ConnectionType.RedisKey) {
                 node.expanded = true
-                if (!includes(value, key)) {
-                    tabStore.addExpandedKey(props.server, key)
-                }
-                break
-            case 'collapse':
-                node.expanded = false
-                tabStore.removeExpandedKey(props.server, key)
-                break
+                tabStore.addExpandedKey(props.server, key)
+            }
+        } else {
+            node.expanded = false
+            tabStore.removeExpandedKey(props.server, key)
         }
-        node = node.children[0]
-    }
+        if (size(node.children) === 1) {
+            node = node.children[0]
+        } else {
+            break
+        }
+    } while (true)
 }
 
 /**

@@ -1,4 +1,4 @@
-import { assign, find, findIndex, get, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
+import { assign, find, findIndex, get, includes, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 import { TabItem } from '@/objects/tabItem.js'
 
@@ -658,12 +658,15 @@ const useTabStore = defineStore('tab', {
         /**
          * set expanded keys for server
          * @param {string} server
-         * @param {string[]} keys
+         * @param {string|string[]} keys
          */
         setExpandedKeys(server, keys = []) {
             /** @type TabItem**/
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
+                if (typeof keys === 'string') {
+                    keys = [keys]
+                }
                 if (isEmpty(keys)) {
                     tab.expandedKeys = []
                 } else {
@@ -675,13 +678,20 @@ const useTabStore = defineStore('tab', {
         /**
          *
          * @param {string} server
-         * @param {string} key
+         * @param {string|string[]} keys
          */
-        addExpandedKey(server, key) {
+        addExpandedKey(server, keys) {
             /** @type TabItem**/
             let tab = find(this.tabList, { name: server })
             if (tab != null) {
-                tab.expandedKeys.push(key)
+                if (typeof keys === 'string') {
+                    keys = [keys]
+                }
+                for (const k of keys) {
+                    if (!includes(tab.expandedKeys, k)) {
+                        tab.expandedKeys.push(k)
+                    }
+                }
             }
         },
 
