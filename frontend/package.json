@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "chart.js": "^4.4.2",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.11",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.47.0",
     "pinia": "^2.1.7",
-    "sass": "^1.75.0",
-    "vue": "^3.4.25",
+    "sass": "^1.77.1",
+    "vue": "^3.4.27",
     "vue-chartjs": "^5.3.1",
     "vue-i18n": "^9.13.1",
     "xterm": "^5.3.0",
@@ -23,11 +23,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "naive-ui": "^2.38.1",
+    "naive-ui": "^2.38.2",
     "prettier": "^3.2.5",
-    "unplugin-auto-import": "^0.17.5",
-    "unplugin-icons": "^0.18.5",
-    "unplugin-vue-components": "^0.26.0",
-    "vite": "^5.2.10"
+    "unplugin-auto-import": "^0.17.6",
+    "unplugin-icons": "^0.19.0",
+    "unplugin-vue-components": "^0.27.0",
+    "vite": "^5.2.11"
   }
 }
