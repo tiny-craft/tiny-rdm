@@ -35,6 +35,9 @@ export const themeOverrides = {
         tabGapLargeCard: '2px',
         tabFontWeightActive: 450,
     },
+    Tree: {
+        nodeWrapperPadding: '0 3px',
+    },
     Card: {
         colorEmbedded: '#FAFAFA',
     },
