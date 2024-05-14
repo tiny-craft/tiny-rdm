@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, get, isEmpty, map, now, size } from 'lodash'
+import { endsWith, get, isEmpty, join, map, now, size, slice, split } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -771,6 +771,37 @@ const useBrowserStore = defineStore('browser', {
             // contains redis key
             const keyPart = key.substring(idx + 1)
             return serverInst.nodeMap.get(keyPart)
+        },
+
+        /**
+         * get parent tree node by key name
+         * @param key
+         * @return {RedisNodeItem|null}
+         */
+        getParentNode(key) {
+            const i = key.indexOf('#')
+            if (i < 0) {
+                return null
+            }
+            const [server, db] = split(key.substring(0, i), '/')
+            if (isEmpty(server) || isEmpty(db)) {
+                return null
+            }
+            /** @type {RedisServerState} **/
+            const serverInst = this.servers[server]
+            if (serverInst == null) {
+                return null
+            }
+            const separator = this.getSeparator(server)
+            const keyPart = key.substring(i)
+            const keyStartIdx = keyPart.indexOf('/')
+            const redisKey = keyPart.substring(keyStartIdx + 1)
+            const redisKeyParts = split(redisKey, separator)
+            const parentKey = slice(redisKeyParts, 0, size(redisKeyParts) - 1)
+            if (isEmpty(parentKey)) {
+                return serverInst.getRoot()
+            }
+            return serverInst.nodeMap.get(`${ConnectionType.RedisKey}/${join(parentKey, separator)}`)
         },
 
         /**

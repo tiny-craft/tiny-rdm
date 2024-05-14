@@ -5,7 +5,7 @@ import { NIcon, NSpace, NText, useThemeVars } from 'naive-ui'
 import Key from '@/components/icons/Key.vue'
 import Binary from '@/components/icons/Binary.vue'
 import Database from '@/components/icons/Database.vue'
-import { filter, find, get, includes, isEmpty, map, size, toUpper } from 'lodash'
+import { filter, find, first, get, includes, isEmpty, last, map, size, toUpper } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import Refresh from '@/components/icons/Refresh.vue'
 import CopyLink from '@/components/icons/CopyLink.vue'
@@ -151,6 +151,133 @@ const menuOptions = {
             icon: Delete,
         },
     ],
+}
+
+const handleKeyUp = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+
+    let parentNode = browserStore.getParentNode(selectedKey)
+    if (parentNode == null) {
+        return
+    }
+    const nodeIndex = parentNode.children.indexOf(node)
+    if (nodeIndex <= 0) {
+        if (parentNode.type === ConnectionType.RedisKey || parentNode.type === ConnectionType.RedisValue) {
+            onUpdateSelectedKeys([parentNode.key])
+            updateKeyDetail(parentNode)
+        }
+        return
+    }
+
+    // try select pre node
+    let preNode = parentNode.children[nodeIndex - 1]
+    while (preNode.expanded && !isEmpty(preNode.children)) {
+        preNode = last(preNode.children)
+    }
+    onUpdateSelectedKeys([preNode.key])
+    updateKeyDetail(preNode)
+}
+
+const handleKeyDown = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+    // try select first child if expanded
+    if (node.expanded && !isEmpty(node.children)) {
+        const childNode = get(node.children, 0)
+        onUpdateSelectedKeys([childNode.key])
+        updateKeyDetail(childNode)
+        return
+    }
+
+    let travelCount = 0
+    let childKey = selectedKey
+    do {
+        if (travelCount++ > 20) {
+            return
+        }
+        // find out parent node
+        const parentNode = browserStore.getParentNode(childKey)
+        if (parentNode == null) {
+            return
+        }
+        const nodeIndex = parentNode.children.indexOf(node)
+        if (nodeIndex < 0 || nodeIndex >= parentNode.children.length - 1) {
+            // last child, try select parent's neighbor node
+            childKey = parentNode.key
+            node = parentNode
+        } else {
+            // select next node
+            const childNode = parentNode.children[nodeIndex + 1]
+            onUpdateSelectedKeys([childNode.key])
+            updateKeyDetail(childNode)
+            return
+        }
+    } while (true)
+}
+
+const handleKeyLeft = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+
+    if (node.type === ConnectionType.RedisKey) {
+        if (node.expanded) {
+            // try collapse
+            onUpdateExpanded([node.key], null, { node, action: 'collapse' })
+            return
+        }
+    }
+
+    // try select parent node
+    let parentNode = browserStore.getParentNode(selectedKey)
+    if (parentNode == null || parentNode.type !== ConnectionType.RedisKey) {
+        return
+    }
+    onUpdateSelectedKeys([parentNode.key])
+    updateKeyDetail(parentNode)
+}
+
+const handleKeyRight = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+
+    if (node.type === ConnectionType.RedisKey) {
+        if (!node.expanded) {
+            // try expand
+            onUpdateExpanded([node.key], null, { node, action: 'expand' })
+        } else if (!isEmpty(node.children)) {
+            // try select first child
+            const childNode = first(node.children)
+            onUpdateSelectedKeys([childNode.key])
+            updateKeyDetail(childNode)
+        }
+    } else if (node.type === ConnectionType.RedisValue) {
+        handleKeyDown()
+    }
 }
 
 const handleSelectContextMenu = (action) => {
@@ -471,20 +598,28 @@ const renderSuffix = ({ option }) => {
     return null
 }
 
+/**
+ *
+ * @param {RedisNodeItem} node
+ */
+const updateKeyDetail = (node) => {
+    if (node.type === ConnectionType.RedisValue) {
+        if (tabStore.setActivatedKey(props.server, node.key)) {
+            const { db, redisKey, redisKeyCode } = node
+            browserStore.loadKeySummary({
+                server: props.server,
+                db,
+                key: redisKeyCode || redisKey,
+                clearValue: true,
+            })
+        }
+    }
+}
+
 const nodeProps = ({ option }) => {
     return {
         onClick: () => {
-            if (option.type === ConnectionType.RedisValue) {
-                if (tabStore.setActivatedKey(props.server, option.key)) {
-                    const { db, redisKey, redisKeyCode } = option
-                    browserStore.loadKeySummary({
-                        server: props.server,
-                        db,
-                        key: redisKeyCode || redisKey,
-                        clearValue: true,
-                    })
-                }
-            }
+            updateKeyDetail(option)
         },
         onDblclick: () => {
             if (props.loading) {
@@ -604,6 +739,11 @@ defineExpose({
             check-strategy="child"
             class="fill-height"
             virtual-scroll
+            :keyboard="false"
+            @keydown.up="handleKeyUp"
+            @keydown.down="handleKeyDown"
+            @keydown.left="handleKeyLeft"
+            @keydown.right="handleKeyRight"
             @keydown.delete="handleSelectContextMenu('value_remove')"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
