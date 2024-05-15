@@ -598,13 +598,25 @@ const renderSuffix = ({ option }) => {
     return null
 }
 
+const lastLoadKey = ref(0)
+
 /**
  *
  * @param {RedisNodeItem} node
  */
 const updateKeyDetail = (node) => {
     if (node.type === ConnectionType.RedisValue) {
-        if (tabStore.setActivatedKey(props.server, node.key)) {
+        const preK = tabStore.getActivatedKey(props.server)
+        if (!isEmpty(preK) && preK === node.key && Date.now() - lastLoadKey.value > 1000) {
+            // reload key already activated
+            lastLoadKey.value = Date.now()
+            const { db, redisKey, redisKeyCode } = node
+            browserStore.reloadKey({
+                server: props.server,
+                db,
+                key: redisKeyCode || redisKey,
+            })
+        } else if (tabStore.setActivatedKey(props.server, node.key)) {
             const { db, redisKey, redisKeyCode } = node
             browserStore.loadKeySummary({
                 server: props.server,

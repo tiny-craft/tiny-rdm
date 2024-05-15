@@ -780,9 +780,20 @@ const useTabStore = defineStore('tab', {
         },
 
         /**
-         * set activated key
+         * get activated key
+         * @param {string} server
+         * @return {string|null}
+         */
+        getActivatedKey(server) {
+            let tab = find(this.tabList, { name: server })
+            return get(tab, 'activatedKey')
+        },
+
+        /**
+         * set activated key and return current activatedKey
          * @param {string} server
          * @param {string} key
+         * @return {boolean}
          */
         setActivatedKey(server, key) {
             /** @type TabItem**/
