@@ -80,9 +80,11 @@ const refreshInfo = async (force) => {
     }
     if (!isEmpty(props.server) && browserStore.isConnected(props.server)) {
         try {
-            const info = await browserStore.getServerInfo(props.server)
-            serverInfo.value = info
-            _updateChart(info)
+            const info = await browserStore.getServerInfo(props.server, true)
+            if (!isEmpty(info)) {
+                serverInfo.value = info
+                _updateChart(info)
+            }
         } finally {
             pageState.loading = false
             pageState.autoLoading = false

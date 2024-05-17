@@ -343,10 +343,11 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          *
-         * @param server
+         * @param {string} server
+         * @param {boolean} mute
          * @returns {Promise<{}>}
          */
-        async getServerInfo(server) {
+        async getServerInfo(server, mute) {
             try {
                 const { success, data, msg } = await ServerInfo(server)
                 if (success) {
@@ -356,7 +357,7 @@ const useBrowserStore = defineStore('browser', {
                         serverInst.stats = data
                     }
                     return data
-                } else if (!isEmpty(msg)) {
+                } else if (!isEmpty(msg) && mute !== true) {
                     $message.warning(msg)
                 }
             } finally {
