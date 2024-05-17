@@ -2,9 +2,9 @@ package convutil
 
 import (
 	"bytes"
-	"encoding/json"
 	"strconv"
 	"strings"
+	strutil "tinyrdm/backend/utils/string"
 	"unicode"
 	"unicode/utf16"
 	"unicode/utf8"
@@ -20,22 +20,16 @@ func (UnicodeJsonConvert) Decode(str string) (string, bool) {
 	trimedStr := strings.TrimSpace(str)
 	if (strings.HasPrefix(trimedStr, "{") && strings.HasSuffix(trimedStr, "}")) ||
 		(strings.HasPrefix(trimedStr, "[") && strings.HasSuffix(trimedStr, "]")) {
-		var out bytes.Buffer
-		if err := json.Indent(&out, []byte(trimedStr), "", "  "); err == nil {
-			if quoteStr, ok := UnquoteUnicodeJson(out.Bytes()); ok {
-				return string(quoteStr), true
-			}
+		resultStr := strutil.JSONBeautify(trimedStr, "  ")
+		if quoteStr, ok := UnquoteUnicodeJson([]byte(resultStr)); ok {
+			return string(quoteStr), true
 		}
 	}
 	return str, false
 }
 
 func (UnicodeJsonConvert) Encode(str string) (string, bool) {
-	var dst bytes.Buffer
-	if err := json.Compact(&dst, []byte(str)); err != nil {
-		return str, false
-	}
-	return dst.String(), true
+	return strutil.JSONMinify(str), true
 }
 
 func UnquoteUnicodeJson(s []byte) ([]byte, bool) {
