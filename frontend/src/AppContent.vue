@@ -110,12 +110,27 @@ onMounted(async () => {
     const maximised = await WindowIsMaximised()
     onToggleMaximize(maximised)
 })
+
+const onKeyShortcut = (e) => {
+    switch (e.key) {
+        case 'w':
+            if (e.metaKey) {
+                // close current tab
+                const tabStore = useTabStore()
+                const currentTab = tabStore.currentTab
+                if (currentTab != null) {
+                    tabStore.closeTab(currentTab.name)
+                }
+            }
+            break
+    }
+}
 </script>
 
 <template>
     <!-- app content-->
     <n-spin :show="props.loading" :style="spinStyle" :theme-overrides="{ opacitySpinning: 0 }">
-        <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v">
+        <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v" tabindex="0" @keydown="onKeyShortcut">
             <!-- title bar -->
             <div
                 id="app-toolbar"

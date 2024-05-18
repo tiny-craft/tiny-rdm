@@ -1,6 +1,8 @@
 import { assign, find, findIndex, get, includes, indexOf, isEmpty, pullAt, remove, set, size } from 'lodash'
 import { defineStore } from 'pinia'
 import { TabItem } from '@/objects/tabItem.js'
+import useBrowserStore from 'stores/browser.js'
+import { i18nGlobal } from '@/utils/i18n.js'
 
 const useTabStore = defineStore('tab', {
     /**
@@ -130,6 +132,17 @@ const useTabStore = defineStore('tab', {
 
         openBlank(server) {
             this.upsertTab({ server, clearValue: true })
+        },
+
+        /**
+         *
+         * @param {string} tabName
+         */
+        closeTab(tabName) {
+            $dialog.warning(i18nGlobal.t('dialogue.close_confirm', { name: tabName }), () => {
+                const browserStore = useBrowserStore()
+                browserStore.closeConnection(tabName)
+            })
         },
 
         /**
