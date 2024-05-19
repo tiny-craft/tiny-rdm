@@ -135,7 +135,7 @@ const onKeyShortcut = (e) => {
             return
 
         case 'd':
-            if (e.metaKey) {
+            if (e.metaKey && isMacOS()) {
                 onDelete()
             }
             return

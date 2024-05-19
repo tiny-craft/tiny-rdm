@@ -26,6 +26,7 @@ import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
 import { nativeRedisKey } from '@/utils/key_convert.js'
+import { isMacOS } from '@/utils/platform.js'
 
 const props = defineProps({
     server: String,
@@ -329,6 +330,44 @@ const handleKeyCopy = () => {
             .catch((e) => {
                 $message.error(e.message)
             })
+    }
+}
+
+const onKeyShortcut = (e) => {
+    switch (e.key) {
+        case 'ArrowUp':
+            handleKeyUp()
+            break
+        case 'ArrowDown':
+            handleKeyDown()
+            break
+        case 'ArrowLeft':
+            handleKeyLeft()
+            break
+        case 'ArrowRight':
+            handleKeyRight()
+            break
+        case 'c':
+            if (e.metaKey) {
+                handleKeyCopy()
+            }
+            break
+        case 'Delete':
+            handleKeyDelete()
+            break
+        case 'd':
+            if (e.metaKey && isMacOS()) {
+                handleKeyDelete()
+            }
+            break
+        case 'F5':
+            handleSelectContextMenu('value_reload')
+            break
+        case 'r':
+            if (e.metaKey && isMacOS()) {
+                handleSelectContextMenu('value_reload')
+            }
+            break
     }
 }
 
@@ -804,12 +843,7 @@ defineExpose({
             class="fill-height"
             virtual-scroll
             :keyboard="false"
-            @keydown.up="handleKeyUp"
-            @keydown.down="handleKeyDown"
-            @keydown.left="handleKeyLeft"
-            @keydown.right="handleKeyRight"
-            @keydown.delete="handleKeyDelete"
-            @keydown.meta.c="handleKeyCopy"
+            @keydown="onKeyShortcut"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
             @update:checked-keys="onUpdateCheckedKeys">
