@@ -309,6 +309,29 @@ const handleKeyDelete = () => {
     }
 }
 
+const handleKeyCopy = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+
+    if (node.type === ConnectionType.RedisValue) {
+        ClipboardSetText(nativeRedisKey(node.redisKeyCode || node.redisKey))
+            .then((succ) => {
+                if (succ) {
+                    $message.success(i18n.t('interface.copy_succ'))
+                }
+            })
+            .catch((e) => {
+                $message.error(e.message)
+            })
+    }
+}
+
 const handleSelectContextMenu = (action) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -786,6 +809,7 @@ defineExpose({
             @keydown.left="handleKeyLeft"
             @keydown.right="handleKeyRight"
             @keydown.delete="handleKeyDelete"
+            @keydown.meta.c="handleKeyCopy"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
             @update:checked-keys="onUpdateCheckedKeys">
