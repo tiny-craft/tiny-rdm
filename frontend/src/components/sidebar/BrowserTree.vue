@@ -355,11 +355,6 @@ const onKeyShortcut = (e) => {
         case 'Delete':
             handleKeyDelete()
             break
-        case 'd':
-            if (e.metaKey && isMacOS()) {
-                handleKeyDelete()
-            }
-            break
         case 'F5':
             handleSelectContextMenu('value_reload')
             break

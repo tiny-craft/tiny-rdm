@@ -133,23 +133,14 @@ const onKeyShortcut = (e) => {
         case 'Delete':
             onDelete()
             return
-
-        case 'd':
-            if (e.metaKey && isMacOS()) {
-                onDelete()
-            }
-            return
-
         case 'F5':
             onReload()
             return
-
         case 'r':
             if (e.metaKey && isMacOS()) {
                 onReload()
             }
             return
-
         case 'F2':
             onRename()
             return
