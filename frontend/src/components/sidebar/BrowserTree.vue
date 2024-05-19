@@ -280,6 +280,35 @@ const handleKeyRight = () => {
     }
 }
 
+const handleKeyDelete = () => {
+    const selectedKey = get(selectedKeys.value, 0)
+    if (selectedKey == null) {
+        return
+    }
+    let node = browserStore.getNode(selectedKey)
+    if (node == null) {
+        return
+    }
+
+    const { db = 0, key: nodeKey, redisKey: rk = '', redisKeyCode: rkc, label } = node || {}
+    const redisKey = rkc || rk
+    const redisKeyName = !!rkc ? label : redisKey
+    switch (node.type) {
+        case ConnectionType.RedisKey:
+            dialogStore.openDeleteKeyDialog(props.server, db, isEmpty(redisKey) ? '*' : redisKey + ':*')
+            break
+        case ConnectionType.RedisValue:
+            $dialog.warning(i18n.t('dialogue.remove_tip', { name: redisKeyName }), () => {
+                browserStore.deleteKey(props.server, db, redisKey).then((success) => {
+                    if (success) {
+                        $message.success(i18n.t('dialogue.delete.success', { key: redisKeyName }))
+                    }
+                })
+            })
+            break
+    }
+}
+
 const handleSelectContextMenu = (action) => {
     contextMenuParam.show = false
     const selectedKey = get(selectedKeys.value, 0)
@@ -756,7 +785,7 @@ defineExpose({
             @keydown.down="handleKeyDown"
             @keydown.left="handleKeyLeft"
             @keydown.right="handleKeyRight"
-            @keydown.delete="handleSelectContextMenu('value_remove')"
+            @keydown.delete="handleKeyDelete"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"
             @update:checked-keys="onUpdateCheckedKeys">
