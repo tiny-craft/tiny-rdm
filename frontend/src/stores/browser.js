@@ -832,7 +832,7 @@ const useBrowserStore = defineStore('browser', {
                 if (success) {
                     /** @type RedisServerState **/
                     const serverInst = this.servers[server]
-                    if (serverInst != null) {
+                    if (serverInst != null && serverInst.db === db) {
                         // const { value } = data
                         // update tree view data
                         const { newKey = 0 } = serverInst.addKeyNodes([key], true)
@@ -840,11 +840,12 @@ const useBrowserStore = defineStore('browser', {
                             serverInst.tidyNode(key)
                             serverInst.updateDBKeyCount(db, newKey)
                         }
-                    }
-                    const { value: updatedValue } = data
-                    if (updatedValue != null) {
-                        const tab = useTabStore()
-                        tab.updateValue({ server, db, key, value: updatedValue })
+
+                        const { value: updatedValue } = data
+                        if (updatedValue != null) {
+                            const tab = useTabStore()
+                            tab.updateValue({ server, db, key, value: updatedValue })
+                        }
                     }
                     // this.loadKeySummary({ server, db, key })
                     return {

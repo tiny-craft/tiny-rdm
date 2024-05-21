@@ -154,7 +154,11 @@ const onAdd = async () => {
             value = defaultValue[type]
         }
         // await browserStore.reloadKey({server, db, key: trim(key)})
-        const { success, msg, nodeKey } = await browserStore.setKey({
+        const {
+            success,
+            msg,
+            nodeKey = '',
+        } = await browserStore.setKey({
             server,
             db,
             key: trim(key),
@@ -165,8 +169,11 @@ const onAdd = async () => {
         if (success) {
             // select current key
             await nextTick()
-            tabStore.setSelectedKeys(server, nodeKey)
-            browserStore.reloadKey({ server, db, key })
+            const selectedDB = browserStore.getSelectedDB(server)
+            if (selectedDB === db) {
+                tabStore.setSelectedKeys(server, nodeKey)
+                browserStore.reloadKey({ server, db, key })
+            }
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }
