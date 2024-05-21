@@ -15,6 +15,7 @@ import { extraTheme } from '@/utils/extra_theme.js'
 import useBrowserStore from 'stores/browser.js'
 import { useRender } from '@/utils/render.js'
 import wechatUrl from '@/assets/images/wechat_official.png'
+import bilibiliUrl from '@/assets/images/bilibili_official.png'
 import QRCode from '@/components/icons/QRCode.vue'
 import Twitter from '@/components/icons/Twitter.vue'
 import { trackEvent } from '@/utils/analytics.js'
@@ -201,7 +202,10 @@ const exThemeVars = computed(() => {
 
         <!-- wechat official modal -->
         <n-modal v-model:show="showWechat" close-on-esc mask-closable transform-origin="center">
-            <n-image :src="wechatUrl" :width="400" preview-disabled />
+            <n-flex vertical>
+                <n-image :src="wechatUrl" :width="400" preview-disabled />
+                <n-image :src="bilibiliUrl" :width="400" preview-disabled />
+            </n-flex>
         </n-modal>
     </div>
 </template>

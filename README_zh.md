@@ -106,6 +106,10 @@ wails dev
 
 <img src="docs/images/wechat_official.png" alt="wechat" width="360" />
 
+### B站官方账号
+
+<img src="docs/images/bilibili_official.png" alt="bilibili" width="360" />
+
 ### 独立开发互助QQ群
 
 ```
