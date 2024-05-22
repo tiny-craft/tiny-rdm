@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "chart.js": "^4.4.2",
+    "chart.js": "^4.4.3",
     "dayjs": "^1.11.11",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.47.0",
     "pinia": "^2.1.7",
-    "sass": "^1.77.1",
+    "sass": "^1.77.2",
     "vue": "^3.4.27",
     "vue-chartjs": "^5.3.1",
     "vue-i18n": "^9.13.1",
