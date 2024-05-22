@@ -249,4 +249,8 @@ onUnmounted(() => {
     left: 2px;
     right: 2px;
 }
+
+:deep(.line-numbers) {
+    white-space: nowrap;
+}
 </style>
