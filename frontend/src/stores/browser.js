@@ -15,6 +15,7 @@ import {
     FlushDB,
     GetClientList,
     GetCmdHistory,
+    GetHashValue,
     GetKeyDetail,
     GetKeySummary,
     GetKeyType,
@@ -979,6 +980,31 @@ const useBrowserStore = defineStore('browser', {
                         this.loadKeySummary({ server, db, key })
                     }
                     return { success, updated, added }
+                } else {
+                    return { success: false, msg }
+                }
+            } catch (e) {
+                return { success: false, msg: e.message }
+            }
+        },
+
+        /**
+         * get hash field
+         * @param {string} server
+         * @param {number} db
+         * @param {string} key
+         * @param {string} field
+         * @param {decodeTypes} [decode]
+         * @param {formatTypes} [format]
+         * @return {Promise<{{msg: string, success: boolean, updated: HashEntryItem[]}>}
+         */
+        async getHashField({ server, db, key, field, decode = decodeTypes.NONE, format = formatTypes.RAW }) {
+            try {
+                const { data, success, msg } = await GetHashValue({ server, db, key, field, decode, format })
+                if (success && !isEmpty(data)) {
+                    const tab = useTabStore()
+                    tab.updateValueEntries({ server, db, key, type: 'hash', entries: [data] })
+                    return { success, updated: data }
                 } else {
                     return { success: false, msg }
                 }

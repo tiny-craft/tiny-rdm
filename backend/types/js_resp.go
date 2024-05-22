@@ -101,3 +101,12 @@ type SetZSetParam struct {
 	RetFormat string  `json:"retFormat,omitempty"`
 	RetDecode string  `json:"retDecode,omitempty"`
 }
+
+type GetHashParam struct {
+	Server string `json:"server"`
+	DB     int    `json:"db"`
+	Key    any    `json:"key"`
+	Field  string `json:"field,omitempty"`
+	Format string `json:"format,omitempty"`
+	Decode string `json:"decode,omitempty"`
+}

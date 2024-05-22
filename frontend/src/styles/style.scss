@@ -63,6 +63,10 @@ body {
     cursor: pointer;
 }
 
+.wordline {
+    word-break: break-all;
+}
+
 .icon-btn {
     @extend .clickable;
     line-height: 100%;

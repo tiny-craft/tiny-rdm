@@ -92,11 +92,14 @@ const fieldColumn = computed(() => ({
         lineClamp: 1,
     },
     filterOptionValue: fieldFilterOption.value,
-    className: inEdit.value ? 'clickable' : '',
+    className: inEdit.value ? 'clickable wordline' : 'wordline',
     filter: (value, row) => {
         return !!~row.k.indexOf(value.toString())
     },
     render: (row) => {
+        if (row.rm === true) {
+            return h('s', {}, decodeRedisKey(row.k))
+        }
         return decodeRedisKey(row.k)
     },
 }))
@@ -134,6 +137,9 @@ const valueColumn = computed(() => ({
     render: (row) => {
         if (isCode.value) {
             return h('pre', {}, row.dv || row.v)
+        }
+        if (row.rm === true) {
+            return h('s', {}, row.dv || row.v)
         }
         return row.dv || row.v
     },
@@ -204,6 +210,25 @@ const actionColumn = {
         return h(EditableTableColumn, {
             editing: false,
             bindKey: row.k,
+            canRefresh: true,
+            onRefresh: async () => {
+                const { updated, success, msg } = await browserStore.getHashField({
+                    server: props.name,
+                    db: props.db,
+                    key: keyName.value,
+                    field: row.k,
+                    decode: props.decode,
+                    format: props.format,
+                })
+                if (success) {
+                    delete props.value[index]['rm']
+                    $message.success(i18n.t('dialogue.reload_succ'))
+                } else {
+                    // update fail, the key may have been deleted
+                    $message.error(msg)
+                    props.value[index]['rm'] = true
+                }
+            },
             onCopy: async () => {
                 try {
                     const succ = await ClipboardSetText(row.v)

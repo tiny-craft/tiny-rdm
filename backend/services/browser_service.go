@@ -1331,6 +1331,45 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 	return
 }
 
+// GetHashValue get hash field
+func (b *browserService) GetHashValue(param types.GetHashParam) (resp types.JSResp) {
+	item, err := b.getRedisClient(param.Server, param.DB)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	client, ctx := item.client, item.ctx
+	key := strutil.DecodeRedisKey(param.Key)
+	val, err := client.HGet(ctx, key, param.Field).Result()
+	if errors.Is(err, redis.Nil) {
+		resp.Msg = "field in key not found"
+		return
+	}
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	var displayVal string
+	if (len(param.Decode) > 0 && param.Decode != types.DECODE_NONE) ||
+		(len(param.Format) > 0 && param.Format != types.FORMAT_RAW) {
+		decoder := Preferences().GetDecoder()
+		displayVal, _, _ = convutil.ConvertTo(val, param.Decode, param.Format, decoder)
+		if displayVal == val {
+			displayVal = ""
+		}
+	}
+
+	resp.Data = types.HashEntryItem{
+		Key:          param.Field,
+		Value:        val,
+		DisplayValue: displayVal,
+	}
+	resp.Success = true
+	return
+}
+
 // SetHashValue update hash field
 func (b *browserService) SetHashValue(param types.SetHashParam) (resp types.JSResp) {
 	item, err := b.getRedisClient(param.Server, param.DB)
