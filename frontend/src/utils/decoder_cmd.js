@@ -13,7 +13,7 @@ export const joinCommand = (path, args = [], emptyContent = '-') => {
     if (!isEmpty(path)) {
         let containValuePlaceholder = false
         cmd = includes(path, ' ') ? `"${path}"` : path
-        for (let part of args) {
+        for (let part of args || []) {
             part = trim(part)
             if (isEmpty(part)) {
                 continue
