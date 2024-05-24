@@ -13,19 +13,21 @@ export const joinCommand = (path, args = [], emptyContent = '-') => {
     if (!isEmpty(path)) {
         let containValuePlaceholder = false
         cmd = includes(path, ' ') ? `"${path}"` : path
-        for (let part of args) {
-            part = trim(part)
-            if (isEmpty(part)) {
-                continue
-            }
-            if (includes(part, ' ')) {
-                cmd += ' "' + part + '"'
-            } else {
-                if (toUpper(part) === '{VALUE}') {
-                    part = '{VALUE}'
-                    containValuePlaceholder = true
+        if (args) {
+            for (let part of args) {
+                part = trim(part)
+                if (isEmpty(part)) {
+                    continue
                 }
-                cmd += ' ' + part
+                if (includes(part, ' ')) {
+                    cmd += ' "' + part + '"'
+                } else {
+                    if (toUpper(part) === '{VALUE}') {
+                        part = '{VALUE}'
+                        containValuePlaceholder = true
+                    }
+                    cmd += ' ' + part
+                }
             }
         }
         if (!containValuePlaceholder) {
