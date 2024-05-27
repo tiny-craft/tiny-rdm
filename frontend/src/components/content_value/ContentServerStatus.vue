@@ -94,7 +94,7 @@ const refreshInfo = async (force) => {
 
 const _updateChart = (info) => {
     let timeLabels = toRaw(cmdRate.value.labels)
-    timeLabels = timeLabels.concat(dayjs().format('hh:mm:ss'))
+    timeLabels = timeLabels.concat(dayjs().format('HH:mm:ss'))
     timeLabels = slice(timeLabels, Math.max(0, timeLabels.length - statusHistory))
 
     // commands per seconds
@@ -146,7 +146,7 @@ const _updateChart = (info) => {
 const _mockChart = () => {
     const timeLabels = []
     for (let i = 0; i < 5; i++) {
-        timeLabels.push(dayjs().add(5, 'seconds').format('hh:mm:ss'))
+        timeLabels.push(dayjs().add(5, 'seconds').format('HH:mm:ss'))
     }
 
     // commands per seconds
