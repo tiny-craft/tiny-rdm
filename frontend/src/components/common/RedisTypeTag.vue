@@ -68,6 +68,7 @@ const label = computed(() => {
             'redis-type-tag-small': !props.short && props.size === 'small',
             'redis-type-tag-round': props.round,
             'redis-type-tag-loading': props.loading,
+            'redis-type-tag': props.short,
         }"
         :color="{ color: backgroundColor, textColor: fontColor }"
         :size="props.size"
@@ -111,5 +112,14 @@ const label = computed(() => {
     100% {
         opacity: 0.4;
     }
+}
+
+.redis-type-tag {
+    width: 22px;
+    height: 22px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
 }
 </style>
