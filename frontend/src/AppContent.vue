@@ -160,7 +160,7 @@ const onKeyShortcut = (e) => {
                 <div v-show="tabStore.nav === 'browser'" class="app-toolbar-tab flex-item-expand">
                     <content-value-tab />
                 </div>
-                <div class="flex-item-expand"></div>
+                <div class="flex-item-expand" style="min-width: 15px"></div>
                 <!-- simulate window control buttons -->
                 <toolbar-control-widget
                     v-if="!isMacOS()"
@@ -248,6 +248,7 @@ const onKeyShortcut = (e) => {
         align-self: flex-end;
         margin-bottom: -1px;
         margin-left: 3px;
+        overflow: auto;
     }
 
     #app-content {
