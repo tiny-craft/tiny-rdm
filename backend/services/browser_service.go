@@ -445,7 +445,7 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 	filterType := len(keyType) > 0
 	scanSize := int64(Preferences().GetScanSize())
 	// define sub scan function
-	scan := func(ctx context.Context, cli redis.UniversalClient, appendFunc func(k []any)) error {
+	scan := func(ctx context.Context, cli redis.UniversalClient, count int64, appendFunc func(k []any)) error {
 		var loadedKey []string
 		var scanCount int64
 		for {
@@ -475,16 +475,22 @@ func (b *browserService) scanKeys(ctx context.Context, client redis.UniversalCli
 	if cluster, ok := client.(*redis.ClusterClient); ok {
 		// cluster mode
 		var mutex sync.Mutex
+		var totalMaster int64
+		cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			totalMaster += 1
+			return nil
+		})
+		partCount := count / max(totalMaster, 1)
 		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
 			// FIXME: BUG? can not fully load in cluster mode? maybe remove the shared "cursor"
-			return scan(ctx, cli, func(k []any) {
+			return scan(ctx, cli, partCount, func(k []any) {
 				mutex.Lock()
 				keys = append(keys, k...)
 				mutex.Unlock()
 			})
 		})
 	} else {
-		err = scan(ctx, client, func(k []any) {
+		err = scan(ctx, client, count, func(k []any) {
 			keys = append(keys, k...)
 		})
 	}
