@@ -24,7 +24,7 @@ func (BinaryConvert) Encode(str string) (string, bool) {
 
 func (BinaryConvert) Decode(str string) (string, bool) {
 	var binary strings.Builder
-	for _, char := range str {
+	for _, char := range []byte(str) {
 		binary.WriteString(fmt.Sprintf("%08b", int(char)))
 	}
 	return binary.String(), true
