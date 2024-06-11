@@ -1,5 +1,5 @@
 <script setup>
-import { every, get, includes, isEmpty, map, reject, sortBy, toNumber } from 'lodash'
+import { every, get, includes, isEmpty, map, reject, sortBy, toNumber, trim } from 'lodash'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ListSentinelMasters, TestConnection } from 'wailsjs/go/services/connectionService.js'
@@ -169,9 +169,11 @@ const onSaveConnection = async () => {
         generalForm.value.network = 'unix'
         generalForm.value.addr = ''
         generalForm.value.port = 0
+        generalForm.value.sock = trim(generalForm.value.sock)
     } else {
         generalForm.value.network = 'tcp'
         generalForm.value.sock = ''
+        generalForm.value.addr = trim(generalForm.value.addr)
     }
 
     // trim advance data
