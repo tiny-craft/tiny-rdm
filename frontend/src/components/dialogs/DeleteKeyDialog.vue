@@ -1,7 +1,6 @@
 <script setup>
 import { computed, nextTick, reactive, ref, watchEffect } from 'vue'
 import useDialog from 'stores/dialog'
-import { useI18n } from 'vue-i18n'
 import { isEmpty, map, size } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
@@ -14,6 +13,7 @@ const deleteForm = reactive({
     loadingAffected: false,
     affectedKeys: [],
     async: true,
+    direct: false,
 })
 
 const dialogStore = useDialog()
@@ -68,13 +68,27 @@ const keyLines = computed(() => {
     return map(deleteForm.affectedKeys, (k) => decodeRedisKey(k))
 })
 
-const i18n = useI18n()
 const onConfirmDelete = async () => {
     try {
         deleting.value = true
         const { server, db, key, affectedKeys } = deleteForm
         await nextTick()
         browserStore.deleteKeys(server, db, affectedKeys).catch((e) => {})
+    } catch (e) {
+        $message.error(e.message)
+        return
+    } finally {
+        deleting.value = false
+    }
+    dialogStore.closeDeleteKeyDialog()
+}
+
+const onConfirmDirectDelete = async () => {
+    try {
+        deleting.value = true
+        const { server, db, key } = deleteForm
+        await nextTick()
+        browserStore.deleteByPattern(server, db, key).catch((e) => {})
     } catch (e) {
         $message.error(e.message)
         return
@@ -116,9 +130,9 @@ const onClose = () => {
                     required>
                     <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
                 </n-form-item>
-                <!--                <n-checkbox v-model:checked="deleteForm.async">-->
-                <!--                    {{ $t('dialogue.key.silent') }}-->
-                <!--                </n-checkbox>-->
+                <n-checkbox v-model:checked="deleteForm.direct">
+                    {{ $t('dialogue.key.direct_delete') }}
+                </n-checkbox>
                 <n-card
                     v-if="deleteForm.showAffected"
                     :title="$t('dialogue.key.affected_key') + `(${size(deleteForm.affectedKeys)})`"
@@ -140,22 +154,32 @@ const onClose = () => {
             <div class="flex-item n-dialog__action">
                 <n-button :disabled="loading" :focusable="false" @click="onClose">{{ $t('common.cancel') }}</n-button>
                 <n-button
-                    v-if="!deleteForm.showAffected"
+                    v-if="deleteForm.direct"
                     :focusable="false"
                     :loading="loading"
                     type="primary"
-                    @click="scanAffectedKey">
-                    {{ $t('dialogue.key.show_affected_key') }}
+                    @click="onConfirmDirectDelete">
+                    {{ $t('dialogue.key.confirm_delete') }}
                 </n-button>
-                <n-button
-                    v-else
-                    :disabled="isEmpty(deleteForm.affectedKeys)"
-                    :focusable="false"
-                    :loading="loading"
-                    type="primary"
-                    @click="onConfirmDelete">
-                    {{ $t('dialogue.key.confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
-                </n-button>
+                <template v-else>
+                    <n-button
+                        v-if="!deleteForm.showAffected"
+                        :focusable="false"
+                        :loading="loading"
+                        type="primary"
+                        @click="scanAffectedKey">
+                        {{ $t('dialogue.key.show_affected_key') }}
+                    </n-button>
+                    <n-button
+                        v-else
+                        :disabled="isEmpty(deleteForm.affectedKeys)"
+                        :focusable="false"
+                        :loading="loading"
+                        type="primary"
+                        @click="onConfirmDelete">
+                        {{ $t('dialogue.key.confirm_delete_key', { num: size(deleteForm.affectedKeys) }) }}
+                    </n-button>
+                </template>
             </div>
         </template>
     </n-modal>

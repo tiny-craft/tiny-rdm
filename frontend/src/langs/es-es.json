@@ -296,6 +296,8 @@
       "affected_key": "Claves afectadas",
       "show_affected_key": "Mostrar claves afectadas",
       "confirm_delete_key": "Confirmar eliminar {num} clave(s)",
+      "direct_delete": "Eliminar el patrón coincidente directamente",
+      "confirm_delete": "Confirmar eliminación",
       "async_delete": "Ejecución asíncrona",
       "async_delete_title": "No esperar el resultado",
       "confirm_flush": "¡Sé lo que estoy haciendo!",

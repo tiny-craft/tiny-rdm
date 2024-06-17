@@ -296,6 +296,8 @@
       "affected_key": "Affected Keys",
       "show_affected_key": "Show Affected Keys",
       "confirm_delete_key": "Confirm delete {num} key(s)",
+      "direct_delete": "Delete match pattern directly",
+      "confirm_delete": "Confirm Delete",
       "async_delete": "Async Execution",
       "async_delete_title": "Don't wait for result",
       "confirm_flush": "I know what I'm doing!",

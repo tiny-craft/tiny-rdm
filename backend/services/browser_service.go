@@ -2292,6 +2292,84 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	return
 }
 
+// DeleteKeysByPattern delete keys by pattern
+func (b *browserService) DeleteKeysByPattern(server string, db int, pattern string) (resp types.JSResp) {
+	conf := Connection().getConnection(server)
+	if conf == nil {
+		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
+		return
+	}
+	var client redis.UniversalClient
+	var err error
+	var connConfig = conf.ConnectionConfig
+	connConfig.LastDB = db
+	if client, err = b.createRedisClient(connConfig); err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+	ctx, cancelFunc := context.WithCancel(b.ctx)
+	defer client.Close()
+	defer cancelFunc()
+
+	var ks []any
+	ks, _, err = b.scanKeys(ctx, client, pattern, "", 0, 0)
+	if err != nil {
+		resp.Msg = err.Error()
+		return
+	}
+
+	total := len(ks)
+	var canceled bool
+	var deletedKeys = make([]any, 0, total)
+	var mutex sync.Mutex
+	del := func(ctx context.Context, cli redis.UniversalClient) error {
+		const batchSize = 1000
+		for i := 0; i < total; i += batchSize {
+			pipe := cli.Pipeline()
+			for j := 0; j < batchSize; j++ {
+				if i+j < total {
+					pipe.Del(ctx, strutil.DecodeRedisKey(ks[i+j]))
+				}
+			}
+			cmders, delErr := pipe.Exec(ctx)
+			for j, cmder := range cmders {
+				if cmder.(*redis.IntCmd).Val() == 1 {
+					// save deleted key
+					mutex.Lock()
+					deletedKeys = append(deletedKeys, ks[i+j])
+					mutex.Unlock()
+				}
+			}
+			if errors.Is(delErr, context.Canceled) || canceled {
+				canceled = true
+				break
+			}
+		}
+		return nil
+	}
+
+	if cluster, ok := client.(*redis.ClusterClient); ok {
+		// cluster mode
+		err = cluster.ForEachMaster(ctx, func(ctx context.Context, cli *redis.Client) error {
+			return del(ctx, cli)
+		})
+	} else {
+		err = del(ctx, client)
+	}
+
+	resp.Success = true
+	resp.Data = struct {
+		Canceled bool `json:"canceled"`
+		Deleted  any  `json:"deleted"`
+		Failed   int  `json:"failed"`
+	}{
+		Canceled: canceled,
+		Deleted:  deletedKeys,
+		Failed:   len(ks) - len(deletedKeys),
+	}
+	return
+}
+
 // ExportKey export keys
 func (b *browserService) ExportKey(server string, db int, ks []any, path string, includeExpire bool) (resp types.JSResp) {
 	// connect a new connection to export keys

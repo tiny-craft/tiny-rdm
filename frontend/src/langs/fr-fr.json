@@ -296,6 +296,8 @@
       "affected_key": "Clés affectées",
       "show_affected_key": "Afficher les clés affectées",
       "confirm_delete_key": "Confirmer la suppression de {num} clé(s)",
+      "direct_delete": "Supprimer le modèle correspondant directement",
+      "confirm_delete": "Confirmer la suppression",
       "async_delete": "Exécution asynchrone",
       "async_delete_title": "Ne pas attendre le résultat",
       "confirm_flush": "Je sais ce que je fais !",

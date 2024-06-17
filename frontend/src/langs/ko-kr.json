@@ -296,6 +296,8 @@
       "affected_key": "영향받는 키",
       "show_affected_key": "영향받는 키 표시",
       "confirm_delete_key": "{num}개의 키를 삭제하시겠습니까?",
+      "direct_delete": "일치하는 패턴 직접 삭제",
+      "confirm_delete": "삭제 확인",
       "async_delete": "비동기 실행",
       "async_delete_title": "결과를 기다리지 않음",
       "confirm_flush": "진행 중인 작업을 알고 있습니다!",

@@ -296,6 +296,8 @@
       "affected_key": "Chaves Afetadas",
       "show_affected_key": "Mostrar Chaves Afetadas",
       "confirm_delete_key": "Confirmar Exclusão de {num} Chave(s)",
+      "direct_delete": "Excluir padrão correspondente diretamente",
+      "confirm_delete": "Confirmar exclusão",
       "async_delete": "Execução Assíncrona",
       "async_delete_title": "Não esperar pelo resultado da operação",
       "confirm_flush": "Eu sei o que estou fazendo!",

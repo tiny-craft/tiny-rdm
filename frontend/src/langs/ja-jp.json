@@ -296,6 +296,8 @@
       "affected_key": "影響を受けるキー",
       "show_affected_key": "影響を受けるキーを表示",
       "confirm_delete_key": "{num}個のキーを削除することを確認",
+      "direct_delete": "一致するパターンを直接削除",
+      "confirm_delete": "削除を確認",
       "async_delete": "非同期実行",
       "async_delete_title": "結果を待たない",
       "confirm_flush": "自分が実行しようとしている操作を理解しています！",

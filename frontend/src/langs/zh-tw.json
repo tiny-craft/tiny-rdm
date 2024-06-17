@@ -296,6 +296,8 @@
       "affected_key": "受影響的鍵名",
       "show_affected_key": "檢視受影響的鍵名",
       "confirm_delete_key": "確認刪除{num}個鍵",
+      "direct_delete": "直接匹配刪除",
+      "confirm_delete": "確認刪除",
       "async_delete": "異步執行",
       "async_delete_title": "不等待操作結果",
       "confirm_flush": "我知道我正在執行的操作！",

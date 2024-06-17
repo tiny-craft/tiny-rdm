@@ -11,6 +11,7 @@ import {
     ConvertValue,
     DeleteKey,
     DeleteKeys,
+    DeleteKeysByPattern,
     ExportKey,
     FlushDB,
     GetClientList,
@@ -1728,6 +1729,66 @@ const useBrowserStore = defineStore('browser', {
             }
             try {
                 const { success, msg, data } = await DeleteKeys(server, db, keys, serialNo)
+                if (success) {
+                    canceled = get(data, 'canceled', false)
+                    deleted = get(data, 'deleted', [])
+                    failCount = get(data, 'failed', 0)
+                } else {
+                    $message.error(msg)
+                }
+            } finally {
+                msgRef.destroy()
+                // clear checked keys
+                const tab = useTabStore()
+                tab.setCheckedKeys(server)
+            }
+            // refresh model data
+            const deletedCount = size(deleted)
+            if (canceled) {
+                $message.info(i18nGlobal.t('dialogue.handle_cancel'))
+            } else if (failCount <= 0) {
+                // no fail
+                $message.success(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            } else if (failCount >= deletedCount) {
+                // all fail
+                $message.error(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            } else {
+                // some fail
+                $message.warning(i18nGlobal.t('dialogue.delete.completed', { success: deletedCount, fail: failCount }))
+            }
+            // update ui
+            timeout(100).then(async () => {
+                /** @type RedisServerState **/
+                const serverInst = this.servers[server]
+                if (serverInst != null) {
+                    let start = now()
+                    for (let i = 0; i < deleted.length; i++) {
+                        serverInst.removeKeyNode(deleted[i], false)
+                        if (now() - start > 300) {
+                            await timeout(100)
+                            start = now()
+                        }
+                    }
+                    serverInst.tidyNode('', true)
+                    serverInst.updateDBKeyCount(db, -deletedCount)
+                }
+            })
+        },
+
+        /**
+         * delete multiple keys by pattern
+         * @param server
+         * @param db
+         * @param pattern
+         * @return {Promise<void>}
+         */
+        async deleteByPattern(server, db, pattern) {
+            const msgRef = $message.loading(i18nGlobal.t('dialogue.delete.deleting'), { duration: 0, closable: true })
+            let deleted = []
+            let failCount = 0
+            let canceled = false
+            try {
+                const { success, msg, data } = await DeleteKeysByPattern(server, db, pattern)
                 if (success) {
                     canceled = get(data, 'canceled', false)
                     deleted = get(data, 'deleted', [])

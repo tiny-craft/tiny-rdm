@@ -296,6 +296,8 @@
       "affected_key": "Затронутые ключи",
       "show_affected_key": "Показать затронутые ключи",
       "confirm_delete_key": "Подтвердить удаление {num} ключ(ей/ей)",
+      "direct_delete": "Удалить совпадающий шаблон напрямую",
+      "confirm_delete": "Подтвердить удаление",
       "async_delete": "Асинхронное выполнение",
       "async_delete_title": "Не ждать результата",
       "confirm_flush": "Я знаю, что делаю!",
