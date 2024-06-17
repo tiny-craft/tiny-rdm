@@ -43,7 +43,7 @@ const hasTooltip = computed(() => {
 </script>
 
 <template>
-    <n-tooltip v-if="hasTooltip" :delay="tooltipDelay" :show-arrow="false">
+    <n-tooltip v-if="hasTooltip" :delay="tooltipDelay" :keep-alive-on-hover="false" :show-arrow="false">
         <template #trigger>
             <n-button
                 :class="props.buttonClass"
