@@ -130,7 +130,7 @@ const onClose = () => {
                     required>
                     <n-input v-model:value="deleteForm.key" placeholder="" @input="resetAffected" />
                 </n-form-item>
-                <n-checkbox v-model:checked="deleteForm.direct">
+                <n-checkbox v-if="!deleteForm.showAffected" v-model:checked="deleteForm.direct">
                     {{ $t('dialogue.key.direct_delete') }}
                 </n-checkbox>
                 <n-card

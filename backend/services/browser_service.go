@@ -233,13 +233,12 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 
 // CloseConnection close redis server connection
 func (b *browserService) CloseConnection(name string) (resp types.JSResp) {
-	item, ok := b.connMap[name]
-	if ok {
+	if item, ok := b.connMap[name]; ok {
 		delete(b.connMap, name)
+		if item.cancelFunc != nil {
+			item.cancelFunc()
+		}
 		if item.client != nil {
-			if item.cancelFunc != nil {
-				item.cancelFunc()
-			}
 			item.client.Close()
 		}
 	}
@@ -247,7 +246,7 @@ func (b *browserService) CloseConnection(name string) (resp types.JSResp) {
 	return
 }
 
-func (b *browserService) createRedisClient(selConn types.ConnectionConfig) (client redis.UniversalClient, err error) {
+func (b *browserService) createRedisClient(ctx context.Context, selConn types.ConnectionConfig) (client redis.UniversalClient, err error) {
 	hook := redis2.NewHook(selConn.Name, func(cmd string, cost int64) {
 		now := time.Now()
 		//last := strings.LastIndex(cmd, ":")
@@ -268,10 +267,10 @@ func (b *browserService) createRedisClient(selConn types.ConnectionConfig) (clie
 		return
 	}
 
-	_ = client.Do(b.ctx, "CLIENT", "SETNAME", url.QueryEscape(selConn.Name)).Err()
+	_ = client.Do(ctx, "CLIENT", "SETNAME", url.QueryEscape(selConn.Name)).Err()
 	// add hook to each node in cluster mode
 	if cluster, ok := client.(*redis.ClusterClient); ok {
-		err = cluster.ForEachShard(b.ctx, func(ctx context.Context, cli *redis.Client) error {
+		err = cluster.ForEachShard(ctx, func(ctx context.Context, cli *redis.Client) error {
 			cli.AddHook(hook)
 			return nil
 		})
@@ -283,7 +282,7 @@ func (b *browserService) createRedisClient(selConn types.ConnectionConfig) (clie
 		client.AddHook(hook)
 	}
 
-	if _, err = client.Ping(b.ctx).Result(); err != nil && !errors.Is(err, redis.Nil) {
+	if _, err = client.Ping(ctx).Result(); err != nil && !errors.Is(err, redis.Nil) {
 		err = errors.New("can not connect to redis server:" + err.Error())
 		return
 	}
@@ -318,13 +317,18 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 		err = fmt.Errorf("no match connection \"%s\"", server)
 		return
 	}
+
+	ctx, cancelFunc := context.WithCancel(b.ctx)
+	b.connMap[server] = &connectionItem{
+		ctx:        ctx,
+		cancelFunc: cancelFunc,
+	}
 	var connConfig = selConn.ConnectionConfig
 	connConfig.LastDB = db
-	client, err = b.createRedisClient(connConfig)
+	client, err = b.createRedisClient(ctx, connConfig)
 	if err != nil {
 		return
 	}
-	ctx, cancelFunc := context.WithCancel(b.ctx)
 	item = &connectionItem{
 		client:      client,
 		ctx:         ctx,
@@ -2009,21 +2013,13 @@ func (b *browserService) SetKeyTTL(server string, db int, k any, ttl int64) (res
 
 // BatchSetTTL batch set ttl
 func (b *browserService) BatchSetTTL(server string, db int, ks []any, ttl int64, serialNo string) (resp types.JSResp) {
-	conf := Connection().getConnection(server)
-	if conf == nil {
-		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
-		return
-	}
-	var client redis.UniversalClient
-	var err error
-	var connConfig = conf.ConnectionConfig
-	connConfig.LastDB = db
-	if client, err = b.createRedisClient(connConfig); err != nil {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	client := item.client
 	ctx, cancelFunc := context.WithCancel(b.ctx)
-	defer client.Close()
 	defer cancelFunc()
 
 	//cancelEvent := "ttling:stop:" + serialNo
@@ -2047,7 +2043,7 @@ func (b *browserService) BatchSetTTL(server string, db int, ks []any, ttl int64,
 			//}
 			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
 				startTime = time.Now()
-				//runtime.EventsEmit(b.ctx, processEvent, param)
+				//runtime.EventsEmit(ctx, processEvent, param)
 				// do some sleep to prevent blocking the Redis server
 				time.Sleep(10 * time.Millisecond)
 			}
@@ -2217,22 +2213,13 @@ func (b *browserService) DeleteOneKey(server string, db int, k any) (resp types.
 
 // DeleteKeys delete keys sync with notification
 func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo string) (resp types.JSResp) {
-	// connect a new connection to export keys
-	conf := Connection().getConnection(server)
-	if conf == nil {
-		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
-		return
-	}
-	var client redis.UniversalClient
-	var err error
-	var connConfig = conf.ConnectionConfig
-	connConfig.LastDB = db
-	if client, err = b.createRedisClient(connConfig); err != nil {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	client := item.client
 	ctx, cancelFunc := context.WithCancel(b.ctx)
-	defer client.Close()
 	defer cancelFunc()
 
 	cancelEvent := "delete:stop:" + serialNo
@@ -2294,21 +2281,13 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 
 // DeleteKeysByPattern delete keys by pattern
 func (b *browserService) DeleteKeysByPattern(server string, db int, pattern string) (resp types.JSResp) {
-	conf := Connection().getConnection(server)
-	if conf == nil {
-		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
-		return
-	}
-	var client redis.UniversalClient
-	var err error
-	var connConfig = conf.ConnectionConfig
-	connConfig.LastDB = db
-	if client, err = b.createRedisClient(connConfig); err != nil {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	client := item.client
 	ctx, cancelFunc := context.WithCancel(b.ctx)
-	defer client.Close()
 	defer cancelFunc()
 
 	var ks []any
@@ -2372,22 +2351,13 @@ func (b *browserService) DeleteKeysByPattern(server string, db int, pattern stri
 
 // ExportKey export keys
 func (b *browserService) ExportKey(server string, db int, ks []any, path string, includeExpire bool) (resp types.JSResp) {
-	// connect a new connection to export keys
-	conf := Connection().getConnection(server)
-	if conf == nil {
-		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
-		return
-	}
-	var client redis.UniversalClient
-	var err error
-	var connConfig = conf.ConnectionConfig
-	connConfig.LastDB = db
-	if client, err = b.createRedisClient(connConfig); err != nil {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	client := item.client
 	ctx, cancelFunc := context.WithCancel(b.ctx)
-	defer client.Close()
 	defer cancelFunc()
 
 	file, err := os.Create(path)
@@ -2456,22 +2426,13 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 
 // ImportCSV import data from csv file
 func (b *browserService) ImportCSV(server string, db int, path string, conflict int, ttl int64) (resp types.JSResp) {
-	// connect a new connection to export keys
-	conf := Connection().getConnection(server)
-	if conf == nil {
-		resp.Msg = fmt.Sprintf("no connection profile named: %s", server)
-		return
-	}
-	var client redis.UniversalClient
-	var err error
-	var connConfig = conf.ConnectionConfig
-	connConfig.LastDB = db
-	if client, err = b.createRedisClient(connConfig); err != nil {
+	item, err := b.getRedisClient(server, db)
+	if err != nil {
 		resp.Msg = err.Error()
 		return
 	}
+	client := item.client
 	ctx, cancelFunc := context.WithCancel(b.ctx)
-	defer client.Close()
 	defer cancelFunc()
 
 	file, err := os.Open(path)
@@ -2553,7 +2514,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 				"ignored":  ignored,
 				//"processing": string(key),
 			}
-			runtime.EventsEmit(b.ctx, processEvent, param)
+			runtime.EventsEmit(ctx, processEvent, param)
 			// do some sleep to prevent blocking the Redis server
 			time.Sleep(10 * time.Millisecond)
 		}
