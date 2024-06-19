@@ -3,10 +3,10 @@ package storage
 import (
 	"errors"
 	"gopkg.in/yaml.v3"
+	"slices"
 	"sync"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
-	sliceutil "tinyrdm/backend/utils/slice"
 )
 
 type ConnectionsStorage struct {
@@ -256,10 +256,10 @@ func (c *ConnectionsStorage) SaveSortedConnection(sortedConns types.Connections)
 
 	conns := c.GetConnectionsFlat()
 	takeConn := func(name string) (types.Connection, bool) {
-		idx, ok := sliceutil.Find(conns, func(i int) bool {
-			return conns[i].Name == name
+		idx := slices.IndexFunc(conns, func(connection types.Connection) bool {
+			return connection.Name == name
 		})
-		if ok {
+		if idx >= 0 {
 			ret := conns[idx]
 			conns = append(conns[:idx], conns[idx+1:]...)
 			return ret, true

@@ -98,9 +98,9 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 	selConn := Connection().getConnection(name)
 	// correct last database index
 	lastDB := selConn.LastDB
-	if selConn.DBFilterType == "show" && !sliceutil.Contains(selConn.DBFilterList, lastDB) {
+	if selConn.DBFilterType == "show" && !slices.Contains(selConn.DBFilterList, lastDB) {
 		lastDB = selConn.DBFilterList[0]
-	} else if selConn.DBFilterType == "hide" && sliceutil.Contains(selConn.DBFilterList, lastDB) {
+	} else if selConn.DBFilterType == "hide" && slices.Contains(selConn.DBFilterList, lastDB) {
 		lastDB = selConn.DBFilterList[0]
 	}
 	if lastDB != selConn.LastDB {
