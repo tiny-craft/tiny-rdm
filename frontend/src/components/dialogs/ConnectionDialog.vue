@@ -507,7 +507,7 @@ const pasteFromClipboard = async () => {
                                 </n-radio-group>
                             </n-form-item-gi>
                             <n-form-item-gi
-                                v-show="generalForm.dbFilterType !== 'none'"
+                                v-if="generalForm.dbFilterType !== 'none'"
                                 :label="$t('dialogue.connection.advn.dbfilter_input')"
                                 :span="24">
                                 <n-select
