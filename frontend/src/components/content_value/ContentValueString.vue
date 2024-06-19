@@ -6,13 +6,13 @@ import Save from '@/components/icons/Save.vue'
 import { useThemeVars } from 'naive-ui'
 import { formatTypes } from '@/consts/value_view_type.js'
 import { types as redisTypes } from '@/consts/support_redis_type.js'
-import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isEmpty, toLower } from 'lodash'
 import useBrowserStore from 'stores/browser.js'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
+import copy from 'copy-text-to-clipboard'
 
 const props = defineProps({
     name: String,
@@ -121,15 +121,8 @@ const onFormatChanged = async (decode = '', format = '') => {
  * Copy value
  */
 const onCopyValue = () => {
-    ClipboardSetText(displayValue.value)
-        .then((succ) => {
-            if (succ) {
-                $message.success(i18n.t('interface.copy_succ'))
-            }
-        })
-        .catch((e) => {
-            $message.error(e.message)
-        })
+    copy(displayValue.value)
+    $message.success(i18n.t('interface.copy_succ'))
 }
 
 /**

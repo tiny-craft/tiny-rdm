@@ -13,8 +13,8 @@ import LoadList from '@/components/icons/LoadList.vue'
 import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
-import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { formatBytes } from '@/utils/byte_convert.js'
+import copy from 'copy-text-to-clipboard'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -108,14 +108,8 @@ const actionColumn = {
             bindKey: row.id,
             readonly: true,
             onCopy: async () => {
-                try {
-                    const succ = await ClipboardSetText(JSON.stringify(row.v))
-                    if (succ) {
-                        $message.success(i18n.t('interface.copy_succ'))
-                    }
-                } catch (e) {
-                    $message.error(e.message)
-                }
+                copy(JSON.stringify(row.v))
+                $message.success(i18n.t('interface.copy_succ'))
             },
             onDelete: async () => {
                 try {

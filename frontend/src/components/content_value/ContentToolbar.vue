@@ -9,12 +9,12 @@ import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import { useI18n } from 'vue-i18n'
 import IconButton from '@/components/common/IconButton.vue'
 import Copy from '@/components/icons/Copy.vue'
-import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
 import { toHumanReadable } from '@/utils/date.js'
+import copy from 'copy-text-to-clipboard'
 
 const props = defineProps({
     server: String,
@@ -139,15 +139,8 @@ const onToggleRefresh = (on) => {
 }
 
 const onCopyKey = () => {
-    ClipboardSetText(props.keyPath)
-        .then((succ) => {
-            if (succ) {
-                $message.success(i18n.t('interface.copy_succ'))
-            }
-        })
-        .catch((e) => {
-            $message.error(e.message)
-        })
+    copy(props.keyPath)
+    $message.success(i18n.t('interface.copy_succ'))
 }
 
 const onTTL = () => {

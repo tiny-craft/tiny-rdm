@@ -17,8 +17,8 @@ import Edit from '@/components/icons/Edit.vue'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import { decodeRedisKey } from '@/utils/key_convert.js'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
-import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { formatBytes } from '@/utils/byte_convert.js'
+import copy from 'copy-text-to-clipboard'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -230,14 +230,8 @@ const actionColumn = {
                 }
             },
             onCopy: async () => {
-                try {
-                    const succ = await ClipboardSetText(row.v)
-                    if (succ) {
-                        $message.success(i18n.t('interface.copy_succ'))
-                    }
-                } catch (e) {
-                    $message.error(e.message)
-                }
+                copy(row.v)
+                $message.success(i18n.t('interface.copy_succ'))
             },
             onEdit: () => startEdit(index + 1, row.k, row.v),
             onDelete: async () => {
