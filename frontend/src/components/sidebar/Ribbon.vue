@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import Database from '@/components/icons/Database.vue'
-import { useI18n } from 'vue-i18n'
 import Server from '@/components/icons/Server.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Config from '@/components/icons/Config.vue'
@@ -39,7 +38,6 @@ const emit = defineEmits(['update:value'])
 const iconSize = computed(() => Math.floor(props.width * 0.45))
 
 const browserStore = useBrowserStore()
-const i18n = useI18n()
 const showWechat = ref(false)
 const menuOptions = computed(() => {
     return [

@@ -25,7 +25,6 @@ import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
 import { nativeRedisKey } from '@/utils/key_convert.js'
-import { isMacOS } from '@/utils/platform.js'
 import copy from 'copy-text-to-clipboard'
 
 const props = defineProps({
@@ -352,7 +351,7 @@ const onKeyShortcut = (e) => {
             handleSelectContextMenu('value_reload')
             break
         case 'r':
-            if (e.metaKey && isMacOS()) {
+            if (e.metaKey) {
                 handleSelectContextMenu('value_reload')
             }
             break
