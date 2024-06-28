@@ -177,6 +177,10 @@ body {
     animation: rotate 2s linear infinite;
 }
 
+.pre-wrap {
+    white-space: pre-wrap;
+}
+
 @keyframes rotate {
     100% {
         transform: rotate(360deg);

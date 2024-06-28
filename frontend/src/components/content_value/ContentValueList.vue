@@ -108,7 +108,7 @@ const valueColumn = computed(() => ({
     },
     render: (row) => {
         if (isCode.value) {
-            return h('pre', {}, row.dv || row.v)
+            return h('pre', { class: 'pre-wrap' }, row.dv || row.v)
         }
         return row.dv || row.v
     },

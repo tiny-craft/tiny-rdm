@@ -157,7 +157,7 @@ const valueColumn = computed(() => ({
     // sorter: (row1, row2) => row1.value - row2.value,
     render: (row) => {
         if (isCode.value) {
-            return h('pre', {}, row.dv || row.v)
+            return h('pre', { class: 'pre-wrap' }, row.dv || row.v)
         }
         return row.dv || row.v
     },

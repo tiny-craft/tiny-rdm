@@ -93,7 +93,7 @@ const valueColumn = computed(() => ({
     },
     // sorter: (row1, row2) => row1.value - row2.value,
     render: (row) => {
-        return h('pre', {}, row.dv)
+        return h('pre', { class: 'pre-wrap' }, row.dv)
     },
 }))
 const actionColumn = {
