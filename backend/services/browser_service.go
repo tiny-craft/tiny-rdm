@@ -23,6 +23,7 @@ import (
 	"tinyrdm/backend/types"
 	"tinyrdm/backend/utils/coll"
 	convutil "tinyrdm/backend/utils/convert"
+	maputil "tinyrdm/backend/utils/map"
 	redis2 "tinyrdm/backend/utils/redis"
 	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
@@ -222,11 +223,20 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 		}
 	}
 
+	// get redis server version
+	var version string
+	if res, err := client.Info(ctx, "server").Result(); err == nil || errors.Is(err, redis.Nil) {
+		info := b.parseInfo(res)
+		serverInfo := maputil.Get(info, "Server", map[string]string{})
+		version = maputil.Get(serverInfo, "redis_version", "1.0.0")
+	}
+
 	resp.Success = true
 	resp.Data = map[string]any{
-		"db":     dbs,
-		"view":   selConn.KeyView,
-		"lastDB": selConn.LastDB,
+		"db":      dbs,
+		"view":    selConn.KeyView,
+		"lastDB":  selConn.LastDB,
+		"version": version,
 	}
 	return
 }

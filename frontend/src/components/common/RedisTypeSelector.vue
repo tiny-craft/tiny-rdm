@@ -14,6 +14,10 @@ const props = defineProps({
         type: String,
         default: 'bottom-start',
     },
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['update:value', 'select'])
@@ -83,6 +87,7 @@ const handleSelect = (select) => {
 
 <template>
     <n-dropdown
+        :disabled="props.disabled"
         :options="options"
         :placement="props.placement"
         :render-icon="renderIcon"
@@ -92,6 +97,7 @@ const handleSelect = (select) => {
         <n-tag
             :bordered="true"
             :color="{ color: backgroundColor, textColor: fontColor }"
+            :disabled="props.disabled"
             class="redis-tag"
             size="medium"
             strong>

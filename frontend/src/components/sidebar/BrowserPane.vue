@@ -27,6 +27,7 @@ import { ConnectionType } from '@/consts/connection_type.js'
 import Import from '@/components/icons/Import.vue'
 import Checkbox from '@/components/icons/Checkbox.vue'
 import Timer from '@/components/icons/Timer.vue'
+import { toVersionArray } from '@/utils/version.js'
 
 const props = defineProps({
     server: String,
@@ -76,6 +77,12 @@ const dbSelectOptions = computed(() => {
             label: label,
         }
     })
+})
+
+const showTypeFilter = computed(() => {
+    const version = browserStore.getServerVersion(props.server)
+    const verArr = toVersionArray(version)
+    return verArr[0] > 5
 })
 
 const moreOptions = [
@@ -301,7 +308,10 @@ watch(
                 @filter-changed="onFilterInput"
                 @match-changed="onMatchInput">
                 <template #prepend>
-                    <redis-type-selector v-model:value="filterForm.type" @update:value="onSelectFilterType" />
+                    <redis-type-selector
+                        v-model:value="filterForm.type"
+                        :disabled="!showTypeFilter"
+                        @update:value="onSelectFilterType" />
                 </template>
             </content-search-input>
             <n-button-group>

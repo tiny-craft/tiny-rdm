@@ -1,6 +1,11 @@
 import { get, isEmpty, map, size, split, trimStart } from 'lodash'
 
-const toVerArr = (ver) => {
+/**
+ * convert version string to number array
+ * @param ver
+ * @return {number[]}
+ */
+export const toVersionArray = (ver) => {
     const v = trimStart(ver, 'v')
     let vParts = split(v, '.')
     if (isEmpty(vParts)) {
@@ -20,8 +25,8 @@ const toVerArr = (ver) => {
  */
 export const compareVersion = (v1, v2) => {
     if (v1 !== v2) {
-        const v1Nums = toVerArr(v1)
-        const v2Nums = toVerArr(v2)
+        const v1Nums = toVersionArray(v1)
+        const v2Nums = toVersionArray(v2)
         const length = Math.max(size(v1Nums), size(v2Nums))
 
         for (let i = 0; i < length; i++) {

@@ -28,6 +28,7 @@ export class RedisServerState {
      * @param {LoadingState} loadingState all loading state in opened connections map by server and LoadingState
      * @param {KeyViewType} viewType view type selection for all opened connections group by 'server'
      * @param {Map<string, RedisNodeItem>} nodeMap map nodes by "type#key"
+     * @param {string} version redis server version
      */
     constructor({
         name,
@@ -40,6 +41,7 @@ export class RedisServerState {
         loadingState = {},
         viewType = KeyViewType.Tree,
         nodeMap = new Map(),
+        version = '',
     }) {
         this.name = name
         this.db = db
@@ -52,6 +54,7 @@ export class RedisServerState {
         this.loadingState = loadingState
         this.viewType = viewType
         this.nodeMap = nodeMap
+        this.version = version
         this.decodeHistory = new Map()
         this.decodeHistoryLimit = 100
         this.getRoot()

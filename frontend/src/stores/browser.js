@@ -111,7 +111,7 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * get database info list
-         * @param server
+         * @param {string} server
          * @return {RedisDatabaseItem[]}
          */
         getDBList(server) {
@@ -120,6 +120,18 @@ const useBrowserStore = defineStore('browser', {
                 return serverInst.getDatabase()
             }
             return []
+        },
+
+        /**
+         * get server version
+         * @param {string} server
+         */
+        getServerVersion(server) {
+            const serverInst = this.servers[server]
+            if (serverInst != null) {
+                return serverInst.version
+            }
+            return '1.0.0'
         },
 
         /**
@@ -240,7 +252,7 @@ const useBrowserStore = defineStore('browser', {
             // if (connNode == null) {
             //     throw new Error('no such connection')
             // }
-            const { db, view = KeyViewType.Tree, lastDB } = data
+            const { db, view = KeyViewType.Tree, lastDB, version } = data
             if (isEmpty(db)) {
                 throw new Error('no db loaded')
             }
@@ -249,6 +261,7 @@ const useBrowserStore = defineStore('browser', {
                 separator: this.getSeparator(name),
                 db: -1,
                 viewType: view,
+                version,
             })
             /** @type {Object.<number,RedisDatabaseItem>} **/
             const databases = {}
