@@ -313,6 +313,8 @@ const updateInput = (data) => {
     if (data == null || data.length <= 0) {
         return
     }
+    // replace &nbsp;(Non-Breaking Space) with normal blank space
+    data = data.replace(/\u00A0/g, ' ')
 
     if (termInst == null) {
         return
