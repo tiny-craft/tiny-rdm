@@ -209,8 +209,6 @@ watch(() => data.value?.keyPath, initContent)
     <!-- FIXME: keep alive may cause virtual list null value error. -->
     <!-- <keep-alive v-else> -->
     <component
-        tabindex="0"
-        @keydown="onKeyShortcut"
         :is="valueComponents[data.type]"
         v-else
         ref="contentRef"
@@ -226,7 +224,9 @@ watch(() => data.value?.keyPath, initContent)
         :size="data.size"
         :ttl="data.ttl"
         :value="data.value"
+        tabindex="0"
         @delete="onDelete"
+        @keydown="onKeyShortcut"
         @loadall="onLoadAll"
         @loadmore="onLoadMore"
         @match="onMatch"

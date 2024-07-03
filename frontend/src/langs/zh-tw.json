@@ -331,7 +331,8 @@
       "set_key_filter": "設定鍵過濾器",
       "filter_pattern": "過濾表示式",
       "filter_pattern_tip": "直接鍵入篩選目前清單，按Enter鍵後可對伺服器進行掃描。\n\n*：匹配零個或多個字元。例如：\"key*\"匹配到以\"key\"開頭的所有鍵\n?：匹配單個字元。例如：\"key?\"匹配\"key1\", \"key2\"\n[ ]：匹配指定範圍內的單個字元。例如：\"key[1-3]\"可以匹配類似於 \"key1\", \"key2\", \"key3\" 的鍵\n\\：轉義字元。如果想要匹配 *, ?, [, 或]，需要使用反斜線\"\\\"進行轉義",
-      "exact_match_tip": "精準匹配"
+      "exact_match_tip": "精準匹配",
+      "filter_type_not_support": "類型篩選不支援 Redis 5.x 以下版本"
     },
     "export": {
       "name": "匯出資料",

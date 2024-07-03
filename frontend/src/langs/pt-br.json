@@ -331,7 +331,8 @@
       "set_key_filter": "Definir Filtro de Chave",
       "filter_pattern": "Padrão",
       "filter_pattern_tip": "Filtre a lista atual inserindo diretamente, e escaneie o servidor pressionando 'Enter'.\n\n* corresponde a 0 ou mais caracteres, ex: 'chave*'\n? corresponde a um único caractere, ex: 'chave?'\n[] corresponde a um intervalo, ex: 'chave[1-3]'\n\\ escapa caracteres especiais",
-      "exact_match_tip": "Correspondência Exata"
+      "exact_match_tip": "Correspondência Exata",
+      "filter_type_not_support": "A filtragem por tipo não é suportada para Redis 5.x e versões anteriores"
     },
     "export": {
       "name": "Exportar Dados",

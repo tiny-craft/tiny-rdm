@@ -812,6 +812,7 @@ defineExpose({
             :expand-on-click="false"
             :expanded-keys="expandedKeys"
             :filter="(pattern, node) => includes(node.redisKey, pattern)"
+            :keyboard="false"
             :node-props="nodeProps"
             :pattern="props.pattern"
             :render-label="renderLabel"
@@ -822,7 +823,6 @@ defineExpose({
             check-strategy="child"
             class="fill-height"
             virtual-scroll
-            :keyboard="false"
             @keydown="onKeyShortcut"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpanded"

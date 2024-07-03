@@ -311,6 +311,7 @@ watch(
                     <redis-type-selector
                         v-model:value="filterForm.type"
                         :disabled="!showTypeFilter"
+                        :disable-tip="$t('dialogue.filter.filter_type_not_support')"
                         @update:value="onSelectFilterType" />
                 </template>
             </content-search-input>
