@@ -325,6 +325,7 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	selConn := Connection().getConnection(server)
 	if selConn == nil {
 		err = fmt.Errorf("no match connection \"%s\"", server)
+		delete(b.connMap, server)
 		return
 	}
 
@@ -337,6 +338,7 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 	connConfig.LastDB = db
 	client, err = b.createRedisClient(ctx, connConfig)
 	if err != nil {
+		delete(b.connMap, server)
 		return
 	}
 	item = &connectionItem{
