@@ -174,7 +174,7 @@ body {
 }
 
 .auto-rotate {
-    animation: rotate 2s linear infinite;
+    animation: rotate 2s steps(60) infinite;
 }
 
 .pre-wrap {
