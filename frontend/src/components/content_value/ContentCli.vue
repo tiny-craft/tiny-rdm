@@ -253,6 +253,15 @@ const onTermKey = (e) => {
             }
             // block all ctrl key combinations input
             return false
+        } else {
+            switch (e.key) {
+                case 'Home': // move to head of line
+                    moveInputCursorTo(0)
+                    return false
+                case 'End': // move to tail of line
+                    moveInputCursorTo(Number.MAX_SAFE_INTEGER)
+                    return false
+            }
         }
     }
     return true
