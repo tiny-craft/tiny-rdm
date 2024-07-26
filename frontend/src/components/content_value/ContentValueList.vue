@@ -18,6 +18,10 @@ import Edit from '@/components/icons/Edit.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
 import copy from 'copy-text-to-clipboard'
+import { TextAlignType } from '@/consts/text_align_type.js'
+import AlignLeft from '@/components/icons/AlignLeft.vue'
+import AlignCenter from '@/components/icons/AlignCenter.vue'
+import SwitchButton from '@/components/common/SwitchButton.vue'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -51,9 +55,10 @@ const props = defineProps({
     },
     end: Boolean,
     loading: Boolean,
+    textAlign: Number,
 })
 
-const emit = defineEmits(['loadmore', 'loadall', 'reload', 'match'])
+const emit = defineEmits(['loadmore', 'loadall', 'reload', 'match', 'update:textAlign'])
 
 /**
  *
@@ -84,7 +89,7 @@ const valueFilterOption = ref(null)
 const valueColumn = computed(() => ({
     key: 'value',
     title: () => i18n.t('common.value'),
-    align: isCode.value ? 'left' : 'center',
+    align: isCode.value ? 'left' : props.textAlign !== TextAlignType.Left ? 'center' : 'left',
     titleAlign: 'center',
     ellipsis: isCode.value
         ? false
@@ -214,7 +219,7 @@ const columns = computed(() => {
                 key: 'no',
                 title: '#',
                 width: 80,
-                align: 'center',
+                align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
                 titleAlign: 'center',
                 render: (row, index) => {
                     return index + 1
@@ -229,7 +234,7 @@ const columns = computed(() => {
                 key: 'no',
                 title: '#',
                 width: 80,
-                align: 'center',
+                align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
                 titleAlign: 'center',
                 render: (row, index) => {
                     if (index + 1 === currentEditRow.no) {
@@ -391,6 +396,13 @@ defineExpose({
             <n-divider v-if="showMemoryUsage" vertical />
             <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ formatBytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
+            <switch-button
+                :icons="[AlignCenter, AlignLeft]"
+                :stroke-width="3.5"
+                :t-tooltips="['interface.text_align_center', 'interface.text_align_left']"
+                :value="props.textAlign"
+                unselect-stroke-width="3"
+                @update:value="(val) => emit('update:textAlign', val)" />
             <format-selector
                 v-show="!inEdit"
                 :decode="props.decode"

@@ -126,6 +126,8 @@
     "length": "Longueur",
     "entries": "Entrées",
     "memory_usage": "Utilisation de la mémoire",
+    "text_align_left": "Aligner à gauche",
+    "text_align_center": "Centrer",
     "view_as": "Voir comme",
     "decode_with": "Décoder / Décompresser",
     "custom_decoder": "Nouveau décodeur personnalisé",

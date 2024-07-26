@@ -126,6 +126,8 @@
     "length": "길이",
     "entries": "항목 수",
     "memory_usage": "메모리 사용량",
+    "text_align_left": "텍스트 왼쪽 정렬",
+    "text_align_center": "텍스트 가운데 정렬",
     "view_as": "보기",
     "decode_with": "디코딩/압축 해제",
     "custom_decoder": "새 사용자 정의 디코더",

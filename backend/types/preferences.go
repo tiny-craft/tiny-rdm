@@ -27,11 +27,12 @@ func NewPreferences() Preferences {
 			AllowTrack:   true,
 		},
 		Editor: PreferencesEditor{
-			FontSize:    consts.DEFAULT_FONT_SIZE,
-			ShowLineNum: true,
-			ShowFolding: true,
-			DropText:    true,
-			Links:       true,
+			FontSize:       consts.DEFAULT_FONT_SIZE,
+			ShowLineNum:    true,
+			ShowFolding:    true,
+			DropText:       true,
+			Links:          true,
+			EntryTextAlign: 0,
 		},
 		Cli: PreferencesCli{
 			FontSize:    consts.DEFAULT_FONT_SIZE,
@@ -67,13 +68,14 @@ type PreferencesGeneral struct {
 }
 
 type PreferencesEditor struct {
-	Font        string   `json:"font" yaml:"font,omitempty"`
-	FontFamily  []string `json:"fontFamily" yaml:"font_family,omitempty"`
-	FontSize    int      `json:"fontSize" yaml:"font_size"`
-	ShowLineNum bool     `json:"showLineNum" yaml:"show_line_num"`
-	ShowFolding bool     `json:"showFolding" yaml:"show_folding"`
-	DropText    bool     `json:"dropText" yaml:"drop_text"`
-	Links       bool     `json:"links" yaml:"links"`
+	Font           string   `json:"font" yaml:"font,omitempty"`
+	FontFamily     []string `json:"fontFamily" yaml:"font_family,omitempty"`
+	FontSize       int      `json:"fontSize" yaml:"font_size"`
+	ShowLineNum    bool     `json:"showLineNum" yaml:"show_line_num"`
+	ShowFolding    bool     `json:"showFolding" yaml:"show_folding"`
+	DropText       bool     `json:"dropText" yaml:"drop_text"`
+	Links          bool     `json:"links" yaml:"links"`
+	EntryTextAlign int      `json:"entryTextAlign" yaml:"entry_text_align"`
 }
 
 type PreferencesCli struct {

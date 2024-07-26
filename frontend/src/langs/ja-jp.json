@@ -126,6 +126,8 @@
     "length": "長さ",
     "entries": "エントリ",
     "memory_usage": "メモリ使用量",
+    "text_align_left": "左揃え",
+    "text_align_center": "中央揃え",
     "view_as": "表示形式",
     "decode_with": "デコード/解凍",
     "custom_decoder": "新しいカスタムデコーダー",

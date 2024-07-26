@@ -126,6 +126,8 @@
     "length": "長度",
     "entries": "條目",
     "memory_usage": "記憶體使用量",
+    "text_align_left": "文字靠左",
+    "text_align_center": "文字置中",
     "view_as": "檢視方式",
     "decode_with": "解碼/解壓方式",
     "custom_decoder": "新增自定義解碼",

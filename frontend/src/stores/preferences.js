@@ -15,6 +15,7 @@ import { enUS, NButton, NSpace, useOsTheme, zhCN } from 'naive-ui'
 import { h, nextTick } from 'vue'
 import { compareVersion } from '@/utils/version.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
+import { TextAlignType } from '@/consts/text_align_type.js'
 
 const osTheme = useOsTheme()
 const usePreferencesStore = defineStore('preferences', {
@@ -63,6 +64,7 @@ const usePreferencesStore = defineStore('preferences', {
             showFolding: true,
             dropText: true,
             links: true,
+            entryTextAlign: TextAlignType.Center,
         },
         cli: {
             fontFamily: [],
@@ -270,6 +272,10 @@ const usePreferencesStore = defineStore('preferences', {
 
         keyIconType() {
             return get(this.general, 'keyIconStyle', typesIconStyle.SHORT)
+        },
+
+        entryTextAlign() {
+            return get(this.editor, 'entryTextAlign', TextAlignType.Center)
         },
     },
     actions: {
