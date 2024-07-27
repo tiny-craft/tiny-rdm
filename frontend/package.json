@@ -11,24 +11,24 @@
   "dependencies": {
     "chart.js": "^4.4.3",
     "copy-text-to-clipboard": "^3.2.0",
-    "dayjs": "^1.11.11",
+    "dayjs": "^1.11.12",
     "lodash": "^4.17.21",
     "monaco-editor": "^0.47.0",
-    "pinia": "^2.1.7",
-    "sass": "^1.77.6",
-    "vue": "^3.4.31",
+    "pinia": "^2.2.0",
+    "sass": "^1.77.8",
+    "vue": "^3.4.34",
     "vue-chartjs": "^5.3.1",
     "vue-i18n": "^9.13.1",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.5",
-    "naive-ui": "^2.38.2",
-    "prettier": "^3.3.2",
-    "unplugin-auto-import": "^0.17.6",
+    "@vitejs/plugin-vue": "^5.1.1",
+    "naive-ui": "^2.39.0",
+    "prettier": "^3.3.3",
+    "unplugin-auto-import": "^0.18.2",
     "unplugin-icons": "^0.19.0",
-    "unplugin-vue-components": "^0.27.2",
-    "vite": "^5.3.3"
+    "unplugin-vue-components": "^0.27.3",
+    "vite": "^5.3.5"
   }
 }
