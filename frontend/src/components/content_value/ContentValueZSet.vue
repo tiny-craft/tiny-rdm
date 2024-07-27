@@ -261,7 +261,7 @@ const columns = computed(() => {
                 key: 'no',
                 title: '#',
                 width: 80,
-                align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
+                align: 'center',
                 titleAlign: 'center',
                 render: (row, index) => {
                     return index + 1
@@ -277,7 +277,7 @@ const columns = computed(() => {
                 key: 'no',
                 title: '#',
                 width: 80,
-                align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
+                align: 'center',
                 titleAlign: 'center',
                 render: (row, index) => {
                     if (index + 1 === currentEditRow.no) {
@@ -348,6 +348,15 @@ defineExpose({
                     @match-changed="onMatchInput" />
             </div>
             <div class="flex-item-expand"></div>
+            <switch-button
+                :icons="[AlignCenter, AlignLeft]"
+                :stroke-width="3.5"
+                :t-tooltips="['interface.text_align_center', 'interface.text_align_left']"
+                :value="props.textAlign"
+                size="medium"
+                unselect-stroke-width="3"
+                @update:value="(val) => emit('update:textAlign', val)" />
+            <n-divider vertical />
             <n-button-group>
                 <icon-button
                     :disabled="props.end || props.loading"
@@ -426,13 +435,6 @@ defineExpose({
             <n-divider v-if="showMemoryUsage" vertical />
             <n-text v-if="showMemoryUsage">{{ $t('interface.memory_usage') }}: {{ formatBytes(props.size) }}</n-text>
             <div class="flex-item-expand"></div>
-            <switch-button
-                :icons="[AlignCenter, AlignLeft]"
-                :stroke-width="3.5"
-                :t-tooltips="['interface.text_align_center', 'interface.text_align_left']"
-                :value="props.textAlign"
-                unselect-stroke-width="3"
-                @update:value="(val) => emit('update:textAlign', val)" />
             <format-selector
                 v-show="!inEdit"
                 :decode="props.decode"
