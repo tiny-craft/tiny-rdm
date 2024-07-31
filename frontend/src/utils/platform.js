@@ -10,3 +10,7 @@ export async function loadEnvironment() {
 export function isMacOS() {
     return os === 'darwin'
 }
+
+export function isWindows() {
+    return os === 'windows'
+}

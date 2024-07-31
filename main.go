@@ -114,7 +114,7 @@ func main() {
 		Windows: &windows.Options{
 			WebviewIsTransparent:              true,
 			WindowIsTranslucent:               true,
-			DisableFramelessWindowDecorations: true,
+			DisableFramelessWindowDecorations: false,
 		},
 		Linux: &linux.Options{
 			ProgramName:         "Tiny RDM",

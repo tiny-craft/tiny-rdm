@@ -13,7 +13,7 @@ import ContentLogPane from './components/content/ContentLogPane.vue'
 import ContentValueTab from '@/components/content/ContentValueTab.vue'
 import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
 import { EventsOn, WindowIsFullscreen, WindowIsMaximised, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
-import { isMacOS } from '@/utils/platform.js'
+import { isMacOS, isWindows } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
 import ResizeableWrapper from '@/components/common/ResizeableWrapper.vue'
 import { extraTheme } from '@/utils/extra_theme.js'
@@ -57,6 +57,9 @@ const logoPaddingLeft = ref(10)
 const maximised = ref(false)
 const hideRadius = ref(false)
 const wrapperStyle = computed(() => {
+    if (isWindows()) {
+        return {}
+    }
     return hideRadius.value
         ? {}
         : {
@@ -65,6 +68,11 @@ const wrapperStyle = computed(() => {
           }
 })
 const spinStyle = computed(() => {
+    if (isWindows()) {
+        return {
+            backgroundColor: themeVars.value.bodyColor,
+        }
+    }
     return hideRadius.value
         ? {
               backgroundColor: themeVars.value.bodyColor,
