@@ -1241,7 +1241,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 	if len(param.Format) <= 0 {
 		param.Format = types.FORMAT_RAW
 	}
-	var savedValue any
+	var savedValue string
 	switch strings.ToLower(param.KeyType) {
 	case "string":
 		if str, ok := param.Value.(string); !ok {
@@ -1339,7 +1339,10 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 		if err == nil && expiration > 0 {
 			client.Expire(ctx, key, expiration)
 		}
-		savedValue = param.Value
+		var ok bool
+		if savedValue, ok = param.Value.(string); !ok {
+			savedValue = ""
+		}
 	}
 
 	if err != nil {
@@ -1348,7 +1351,7 @@ func (b *browserService) SetKeyValue(param types.SetKeyParam) (resp types.JSResp
 	}
 	resp.Success = true
 	resp.Data = map[string]any{
-		"value": savedValue,
+		"value": strutil.EncodeRedisKey(savedValue),
 	}
 	return
 }
