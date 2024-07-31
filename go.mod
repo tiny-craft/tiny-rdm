@@ -7,6 +7,7 @@ require (
 	github.com/andybalholm/brotli v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.17.9
+	github.com/pierrec/lz4/v4 v4.1.21
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68

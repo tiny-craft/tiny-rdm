@@ -24,6 +24,7 @@ var (
 	gzipConv    GZipConvert
 	deflateConv DeflateConvert
 	zstdConv    ZStdConvert
+	lz4Conv     LZ4Convert
 	brotliConv  BrotliConvert
 	msgpackConv MsgpackConvert
 	phpConv     = NewPhpConvert()
@@ -44,6 +45,7 @@ var BuildInDecoders = map[string]DataConvert{
 	types.DECODE_GZIP:    gzipConv,
 	types.DECODE_DEFLATE: deflateConv,
 	types.DECODE_ZSTD:    zstdConv,
+	types.DECODE_LZ4:     lz4Conv,
 	types.DECODE_BROTLI:  brotliConv,
 	types.DECODE_MSGPACK: msgpackConv,
 	types.DECODE_PHP:     phpConv,
@@ -135,6 +137,11 @@ func autoDecode(str string, customDecoder []CmdConvert) (value, resultDecode str
 
 			if value, ok = zstdConv.Decode(str); ok {
 				resultDecode = types.DECODE_ZSTD
+				return
+			}
+
+			if value, ok = lz4Conv.Decode(str); ok {
+				resultDecode = types.DECODE_LZ4
 				return
 			}
 
