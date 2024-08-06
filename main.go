@@ -35,6 +35,7 @@ func main() {
 	pubsubSvc := services.Pubsub()
 	prefSvc := services.Preferences()
 	prefSvc.SetAppVersion(version)
+	prefSvc.UpdateEnv()
 	windowWidth, windowHeight, maximised := prefSvc.GetWindowSize()
 	windowStartState := options.Normal
 	if maximised {

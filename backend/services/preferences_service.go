@@ -6,6 +6,7 @@ import (
 	"github.com/adrg/sysfont"
 	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -50,6 +51,7 @@ func (p *preferencesService) SetPreferences(pf types.Preferences) (resp types.JS
 		return
 	}
 
+	p.UpdateEnv()
 	resp.Success = true
 	return
 }
@@ -112,6 +114,11 @@ func (p *preferencesService) GetBuildInDecoder() (resp types.JSResp) {
 	}
 	resp.Success = true
 	return
+}
+
+func (p *preferencesService) GetLanguage() string {
+	pref := p.pref.GetPreferences()
+	return pref.General.Language
 }
 
 func (p *preferencesService) SetAppVersion(ver string) {
@@ -245,4 +252,13 @@ func (p *preferencesService) CheckForUpdate() (resp types.JSResp) {
 		"page_url": respObj.HtmlUrl,
 	}
 	return
+}
+
+// UpdateEnv Update System Environment
+func (p *preferencesService) UpdateEnv() {
+	if p.GetLanguage() == "zh" {
+		os.Setenv("LANG", "zh_CN.UTF-8")
+	} else {
+		os.Unsetenv("LANG")
+	}
 }
