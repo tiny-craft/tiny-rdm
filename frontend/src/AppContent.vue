@@ -1,7 +1,7 @@
 <script setup>
 import ContentPane from './components/content/ContentPane.vue'
 import BrowserPane from './components/sidebar/BrowserPane.vue'
-import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watchEffect } from 'vue'
 import { debounce } from 'lodash'
 import { useThemeVars } from 'naive-ui'
 import Ribbon from './components/sidebar/Ribbon.vue'
@@ -117,6 +117,11 @@ onMounted(async () => {
     onToggleFullscreen(fullscreen === true)
     const maximised = await WindowIsMaximised()
     onToggleMaximize(maximised)
+    window.addEventListener('keydown', onKeyShortcut)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', onKeyShortcut)
 })
 
 const onKeyShortcut = (e) => {
@@ -138,7 +143,7 @@ const onKeyShortcut = (e) => {
 <template>
     <!-- app content-->
     <n-spin :show="props.loading" :style="spinStyle" :theme-overrides="{ opacitySpinning: 0 }">
-        <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v" tabindex="0" @keydown="onKeyShortcut">
+        <div id="app-content-wrapper" :style="wrapperStyle" class="flex-box-v">
             <!-- title bar -->
             <div
                 id="app-toolbar"
