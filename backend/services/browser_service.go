@@ -156,25 +156,27 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 	} else {
 		// get database info
 		var res string
-		res, err = client.Info(ctx, "keyspace").Result()
-		if err != nil {
-			resp.Msg = "get server info fail:" + err.Error()
-			return
+		info := map[string]map[string]string{}
+		if res, err = client.Info(ctx, "keyspace").Result(); err != nil {
+			//resp.Msg = "get server info fail:" + err.Error()
+			//return
+		} else {
+			info = b.parseInfo(res)
 		}
-		info := b.parseInfo(res)
 
 		if totaldb <= 0 {
 			// cannot retrieve the database count by "CONFIG GET databases", try to get max index from keyspace
-			keyspace := info["Keyspace"]
-			var db, maxDB int
-			for dbName := range keyspace {
-				if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
-					if maxDB < db {
-						maxDB = db
+			if keyspace := info["Keyspace"]; len(keyspace) > 0 {
+				var db, maxDB int
+				for dbName := range keyspace {
+					if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
+						if maxDB < db {
+							maxDB = db
+						}
 					}
 				}
+				totaldb = maxDB + 1
 			}
-			totaldb = maxDB + 1
 		}
 
 		queryDB := func(idx int) types.ConnectionDB {
