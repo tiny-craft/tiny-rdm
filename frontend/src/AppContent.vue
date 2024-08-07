@@ -125,9 +125,10 @@ onUnmounted(() => {
 })
 
 const onKeyShortcut = (e) => {
+    const isCtrlOn = isMacOS() ? e.metaKey : e.ctrlKey
     switch (e.key) {
         case 'w':
-            if (e.metaKey) {
+            if (isCtrlOn) {
                 // close current tab
                 const tabStore = useTabStore()
                 const currentTab = tabStore.currentTab

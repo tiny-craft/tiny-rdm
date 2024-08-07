@@ -16,6 +16,7 @@ import ContentToolbar from '@/components/content_value/ContentToolbar.vue'
 import ContentValueJson from '@/components/content_value/ContentValueJson.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import { TextAlignType } from '@/consts/text_align_type.js'
+import { isMacOS } from '@/utils/platform.js'
 
 const themeVars = useThemeVars()
 const browserStore = useBrowserStore()
@@ -130,7 +131,7 @@ const onReload = async (selDecode, selFormat) => {
 }
 
 const onKeyShortcut = (e) => {
-    // console.log(e)
+    const isCtrlOn = isMacOS() ? e.metaKey : e.ctrlKey
     switch (e.key) {
         case 'Delete':
             onDelete()
@@ -139,7 +140,7 @@ const onKeyShortcut = (e) => {
             onReload()
             return
         case 'r':
-            if (e.metaKey) {
+            if (isCtrlOn) {
                 onReload()
             }
             return
