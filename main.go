@@ -29,6 +29,7 @@ var gaMeasurementID, gaSecretKey string
 const appName = "Tiny RDM"
 
 func main() {
+	os.Setenv("LANG", "zh_CN.UTF-8")
 	// Create an instance of the app structure
 	sysSvc := services.System()
 	connSvc := services.Connection()
