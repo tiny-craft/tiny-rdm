@@ -89,7 +89,7 @@ func (c *monitorService) StartMonitor(server string) (resp types.JSResp) {
 	item.cmd = item.client.Monitor(c.ctx, item.ch)
 	item.cmd.Start()
 
-	go c.processMonitor(&item.mutex, item.ch, item.closeCh, item.eventName)
+	go c.processMonitor(&item.mutex, item.ch, item.closeCh, item.cmd, item.eventName)
 	resp.Success = true
 	resp.Data = struct {
 		EventName string `json:"eventName"`
@@ -99,7 +99,7 @@ func (c *monitorService) StartMonitor(server string) (resp types.JSResp) {
 	return
 }
 
-func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, closeCh <-chan struct{}, eventName string) {
+func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, closeCh <-chan struct{}, cmd *redis.MonitorCmd, eventName string) {
 	lastEmitTime := time.Now().Add(-1 * time.Minute)
 	cache := make([]string, 0, 1000)
 	for {
@@ -120,6 +120,7 @@ func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, clo
 
 		case <-closeCh:
 			// monitor stopped
+			cmd.Stop()
 			return
 		}
 	}
@@ -136,7 +137,6 @@ func (c *monitorService) StopMonitor(server string) (resp types.JSResp) {
 		return
 	}
 
-	item.cmd.Stop()
 	//close(item.ch)
 	close(item.closeCh)
 	delete(c.items, server)
