@@ -2,7 +2,7 @@
 <a href="https://github.com/tiny-craft/tiny-rdm/"><img src="build/appicon.png" width="120"/></a>
 </div>
 <h1 align="center">Tiny RDM</h1>
-<h4 align="center"><strong><a href="/">English</a></strong> | 简体中文</h4>
+<h4 align="center"><strong><a href="/">English</a></strong> | 简体中文 | <a href="https://github.com/tiny-craft/tiny-rdm/blob/main/README_ja.md">日本語</a></h4>
 <div align="center">
 
 [![License](https://img.shields.io/github/license/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/blob/main/LICENSE)
