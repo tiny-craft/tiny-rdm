@@ -174,10 +174,10 @@ const onAdd = async () => {
                 tabStore.setSelectedKeys(server, nodeKey)
                 browserStore.reloadKey({ server, db, key })
             }
+            dialogStore.closeNewKeyDialog()
         } else if (!isEmpty(msg)) {
             $message.error(msg)
         }
-        dialogStore.closeNewKeyDialog()
     } catch (e) {
         return false
     }
