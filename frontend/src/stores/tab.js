@@ -198,6 +198,7 @@ const useTabStore = defineStore('tab', {
                 })
                 this.tabList.push(tabItem)
                 tabIndex = this.tabList.length - 1
+                this._setActivatedIndex(tabIndex, true, subTab)
             } else {
                 const tab = this.tabList[tabIndex]
                 tab.blank = false
@@ -219,7 +220,6 @@ const useTabStore = defineStore('tab', {
                     tab.value = undefined
                 }
             }
-            this._setActivatedIndex(tabIndex, true, subTab)
         },
 
         /**
