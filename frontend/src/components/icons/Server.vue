@@ -37,18 +37,6 @@ const props = defineProps({
             d="M26 38H38"
             stroke-linecap="round"
             stroke-linejoin="round" />
-        <path
-            :stroke-width="props.strokeWidth"
-            d="M44 37V27"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path
-            :stroke-width="props.strokeWidth"
-            d="M4 37V27"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
     </svg>
 </template>
 

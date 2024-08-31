@@ -39,18 +39,6 @@ const props = defineProps({
             stroke="currentColor"
             stroke-linejoin="round" />
         <path :stroke-width="props.strokeWidth" d="M43 22H5" stroke="currentColor" stroke-linejoin="round" />
-        <path
-            :stroke-width="props.strokeWidth"
-            d="M5 16V28"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path
-            :stroke-width="props.strokeWidth"
-            d="M43 16V28"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
     </svg>
 </template>
 
