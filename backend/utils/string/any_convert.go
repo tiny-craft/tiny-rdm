@@ -135,29 +135,38 @@ func SplitCmd(cmd string) []string {
 	var result []string
 	var curStr strings.Builder
 	var preChar int32
-	inQuotes := false
+	var quotesChar int32
 
-	for _, char := range []rune(cmd) {
-		if char == '"' && preChar != '\\' {
-			inQuotes = !inQuotes
-		} else if char == ' ' && !inQuotes {
-			if curStr.Len() > 0 {
-				if part, e := strconv.Unquote(`"` + curStr.String() + `"`); e == nil {
-					result = append(result, part)
-				}
-				curStr.Reset()
+	cmdRune := []rune(cmd)
+	for _, char := range cmdRune {
+		if (char == '"' || char == '\'') && preChar != '\\' && (quotesChar == 0 || quotesChar == char) {
+			if quotesChar != 0 {
+				quotesChar = 0
+			} else {
+				quotesChar = char
 			}
+		} else if char == ' ' && quotesChar == 0 {
+			result = append(result, curStr.String())
+			curStr.Reset()
 		} else {
 			curStr.WriteRune(char)
 		}
 		preChar = char
 	}
+	result = append(result, curStr.String())
 
-	if curStr.Len() > 0 {
-		if part, e := strconv.Unquote(`"` + curStr.String() + `"`); e == nil {
-			result = append(result, part)
+	result = sliceutil.FilterMap(result, func(i int) (string, bool) {
+		var part = strings.TrimSpace(result[i])
+		if len(part) <= 0 {
+			return "", false
 		}
-	}
+		if strings.Contains(part, "\\") {
+			if unquotePart, e := strconv.Unquote(`"` + part + `"`); e == nil {
+				return unquotePart, true
+			}
+		}
+		return part, true
+	})
 
 	return result
 }
