@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { lang } from '@/langs/index.js'
-import { cloneDeep, findIndex, get, isEmpty, join, map, merge, pick, set, some, split } from 'lodash'
+import { cloneDeep, findIndex, get, isEmpty, join, map, pick, set, some, split } from 'lodash'
 import {
     CheckForUpdate,
     GetBuildInDecoder,
@@ -427,15 +427,15 @@ const usePreferencesStore = defineStore('preferences', {
                 return false
             }
 
-            this.decoder[idx] = merge(this.decoder[idx], {
-                name: newName || name,
-                enable,
-                auto,
-                encodePath,
-                encodeArgs,
-                decodePath,
-                decodeArgs,
-            })
+            let selDecoder = this.decoder[idx]
+            selDecoder.name = newName || name
+            selDecoder.enable = enable
+            selDecoder.auto = auto
+            selDecoder.encodePath = encodePath
+            selDecoder.encodeArgs = encodeArgs
+            selDecoder.decodePath = decodePath
+            selDecoder.decodeArgs = decodeArgs
+            this.decoder[idx] = selDecoder
             return true
         },
 
