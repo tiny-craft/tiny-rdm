@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"fmt"
 	"github.com/klauspost/compress/zip"
 	"github.com/redis/go-redis/v9"
 	"github.com/vrischmann/userdir"
@@ -65,7 +64,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	} else if config.Proxy.Type == 2 {
 		// use custom proxy
 		proxyUrl := url.URL{
-			Host: fmt.Sprintf("%s:%d", config.Proxy.Addr, config.Proxy.Port),
+			Host: net.JoinHostPort(config.Proxy.Addr, strconv.Itoa(config.Proxy.Port)),
 		}
 		if len(config.Proxy.Username) > 0 {
 			proxyUrl.User = url.UserPassword(config.Proxy.Username, config.Proxy.Password)
@@ -111,7 +110,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			return nil, errors.New("invalid login type")
 		}
 
-		sshAddr = fmt.Sprintf("%s:%d", config.SSH.Addr, config.SSH.Port)
+		sshAddr = net.JoinHostPort(config.SSH.Addr, strconv.Itoa(config.SSH.Port))
 	}
 
 	var tlsConfig *tls.Config
@@ -168,9 +167,9 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 			port = config.Port
 		}
 		if len(config.Addr) <= 0 {
-			option.Addr = fmt.Sprintf("127.0.0.1:%d", port)
+			option.Addr = net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 		} else {
-			option.Addr = fmt.Sprintf("%s:%d", config.Addr, port)
+			option.Addr = net.JoinHostPort(config.Addr, strconv.Itoa(port))
 		}
 	}
 
@@ -224,7 +223,7 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 		if len(addr) < 2 {
 			return nil, errors.New("cannot get master address")
 		}
-		option.Addr = fmt.Sprintf("%s:%s", addr[0], addr[1])
+		option.Addr = net.JoinHostPort(addr[0], addr[1])
 		option.Username = config.Sentinel.Username
 		option.Password = config.Sentinel.Password
 	}
@@ -310,7 +309,7 @@ func (c *connectionService) ListSentinelMasters(config types.ConnectionConfig) (
 		if infoMap, ok := info.(map[any]any); ok {
 			retInfo = append(retInfo, map[string]string{
 				"name": infoMap["name"].(string),
-				"addr": fmt.Sprintf("%s:%s", infoMap["ip"].(string), infoMap["port"].(string)),
+				"addr": net.JoinHostPort(infoMap["ip"].(string), infoMap["port"].(string)),
 			})
 		}
 	}

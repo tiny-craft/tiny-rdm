@@ -301,8 +301,8 @@ func (b *browserService) createRedisClient(ctx context.Context, selConn types.Co
 	return
 }
 
-// get a redis client from local cache or create a new open
-// if db >= 0, will also switch to db index
+// get a redis client from local cache or create a new one
+// if db >= 0, it will also switch to target database index
 func (b *browserService) getRedisClient(server string, db int) (item *connectionItem, err error) {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
