@@ -166,17 +166,16 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 
 		if totaldb <= 0 {
 			// cannot retrieve the database count by "CONFIG GET databases", try to get max index from keyspace
-			if keyspace := info["Keyspace"]; len(keyspace) > 0 {
-				var db, maxDB int
-				for dbName := range keyspace {
-					if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
-						if maxDB < db {
-							maxDB = db
-						}
+			keyspace := info["Keyspace"]
+			var db, maxDB int
+			for dbName := range keyspace {
+				if db, err = strconv.Atoi(strings.TrimLeft(dbName, "db")); err == nil {
+					if maxDB < db {
+						maxDB = db
 					}
 				}
-				totaldb = maxDB + 1
 			}
+			totaldb = maxDB + 1
 		}
 
 		queryDB := func(idx int) types.ConnectionDB {
