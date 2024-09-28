@@ -296,6 +296,9 @@ export class RedisServerState {
     removeKeyNode(key, isLayer) {
         if (isLayer === true) {
             this.deleteChildrenKeyNodes(key)
+        } else {
+            const nodeKey = `${ConnectionType.RedisValue}/${key}`
+            this.nodeMap.delete(nodeKey)
         }
 
         const dbRoot = this.getRoot()
