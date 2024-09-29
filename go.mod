@@ -11,7 +11,7 @@ require (
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
-	github.com/wailsapp/wails/v2 v2.9.2
+	github.com/wailsapp/wails/v2 v2.9.1
 	golang.org/x/crypto v0.27.0
 	golang.org/x/net v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -52,4 +52,4 @@ require (
 )
 
 // install latest wails: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-// replace github.com/wailsapp/wails/v2 v2.9.2 => ~/go/pkg/mod
+// replace github.com/wailsapp/wails/v2 v2.9.1 => ~/go/pkg/mod

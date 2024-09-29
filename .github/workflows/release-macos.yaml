@@ -60,7 +60,7 @@ jobs:
 
       - name: Install wails
         shell: bash
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.9.1
 
       - name: Setup Node
         uses: actions/setup-node@v3
