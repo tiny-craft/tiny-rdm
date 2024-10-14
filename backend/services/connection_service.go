@@ -226,6 +226,10 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 		option.Addr = net.JoinHostPort(addr[0], addr[1])
 		option.Username = config.Sentinel.Username
 		option.Password = config.Sentinel.Password
+		if option.Dialer != nil {
+			option.ReadTimeout = -2
+			option.WriteTimeout = -2
+		}
 	}
 
 	if config.LastDB > 0 {
