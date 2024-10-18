@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { TabItem } from '@/objects/tabItem.js'
 import useBrowserStore from 'stores/browser.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import { BrowserTabType } from '@/consts/browser_tab_type.js'
 
 const useTabStore = defineStore('tab', {
     /**
@@ -179,6 +180,7 @@ const useTabStore = defineStore('tab', {
         }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
+                subTab = subTab || BrowserTabType.KeyDetail
                 const tabItem = new TabItem({
                     name: server,
                     title: server,
@@ -202,7 +204,7 @@ const useTabStore = defineStore('tab', {
             } else {
                 const tab = this.tabList[tabIndex]
                 tab.blank = false
-                tab.subTab = subTab
+                tab.subTab = subTab || tab.subTab
                 // tab.title = db !== undefined ? `${server}/db${db}` : `${server}`
                 tab.title = server
                 tab.server = server

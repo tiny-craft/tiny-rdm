@@ -386,9 +386,10 @@ const useBrowserStore = defineStore('browser', {
          * @param {number} db
          * @param {string|number[]} [key] null or blank indicate that update tab to display normal content (blank content or server status)
          * @param {boolean} [clearValue]
+         * @param {boolean} [redirect] redirect to key detail tab
          * @return {Promise<void>}
          */
-        async loadKeySummary({ server, db, key, clearValue }) {
+        async loadKeySummary({ server, db, key, clearValue, redirect = true }) {
             try {
                 const tab = useTabStore()
                 if (!isEmpty(key)) {
@@ -402,7 +403,7 @@ const useBrowserStore = defineStore('browser', {
                         const k = nativeRedisKey(key)
                         const binaryKey = k !== key
                         tab.upsertTab({
-                            subTab: BrowserTabType.KeyDetail,
+                            subTab: redirect === false ? null : BrowserTabType.KeyDetail,
                             server,
                             db,
                             type,
@@ -492,7 +493,7 @@ const useBrowserStore = defineStore('browser', {
                 if (showLoading) {
                     tab.updateLoading({ server, db, loading: true })
                 }
-                await this.loadKeySummary({ server, db, key, clearValue: true })
+                await this.loadKeySummary({ server, db, key, clearValue: true, redirect: false })
                 await this.loadKeyDetail({
                     server,
                     db,
