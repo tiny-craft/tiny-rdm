@@ -11,9 +11,12 @@ func (MsgpackConvert) Enable() bool {
 	return true
 }
 
-func (MsgpackConvert) Encode(str string) (string, bool) {
+func (c MsgpackConvert) Encode(str string) (string, bool) {
 	var obj map[string]any
 	if err := json.Unmarshal([]byte(str), &obj); err == nil {
+		for k, v := range obj {
+			obj[k] = c.TryFloatToInt(v)
+		}
 		if b, err := msgpack.Marshal(obj); err == nil {
 			return string(b), true
 		}
@@ -42,4 +45,26 @@ func (MsgpackConvert) Decode(str string) (string, bool) {
 	}
 
 	return str, false
+}
+
+func (c MsgpackConvert) TryFloatToInt(input any) any {
+	switch val := input.(type) {
+	case map[string]any:
+		for k, v := range val {
+			val[k] = c.TryFloatToInt(v)
+		}
+		return val
+	case []any:
+		for i, v := range val {
+			val[i] = c.TryFloatToInt(v)
+		}
+		return val
+	case float64:
+		if val == float64(int(val)) {
+			return int(val)
+		}
+		return val
+	default:
+		return val
+	}
 }
