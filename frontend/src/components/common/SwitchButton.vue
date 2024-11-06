@@ -12,6 +12,10 @@ const props = defineProps({
     },
     icons: Array,
     tTooltips: Array,
+    tTooltipPlacement: {
+        type: String,
+        default: 'bottom',
+    },
     iconSize: {
         type: [Number, String],
         default: 20,
@@ -45,6 +49,7 @@ const handleSwitch = (idx) => {
             v-for="(icon, i) in props.icons"
             :key="i"
             :disabled="!(props.tTooltips && props.tTooltips[i])"
+            :placement="props.tTooltipPlacement"
             :show-arrow="false">
             <template #trigger>
                 <n-button :focusable="false" :size="props.size" :tertiary="i !== props.value" @click="handleSwitch(i)">
