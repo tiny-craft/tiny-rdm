@@ -150,7 +150,7 @@ const saveEdit = async (pos, value, decode, format) => {
             server: props.name,
             db: props.db,
             key: keyName.value,
-            index,
+            index: row.index,
             value,
             decode,
             format,
@@ -180,16 +180,16 @@ const actionColumn = {
     align: 'center',
     titleAlign: 'center',
     fixed: 'right',
-    render: (row, index) => {
+    render: ({ index, v }, _) => {
         return h(EditableTableColumn, {
             editing: false,
             bindKey: `#${index + 1}`,
             onCopy: async () => {
-                copy(row.v)
+                copy(v)
                 $message.success(i18n.t('interface.copy_succ'))
             },
             onEdit: () => {
-                startEdit(index + 1, row.v)
+                startEdit(index + 1, v)
             },
             onDelete: async () => {
                 try {
@@ -221,7 +221,7 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
-                render: (row, index) => {
+                render: ({ index }, _) => {
                     return index + 1
                 },
             },
@@ -236,7 +236,7 @@ const columns = computed(() => {
                 width: 80,
                 align: 'center',
                 titleAlign: 'center',
-                render: (row, index) => {
+                render: ({ index }, _) => {
                     if (index + 1 === currentEditRow.no) {
                         // editing row, show edit state
                         return h(NIcon, { size: 16, color: 'red' }, () => h(Edit, { strokeWidth: 5 }))
@@ -250,12 +250,12 @@ const columns = computed(() => {
     }
 })
 
-const rowProps = (row, index) => {
+const rowProps = ({ index, v }, _) => {
     return {
         onClick: () => {
             // in edit mode, switch edit row by click
             if (inEdit.value) {
-                startEdit(index + 1, row.v)
+                startEdit(index + 1, v)
             }
         },
     }

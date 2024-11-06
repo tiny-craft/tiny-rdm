@@ -291,9 +291,25 @@ const useTabStore = defineStore('tab', {
                 case 'list': // {v:string, dv:[string]}[]
                     tab.value = tab.value || []
                     if (prepend === true) {
-                        tab.value = [...entries, ...tab.value]
+                        const originList = tab.value
+                        const list = []
+                        let starIndex = 0
+                        for (const entry of entries) {
+                            entry.index = starIndex++
+                            list.push(entry)
+                        }
+                        for (const entry of originList) {
+                            entry.index = starIndex++
+                            list.push(entry)
+                        }
+                        tab.value = list
                     } else {
-                        tab.value.push(...entries)
+                        const list = tab.value
+                        let starIndex = list.length
+                        for (const entry of entries) {
+                            entry.index = starIndex++
+                            list.push(entry)
+                        }
                     }
                     tab.length += size(entries)
                     break
@@ -392,6 +408,7 @@ const useTabStore = defineStore('tab', {
                     for (const entry of entries) {
                         if (size(tab.value) > entry.index) {
                             tab.value[entry.index] = {
+                                index: entry.index,
                                 v: entry.v,
                                 dv: entry.dv,
                             }

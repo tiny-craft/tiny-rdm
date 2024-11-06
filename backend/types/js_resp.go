@@ -56,7 +56,7 @@ type SetListParam struct {
 	Server    string `json:"server"`
 	DB        int    `json:"db"`
 	Key       any    `json:"key"`
-	Index     int64  `json:"index"`
+	Index     int    `json:"index"`
 	Value     any    `json:"value"`
 	Format    string `json:"format,omitempty"`
 	Decode    string `json:"decode,omitempty"`

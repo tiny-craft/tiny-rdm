@@ -107,27 +107,6 @@ func Merge[M ~map[K]V, K Hashable, V any](mapArr ...M) M {
 	return result
 }
 
-// DeepMerge 深度递归覆盖src值到dst中
-// 将返回新的值
-func DeepMerge[M ~map[K]any, K Hashable](src1, src2 M) M {
-	out := make(map[K]any, len(src1))
-	for k, v := range src1 {
-		out[k] = v
-	}
-	for k, v := range src2 {
-		if v1, ok := v.(map[K]any); ok {
-			if bv, ok := out[k]; ok {
-				if bv1, ok := bv.(map[K]any); ok {
-					out[k] = DeepMerge(bv1, v1)
-					continue
-				}
-			}
-		}
-		out[k] = v
-	}
-	return out
-}
-
 // Omit 根据条件省略指定元素
 func Omit[M ~map[K]V, K Hashable, V any](m M, omitFunc func(k K, v V) bool) (M, []K) {
 	result := M{}

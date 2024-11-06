@@ -876,6 +876,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					continue
 				}
 				items = append(items, types.ListEntryItem{
+					Index: len(items),
 					Value: val,
 				})
 				if doConvert {
@@ -1614,10 +1615,11 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 	client, ctx := item.client, item.ctx
 	key := strutil.DecodeRedisKey(param.Key)
 	str := strutil.DecodeRedisKey(param.Value)
+	index := int64(param.Index)
 	var replaced, removed []types.ListReplaceItem
 	if len(str) <= 0 {
 		// remove from list
-		err = client.LSet(ctx, key, param.Index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
+		err = client.LSet(ctx, key, index, "---VALUE_REMOVED_BY_TINY_RDM---").Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
@@ -1639,7 +1641,7 @@ func (b *browserService) SetListItem(param types.SetListParam) (resp types.JSRes
 			resp.Msg = fmt.Sprintf(`save to type "%s" fail: %s`, param.Format, err.Error())
 			return
 		}
-		err = client.LSet(ctx, key, param.Index, saveStr).Err()
+		err = client.LSet(ctx, key, index, saveStr).Err()
 		if err != nil {
 			resp.Msg = err.Error()
 			return
