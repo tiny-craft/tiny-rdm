@@ -4,16 +4,16 @@ go 1.21
 
 require (
 	github.com/adrg/sysfont v0.1.2
-	github.com/andybalholm/brotli v1.1.0
+	github.com/andybalholm/brotli v1.1.1
 	github.com/google/uuid v1.6.0
-	github.com/klauspost/compress v1.17.10
+	github.com/klauspost/compress v1.17.11
 	github.com/pierrec/lz4/v4 v4.1.21
-	github.com/redis/go-redis/v9 v9.6.1
+	github.com/redis/go-redis/v9 v9.7.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
-	github.com/wailsapp/wails/v2 v2.9.1
-	golang.org/x/crypto v0.27.0
-	golang.org/x/net v0.29.0
+	github.com/wailsapp/wails/v2 v2.9.2
+	golang.org/x/crypto v0.28.0
+	golang.org/x/net v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -46,10 +46,10 @@ require (
 	github.com/wailsapp/go-webview2 v1.0.16 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 // install latest wails: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-// replace github.com/wailsapp/wails/v2 v2.9.1 => ~/go/pkg/mod
+// replace github.com/wailsapp/wails/v2 v2.9.2 => ~/go/pkg/mod
