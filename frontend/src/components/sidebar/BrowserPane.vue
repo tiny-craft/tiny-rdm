@@ -458,7 +458,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/style';
+@use '@/styles/style' as style;
 
 :deep(.toggle-btn) {
     border-style: solid;
@@ -483,7 +483,7 @@ watch(
 }
 
 .nav-pane-bottom {
-    @include top-shadow(0.1);
+    @include style.top-shadow(0.1);
     color: v-bind('themeVars.iconColor');
     border-top: v-bind('themeVars.borderColor') 1px solid;
 }

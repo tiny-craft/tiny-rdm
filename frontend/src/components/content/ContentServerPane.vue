@@ -22,7 +22,7 @@ const dialogStore = useDialogStore()
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .content-container {
     justify-content: center;

@@ -850,7 +850,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .browser-tree-wrapper {
     height: 100%;

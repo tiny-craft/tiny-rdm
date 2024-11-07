@@ -212,7 +212,7 @@ watch(
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .content-container {
     //padding: 5px 5px 0;

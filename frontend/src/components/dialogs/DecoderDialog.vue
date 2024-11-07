@@ -203,5 +203,5 @@ const onClose = () => {}
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 </style>

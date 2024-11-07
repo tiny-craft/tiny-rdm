@@ -776,7 +776,7 @@ const clientTableColumns = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .line-chart {
     display: flex;

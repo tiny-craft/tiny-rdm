@@ -29,4 +29,11 @@ export default defineConfig({
             wailsjs: rootPath + 'wailsjs',
         },
     },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                api: 'modern-compiler',
+            },
+        },
+    },
 })

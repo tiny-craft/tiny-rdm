@@ -181,7 +181,7 @@ const onCleanLog = () => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .line-item {
     margin-bottom: 5px;

@@ -542,7 +542,7 @@ const onCancelOpen = () => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/content';
+@use '@/styles/content';
 
 .connection-tree-wrapper {
     height: 100%;
