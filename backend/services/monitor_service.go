@@ -138,6 +138,7 @@ func (c *monitorService) StopMonitor(server string) (resp types.JSResp) {
 	}
 
 	//close(item.ch)
+	item.client.Close()
 	close(item.closeCh)
 	delete(c.items, server)
 	resp.Success = true
