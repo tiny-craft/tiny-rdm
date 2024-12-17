@@ -2093,7 +2093,7 @@ const useBrowserStore = defineStore('browser', {
             if (serverInst == null) {
                 serverInst = new RedisServerState({
                     name: server,
-                    separator: this.getSeparator(name),
+                    separator: this.getSeparator(server),
                 })
             }
             return serverInst.getFilter()
