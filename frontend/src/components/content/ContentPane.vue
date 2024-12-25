@@ -70,7 +70,7 @@ const isBlankValue = computed(() => {
 })
 
 const selectedSubTab = computed(() => {
-    const { subTab = 'status' } = tabStore.currentTab || {}
+    const { subTab = BrowserTabType.Status } = tabStore.currentTab || {}
     return subTab
 })
 
@@ -104,7 +104,7 @@ watch(
             }"
             :value="selectedSubTab"
             class="content-sub-tab"
-            default-value="status"
+            :default-value="BrowserTabType.Status.toString()"
             pane-class="content-sub-tab-pane"
             placement="top"
             tab-style="padding-left: 10px; padding-right: 10px;"

@@ -180,7 +180,7 @@ const useTabStore = defineStore('tab', {
         }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
-                subTab = subTab || BrowserTabType.KeyDetail
+                subTab = subTab || BrowserTabType.Status
                 const tabItem = new TabItem({
                     name: server,
                     title: server,
