@@ -161,6 +161,7 @@ const useTabStore = defineStore('tab', {
          * @param {boolean} [clearValue]
          * @param {string} format
          * @param {string} decode
+         * @param {boolean} forceSwitch
          * @param {*} [value]
          */
         upsertTab({
@@ -177,6 +178,7 @@ const useTabStore = defineStore('tab', {
             clearValue,
             format = '',
             decode = '',
+            forceSwitch = false,
         }) {
             let tabIndex = findIndex(this.tabList, { name: server })
             if (tabIndex === -1) {
@@ -220,6 +222,9 @@ const useTabStore = defineStore('tab', {
                 tab.decode = decode
                 if (clearValue === true) {
                     tab.value = undefined
+                }
+                if (forceSwitch === true) {
+                    this._setActivatedIndex(tabIndex, true, subTab)
                 }
             }
         },

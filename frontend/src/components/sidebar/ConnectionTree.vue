@@ -295,6 +295,7 @@ const openConnection = async (name) => {
             tabStore.upsertTab({
                 server: name,
                 db: browserStore.getSelectedDB(name),
+                forceSwitch: true,
             })
         }
     } catch (e) {
