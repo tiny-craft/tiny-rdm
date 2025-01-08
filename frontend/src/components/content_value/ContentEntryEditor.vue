@@ -23,7 +23,7 @@ const props = defineProps({
         type: [String, Number],
     },
     value: {
-        type: String,
+        type: [String, Array],
     },
     fieldLabel: {
         type: String,
