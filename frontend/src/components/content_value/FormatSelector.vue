@@ -93,7 +93,7 @@ const onDecodeMenu = (key) => {
             :icon="Code"
             :options="formatTypeOption"
             :tooltip="$t('interface.view_as')"
-            :value="props.format"
+            :value="props.format || formatTypes.RAW"
             @update:value="(f) => onFormatChanged(props.decode, f)" />
         <n-divider vertical />
         <dropdown-selector
@@ -103,7 +103,7 @@ const onDecodeMenu = (key) => {
             :menu-option="decodeMenuOption"
             :options="decodeTypeOption"
             :tooltip="$t('interface.decode_with')"
-            :value="props.decode"
+            :value="props.decode || decodeTypes.NONE"
             @menu="onDecodeMenu"
             @update:value="(d) => onFormatChanged(d, '')" />
     </n-space>
