@@ -40,7 +40,7 @@ const props = defineProps({
         default: -1,
     },
     value: {
-        type: Array,
+        type: [String, Array],
         default: () => [],
     },
     size: Number,
@@ -140,13 +140,14 @@ const valueColumn = computed(() => ({
     //     return !!~row.v.indexOf(value.toString())
     // },
     render: (row) => {
+        const val = row.dv || decodeRedisKey(row.v)
         if (isCode.value) {
-            return h('pre', { class: 'pre-wrap' }, row.dv || row.v)
+            return h('pre', { class: 'pre-wrap' }, val)
         }
         if (row.rm === true) {
-            return h('s', {}, row.dv || row.v)
+            return h('s', {}, val)
         }
-        return row.dv || row.v
+        return val
     },
 }))
 
