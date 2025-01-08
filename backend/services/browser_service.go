@@ -877,7 +877,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				}
 				items = append(items, types.ListEntryItem{
 					Index: len(items),
-					Value: val,
+					Value: strutil.EncodeRedisKey(val),
 				})
 				if doConvert {
 					if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format, decoder); dv != val {
@@ -994,7 +994,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					}
 					for _, val := range loadedKey {
 						items = append(items, types.SetEntryItem{
-							Value: val,
+							Value: strutil.EncodeRedisKey(val),
 						})
 						if doConvert {
 							if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format, decoder); dv != val {
@@ -1015,7 +1015,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 				loadedKey, cursor, subErr = client.SScan(ctx, key, cursor, matchPattern, scanSize).Result()
 				items = make([]types.SetEntryItem, len(loadedKey))
 				for i, val := range loadedKey {
-					items[i].Value = val
+					items[i].Value = strutil.EncodeRedisKey(val)
 					if doConvert {
 						if dv, _, _ := convutil.ConvertTo(val, param.Decode, param.Format, decoder); dv != val {
 							items[i].DisplayValue = dv
@@ -1061,7 +1061,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					for i := 0; i < len(loadedVal); i += 2 {
 						if score, err = strconv.ParseFloat(loadedVal[i+1], 64); err == nil {
 							items = append(items, types.ZSetEntryItem{
-								Value: loadedVal[i],
+								Value: strutil.EncodeRedisKey(loadedVal[i]),
 								Score: score,
 							})
 							if doConvert {
@@ -1095,7 +1095,7 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 						continue
 					}
 					entry := types.ZSetEntryItem{
-						Value: val,
+						Value: strutil.EncodeRedisKey(val),
 					}
 					if math.IsInf(z.Score, 1) {
 						entry.ScoreStr = "+inf"

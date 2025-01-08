@@ -22,6 +22,7 @@ import { TextAlignType } from '@/consts/text_align_type.js'
 import AlignLeft from '@/components/icons/AlignLeft.vue'
 import AlignCenter from '@/components/icons/AlignCenter.vue'
 import SwitchButton from '@/components/common/SwitchButton.vue'
+import { nativeRedisKey } from '@/utils/key_convert.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -153,18 +154,17 @@ const valueColumn = computed(() => ({
           },
     filterOptionValue: valueFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
-    filter(value, row) {
-        if (row.dv) {
-            return !!~row.dv.indexOf(value.toString())
-        }
-        return !!~row.v.indexOf(value.toString())
+    filter(filterValue, row) {
+        const val = row.dv || nativeRedisKey(row.v)
+        return !!~val.indexOf(filterValue.toString())
     },
     // sorter: (row1, row2) => row1.value - row2.value,
     render: (row) => {
+        const val = row.dv || nativeRedisKey(row.v)
         if (isCode.value) {
-            return h('pre', { class: 'pre-wrap' }, row.dv || row.v)
+            return h('pre', { class: 'pre-wrap' }, val)
         }
-        return row.dv || row.v
+        return val
     },
 }))
 
