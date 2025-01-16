@@ -56,7 +56,7 @@
       "show_linenum": "显示行号",
       "show_folding": "启用代码折叠",
       "drop_text": "允许拖放文本",
-      "links": "支持连接跳转"
+      "links": "支持链接跳转"
     },
     "cli": {
       "name": "命令行",
