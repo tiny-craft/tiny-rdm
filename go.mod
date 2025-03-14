@@ -50,4 +50,4 @@ require (
 )
 
 // install latest wails: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-// replace github.com/wailsapp/wails/v2 v2.10.0 => ~/go/pkg/mod
+// replace github.com/wailsapp/wails/v2 v2.10.1 => ~/go/pkg/mod
