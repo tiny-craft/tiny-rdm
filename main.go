@@ -110,7 +110,7 @@ func main() {
 			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{
 				Title:   fmt.Sprintf("%s %s", appName, version),
-				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2024",
+				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2025",
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,
