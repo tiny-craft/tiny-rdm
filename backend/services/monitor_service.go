@@ -100,8 +100,10 @@ func (c *monitorService) StartMonitor(server string) (resp types.JSResp) {
 }
 
 func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, closeCh <-chan struct{}, cmd *redis.MonitorCmd, eventName string) {
-	lastEmitTime := time.Now().Add(-1 * time.Minute)
 	cache := make([]string, 0, 1000)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case data := <-ch:
@@ -110,13 +112,22 @@ func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, clo
 					mutex.Lock()
 					defer mutex.Unlock()
 					cache = append(cache, data)
-					if time.Now().Sub(lastEmitTime) > 1*time.Second || len(cache) > 300 {
+					if len(cache) > 300 {
 						runtime.EventsEmit(c.ctx, eventName, cache)
 						cache = cache[:0:cap(cache)]
-						lastEmitTime = time.Now()
 					}
 				}()
 			}
+
+		case <-ticker.C:
+			func() {
+				mutex.Lock()
+				defer mutex.Unlock()
+				if len(cache) > 0 {
+					runtime.EventsEmit(c.ctx, eventName, cache)
+					cache = cache[:0:cap(cache)]
+				}
+			}()
 
 		case <-closeCh:
 			// monitor stopped
