@@ -47,11 +47,11 @@ const columns = computed(() => [
     {
         title: () => i18n.t('pubsub.time'),
         key: 'timestamp',
-        width: 180,
+        width: 200,
         align: 'center',
         titleAlign: 'center',
         render: ({ timestamp }, index) => {
-            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')
+            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS')
         },
     },
     {
