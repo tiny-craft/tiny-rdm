@@ -144,14 +144,14 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 	}
 
 	option := &redis.Options{
-		Username:         config.Username,
-		Password:         config.Password,
-		DialTimeout:      time.Duration(config.ConnTimeout) * time.Second,
-		ReadTimeout:      time.Duration(config.ExecTimeout) * time.Second,
-		WriteTimeout:     time.Duration(config.ExecTimeout) * time.Second,
-		TLSConfig:        tlsConfig,
-		DisableIndentity: true,
-		IdentitySuffix:   "tinyrdm_",
+		Username:        config.Username,
+		Password:        config.Password,
+		DialTimeout:     time.Duration(config.ConnTimeout) * time.Second,
+		ReadTimeout:     time.Duration(config.ExecTimeout) * time.Second,
+		WriteTimeout:    time.Duration(config.ExecTimeout) * time.Second,
+		TLSConfig:       tlsConfig,
+		DisableIdentity: true,
+		IdentitySuffix:  "tinyrdm_",
 	}
 	if config.Network == "unix" {
 		option.Network = "unix"
@@ -238,6 +238,8 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 
 	rdb := redis.NewClient(option)
 	if config.Cluster.Enable {
+		defer rdb.Close()
+		
 		// connect to cluster
 		var slots []redis.ClusterSlot
 		if slots, err = rdb.ClusterSlots(c.ctx).Result(); err == nil {
@@ -265,7 +267,7 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 				ConnMaxIdleTime:       option.ConnMaxIdleTime,
 				ConnMaxLifetime:       option.ConnMaxLifetime,
 				TLSConfig:             option.TLSConfig,
-				DisableIndentity:      option.DisableIndentity,
+				DisableIdentity:       option.DisableIdentity,
 			}
 			if option.Dialer != nil {
 				clusterOptions.Dialer = option.Dialer
