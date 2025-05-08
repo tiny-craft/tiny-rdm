@@ -576,7 +576,7 @@ const clientTableColumns = computed(() => {
                 {
                     key: 'idle',
                     title: () => i18n.t('status.client.idle'),
-                    sorter: (row1, row2) => row1.age - row2.age,
+                    sorter: (row1, row2) => row1.idle - row2.idle,
                     align: 'center',
                     titleAlign: 'center',
                     render: ({ idle }, index) => {
