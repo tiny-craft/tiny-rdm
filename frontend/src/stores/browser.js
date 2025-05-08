@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { endsWith, get, isEmpty, join, map, now, size, slice, split } from 'lodash'
+import { endsWith, get, isEmpty, join, map, now, size, slice, split, startsWith } from 'lodash'
 import {
     AddHashField,
     AddListItem,
@@ -644,6 +644,9 @@ const useBrowserStore = defineStore('browser', {
             }
 
             if (!isRedisGlob(match) && !exact) {
+                if (!startsWith(match, '*')) {
+                    match = '*' + match
+                }
                 if (!endsWith(match, '*')) {
                     match = match + '*'
                 }
