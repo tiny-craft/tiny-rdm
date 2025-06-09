@@ -102,6 +102,10 @@ wails dev
 ```
 ## About
 
+### Thanks
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
 ### Wechat Official Account
 
 <img src="docs/images/wechat_official.png" alt="wechat" width="360" />
