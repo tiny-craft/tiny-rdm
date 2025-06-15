@@ -569,7 +569,7 @@ const receiveTermOutput = (data) => {
 </style>
 
 <style lang="scss">
-.xterm-screen {
+.xterm {
     padding: 0 5px !important;
 }
 
