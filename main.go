@@ -12,6 +12,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
+	"os"
+	"path/filepath"
 	"runtime"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/services"
@@ -120,6 +122,7 @@ func main() {
 			WebviewIsTransparent:              false,
 			WindowIsTranslucent:               false,
 			DisableFramelessWindowDecorations: false,
+			WebviewUserDataPath:               filepath.Join(os.Getenv("APPDATA"), "TinyRDM"),
 		},
 		Linux: &linux.Options{
 			ProgramName:         appName,
