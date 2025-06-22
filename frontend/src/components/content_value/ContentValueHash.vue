@@ -6,7 +6,7 @@ import { NButton, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
-import { isEmpty, size } from 'lodash'
+import { isEmpty, size, truncate } from 'lodash'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
@@ -140,10 +140,11 @@ const valueColumn = computed(() => ({
     //     return !!~row.v.indexOf(value.toString())
     // },
     render: (row) => {
-        const val = row.dv || nativeRedisKey(row.v)
+        let val = row.dv || nativeRedisKey(row.v)
         if (isCode.value) {
             return h('pre', { class: 'pre-wrap' }, val)
         }
+        val = truncate(val, { length: 500 })
         if (row.rm === true) {
             return h('s', {}, val)
         }

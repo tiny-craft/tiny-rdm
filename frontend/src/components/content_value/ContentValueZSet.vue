@@ -5,7 +5,7 @@ import AddLink from '@/components/icons/AddLink.vue'
 import { NButton, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
-import { isEmpty, size } from 'lodash'
+import { isEmpty, size, truncate } from 'lodash'
 import useDialogStore from 'stores/dialog.js'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
@@ -164,7 +164,7 @@ const valueColumn = computed(() => ({
         if (isCode.value) {
             return h('pre', { class: 'pre-wrap' }, val)
         }
-        return val
+        return truncate(val, { length: 500 })
     },
 }))
 
