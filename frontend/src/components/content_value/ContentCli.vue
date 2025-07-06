@@ -261,6 +261,10 @@ const onTermKey = (e) => {
                 case 'End': // move to tail of line
                     moveInputCursorTo(Number.MAX_SAFE_INTEGER)
                     return false
+                case ' ': // replace space
+                    e.preventDefault()
+                    updateInput(' ')
+                    return false
             }
         }
     }
