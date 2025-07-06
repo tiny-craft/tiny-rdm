@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "tinyrdm",
+  "name": "Tiny RDM",
   "outputfilename": "Tiny RDM",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",

@@ -94,7 +94,8 @@ jobs:
         shell: bash
         run: |
           content=$(cat build/linux/tiny-rdm_0.0.0_amd64/DEBIAN/control)
-          content=$(echo "$content" | sed -e "s/{{.Name}}/$(jq -r '.name' wails.json)/g")
+          name=$(jq -r '.name' wails.json | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+          content=$(echo "$content" | sed -e "s/{{.Name}}/$name/g")
           content=$(echo "$content" | sed -e "s/{{.Info.ProductVersion}}/$(jq -r '.info.productVersion' wails.json)/g")
           content=$(echo "$content" | sed -e "s/{{.Author.Name}}/$(jq -r '.author.name' wails.json)/g")
           content=$(echo "$content" | sed -e "s/{{.Author.Email}}/$(jq -r '.author.email' wails.json)/g")

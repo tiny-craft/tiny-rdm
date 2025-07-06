@@ -102,7 +102,6 @@ jobs:
         shell: bash
         working-directory: ./build
         run: |
-          mv bin/tinyrdm.app "bin/Tiny RDM.app"
           ./create-dmg/create-dmg \
             --no-internet-enable \
             --volname "Tiny RDM" \
