@@ -15,6 +15,15 @@ const onOpenSponsor = (link) => {
     BrowserOpenURL(link)
 }
 
+const openBanner = (link) => {
+    BrowserOpenURL(link)
+}
+
+const skipBanner = () => {
+    // Show again after 30 days
+    localStorage.setItem('banner_next_time', Date.now() + 30 * 24 * 60 * 60 * 1000)
+}
+
 const sponsorAd = computed(() => {
     try {
         const content = localStorage.getItem('sponsor_ad')
@@ -27,10 +36,54 @@ const sponsorAd = computed(() => {
         return null
     }
 })
+
+const banner = computed(() => {
+    try {
+        const nextTime = localStorage.getItem('banner_next_time') || 0
+        if (nextTime > 0 && nextTime > Date.now()) {
+            return null
+        }
+
+        const content = localStorage.getItem('banner')
+        const banners = JSON.parse(content)
+        let banner = find(banners, ({ lang }) => {
+            return lang === prefStore.currentLanguage
+        })
+        if (banner == null) {
+            banner = find(banners, ({ lang }) => {
+                return lang === 'en'
+            })
+        }
+        return banner || null
+        // return {
+        //     lang: 'zh',
+        //     title: 'title',
+        //     content: 'content',
+        //     button: 'button',
+        //     link: 'https://redis.tinycraft.cc',
+        // }
+    } catch {
+        return null
+    }
+})
 </script>
 
 <template>
     <div class="content-container flex-box-v">
+        <n-alert
+            v-if="banner != null"
+            :bordered="false"
+            :on-close="skipBanner"
+            :title="banner.title"
+            class="banner"
+            closable
+            type="warning">
+            <span style="margin: 0 10px 0 0">{{ banner.content }}</span>
+            <n-button size="small" tertiary type="warning" @click="openBanner(banner.link)">
+                {{ banner.button }}
+            </n-button>
+        </n-alert>
+
         <!-- TODO: replace icon to app icon -->
         <n-empty :description="$t('interface.empty_server_content')">
             <template #extra>
@@ -56,6 +109,14 @@ const sponsorAd = computed(() => {
     justify-content: center;
     padding: 5px;
     box-sizing: border-box;
+    position: relative;
+
+    & > .banner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
 
     & > .sponsor-ad {
         text-align: center;
