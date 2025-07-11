@@ -149,6 +149,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		DialTimeout:     time.Duration(config.ConnTimeout) * time.Second,
 		ReadTimeout:     time.Duration(config.ExecTimeout) * time.Second,
 		WriteTimeout:    time.Duration(config.ExecTimeout) * time.Second,
+		ConnMaxIdleTime: 0,
 		TLSConfig:       tlsConfig,
 		DisableIdentity: true,
 		IdentitySuffix:  "tinyrdm_",
@@ -239,7 +240,7 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 	rdb := redis.NewClient(option)
 	if config.Cluster.Enable {
 		defer rdb.Close()
-		
+
 		// connect to cluster
 		var slots []redis.ClusterSlot
 		if slots, err = rdb.ClusterSlots(c.ctx).Result(); err == nil {
