@@ -67,7 +67,7 @@ Available to download for free from [here](https://github.com/tiny-craft/tiny-rd
 ### Prerequisites
 
 * Go (latest version)
-* Node.js >= 16
+* Node.js >= 20
 * NPM >= 9
 
 ### Install Wails
