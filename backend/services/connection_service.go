@@ -334,7 +334,7 @@ func (c *connectionService) TestConnection(config types.ConnectionConfig) (resp 
 	}
 	defer client.Close()
 
-	if _, err = client.Ping(c.ctx).Result(); err != nil && err != redis.Nil {
+	if _, err = client.Ping(c.ctx).Result(); err != nil && !errors.Is(err, redis.Nil) {
 		resp.Msg = err.Error()
 	} else {
 		resp.Success = true
