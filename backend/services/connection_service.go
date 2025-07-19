@@ -196,8 +196,27 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		}
 	}
 	if dialer != nil {
-		option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		dial := func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.Dial(network, addr)
+		}
+
+		if tlsConfig != nil {
+			// use dialer with tls config
+			option.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+				rawConn, err := dial(ctx, network, addr)
+				if err != nil {
+					rawConn.Close()
+					return nil, err
+				}
+				tlsConn := tls.Client(rawConn, tlsConfig)
+				if err = tlsConn.Handshake(); err != nil {
+					rawConn.Close()
+					return nil, err
+				}
+				return tlsConn, nil
+			}
+		} else {
+			option.Dialer = dial
 		}
 		option.ReadTimeout = -2
 		option.WriteTimeout = -2
