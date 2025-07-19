@@ -1,5 +1,5 @@
 <script setup>
-import { defineOptions, ref } from 'vue'
+import { ref } from 'vue'
 import { isEmpty, reject } from 'lodash'
 import Add from '@/components/icons/Add.vue'
 import Delete from '@/components/icons/Delete.vue'

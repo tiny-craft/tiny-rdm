@@ -1,7 +1,7 @@
 <script setup>
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
-import { computed, defineExpose, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import 'xterm/css/xterm.css'
 import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
 import { get, isEmpty, set } from 'lodash'

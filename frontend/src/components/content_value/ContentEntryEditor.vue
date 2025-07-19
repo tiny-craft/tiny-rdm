@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineEmits, defineProps, nextTick, reactive, ref, watchEffect } from 'vue'
+import { computed, nextTick, reactive, ref, watchEffect } from 'vue'
 import { useThemeVars } from 'naive-ui'
 import Save from '@/components/icons/Save.vue'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
