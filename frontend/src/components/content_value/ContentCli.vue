@@ -27,6 +27,30 @@ let termInst = null
  */
 let fitAddonInst = null
 
+const nonPrintableKeys = [
+    'F1',
+    'F2',
+    'F3',
+    'F4',
+    'F5',
+    'F6',
+    'F7',
+    'F8',
+    'F9',
+    'F10',
+    'F11',
+    'F12',
+    'Shift',
+    'CapsLock',
+    'Tab',
+    'Escape',
+    'ScrollLock',
+    'Pause',
+    'Insert',
+    'NumLock',
+    'ContextMenu',
+]
+
 /**
  *
  * @return {{fitAddon: xterm-addon-fit.FitAddon, term: Terminal}}
@@ -137,6 +161,9 @@ let inputCursor = 0
 const inputHistory = []
 let historyIndex = 0
 let waitForOutput = false
+let isComposingBefore = false
+let ignore229 = false
+
 const onTermData = (data) => {
     if (termInst == null) {
         return
@@ -145,10 +172,6 @@ const onTermData = (data) => {
     if (data) {
         const cc = data.charCodeAt(0)
         switch (cc) {
-            case 127: // backspace
-                deleteInput(true)
-                return
-
             case 13: // enter
                 // try to process local command first
                 switch (getCurrentInput()) {
@@ -163,33 +186,9 @@ const onTermData = (data) => {
                         flushTermInput()
                         return
                 }
-
-            case 27:
-                switch (data.substring(1)) {
-                    case '[A': // arrow up
-                        changeHistory(true)
-                        return
-                    case '[B': // arrow down
-                        changeHistory(false)
-                        return
-                    case '[C': // arrow right ->
-                        moveInputCursor(1)
-                        return
-                    case '[D': // arrow left <-
-                        moveInputCursor(-1)
-                        return
-                    case '[3~': // del
-                        deleteInput(false)
-                        return
-                }
-
-            case 9: // tab
-                return
         }
+        updateInput(data)
     }
-
-    updateInput(data)
-    // term.write(data)
 }
 
 /**
@@ -198,6 +197,19 @@ const onTermData = (data) => {
  * @return {boolean}
  */
 const onTermKey = (e) => {
+    // ignore first input when leave composing
+    if (!e.isComposing) {
+        if (isComposingBefore) {
+            ignore229 = true
+            isComposingBefore = false
+        } else {
+            ignore229 = false
+        }
+    } else if (e.isComposing) {
+        ignore229 = true
+        isComposingBefore = true
+    }
+
     if (e.type === 'keydown') {
         if (e.ctrlKey) {
             switch (e.key) {
@@ -250,6 +262,12 @@ const onTermKey = (e) => {
                     replaceTermInput()
                     newInputLine()
                     return false
+
+                case 'c': // interrupt and new line
+                    termInst.writeln('')
+                    replaceTermInput()
+                    newInputLine()
+                    return false
             }
             // block all ctrl key combinations input
             return false
@@ -258,13 +276,40 @@ const onTermKey = (e) => {
                 case 'Home': // move to head of line
                     moveInputCursorTo(0)
                     return false
+
                 case 'End': // move to tail of line
                     moveInputCursorTo(Number.MAX_SAFE_INTEGER)
                     return false
-                case ' ': // replace space
-                    e.preventDefault()
-                    updateInput(' ')
+
+                case 'Backspace':
+                    deleteInput(true)
                     return false
+
+                case 'ArrowUp': // arrow up
+                case 'PageUp':
+                    changeHistory(true)
+                    return false
+                case 'ArrowDown': // arrow down
+                case 'PageDown':
+                    changeHistory(false)
+                    return false
+                case 'ArrowRight': // arrow right ->
+                    moveInputCursor(1)
+                    return false
+                case 'ArrowLeft': // arrow left <-
+                    moveInputCursor(-1)
+                    return false
+                case 'Delete': // del
+                    deleteInput(false)
+                    return false
+
+                default:
+                    if (e.altKey || e.altGraphKey || e.ctrlKey || e.metaKey || nonPrintableKeys.includes(e.key)) {
+                        return false
+                    } else if (e.keyCode === 229 && !ignore229) {
+                        updateInput(e.key)
+                        return false
+                    }
             }
         }
     }
@@ -326,8 +371,6 @@ const updateInput = (data) => {
     if (data == null || data.length <= 0) {
         return
     }
-    // replace &nbsp;(Non-Breaking Space) with normal blank space
-    data = data.replace(/\u00A0/g, ' ')
 
     if (termInst == null) {
         return
