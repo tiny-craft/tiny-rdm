@@ -8,6 +8,7 @@ import { get, isEmpty, set } from 'lodash'
 import { CloseCli, StartCli } from 'wailsjs/go/services/cliService.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { i18nGlobal } from '@/utils/i18n.js'
+import wcwidth from 'wcwidth'
 
 const props = defineProps({
     name: String,
@@ -360,7 +361,8 @@ const moveInputCursorToEnd = () => {
 const moveInputCursorTo = (pos) => {
     const currentLine = getCurrentInput()
     inputCursor = Math.min(Math.max(0, pos), currentLine.length)
-    termInst.write(`\x1B[${prefixLen.value + inputCursor + 1}G`)
+    const cursorPos = wcwidth(currentLine.substring(0, inputCursor))
+    termInst.write(`\x1B[${prefixLen.value + cursorPos + 1}G`)
 }
 
 /**
@@ -434,7 +436,7 @@ const deleteInput2 = (back = false) => {
     let currentLine = getCurrentInput()
     if (back) {
         // delete until tail
-        currentLine = currentLine.substring(0, inputCursor - 1)
+        currentLine = currentLine.substring(0, inputCursor)
         inputCursor = currentLine.length
     } else {
         // delete until head
