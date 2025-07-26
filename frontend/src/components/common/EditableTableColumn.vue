@@ -27,6 +27,7 @@ const emit = defineEmits(['edit', 'delete', 'copy', 'refresh', 'save', 'cancel']
         <icon-button v-if="props.canRefresh" :icon="Refresh" :title="$t('interface.reload')" @click="emit('refresh')" />
         <icon-button v-if="!props.readonly" :icon="Edit" :title="$t('interface.edit_row')" @click="emit('edit')" />
         <n-popconfirm
+            v-if="props.bindKey"
             :negative-text="$t('common.cancel')"
             :positive-text="$t('common.confirm')"
             @positive-click="emit('delete')">

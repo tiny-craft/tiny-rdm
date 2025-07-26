@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, h, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { debounce, get, isEmpty, size, uniq } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import { useThemeVars } from 'naive-ui'
@@ -14,6 +14,8 @@ import { Publish as PublishSend, StartSubscribe, StopSubscribe } from 'wailsjs/g
 import Checked from '@/components/icons/Checked.vue'
 import Bottom from '@/components/icons/Bottom.vue'
 import IconButton from '@/components/common/IconButton.vue'
+import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
+import copy from 'copy-text-to-clipboard'
 
 const themeVars = useThemeVars()
 
@@ -95,6 +97,26 @@ const columns = computed(() => [
             : undefined,
         filter: (value, row) => {
             return value === '' || !!~row.cmd.indexOf(value.toString())
+        },
+    },
+    {
+        title: () => i18n.t('interface.action'),
+        key: 'action',
+        width: 60,
+        titleAlign: 'center',
+        align: 'center',
+        fixed: 'right',
+        render: (row, index) => {
+            return h(EditableTableColumn, {
+                editing: false,
+                readonly: true,
+                canRefresh: false,
+                canDelete: false,
+                onCopy: async () => {
+                    copy(row.message)
+                    $message.success(i18n.t('interface.copy_succ'))
+                },
+            })
         },
     },
 ])
