@@ -4,7 +4,7 @@ import { FitAddon } from 'xterm-addon-fit'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import 'xterm/css/xterm.css'
 import { EventsEmit, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
-import { get, isEmpty, set } from 'lodash'
+import { get, isEmpty, set, size, trim } from 'lodash'
 import { CloseCli, StartCli } from 'wailsjs/go/services/cliService.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { i18nGlobal } from '@/utils/i18n.js'
@@ -187,6 +187,11 @@ const onTermData = (data) => {
                         flushTermInput()
                         return
                 }
+        }
+
+        // trim space prefix and suffix, it may be input via IME
+        if (size(data) > 1) {
+            data = trim(data)
         }
         updateInput(data)
     }
