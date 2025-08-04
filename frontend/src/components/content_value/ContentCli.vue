@@ -522,6 +522,10 @@ const newInputLine = () => {
         const pop = inputHistory.splice(historyIndex, 1)
         inputHistory[inputHistory.length - 1] = pop[0]
     }
+    // remove adjacent duplicated history
+    if (inputHistory.length > 1 && inputHistory[inputHistory.length - 1] === inputHistory[inputHistory.length - 2]) {
+        inputHistory.pop()
+    }
     if (get(inputHistory, inputHistory.length - 1, '')) {
         historyIndex = inputHistory.length
         updateCurrentInput('')
