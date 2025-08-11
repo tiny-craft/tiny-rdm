@@ -1,4 +1,4 @@
-import { join, map } from 'lodash'
+import { join, map, take } from 'lodash'
 
 /**
  * converted binary data in strings to hex format
@@ -25,10 +25,15 @@ export function decodeRedisKey(key) {
 /**
  * convert char code array to string
  * @param {string|number[]} key
+ * @param {number|undefined} truncate
  * @return {string}
  */
-export function nativeRedisKey(key) {
+export function nativeRedisKey(key, truncate) {
     if (key instanceof Array) {
+        // truncate char code array
+        if (typeof truncate === 'number' && truncate > 0) {
+            key = take(key, truncate)
+        }
         return map(key, (c) => String.fromCharCode(c)).join('')
     }
     return key

@@ -99,6 +99,9 @@ const fieldColumn = computed(() => ({
     filterOptionValue: fieldFilterOption.value,
     className: inEdit.value ? 'clickable wordline' : 'wordline',
     filter: (value, row) => {
+        if (isEmpty(value)) {
+            return true
+        }
         return !!~row.k.indexOf(value.toString())
     },
     render: (row) => {
@@ -140,15 +143,17 @@ const valueColumn = computed(() => ({
     //     return !!~row.v.indexOf(value.toString())
     // },
     render: (row) => {
-        let val = row.dv || nativeRedisKey(row.v)
         if (isCode.value) {
+            let val = row.dv || nativeRedisKey(row.v)
             return h('pre', { class: 'pre-wrap' }, val)
+        } else {
+            let val = row.dv || nativeRedisKey(row.v, 500)
+            val = truncate(val, { length: 500 })
+            if (row.rm === true) {
+                return h('s', {}, val)
+            }
+            return val
         }
-        val = truncate(val, { length: 500 })
-        if (row.rm === true) {
-            return h('s', {}, val)
-        }
-        return val
     },
 }))
 

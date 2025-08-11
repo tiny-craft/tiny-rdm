@@ -81,6 +81,9 @@ const valueColumn = computed(() => ({
     filterOptionValue: valueFilterOption.value,
     filter: (value, row) => {
         const v = value.toString()
+        if (isEmpty(v)) {
+            return true
+        }
         if (row.dv) {
             return includes(row.dv, v)
         }

@@ -106,15 +106,20 @@ const valueColumn = computed(() => ({
     filterOptionValue: valueFilterOption.value,
     className: inEdit.value ? 'clickable' : '',
     filter: (filterValue, row) => {
+        if (isEmpty(filterValue)) {
+            return true
+        }
         const val = row.dv || nativeRedisKey(row.v)
         return !!~val.indexOf(filterValue.toString())
     },
     render: (row) => {
-        const val = row.dv || nativeRedisKey(row.v)
         if (isCode.value) {
+            const val = row.dv || nativeRedisKey(row.v)
             return h('pre', { class: 'pre-wrap' }, val)
+        } else {
+            const val = row.dv || nativeRedisKey(row.v, 500)
+            return truncate(val, { length: 500 })
         }
-        return truncate(val, { length: 500 })
     },
 }))
 
