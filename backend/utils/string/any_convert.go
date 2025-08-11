@@ -137,7 +137,7 @@ func SplitCmd(cmd string) []string {
 	var preChar int32
 	var quotesChar int32
 
-	cmdRune := []rune(cmd)
+	cmdRune := []rune(strings.TrimSpace(cmd))
 	for _, char := range cmdRune {
 		if (char == '"' || char == '\'') && preChar != '\\' && (quotesChar == 0 || quotesChar == char) {
 			if quotesChar != 0 {
@@ -157,7 +157,7 @@ func SplitCmd(cmd string) []string {
 
 	result = sliceutil.FilterMap(result, func(i int) (string, bool) {
 		var part = strings.TrimSpace(result[i])
-		if len(part) <= 0 {
+		if i == 0 && len(part) <= 0 {
 			return "", false
 		}
 		if strings.Contains(part, "\\") {
