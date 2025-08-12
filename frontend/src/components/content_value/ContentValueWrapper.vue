@@ -1,5 +1,5 @@
 <script setup>
-import { types as redisTypes } from '@/consts/support_redis_type.js'
+import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import ContentValueString from '@/components/content_value/ContentValueString.vue'
 import ContentValueHash from '@/components/content_value/ContentValueHash.vue'
 import ContentValueList from '@/components/content_value/ContentValueList.vue'
@@ -113,7 +113,7 @@ const loadData = async (reset, full, selMatch) => {
  */
 const onReload = async (selDecode, selFormat) => {
     try {
-        const { name, db, keyCode, keyPath, decode, format, matchPattern } = data.value
+        const { name, type, db, keyCode, keyPath, decode, format, matchPattern } = data.value
         const targetFormat = selFormat || format
         const targetDecode = selDecode || decode
         browserStore.setSelectedFormat(name, keyPath, db, targetFormat, targetDecode)
@@ -124,7 +124,7 @@ const onReload = async (selDecode, selFormat) => {
             decode: targetDecode,
             format: targetFormat,
             matchPattern,
-            showLoading: false,
+            showLoading: type !== types.STRING && type !== types.JSON,
         })
     } finally {
     }
