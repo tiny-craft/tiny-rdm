@@ -50,6 +50,7 @@ const nonPrintableKeys = [
     'Insert',
     'NumLock',
     'ContextMenu',
+    'Process',
 ]
 
 /**
