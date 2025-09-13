@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
           go-version: stable
 
@@ -104,20 +104,16 @@ jobs:
           -nsis -webview2 embed \
           -ldflags "-X main.version=v${{ steps.normalise_version.outputs.version }}"
 
-      - name: Codesign Windows NSIS installer
-        shell: powershell
-        working-directory: ./build/bin
-        run: |
-          echo "Creating certificate file"
-          New-Item -ItemType directory -Path certificate
-          Set-Content -Path certificate\certificate.txt -Value '${{ secrets.WIN_SIGNING_CERT }}'
-          certutil -decode certificate\certificate.txt certificate\certificate.pfx
-          echo "Signing TinyRDM installer"
-          & 'C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe' sign /td sha256 /tr http://timestamp.sectigo.com/?td=sha256 /f certificate\certificate.pfx /p '${{ secrets.WIN_SIGNING_CERT_PASSWORD }}' 'TinyRDM-${{ steps.normalise_platform_name.outputs.pname }}-installer.exe'
+      - name: Sign the installer
+        uses: dlemstra/code-sign-action@v1
+        with:
+          certificate: ${{ secrets.WIN_SIGNING_CERT }}
+          password: ${{ secrets.WIN_SIGNING_CERT_PASSWORD }}
+          folder: ./build/bin
 
       - name: Rename installer
         working-directory: ./build/bin
-        run: Rename-Item -Path "TinyRDM-${{ steps.normalise_platform_name.outputs.pname }}-installer.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
+        run: Rename-Item -Path "Tiny RDM.exe" -NewName "TinyRDM_Setup_${{ steps.normalise_version.outputs.version }}_${{ steps.normalise_platform.outputs.tag }}.exe"
 
       - name: Upload release asset (Installer)
         uses: softprops/action-gh-release@v1
