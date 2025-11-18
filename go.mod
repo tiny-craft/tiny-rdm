@@ -11,7 +11,7 @@ require (
 	github.com/redis/go-redis/v9 v9.14.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
-	github.com/wailsapp/wails/v2 v2.10.2
+	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/crypto v0.42.0
 	golang.org/x/net v0.44.0
 	gopkg.in/yaml.v3 v3.0.1
