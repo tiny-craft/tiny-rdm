@@ -7,6 +7,7 @@ const FORMAT_YAML = "YAML"
 const FORMAT_XML = "XML"
 const FORMAT_HEX = "Hex"
 const FORMAT_BINARY = "Binary"
+const FORMAT_BITSET = "BitSet"
 
 const DECODE_NONE = "None"
 const DECODE_BASE64 = "Base64"
