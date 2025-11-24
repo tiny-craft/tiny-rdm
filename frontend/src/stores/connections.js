@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { get, isEmpty, isObject, uniq } from 'lodash'
+import { get, isEmpty, isObject, union, uniq } from 'lodash'
 import {
     CreateGroup,
     DeleteConnection,
@@ -210,7 +210,8 @@ const useConnectionStore = defineStore('connections', {
 
         mergeConnectionProfile(dest, src) {
             const mergeObj = (destObj, srcObj) => {
-                for (const k in srcObj) {
+                const keys = union(Object.keys(destObj), Object.keys(srcObj))
+                for (const k of keys) {
                     const t = typeof srcObj[k]
                     if (t === 'string') {
                         destObj[k] = srcObj[k] || destObj[k] || ''
