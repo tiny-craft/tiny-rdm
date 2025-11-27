@@ -10,6 +10,7 @@ export const formatTypes = {
     XML: 'XML',
     HEX: 'Hex',
     BINARY: 'Binary',
+    BITSET: 'BitSet',
 }
 
 /**

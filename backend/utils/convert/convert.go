@@ -20,6 +20,7 @@ var (
 	xmlConv     XmlConvert
 	base64Conv  Base64Convert
 	binaryConv  BinaryConvert
+	bitSetConv  BitSetConvert
 	hexConv     HexConvert
 	gzipConv    GZipConvert
 	deflateConv DeflateConvert
@@ -38,6 +39,7 @@ var BuildInFormatters = map[string]DataConvert{
 	types.FORMAT_XML:          xmlConv,
 	types.FORMAT_HEX:          hexConv,
 	types.FORMAT_BINARY:       binaryConv,
+	types.FORMAT_BITSET:       bitSetConv,
 }
 
 var BuildInDecoders = map[string]DataConvert{
