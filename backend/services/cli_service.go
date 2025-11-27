@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"strings"
 	"sync"
 	"tinyrdm/backend/types"
 	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type cliService struct {
@@ -22,8 +23,9 @@ type cliService struct {
 }
 
 type cliOutput struct {
-	Content []string `json:"content"`          // output content
-	Prompt  string   `json:"prompt,omitempty"` // new line prompt, empty if not ready to input
+	Null    bool     `json:"null,omitempty"`    // output content is null
+	Content []string `json:"content,omitempty"` // output content
+	Prompt  string   `json:"prompt,omitempty"`  // new line prompt, empty if not ready to input
 }
 
 var cli *cliService
@@ -55,7 +57,7 @@ func (c *cliService) runCommand(server, data string) {
 					}
 				}
 
-				c.echo(server, strutil.AnyToString(result, "", 0), true)
+				c.echo(server, result, true)
 			} else {
 				c.echoError(server, err.Error())
 			}
@@ -66,9 +68,11 @@ func (c *cliService) runCommand(server, data string) {
 	c.echoReady(server)
 }
 
-func (c *cliService) echo(server, data string, newLineReady bool) {
-	output := cliOutput{
-		Content: strings.Split(data, "\n"),
+func (c *cliService) echo(server string, data any, newLineReady bool) {
+	var output cliOutput
+	if data != nil {
+		str := strutil.AnyToString(data, "", 0)
+		output.Content = strings.Split(str, "\n")
 	}
 	if newLineReady {
 		output.Prompt = fmt.Sprintf("%s:db%d> ", server, c.selectedDB[server])

@@ -598,11 +598,13 @@ const receiveTermOutput = (data) => {
         return
     }
 
-    const { content = [], prompt } = data || {}
-    if (!isEmpty(content)) {
+    const { content, prompt } = data || {}
+    if (content instanceof Array) {
         for (const line of content) {
             termInst.write('\r\n' + line)
         }
+    } else {
+        termInst.write('\r\n\x1b[38;5;244m(nil)\x1b[0m')
     }
     if (!isEmpty(prompt)) {
         promptPrefix.value = prompt
