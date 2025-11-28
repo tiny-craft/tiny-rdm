@@ -477,8 +477,12 @@ const onUpdateExpanded = (value, option, meta) => {
  * @param {TreeOption[]} options
  */
 const onUpdateCheckedKeys = (keys, options) => {
+    const hasFilter = !isEmpty(props.pattern)
     const checkedKeys = map(
-        filter(options, (o) => o.type === ConnectionType.RedisValue),
+        filter(
+            options,
+            (o) => o.type === ConnectionType.RedisValue && (!hasFilter || includes(o.redisKey, props.pattern)),
+        ),
         (o) => ({ key: o.key, redisKey: o.redisKeyCode || o.redisKey }),
     )
     tabStore.setCheckedKeys(props.server, checkedKeys)
