@@ -761,11 +761,15 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * get tree node by key name
-         * @param key
+         * @param {string} key format `<connection>/<db>#<key_type>/<key>`
          * @return {RedisNodeItem|null}
          */
         getNode(key) {
-            let idx = key.indexOf('#')
+            const match = key.match(/db\d+(?=#)/)
+            if (!match) {
+                return null
+            }
+            let idx = match.index + match[0].length
             if (idx < 0) {
                 idx = size(key)
             }
@@ -797,7 +801,7 @@ const useBrowserStore = defineStore('browser', {
 
         /**
          * get parent tree node by key name
-         * @param key
+         * @param {string} key
          * @return {RedisNodeItem|null}
          */
         getParentNode(key) {
