@@ -193,6 +193,9 @@ const onSaveConnection = async () => {
                 generalForm.value.ssh.password = ''
                 break
             case 'agent':
+                generalForm.value.ssh.password = ''
+                generalForm.value.ssh.pkFile = ''
+                generalForm.value.ssh.passphrase = ''
                 break
             default:
                 generalForm.value.ssh.pkFile = ''
