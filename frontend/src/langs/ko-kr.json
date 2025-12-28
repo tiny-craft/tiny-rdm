@@ -251,6 +251,7 @@
         "enable": "SSH 터널 활성화",
         "title": "SSH 터널",
         "login_type": "로그인 유형",
+        "agent": "SSH 에이전트",
         "pkfile": "개인 키 파일",
         "passphrase": "암호구문",
         "addr_tip": "SSH 주소",

@@ -251,6 +251,7 @@
         "enable": "Habilitar Túnel SSH",
         "title": "Túnel SSH",
         "login_type": "Tipo de Login",
+        "agent": "Agente SSH",
         "pkfile": "Arquivo de Chave Privada",
         "passphrase": "Frase de Senha",
         "addr_tip": "Endereço do Servidor SSH",

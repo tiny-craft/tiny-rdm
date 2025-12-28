@@ -251,6 +251,7 @@
         "enable": "Enable SSH Tunnel",
         "title": "SSH Tunnel",
         "login_type": "Login Type",
+        "agent": "SSH Agent",
         "pkfile": "Private Key File",
         "passphrase": "Passphrase",
         "addr_tip": "SSH Server Address",

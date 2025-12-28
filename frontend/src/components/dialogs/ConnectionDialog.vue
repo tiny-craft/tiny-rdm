@@ -192,6 +192,8 @@ const onSaveConnection = async () => {
             case 'pkfile':
                 generalForm.value.ssh.password = ''
                 break
+            case 'agent':
+                break
             default:
                 generalForm.value.ssh.pkFile = ''
                 generalForm.value.ssh.passphrase = ''
@@ -650,10 +652,11 @@ const pasteFromClipboard = async () => {
                             <n-radio-group v-model:value="generalForm.ssh.loginType">
                                 <n-radio-button :label="$t('dialogue.connection.pwd')" value="pwd" />
                                 <n-radio-button :label="$t('dialogue.connection.ssh.pkfile')" value="pkfile" />
+                                <n-radio-button :label="$t('dialogue.connection.ssh.agent')" value="agent" />
                             </n-radio-group>
                         </n-form-item>
                         <n-form-item
-                            v-if="sshLoginType === 'pwd' || sshLoginType === 'pkfile'"
+                            v-if="sshLoginType === 'pwd' || sshLoginType === 'pkfile' || sshLoginType === 'agent'"
                             :label="$t('dialogue.connection.usr')">
                             <n-input
                                 v-model:value="generalForm.ssh.username"

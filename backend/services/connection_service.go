@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/vrischmann/userdir"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/xanzy/ssh-agent"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
 	"io"
@@ -106,6 +107,15 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 				return nil, err
 			}
 			sshConfig.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		case "agent":
+			agent, conn, err := sshagent.New()
+			if err != nil {
+				return nil, err
+			}
+			if conn != nil {
+				defer conn.Close()
+			}
+			sshConfig.Auth = []ssh.AuthMethod{ssh.PublicKeysCallback(agent.Signers)}
 		default:
 			return nil, errors.New("invalid login type")
 		}

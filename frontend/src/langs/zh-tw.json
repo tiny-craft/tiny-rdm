@@ -251,6 +251,7 @@
         "enable": "啟用SSH隧道",
         "title": "SSH隧道",
         "login_type": "登入類型",
+        "agent": "SSH代理",
         "pkfile": "私鑰文件",
         "passphrase": "私鑰密碼",
         "addr_tip": "SSH位址",

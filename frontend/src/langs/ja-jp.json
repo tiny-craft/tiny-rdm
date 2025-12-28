@@ -251,6 +251,7 @@
         "enable": "SSHトンネルを有効化",
         "title": "SSHトンネル",
         "login_type": "ログイン方式",
+        "agent": "SSHエージェント",
         "pkfile": "秘密鍵ファイル",
         "passphrase": "パスフレーズ",
         "addr_tip": "SSHサーバーのアドレス",
