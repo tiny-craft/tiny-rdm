@@ -251,6 +251,7 @@
         "enable": "Activer le tunnel SSH",
         "title": "Tunnel SSH",
         "login_type": "Type de connexion",
+        "agent": "Agent SSH",
         "pkfile": "Fichier de clé privée",
         "passphrase": "Phrase secrète",
         "addr_tip": "Adresse SSH",

@@ -12,12 +12,14 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.11.0
+	github.com/xanzy/ssh-agent v0.3.3
 	golang.org/x/crypto v0.45.0
 	golang.org/x/net v0.47.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/adrg/strutil v0.3.1 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/bep/debounce v1.2.1 // indirect

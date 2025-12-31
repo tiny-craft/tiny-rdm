@@ -251,6 +251,7 @@
         "enable": "SSH Tünelini Etkinleştir",
         "title": "SSH Tüneli",
         "login_type": "Giriş Türü",
+        "agent": "SSH Ajanı",
         "pkfile": "Özel Anahtar Dosyası",
         "passphrase": "Parola",
         "addr_tip": "SSH Sunucu Adresi",

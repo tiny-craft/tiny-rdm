@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/vrischmann/userdir"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/xanzy/ssh-agent"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
 	"io"
@@ -106,6 +107,15 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 				return nil, err
 			}
 			sshConfig.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		case "agent":
+			agent, conn, err := sshagent.New()
+			if err != nil {
+				return nil, err
+			}
+			if conn != nil {
+				defer conn.Close()
+			}
+			sshConfig.Auth = []ssh.AuthMethod{ssh.PublicKeysCallback(agent.Signers)}
 		default:
 			return nil, errors.New("invalid login type")
 		}
@@ -218,8 +228,10 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		} else {
 			option.Dialer = dial
 		}
-		option.ReadTimeout = -2
-		option.WriteTimeout = -2
+		if config.SSH.Enable {
+			option.ReadTimeout = -2
+			option.WriteTimeout = -2
+		}
 	}
 	return option, nil
 }
@@ -246,7 +258,7 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 		option.Addr = net.JoinHostPort(addr[0], addr[1])
 		option.Username = config.Sentinel.Username
 		option.Password = config.Sentinel.Password
-		if option.Dialer != nil {
+		if option.Dialer != nil && config.SSH.Enable {
 			option.ReadTimeout = -2
 			option.WriteTimeout = -2
 		}
@@ -289,7 +301,7 @@ func (c *connectionService) createRedisClient(config types.ConnectionConfig) (re
 				TLSConfig:             option.TLSConfig,
 				DisableIdentity:       option.DisableIdentity,
 			}
-			if option.Dialer != nil {
+			if option.Dialer != nil && config.SSH.Enable {
 				clusterOptions.Dialer = option.Dialer
 				clusterOptions.ReadTimeout = -2
 				clusterOptions.WriteTimeout = -2
