@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"math"
 	"net/url"
 	"os"
@@ -27,6 +25,9 @@ import (
 	redis2 "tinyrdm/backend/utils/redis"
 	sliceutil "tinyrdm/backend/utils/slice"
 	strutil "tinyrdm/backend/utils/string"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type slowLogItem struct {
@@ -1164,11 +1165,20 @@ func (b *browserService) GetKeyDetail(param types.KeyDetailParam) (resp types.JS
 					ID:    msg.ID,
 					Value: msg.Values,
 				}
-				if vb, merr := json.Marshal(msg.Values); merr != nil {
-					it.DisplayValue = "{}"
-				} else {
-					it.DisplayValue, _, _ = convutil.ConvertTo(string(vb), types.DECODE_NONE, types.FORMAT_JSON, decoder)
+				var displayValue strings.Builder
+				for k, v := range msg.Values {
+					if displayValue.Len() > 0 {
+						displayValue.WriteString(", ")
+					}
+					if str, ok := v.(string); ok {
+						displayValue.WriteByte('"')
+						displayValue.WriteString(k)
+						displayValue.WriteByte('"')
+						displayValue.WriteByte(':')
+						displayValue.WriteString(str)
+					}
 				}
+				it.DisplayValue = displayValue.String()
 				if doFilter && !strings.Contains(it.DisplayValue, param.MatchPattern) {
 					continue
 				}
