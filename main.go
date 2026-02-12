@@ -4,6 +4,10 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"runtime"
+	"tinyrdm/backend/consts"
+	"tinyrdm/backend/services"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/menu"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -12,9 +16,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
-	"runtime"
-	"tinyrdm/backend/consts"
-	"tinyrdm/backend/services"
 )
 
 //go:embed all:frontend/dist
@@ -110,7 +111,7 @@ func main() {
 			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{
 				Title:   fmt.Sprintf("%s %s", appName, version),
-				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2025",
+				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2026",
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,
