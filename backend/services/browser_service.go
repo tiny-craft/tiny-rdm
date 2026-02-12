@@ -105,14 +105,14 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 	} else if selConn.DBFilterType == "hide" && slices.Contains(selConn.DBFilterList, lastDB) {
 		lastDB = selConn.DBFilterList[0]
 	}
-	if lastDB != selConn.LastDB {
-		Connection().SaveLastDB(name, lastDB)
-	}
 
-	item, err := b.getRedisClient(name, lastDB)
+	item, db, err := b.getRedisClient2(name, lastDB)
 	if err != nil {
 		resp.Msg = err.Error()
 		return
+	}
+	if lastDB != db {
+		lastDB = db
 	}
 
 	client, ctx := item.client, item.ctx
@@ -356,6 +356,22 @@ func (b *browserService) getRedisClient(server string, db int) (item *connection
 		item.stepSize = consts.DEFAULT_LOAD_SIZE
 	}
 	b.connMap[server] = item
+	return
+}
+
+// get redis client and try to reset selected database when not exists
+func (b *browserService) getRedisClient2(server string, db int) (item *connectionItem, selecetdDB int, err error) {
+	selecetdDB = db
+	item, err = b.getRedisClient(server, db)
+	if err != nil {
+		if strings.Contains(err.Error(), "DB index is out of range") && db != 0 {
+			if item, err = b.getRedisClient(server, 0); err != nil {
+				item = nil
+			} else {
+				selecetdDB = 0
+			}
+		}
+	}
 	return
 }
 
