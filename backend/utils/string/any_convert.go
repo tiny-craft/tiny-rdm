@@ -153,10 +153,12 @@ func SplitCmd(cmd string) []string {
 		}
 		preChar = char
 	}
-	result = append(result, curStr.String())
+	if curStr.Len() > 0 {
+		result = append(result, curStr.String())
+	}
 
 	result = sliceutil.FilterMap(result, func(i int) (string, bool) {
-		var part = strings.TrimSpace(result[i])
+		var part = result[i]
 		if i == 0 && len(part) <= 0 {
 			return "", false
 		}

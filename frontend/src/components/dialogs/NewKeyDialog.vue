@@ -2,7 +2,7 @@
 import { computed, h, nextTick, reactive, ref, watchEffect } from 'vue'
 import { types, typesColor } from '@/consts/support_redis_type.js'
 import useDialog from 'stores/dialog'
-import { endsWith, get, isEmpty, keys, map, trim } from 'lodash'
+import { endsWith, get, isEmpty, keys, map } from 'lodash'
 import NewStringValue from '@/components/new_value/NewStringValue.vue'
 import NewHashValue from '@/components/new_value/NewHashValue.vue'
 import NewListValue from '@/components/new_value/NewListValue.vue'
@@ -161,7 +161,7 @@ const onAdd = async () => {
         } = await browserStore.setKey({
             server,
             db,
-            key: trim(key),
+            key,
             keyType: type,
             value,
             ttl,
