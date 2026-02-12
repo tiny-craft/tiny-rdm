@@ -18,7 +18,7 @@ import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import { decodeRedisKey, nativeRedisKey } from '@/utils/key_convert.js'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import SwitchButton from '@/components/common/SwitchButton.vue'
 import AlignLeft from '@/components/icons/AlignLeft.vue'
 import AlignCenter from '@/components/icons/AlignCenter.vue'
@@ -242,7 +242,7 @@ const actionColumn = {
                 }
             },
             onCopy: async () => {
-                copy(row.v)
+                await ClipboardSetText(row.v)
                 $message.success(i18n.t('interface.copy_succ'))
             },
             onEdit: () => startEdit(index + 1, row.k, row.v),

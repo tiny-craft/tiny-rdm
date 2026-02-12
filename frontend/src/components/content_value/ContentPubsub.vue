@@ -4,7 +4,7 @@ import { debounce, get, isEmpty, size, uniq } from 'lodash'
 import { useI18n } from 'vue-i18n'
 import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
-import { EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
+import { ClipboardSetText, EventsOff, EventsOn } from 'wailsjs/runtime/runtime.js'
 import dayjs from 'dayjs'
 import Publish from '@/components/icons/Publish.vue'
 import Subscribe from '@/components/icons/Subscribe.vue'
@@ -15,7 +15,6 @@ import Checked from '@/components/icons/Checked.vue'
 import Bottom from '@/components/icons/Bottom.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
-import copy from 'copy-text-to-clipboard'
 
 const themeVars = useThemeVars()
 
@@ -113,7 +112,7 @@ const columns = computed(() => [
                 canRefresh: false,
                 canDelete: false,
                 onCopy: async () => {
-                    copy(row.message)
+                    await ClipboardSetText(row.message)
                     $message.success(i18n.t('interface.copy_succ'))
                 },
             })

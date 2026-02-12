@@ -10,7 +10,6 @@
     },
     "dependencies": {
         "chart.js": "^4.5.1",
-        "copy-text-to-clipboard": "^3.2.2",
         "dayjs": "^1.11.19",
         "lodash": "^4.17.23",
         "monaco-editor": "^0.47.0",

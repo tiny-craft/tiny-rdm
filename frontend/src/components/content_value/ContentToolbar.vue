@@ -14,7 +14,7 @@ import { NIcon, useThemeVars } from 'naive-ui'
 import { timeout } from '@/utils/promise.js'
 import AutoRefreshForm from '@/components/common/AutoRefreshForm.vue'
 import { toHumanReadable } from '@/utils/date.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const props = defineProps({
     server: String,
@@ -138,8 +138,8 @@ const onToggleRefresh = (on) => {
     }
 }
 
-const onCopyKey = () => {
-    copy(props.keyPath)
+const onCopyKey = async () => {
+    await ClipboardSetText(props.keyPath)
     $message.success(i18n.t('interface.copy_succ'))
 }
 

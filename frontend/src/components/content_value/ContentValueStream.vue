@@ -14,7 +14,7 @@ import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const i18n = useI18n()
 const themeVars = useThemeVars()
@@ -111,7 +111,7 @@ const actionColumn = {
             bindKey: row.id,
             readonly: true,
             onCopy: async () => {
-                copy(JSON.stringify(row.v))
+                await ClipboardSetText(JSON.stringify(row.v))
                 $message.success(i18n.t('interface.copy_succ'))
             },
             onDelete: async () => {

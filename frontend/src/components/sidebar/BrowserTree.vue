@@ -25,7 +25,7 @@ import RedisTypeTag from '@/components/common/RedisTypeTag.vue'
 import usePreferencesStore from 'stores/preferences.js'
 import { typesIconStyle } from '@/consts/support_redis_type.js'
 import { nativeRedisKey } from '@/utils/key_convert.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { isMacOS } from '@/utils/platform.js'
 
 const props = defineProps({
@@ -321,7 +321,7 @@ const handleKeyCopy = () => {
     }
 
     if (node.type === ConnectionType.RedisValue) {
-        copy(nativeRedisKey(node.redisKeyCode || node.redisKey))
+        ClipboardSetText(nativeRedisKey(node.redisKeyCode || node.redisKey))
         $message.success(i18n.t('interface.copy_succ'))
     }
 }
@@ -407,7 +407,7 @@ const handleSelectContextMenu = (action) => {
             break
         case 'key_copy':
         case 'value_copy':
-            copy(nativeRedisKey(redisKey))
+            ClipboardSetText(nativeRedisKey(redisKey))
             $message.success(i18n.t('interface.copy_succ'))
             break
         case 'db_loadall':

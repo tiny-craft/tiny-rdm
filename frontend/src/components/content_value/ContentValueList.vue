@@ -17,7 +17,7 @@ import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import Edit from '@/components/icons/Edit.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 import { TextAlignType } from '@/consts/text_align_type.js'
 import AlignLeft from '@/components/icons/AlignLeft.vue'
 import AlignCenter from '@/components/icons/AlignCenter.vue'
@@ -190,7 +190,7 @@ const actionColumn = {
             editing: false,
             bindKey: `#${index + 1}`,
             onCopy: async () => {
-                copy(v)
+                await ClipboardSetText(v)
                 $message.success(i18n.t('interface.copy_succ'))
             },
             onEdit: () => {

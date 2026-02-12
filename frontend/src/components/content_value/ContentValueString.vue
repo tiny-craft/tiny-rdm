@@ -12,7 +12,7 @@ import { decodeRedisKey } from '@/utils/key_convert.js'
 import FormatSelector from '@/components/content_value/FormatSelector.vue'
 import ContentEditor from '@/components/content_value/ContentEditor.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
-import copy from 'copy-text-to-clipboard'
+import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const props = defineProps({
     name: String,
@@ -120,8 +120,8 @@ const onFormatChanged = async (decode = '', format = '') => {
 /**
  * Copy value
  */
-const onCopyValue = () => {
-    copy(displayValue.value)
+const onCopyValue = async () => {
+    await ClipboardSetText(displayValue.value)
     $message.success(i18n.t('interface.copy_succ'))
 }
 
