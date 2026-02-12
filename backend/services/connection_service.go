@@ -5,13 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"github.com/klauspost/compress/zip"
-	"github.com/redis/go-redis/v9"
-	"github.com/vrischmann/userdir"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"github.com/xanzy/ssh-agent"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/net/proxy"
 	"io"
 	"net"
 	"net/url"
@@ -24,6 +17,14 @@ import (
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
 	_ "tinyrdm/backend/utils/proxy"
+
+	"github.com/klauspost/compress/zip"
+	"github.com/redis/go-redis/v9"
+	"github.com/vrischmann/userdir"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/xanzy/ssh-agent"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/net/proxy"
 )
 
 type cmdHistoryItem struct {
@@ -163,6 +164,7 @@ func (c *connectionService) buildOption(config types.ConnectionConfig) (*redis.O
 		TLSConfig:       tlsConfig,
 		DisableIdentity: true,
 		IdentitySuffix:  "tinyrdm_",
+		Protocol:        2,
 	}
 	if config.Network == "unix" {
 		option.Network = "unix"
