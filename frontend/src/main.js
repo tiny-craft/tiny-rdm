@@ -24,7 +24,10 @@ async function setupApp() {
     setupMonaco()
     setupChart()
     const prefStore = usePreferencesStore()
-    await prefStore.loadPreferences()
+    const isWebMode = import.meta.env.VITE_WEB === 'true'
+    if (!isWebMode) {
+        await prefStore.loadPreferences()
+    }
     await setupDiscreteApi()
     app.config.errorHandler = (err, instance, info) => {
         // TODO: add "send error message to author" later

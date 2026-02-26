@@ -21,7 +21,6 @@ import (
 	"github.com/klauspost/compress/zip"
 	"github.com/redis/go-redis/v9"
 	"github.com/vrischmann/userdir"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/xanzy/ssh-agent"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
@@ -510,10 +509,10 @@ func (c *connectionService) SaveRefreshInterval(name string, interval int) (resp
 // ExportConnections export connections to zip file
 func (c *connectionService) ExportConnections() (resp types.JSResp) {
 	defaultFileName := "connections_" + time.Now().Format("20060102150405") + ".zip"
-	filepath, err := runtime.SaveFileDialog(c.ctx, runtime.SaveDialogOptions{
+	filepath, err := SaveFileDialog(c.ctx, SaveDialogOptions{
 		ShowHiddenFiles: true,
 		DefaultFilename: defaultFileName,
-		Filters: []runtime.FileFilter{
+		Filters: []FileFilter{
 			{
 				Pattern: "*.zip",
 			},
@@ -568,9 +567,9 @@ func (c *connectionService) ExportConnections() (resp types.JSResp) {
 
 // ImportConnections import connections from local zip file
 func (c *connectionService) ImportConnections() (resp types.JSResp) {
-	filepath, err := runtime.OpenFileDialog(c.ctx, runtime.OpenDialogOptions{
+	filepath, err := OpenFileDialog(c.ctx, OpenDialogOptions{
 		ShowHiddenFiles: true,
-		Filters: []runtime.FileFilter{
+		Filters: []FileFilter{
 			{
 				Pattern: "*.zip",
 			},
@@ -618,7 +617,6 @@ func (c *connectionService) ImportConnections() (resp types.JSResp) {
 	resp.Success = true
 	return
 }
-
 // ParseConnectURL parse connection url string
 func (c *connectionService) ParseConnectURL(url string) (resp types.JSResp) {
 	urlOpt, err := redis.ParseURL(url)

@@ -13,7 +13,7 @@ import {
     SaveConnection,
     SaveLastDB,
     SaveRefreshInterval,
-    SaveSortedConnection,
+    SaveSortedConnection
 } from 'wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
@@ -431,8 +431,8 @@ const useConnectionStore = defineStore('connections', {
             if (!success) {
                 if (!isEmpty(msg)) {
                     $message.error(msg)
-                    return
                 }
+                return
             }
 
             $message.success(i18nGlobal.t('dialogue.handle_succ'))
@@ -447,8 +447,8 @@ const useConnectionStore = defineStore('connections', {
             if (!success) {
                 if (!isEmpty(msg)) {
                     $message.error(msg)
-                    return
                 }
+                return
             }
 
             $message.success(i18nGlobal.t('dialogue.handle_succ'))

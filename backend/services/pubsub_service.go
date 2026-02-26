@@ -3,12 +3,12 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"strconv"
 	"sync"
 	"time"
 	"tinyrdm/backend/types"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type pubsubItem struct {
@@ -137,7 +137,7 @@ func (p *pubsubService) processSubscribe(mutex *sync.Mutex, ch <-chan *redis.Mes
 					Message:   data.Payload,
 				})
 				if len(cache) > 300 {
-					runtime.EventsEmit(p.ctx, eventName, cache)
+					EventsEmit(p.ctx, eventName, cache)
 					cache = cache[:0:cap(cache)]
 				}
 			}()
@@ -147,7 +147,7 @@ func (p *pubsubService) processSubscribe(mutex *sync.Mutex, ch <-chan *redis.Mes
 				mutex.Lock()
 				defer mutex.Unlock()
 				if len(cache) > 0 {
-					runtime.EventsEmit(p.ctx, eventName, cache)
+					EventsEmit(p.ctx, eventName, cache)
 					cache = cache[:0:cap(cache)]
 				}
 			}()

@@ -1,9 +1,10 @@
 package storage
 
 import (
-	"github.com/vrischmann/userdir"
 	"os"
 	"path"
+
+	"github.com/vrischmann/userdir"
 )
 
 // localStorage provides reading and writing application data to the user's
@@ -36,7 +37,7 @@ func (l *localStorage) Store(data []byte) error {
 	if err := ensureDirExists(dir); err != nil {
 		return err
 	}
-	if err := os.WriteFile(l.ConfPath, data, 0777); err != nil {
+	if err := os.WriteFile(l.ConfPath, data, 0600); err != nil {
 		return err
 	}
 	return nil
@@ -47,7 +48,7 @@ func (l *localStorage) Store(data []byte) error {
 func ensureDirExists(path string) error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		if err = os.Mkdir(path, 0777); err != nil {
+		if err = os.Mkdir(path, 0700); err != nil {
 			return err
 		}
 	}

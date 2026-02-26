@@ -27,7 +27,6 @@ import (
 	strutil "tinyrdm/backend/utils/string"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type slowLogItem struct {
@@ -2089,7 +2088,7 @@ func (b *browserService) BatchSetTTL(server string, db int, ks []any, ttl int64,
 			//}
 			if i >= total-1 || time.Now().Sub(startTime).Milliseconds() > 100 {
 				startTime = time.Now()
-				//runtime.EventsEmit(ctx, processEvent, param)
+				//EventsEmit(ctx, processEvent, param)
 				// do some sleep to prevent blocking the Redis server
 				time.Sleep(10 * time.Millisecond)
 			}
@@ -2269,7 +2268,7 @@ func (b *browserService) DeleteKeys(server string, db int, ks []any, serialNo st
 	defer cancelFunc()
 
 	cancelEvent := "delete:stop:" + serialNo
-	cancelStopEvent := runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	cancelStopEvent := EventsOnce(ctx, cancelEvent, func(data ...any) {
 		cancelFunc()
 	})
 	total := len(ks)
@@ -2416,7 +2415,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	cancelStopEvent := runtime.EventsOnce(ctx, "export:stop:"+path, func(data ...any) {
+	cancelStopEvent := EventsOnce(ctx, "export:stop:"+path, func(data ...any) {
 		cancelFunc()
 	})
 	processEvent := "exporting:" + path
@@ -2432,7 +2431,7 @@ func (b *browserService) ExportKey(server string, db int, ks []any, path string,
 				"progress":   i + 1,
 				"processing": k,
 			}
-			runtime.EventsEmit(ctx, processEvent, param)
+			EventsEmit(ctx, processEvent, param)
 		}
 
 		key := strutil.DecodeRedisKey(k)
@@ -2491,7 +2490,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 	reader := csv.NewReader(file)
 
 	cancelEvent := "import:stop:" + path
-	cancelStopEvent := runtime.EventsOnce(ctx, cancelEvent, func(data ...any) {
+	cancelStopEvent := EventsOnce(ctx, cancelEvent, func(data ...any) {
 		cancelFunc()
 	})
 	processEvent := "importing:" + path
@@ -2560,7 +2559,7 @@ func (b *browserService) ImportCSV(server string, db int, path string, conflict 
 				"ignored":  ignored,
 				//"processing": string(key),
 			}
-			runtime.EventsEmit(ctx, processEvent, param)
+			EventsEmit(ctx, processEvent, param)
 			// do some sleep to prevent blocking the Redis server
 			time.Sleep(10 * time.Millisecond)
 		}

@@ -84,7 +84,7 @@ const newTerm = () => {
     return { term, fitAddon }
 }
 
-onMounted(() => {
+onMounted(async () => {
     const { term, fitAddon } = newTerm()
     termInst = term
     fitAddonInst = fitAddon
@@ -92,10 +92,25 @@ onMounted(() => {
 
     term.writeln('\r\n' + i18nGlobal.t('interface.cli_welcome'))
     // term.write('\x1b[4h') // insert mode
-    CloseCli(props.name)
-    StartCli(props.name, 0)
 
     EventsOn(`cmd:output:${props.name}`, receiveTermOutput)
+
+    // Wait for WebSocket with timeout (CLI needs it for real-time I/O, web mode only)
+    if (import.meta.env.VITE_WEB === 'true') {
+        try {
+            const { WaitForWebSocket } = await import('wailsjs/runtime/runtime.js')
+            await Promise.race([
+                WaitForWebSocket(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('ws timeout')), 5000)),
+            ])
+        } catch {
+            console.warn('[cli] WebSocket not connected, some features may be limited')
+        }
+    }
+
+    await CloseCli(props.name)
+    await StartCli(props.name, 0)
+
     fitAddon.fit()
     term.focus()
 })

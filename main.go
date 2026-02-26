@@ -1,3 +1,5 @@
+//go:build !web
+
 package main
 
 import (

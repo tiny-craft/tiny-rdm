@@ -13,7 +13,7 @@ import ContentLogPane from './components/content/ContentLogPane.vue'
 import ContentValueTab from '@/components/content/ContentValueTab.vue'
 import ToolbarControlWidget from '@/components/common/ToolbarControlWidget.vue'
 import { EventsOn, WindowIsFullscreen, WindowIsMaximised, WindowToggleMaximise } from 'wailsjs/runtime/runtime.js'
-import { isMacOS, isWindows } from '@/utils/platform.js'
+import { isMacOS, isWeb, isWindows } from '@/utils/platform.js'
 import iconUrl from '@/assets/images/icon.png'
 import ResizeableWrapper from '@/components/common/ResizeableWrapper.vue'
 import { extraTheme } from '@/utils/extra_theme.js'
@@ -57,7 +57,7 @@ const logoPaddingLeft = ref(10)
 const maximised = ref(false)
 const hideRadius = ref(false)
 const wrapperStyle = computed(() => {
-    if (isWindows()) {
+    if (isWindows() || isWeb()) {
         return {}
     }
     return hideRadius.value
@@ -68,7 +68,7 @@ const wrapperStyle = computed(() => {
           }
 })
 const spinStyle = computed(() => {
-    if (isWindows()) {
+    if (isWindows() || isWeb()) {
         return {
             backgroundColor: themeVars.value.bodyColor,
         }
@@ -177,7 +177,7 @@ const onKeyShortcut = (e) => {
                 <div class="flex-item-expand" style="min-width: 15px"></div>
                 <!-- simulate window control buttons -->
                 <toolbar-control-widget
-                    v-if="!isMacOS()"
+                    v-if="!isMacOS() && !isWeb()"
                     :maximised="maximised"
                     :size="data.toolbarHeight"
                     style="align-self: flex-start" />
@@ -240,6 +240,7 @@ const onKeyShortcut = (e) => {
 #app-content-wrapper {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     box-sizing: border-box;
     background-color: v-bind('themeVars.bodyColor');

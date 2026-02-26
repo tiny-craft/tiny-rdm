@@ -3,8 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"github.com/adrg/sysfont"
-	runtime2 "github.com/wailsapp/wails/v2/pkg/runtime"
 	"net/http"
 	"os"
 	"sort"
@@ -16,6 +14,8 @@ import (
 	"tinyrdm/backend/utils/coll"
 	convutil "tinyrdm/backend/utils/convert"
 	sliceutil "tinyrdm/backend/utils/slice"
+
+	"github.com/adrg/sysfont"
 )
 
 type preferencesService struct {
@@ -169,7 +169,7 @@ func (p *preferencesService) GetWindowPosition(ctx context.Context) (x, y int) {
 	x, y = data.Behavior.WindowPosX, data.Behavior.WindowPosY
 	width, height := data.Behavior.WindowWidth, data.Behavior.WindowHeight
 	var screenWidth, screenHeight int
-	if screens, err := runtime2.ScreenGetAll(ctx); err == nil {
+	if screens, err := ScreenGetAll(ctx); err == nil {
 		for _, screen := range screens {
 			if screen.IsCurrent {
 				screenWidth, screenHeight = screen.Size.Width, screen.Size.Height

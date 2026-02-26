@@ -18,6 +18,8 @@ import bilibiliUrl from '@/assets/images/bilibili_official.png'
 import QRCode from '@/components/icons/QRCode.vue'
 import Twitter from '@/components/icons/Twitter.vue'
 import { trackEvent } from '@/utils/analytics.js'
+import Logout from '@/components/icons/Logout.vue'
+import { isWeb } from '@/utils/platform.js'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -136,6 +138,13 @@ const openGithub = () => {
     BrowserOpenURL('https://github.com/tiny-craft/tiny-rdm')
 }
 
+const handleLogout = async () => {
+    try {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+    } catch {}
+    window.dispatchEvent(new Event('rdm:unauthorized'))
+}
+
 const exThemeVars = computed(() => {
     return extraTheme(prefStore.isDark)
 })
@@ -196,6 +205,14 @@ const exThemeVars = computed(() => {
                 :tooltip-delay="100"
                 t-tooltip="ribbon.github"
                 @click="openGithub" />
+            <icon-button
+                v-if="isWeb()"
+                :icon="Logout"
+                :size="iconSize"
+                :stroke-width="3"
+                :tooltip-delay="100"
+                t-tooltip="ribbon.logout"
+                @click="handleLogout" />
         </div>
 
         <!-- wechat official modal -->

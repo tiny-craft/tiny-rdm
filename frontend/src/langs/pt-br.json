@@ -170,7 +170,8 @@
     "log": "Log",
     "wechat_official": "Conta Oficial do WeChat",
     "follow_x": "Siga \uD835\uDD4F",
-    "github": "Github"
+    "github": "Github",
+    "logout": "Sair"
   },
   "dialogue": {
     "close_confirm": "Fechar esta conexão ({name})?",

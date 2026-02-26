@@ -7,7 +7,7 @@ import {
     GetFontList,
     GetPreferences,
     RestorePreferences,
-    SetPreferences,
+    SetPreferences
 } from 'wailsjs/go/services/preferencesService.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
@@ -287,7 +287,7 @@ const usePreferencesStore = defineStore('preferences', {
 
         /**
          * load preferences from local
-         * @returns {Promise<void>}
+         * @returns {Promise<boolean>}
          */
         async loadPreferences() {
             const { success, data } = await GetPreferences()
@@ -313,6 +313,7 @@ const usePreferencesStore = defineStore('preferences', {
                 }
                 i18nGlobal.locale.value = this.currentLanguage
             }
+            return success
         },
 
         /**
@@ -350,7 +351,7 @@ const usePreferencesStore = defineStore('preferences', {
          */
         async savePreferences() {
             const pf = pick(this, ['behavior', 'general', 'editor', 'cli', 'decoder'])
-            const { success, msg } = await SetPreferences(pf)
+            const { success } = await SetPreferences(pf)
             return success === true
         },
 

@@ -170,7 +170,8 @@
     "log": "Лог",
     "wechat_official": "Официальный аккаунт WeChat",
     "follow_x": "Подписаться на \uD835\uDD4F",
-    "github": "Github"
+    "github": "Github",
+    "logout": "Выйти"
   },
   "dialogue": {
     "close_confirm": "Закрыть это соединение ({name})?",

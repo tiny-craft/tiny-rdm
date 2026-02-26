@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"os"
 	"strconv"
 	"sync"
 	"time"
 	"tinyrdm/backend/types"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type monitorItem struct {
@@ -113,7 +113,7 @@ func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, clo
 					defer mutex.Unlock()
 					cache = append(cache, data)
 					if len(cache) > 300 {
-						runtime.EventsEmit(c.ctx, eventName, cache)
+						EventsEmit(c.ctx, eventName, cache)
 						cache = cache[:0:cap(cache)]
 					}
 				}()
@@ -124,7 +124,7 @@ func (c *monitorService) processMonitor(mutex *sync.Mutex, ch <-chan string, clo
 				mutex.Lock()
 				defer mutex.Unlock()
 				if len(cache) > 0 {
-					runtime.EventsEmit(c.ctx, eventName, cache)
+					EventsEmit(c.ctx, eventName, cache)
 					cache = cache[:0:cap(cache)]
 				}
 			}()
@@ -168,10 +168,10 @@ func (c *monitorService) StopAll() {
 }
 
 func (c *monitorService) ExportLog(logs []string) (resp types.JSResp) {
-	filepath, err := runtime.SaveFileDialog(c.ctx, runtime.SaveDialogOptions{
+	filepath, err := SaveFileDialog(c.ctx, SaveDialogOptions{
 		ShowHiddenFiles: false,
 		DefaultFilename: fmt.Sprintf("monitor_log_%s.txt", time.Now().Format("20060102150405")),
-		Filters: []runtime.FileFilter{
+		Filters: []FileFilter{
 			{Pattern: "*.txt"},
 		},
 	})

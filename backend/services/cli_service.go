@@ -11,7 +11,6 @@ import (
 	strutil "tinyrdm/backend/utils/string"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type cliService struct {
@@ -77,7 +76,7 @@ func (c *cliService) echo(server string, data any, newLineReady bool) {
 	if newLineReady {
 		output.Prompt = fmt.Sprintf("%s:db%d> ", server, c.selectedDB[server])
 	}
-	runtime.EventsEmit(c.ctx, "cmd:output:"+server, output)
+	EventsEmit(c.ctx, "cmd:output:"+server, output)
 }
 
 func (c *cliService) echoReady(server string) {
@@ -122,7 +121,7 @@ func (c *cliService) StartCli(server string, db int) (resp types.JSResp) {
 	c.selectedDB[server] = db
 
 	// monitor input
-	runtime.EventsOn(c.ctx, "cmd:input:"+server, func(data ...interface{}) {
+	EventsOn(c.ctx, "cmd:input:"+server, func(data ...interface{}) {
 		if len(data) > 0 {
 			if str, ok := data[0].(string); ok {
 				c.runCommand(server, str)
@@ -148,7 +147,7 @@ func (c *cliService) CloseCli(server string) (resp types.JSResp) {
 		delete(c.clients, server)
 		delete(c.selectedDB, server)
 	}
-	runtime.EventsOff(c.ctx, "cmd:input:"+server)
+	EventsOff(c.ctx, "cmd:input:"+server)
 	resp.Success = true
 	return
 }

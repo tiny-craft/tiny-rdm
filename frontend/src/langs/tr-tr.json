@@ -170,7 +170,8 @@
     "log": "Log",
     "wechat_official": "WeChat Resmi Hesap",
     "follow_x": "𝕏'i Takip Et",
-    "github": "Github"
+    "github": "Github",
+    "logout": "Çıkış Yap"
   },
   "dialogue": {
     "close_confirm": "Bu bağlantı kapatılsın mı ({name})?",

@@ -170,7 +170,8 @@
     "log": "日誌",
     "wechat_official": "微信公眾號",
     "follow_x": "關注我的\uD835\uDD4F",
-    "github": "Github"
+    "github": "Github",
+    "logout": "登出"
   },
   "dialogue": {
     "close_confirm": "是否關閉此連線（{name}）",

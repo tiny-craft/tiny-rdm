@@ -170,7 +170,8 @@
     "log": "Journal",
     "wechat_official": "Compte officiel WeChat",
     "follow_x": "Suivre \uD835\uDD4F",
-    "github": "Github"
+    "github": "Github",
+    "logout": "Se déconnecter"
   },
   "dialogue": {
     "close_confirm": "Fermer cette connexion ({name}) ?",
