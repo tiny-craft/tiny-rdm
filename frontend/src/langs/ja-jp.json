@@ -403,6 +403,14 @@
       "website": "公式ウェブサイト"
     }
   },
+  "login": {
+    "username_placeholder": "ユーザー名を入力",
+    "password_placeholder": "パスワードを入力",
+    "submit": "ログイン",
+    "too_many_attempts": "試行回数が多すぎます",
+    "invalid_credentials": "ユーザー名またはパスワードが正しくありません",
+    "network_error": "ネットワークエラー"
+  },
   "menu": {
     "minimise": "最小化",
     "maximise": "最大化",

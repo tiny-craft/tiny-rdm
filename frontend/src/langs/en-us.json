@@ -403,6 +403,14 @@
       "website": "Official Website"
     }
   },
+  "login": {
+    "username_placeholder": "Enter username",
+    "password_placeholder": "Enter password",
+    "submit": "Sign In",
+    "too_many_attempts": "Too many attempts, please try later",
+    "invalid_credentials": "Invalid credentials",
+    "network_error": "Network error"
+  },
   "menu": {
     "minimise": "Minimise",
     "maximise": "Maximise",

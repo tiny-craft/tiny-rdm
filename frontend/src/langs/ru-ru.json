@@ -403,6 +403,14 @@
       "website": "Официальный сайт"
     }
   },
+  "login": {
+    "username_placeholder": "Введите имя пользователя",
+    "password_placeholder": "Введите пароль",
+    "submit": "Войти",
+    "too_many_attempts": "Слишком много попыток, попробуйте позже",
+    "invalid_credentials": "Неверные учётные данные",
+    "network_error": "Ошибка сети"
+  },
   "menu": {
     "minimise": "Свернуть",
     "maximise": "Развернуть",

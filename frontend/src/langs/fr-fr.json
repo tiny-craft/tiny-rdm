@@ -403,6 +403,14 @@
       "website": "Site officiel"
     }
   },
+  "login": {
+    "username_placeholder": "Entrez le nom d'utilisateur",
+    "password_placeholder": "Entrez le mot de passe",
+    "submit": "Se connecter",
+    "too_many_attempts": "Trop de tentatives, réessayez plus tard",
+    "invalid_credentials": "Identifiants invalides",
+    "network_error": "Erreur réseau"
+  },
   "menu": {
     "minimise": "Minimiser",
     "maximise": "Maximiser",

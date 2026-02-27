@@ -403,6 +403,14 @@
       "website": "Site Oficial"
     }
   },
+  "login": {
+    "username_placeholder": "Digite o usuário",
+    "password_placeholder": "Digite a senha",
+    "submit": "Entrar",
+    "too_many_attempts": "Muitas tentativas, tente novamente mais tarde",
+    "invalid_credentials": "Credenciais inválidas",
+    "network_error": "Erro de rede"
+  },
   "menu": {
     "minimise": "Minimizar",
     "maximise": "Maximizar",

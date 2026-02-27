@@ -403,6 +403,14 @@
       "website": "Resmi Web Sitesi"
     }
   },
+  "login": {
+    "username_placeholder": "Kullanıcı adını girin",
+    "password_placeholder": "Şifreyi girin",
+    "submit": "Giriş Yap",
+    "too_many_attempts": "Çok fazla deneme, lütfen daha sonra tekrar deneyin",
+    "invalid_credentials": "Geçersiz kimlik bilgileri",
+    "network_error": "Ağ hatası"
+  },
   "menu": {
     "minimise": "Küçült",
     "maximise": "Büyüt",

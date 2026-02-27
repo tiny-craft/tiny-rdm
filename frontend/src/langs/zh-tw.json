@@ -403,6 +403,14 @@
       "website": "官方網站"
     }
   },
+  "login": {
+    "username_placeholder": "請輸入使用者名稱",
+    "password_placeholder": "請輸入密碼",
+    "submit": "登入",
+    "too_many_attempts": "嘗試次數過多，請稍後再試",
+    "invalid_credentials": "使用者名稱或密碼錯誤",
+    "network_error": "網路錯誤"
+  },
   "menu": {
     "minimise": "最小化",
     "maximise": "最大化",

@@ -1,6 +1,6 @@
 <script setup>
 // --- Render icon helper for dropdown items ---
-import { computed, h, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref, watch } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import iconUrl from '@/assets/images/icon.png'
 import usePreferencesStore from '@/stores/preferences.js'
@@ -8,9 +8,11 @@ import LangIcon from '@/components/icons/Lang.vue'
 
 import { Login } from '@/utils/api.js'
 import { lang } from '@/langs/index.js'
+import { useI18n } from 'vue-i18n'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
+const i18n = useI18n()
 const emit = defineEmits(['login'])
 
 // --- Theme ---
@@ -46,7 +48,9 @@ const currentThemeLabel = computed(() => {
 })
 
 const onThemeSelect = (key) => {
-    if (!['auto', 'light', 'dark'].includes(key)) return
+    if (!['auto', 'light', 'dark'].includes(key)) {
+        return
+    }
     themeMode.value = key
     prefStore.general.theme = key
     localStorage.setItem(THEME_KEY, key)
@@ -84,7 +88,9 @@ const currentLangLabel = computed(() => {
 
 const onLangSelect = (key) => {
     const valid = ['auto', ...Object.keys(langNames)]
-    if (!valid.includes(key)) return
+    if (!valid.includes(key)) {
+        return
+    }
     langSetting.value = key
     localStorage.setItem(LANG_KEY, key)
 }
@@ -148,150 +154,18 @@ const AutoSvg = {
             [h('circle', { cx: '12', cy: '12', r: '10' }), h('path', { d: 'M12 2a10 10 0 0 1 0 20V2' })],
         ),
 }
-const LangSvg = {
-    render: () =>
-        h(
-            'svg',
-            {
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 24 24',
-                width: '1em',
-                height: '1em',
-                fill: 'none',
-                stroke: 'currentColor',
-                'stroke-width': '2',
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
-            },
-            [
-                h('path', { d: 'M5 8l6 6' }),
-                h('path', { d: 'M4 14l6-6 2-3' }),
-                h('path', { d: 'M2 5h12' }),
-                h('path', { d: 'M7 2h1' }),
-                h('path', { d: 'M22 22l-5-10-5 10' }),
-                h('path', { d: 'M14 18h6' }),
-            ],
-        ),
-}
 
-const iconMap = { sun: SunSvg, moon: MoonSvg, auto: AutoSvg, lang: LangSvg }
+const iconMap = { sun: SunSvg, moon: MoonSvg, auto: AutoSvg }
 const renderIcon = (name) => () => h(NIcon, null, { default: () => h(iconMap[name]) })
 
-// --- i18n texts ---
-const langTexts = {
-    zh: {
-        title: '登录',
-        username: '用户名',
-        password: '密码',
-        usernamePh: '请输入用户名',
-        passwordPh: '请输入密码',
-        submit: '登 录',
-        tooMany: '尝试次数过多，请稍后再试',
-        failed: '用户名或密码错误',
-        network: '网络错误',
+// --- i18n ---
+watch(
+    currentLang,
+    (val) => {
+        i18n.locale.value = val
     },
-    tw: {
-        title: '登入',
-        username: '使用者名稱',
-        password: '密碼',
-        usernamePh: '請輸入使用者名稱',
-        passwordPh: '請輸入密碼',
-        submit: '登 入',
-        tooMany: '嘗試次數過多，請稍後再試',
-        failed: '使用者名稱或密碼錯誤',
-        network: '網路錯誤',
-    },
-    ja: {
-        title: 'ログイン',
-        username: 'ユーザー名',
-        password: 'パスワード',
-        usernamePh: 'ユーザー名を入力',
-        passwordPh: 'パスワードを入力',
-        submit: 'ログイン',
-        tooMany: '試行回数が多すぎます',
-        failed: 'ユーザー名またはパスワードが正しくありません',
-        network: 'ネットワークエラー',
-    },
-    ko: {
-        title: '로그인',
-        username: '사용자 이름',
-        password: '비밀번호',
-        usernamePh: '사용자 이름 입력',
-        passwordPh: '비밀번호 입력',
-        submit: '로그인',
-        tooMany: '시도 횟수 초과, 잠시 후 다시 시도하세요',
-        failed: '사용자 이름 또는 비밀번호가 올바르지 않습니다',
-        network: '네트워크 오류',
-    },
-    es: {
-        title: 'Iniciar sesión',
-        username: 'Usuario',
-        password: 'Contraseña',
-        usernamePh: 'Ingrese usuario',
-        passwordPh: 'Ingrese contraseña',
-        submit: 'Entrar',
-        tooMany: 'Demasiados intentos, intente más tarde',
-        failed: 'Credenciales inválidas',
-        network: 'Error de red',
-    },
-    fr: {
-        title: 'Connexion',
-        username: "Nom d'utilisateur",
-        password: 'Mot de passe',
-        usernamePh: "Entrez le nom d'utilisateur",
-        passwordPh: 'Entrez le mot de passe',
-        submit: 'Se connecter',
-        tooMany: 'Trop de tentatives, réessayez plus tard',
-        failed: 'Identifiants invalides',
-        network: 'Erreur réseau',
-    },
-    ru: {
-        title: 'Вход',
-        username: 'Имя пользователя',
-        password: 'Пароль',
-        usernamePh: 'Введите имя пользователя',
-        passwordPh: 'Введите пароль',
-        submit: 'Войти',
-        tooMany: 'Слишком много попыток, попробуйте позже',
-        failed: 'Неверные учётные данные',
-        network: 'Ошибка сети',
-    },
-    pt: {
-        title: 'Entrar',
-        username: 'Usuário',
-        password: 'Senha',
-        usernamePh: 'Digite o usuário',
-        passwordPh: 'Digite a senha',
-        submit: 'Entrar',
-        tooMany: 'Muitas tentativas, tente novamente mais tarde',
-        failed: 'Credenciais inválidas',
-        network: 'Erro de rede',
-    },
-    tr: {
-        title: 'Giriş',
-        username: 'Kullanıcı adı',
-        password: 'Şifre',
-        usernamePh: 'Kullanıcı adını girin',
-        passwordPh: 'Şifreyi girin',
-        submit: 'Giriş Yap',
-        tooMany: 'Çok fazla deneme, lütfen daha sonra tekrar deneyin',
-        failed: 'Geçersiz kimlik bilgileri',
-        network: 'Ağ hatası',
-    },
-    en: {
-        title: 'Sign In',
-        username: 'Username',
-        password: 'Password',
-        usernamePh: 'Enter username',
-        passwordPh: 'Enter password',
-        submit: 'Sign In',
-        tooMany: 'Too many attempts, please try later',
-        failed: 'Invalid credentials',
-        network: 'Network error',
-    },
-}
-
-const t = computed(() => langTexts[currentLang.value] || langTexts.en)
+    { immediate: true },
+)
 
 // --- Form ---
 const username = ref('')
@@ -309,16 +183,16 @@ const handleLogin = async () => {
     try {
         const { msg, success = false } = await Login(username.value, password.value)
         if (msg === 'too_many_attempts') {
-            errorMsg.value = t.value.tooMany
+            errorMsg.value = $t('login.too_many_attempts')
             return
         }
         if (!success) {
-            errorMsg.value = t.value.failed
+            errorMsg.value = $t('login.invalid_credentials')
             return
         }
         emit('login')
     } catch (e) {
-        errorMsg.value = t.value.network
+        errorMsg.value = $t('login.network_error')
     } finally {
         loading.value = false
     }
@@ -331,22 +205,22 @@ const handleLogin = async () => {
             <div class="login-header">
                 <n-avatar :size="64" :src="iconUrl" color="#0000" />
                 <div class="login-title">Tiny RDM</div>
-                <n-text depth="3" style="font-size: 13px">Redis Web Manager</n-text>
+                <!--                <n-text depth="3" style="font-size: 13px">Redis Web Manager</n-text>-->
             </div>
 
             <n-form class="login-form" @submit.prevent="handleLogin">
-                <n-form-item :label="t.username">
+                <n-form-item :label="$t('dialogue.connection.usr')">
                     <n-input
                         v-model:value="username"
-                        :placeholder="t.usernamePh"
+                        :placeholder="$t('login.username_placeholder')"
                         autofocus
                         size="large"
                         @keydown.enter="handleLogin" />
                 </n-form-item>
-                <n-form-item :label="t.password">
+                <n-form-item :label="$t('dialogue.connection.pwd')">
                     <n-input
                         v-model:value="password"
-                        :placeholder="t.passwordPh"
+                        :placeholder="$t('login.password_placeholder')"
                         show-password-on="click"
                         size="large"
                         type="password"
@@ -366,7 +240,7 @@ const handleLogin = async () => {
                     style="margin-top: 8px"
                     type="primary"
                     @click="handleLogin">
-                    {{ t.submit }}
+                    {{ $t('login.submit') }}
                 </n-button>
             </n-form>
 

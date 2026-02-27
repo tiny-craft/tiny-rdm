@@ -403,6 +403,14 @@
       "website": "공식 웹사이트"
     }
   },
+  "login": {
+    "username_placeholder": "사용자 이름 입력",
+    "password_placeholder": "비밀번호 입력",
+    "submit": "로그인",
+    "too_many_attempts": "시도 횟수 초과, 잠시 후 다시 시도하세요",
+    "invalid_credentials": "사용자 이름 또는 비밀번호가 올바르지 않습니다",
+    "network_error": "네트워크 오류"
+  },
   "menu": {
     "minimise": "최소화",
     "maximise": "최대화",
