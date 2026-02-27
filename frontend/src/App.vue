@@ -90,13 +90,12 @@ const onLogin = async () => {
     await initApp()
     // Sync login page choices to preferences
     let prefUpdated = false
-    if (loginTheme && ['auto', 'light', 'dark'].includes(loginTheme)) {
+    if (loginTheme && prefStore.allThemes.includes(loginTheme)) {
         prefStore.general.theme = loginTheme
         prefUpdated = true
     }
     if (loginLang) {
-        const validLangs = ['auto', 'zh', 'tw', 'en', 'ja', 'ko', 'es', 'fr', 'ru', 'pt', 'tr']
-        if (validLangs.includes(loginLang)) {
+        if (prefStore.allLangs.includes(loginLang)) {
             prefStore.general.language = loginLang
             i18n.locale.value = prefStore.currentLanguage
             prefUpdated = true
@@ -201,7 +200,7 @@ onMounted(async () => {
     if (isWeb()) {
         // Apply saved login theme before auth check to prevent flash
         const savedTheme = localStorage.getItem('rdm_login_theme')
-        if (savedTheme && ['auto', 'light', 'dark'].includes(savedTheme)) {
+        if (savedTheme && prefStore.allThemes.includes(savedTheme)) {
             prefStore.general.theme = savedTheme
         }
         window.addEventListener('rdm:unauthorized', onUnauthorized)

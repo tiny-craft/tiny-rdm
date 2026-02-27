@@ -51,7 +51,7 @@ const currentThemeLabel = computed(() => {
 })
 
 const onThemeSelect = (key) => {
-    if (!['auto', 'light', 'dark'].includes(key)) {
+    if (!prefStore.allThemes.includes(key)) {
         return
     }
     themeMode.value = key
@@ -90,8 +90,7 @@ const currentLangLabel = computed(() => {
 })
 
 const onLangSelect = (key) => {
-    const valid = ['auto', ...Object.keys(langNames)]
-    if (!valid.includes(key)) {
+    if (!prefStore.allLangs.includes(key)) {
         return
     }
     langSetting.value = key

@@ -101,6 +101,14 @@ const usePreferencesStore = defineStore('preferences', {
         },
 
         /**
+         * all themes' name
+         * @returns {string[]}
+         */
+        allThemes() {
+            return this.themeOption.map((o) => o.value)
+        },
+
+        /**
          * all available language
          * @returns {{label: string, value: string}[]}
          */
@@ -114,6 +122,14 @@ const usePreferencesStore = defineStore('preferences', {
                 label: 'preferences.general.system_lang',
             })
             return options
+        },
+
+        /**
+         * all languages' name
+         * @returns {string[]}
+         */
+        allLangs() {
+            return this.langOption.map((o) => o.value)
         },
 
         /**
