@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,9 +13,6 @@ import (
 	"tinyrdm/backend/api"
 	"tinyrdm/backend/services"
 )
-
-//go:embed all:frontend/dist
-var assets embed.FS
 
 var version = "0.0.0"
 
@@ -60,7 +56,7 @@ func main() {
 	}
 
 	// Setup HTTP server
-	router := api.SetupRouter(assets)
+	router := api.SetupRouter()
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%s", port),
 		Handler: router,

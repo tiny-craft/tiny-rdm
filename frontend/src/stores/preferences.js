@@ -3,11 +3,12 @@ import { lang } from '@/langs/index.js'
 import { cloneDeep, findIndex, get, isEmpty, join, map, pick, set, some, split } from 'lodash'
 import {
     CheckForUpdate,
+    GetAppVersion,
     GetBuildInDecoder,
     GetFontList,
     GetPreferences,
     RestorePreferences,
-    SetPreferences
+    SetPreferences,
 } from 'wailsjs/go/services/preferencesService.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
@@ -75,6 +76,7 @@ const usePreferencesStore = defineStore('preferences', {
         decoder: [],
         lastPref: {},
         fontList: [],
+        appVersion: '',
     }),
     getters: {
         getSeparator() {
@@ -342,6 +344,17 @@ const usePreferencesStore = defineStore('preferences', {
                 this.buildInDecoder = decoder
             } else {
                 this.buildInDecoder = []
+            }
+        },
+
+        /**
+         * load app version
+         * @return {Promise<void>}
+         */
+        async loadAppVersion() {
+            const { success, data } = await GetAppVersion()
+            if (success && data?.version) {
+                this.appVersion = data.version
             }
         },
 

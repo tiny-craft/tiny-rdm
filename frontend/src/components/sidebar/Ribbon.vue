@@ -18,8 +18,9 @@ import bilibiliUrl from '@/assets/images/bilibili_official.png'
 import QRCode from '@/components/icons/QRCode.vue'
 import Twitter from '@/components/icons/Twitter.vue'
 import { trackEvent } from '@/utils/analytics.js'
-import Logout from '@/components/icons/Logout.vue'
+import LogoutIcon from '@/components/icons/Logout.vue'
 import { isWeb } from '@/utils/platform.js'
+import { Logout } from '@/utils/api.js'
 
 const themeVars = useThemeVars()
 const render = useRender()
@@ -140,7 +141,7 @@ const openGithub = () => {
 
 const handleLogout = async () => {
     try {
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+        await Logout()
     } catch {}
     window.dispatchEvent(new Event('rdm:unauthorized'))
 }
@@ -207,9 +208,9 @@ const exThemeVars = computed(() => {
                 @click="openGithub" />
             <icon-button
                 v-if="isWeb()"
-                :icon="Logout"
+                :icon="LogoutIcon"
                 :size="iconSize"
-                :stroke-width="3"
+                :stroke-width="3.5"
                 :tooltip-delay="100"
                 t-tooltip="ribbon.logout"
                 @click="handleLogout" />

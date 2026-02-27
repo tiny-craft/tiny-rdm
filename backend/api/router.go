@@ -3,8 +3,6 @@
 package api
 
 import (
-	"embed"
-	"io/fs"
 	"log"
 	"net/http"
 	"strings"
@@ -17,7 +15,7 @@ import (
 const maxRequestBodySize = 10 << 20 // 10MB
 
 // SetupRouter creates the Gin router with all API routes and static file serving
-func SetupRouter(assets embed.FS) *gin.Engine {
+func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -57,9 +55,8 @@ func SetupRouter(assets embed.FS) *gin.Engine {
 
 	// Public routes (no auth required)
 	registerAuthRoutes(r)
-	r.GET("/api/version", func(c *gin.Context) {
-		resp := services.Preferences().GetAppVersion()
-		c.JSON(200, resp)
+	r.GET("/api/preferences/version", func(c *gin.Context) {
+		c.JSON(http.StatusOK, services.Preferences().GetAppVersion())
 	})
 
 	// WebSocket endpoint (auth checked via cookie + origin)
@@ -75,22 +72,6 @@ func SetupRouter(assets embed.FS) *gin.Engine {
 	registerPubsubRoutes(api)
 	registerPreferencesRoutes(api)
 	registerSystemRoutes(api)
-
-	// Serve frontend static files from embedded assets
-	distFS, err := fs.Sub(assets, "frontend/dist")
-	if err == nil {
-		fileServer := http.FileServer(http.FS(distFS))
-		r.NoRoute(func(c *gin.Context) {
-			path := c.Request.URL.Path
-			f, ferr := http.FS(distFS).Open(path)
-			if ferr == nil {
-				f.Close()
-				fileServer.ServeHTTP(c.Writer, c.Request)
-				return
-			}
-			c.FileFromFS("/", http.FS(distFS))
-		})
-	}
 
 	return r
 }

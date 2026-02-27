@@ -7,6 +7,7 @@ import (
 	"embed"
 	"fmt"
 	"runtime"
+	"time"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/services"
 
@@ -113,7 +114,7 @@ func main() {
 			TitleBar: mac.TitleBarHiddenInset(),
 			About: &mac.AboutInfo{
 				Title:   fmt.Sprintf("%s %s", appName, version),
-				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © 2026",
+				Message: "A modern lightweight cross-platform Redis desktop client.\n\nCopyright © " + time.Now().Format("2006"),
 				Icon:    icon,
 			},
 			WebviewIsTransparent: false,

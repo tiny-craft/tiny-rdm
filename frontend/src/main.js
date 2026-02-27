@@ -11,6 +11,7 @@ import usePreferencesStore from 'stores/preferences.js'
 import { loadEnvironment } from '@/utils/platform.js'
 import { setupMonaco } from '@/utils/monaco.js'
 import { setupChart } from '@/utils/chart.js'
+import { isWeb } from './utils/platform.js'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -24,8 +25,8 @@ async function setupApp() {
     setupMonaco()
     setupChart()
     const prefStore = usePreferencesStore()
-    const isWebMode = import.meta.env.VITE_WEB === 'true'
-    if (!isWebMode) {
+    if (isWeb()) {
+        await prefStore.loadAppVersion()
         await prefStore.loadPreferences()
     }
     await setupDiscreteApi()

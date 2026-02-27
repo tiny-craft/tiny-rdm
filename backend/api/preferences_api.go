@@ -47,10 +47,6 @@ func registerPreferencesRoutes(rg *gin.RouterGroup) {
 		c.JSON(http.StatusOK, services.Preferences().GetBuildInDecoder())
 	})
 
-	g.GET("/version", func(c *gin.Context) {
-		c.JSON(http.StatusOK, services.Preferences().GetAppVersion())
-	})
-
 	g.GET("/check-update", func(c *gin.Context) {
 		c.JSON(http.StatusOK, services.Preferences().CheckForUpdate())
 	})

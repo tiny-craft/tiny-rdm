@@ -23,17 +23,15 @@ import ImportKeyDialog from '@/components/dialogs/ImportKeyDialog.vue'
 import { Info } from 'wailsjs/go/services/systemService.js'
 import DecoderDialog from '@/components/dialogs/DecoderDialog.vue'
 import { loadModule, trackEvent } from '@/utils/analytics.js'
+import { isWeb } from '@/utils/platform.js'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
 const i18n = useI18n()
 const initializing = ref(true)
 
-// Detect if running in web mode (VITE_WEB=true at build time)
-const isWebMode = import.meta.env.VITE_WEB === 'true'
-
 // Web-only: lazy load LoginPage to avoid importing websocket.js in desktop mode
-const LoginPage = isWebMode ? defineAsyncComponent(() => import('@/components/LoginPage.vue')) : null
+const LoginPage = isWeb() ? defineAsyncComponent(() => import('@/components/LoginPage.vue')) : null
 
 // Viewport management for mobile
 const setViewport = (mode) => {
@@ -57,7 +55,7 @@ const setViewport = (mode) => {
 }
 
 // Auth state (web mode only)
-const authChecking = ref(isWebMode) // desktop: false (skip), web: true (checking)
+const authChecking = ref(isWeb()) // desktop: false (skip), web: true (checking)
 const authenticated = ref(false)
 const authEnabled = ref(false)
 
@@ -82,33 +80,37 @@ const onLogin = async () => {
     // Reconnect WebSocket with auth cookie (dynamic import to avoid desktop issues)
     try {
         const runtime = await import('wailsjs/runtime/runtime.js')
-        if (runtime.ReconnectWebSocket) runtime.ReconnectWebSocket()
+        if (runtime.ReconnectWebSocket) {
+            runtime.ReconnectWebSocket()
+        }
     } catch {}
     // Capture login page choices before loadPreferences overwrites them
     const loginTheme = localStorage.getItem('rdm_login_theme')
     const loginLang = localStorage.getItem('rdm_login_lang')
     await initApp()
     // Sync login page choices to preferences
-    let needSave = false
+    let prefUpdated = false
     if (loginTheme && ['auto', 'light', 'dark'].includes(loginTheme)) {
         prefStore.general.theme = loginTheme
-        needSave = true
+        prefUpdated = true
     }
     if (loginLang) {
         const validLangs = ['auto', 'zh', 'tw', 'en', 'ja', 'ko', 'es', 'fr', 'ru', 'pt', 'tr']
         if (validLangs.includes(loginLang)) {
             prefStore.general.language = loginLang
             i18n.locale.value = prefStore.currentLanguage
-            needSave = true
+            prefUpdated = true
         }
     }
-    if (needSave) prefStore.savePreferences()
+    if (prefUpdated) {
+        prefStore.savePreferences()
+    }
 }
 
 const initApp = async () => {
     try {
         initializing.value = true
-        if (isWebMode) {
+        if (isWeb()) {
             const prefResult = await prefStore.loadPreferences()
             // If loadPreferences failed (e.g. 401 from expired session),
             // rdm:unauthorized event already fired → silently abort init
@@ -118,7 +120,7 @@ const initApp = async () => {
         await prefStore.loadFontList()
         await prefStore.loadBuildInDecoder()
         await connectionStore.initConnections()
-        if (prefStore.autoCheckUpdate) {
+        if (!isWeb() && prefStore.autoCheckUpdate) {
             prefStore.checkForUpdate()
         }
         const env = await Environment()
@@ -196,7 +198,7 @@ const onOrientationChange = () => {
 }
 
 onMounted(async () => {
-    if (isWebMode) {
+    if (isWeb()) {
         // Apply saved login theme before auth check to prevent flash
         const savedTheme = localStorage.getItem('rdm_login_theme')
         if (savedTheme && ['auto', 'light', 'dark'].includes(savedTheme)) {
@@ -225,7 +227,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    if (isWebMode) {
+    if (isWeb()) {
         window.removeEventListener('rdm:unauthorized', onUnauthorized)
         window.removeEventListener('orientationchange', onOrientationChange)
         window.removeEventListener('resize', onOrientationChange)
@@ -253,10 +255,10 @@ watch(
         :theme-overrides="prefStore.isDark ? darkThemeOverrides : themeOverrides"
         class="fill-height">
         <!-- Web mode: auth gate -->
-        <template v-if="isWebMode && authChecking">
+        <template v-if="isWeb() && authChecking">
             <div style="width: 100vw; height: 100vh"></div>
         </template>
-        <template v-else-if="isWebMode && authEnabled && !authenticated">
+        <template v-else-if="isWeb() && authEnabled && !authenticated">
             <component :is="LoginPage" @login="onLogin" />
         </template>
         <template v-else>

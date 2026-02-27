@@ -9,6 +9,7 @@ import { CloseCli, StartCli } from 'wailsjs/go/services/cliService.js'
 import usePreferencesStore from 'stores/preferences.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import wcwidth from 'wcwidth'
+import { isWeb } from '@/utils/platform.js'
 
 const props = defineProps({
     name: String,
@@ -96,7 +97,7 @@ onMounted(async () => {
     EventsOn(`cmd:output:${props.name}`, receiveTermOutput)
 
     // Wait for WebSocket with timeout (CLI needs it for real-time I/O, web mode only)
-    if (import.meta.env.VITE_WEB === 'true') {
+    if (isWeb()) {
         try {
             const { WaitForWebSocket } = await import('wailsjs/runtime/runtime.js')
             await Promise.race([

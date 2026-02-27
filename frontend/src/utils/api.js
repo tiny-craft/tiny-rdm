@@ -426,4 +426,12 @@ export async function SaveFile(title, defaultName, ext) {
     return { success: true, data: { path: '' } }
 }
 
+// ==================== Auth Service ====================
 
+export async function Login(username, password) {
+    return await post('/auth/login', { username, password })
+}
+
+export async function Logout() {
+    return await post('/auth/logout')
+}

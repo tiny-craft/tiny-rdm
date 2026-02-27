@@ -4,6 +4,10 @@ import { computed, h, onMounted, ref } from 'vue'
 import { NIcon, useThemeVars } from 'naive-ui'
 import iconUrl from '@/assets/images/icon.png'
 import usePreferencesStore from '@/stores/preferences.js'
+import LangIcon from '@/components/icons/Lang.vue'
+
+import { Login } from '@/utils/api.js'
+import { lang } from '@/langs/index.js'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
@@ -17,21 +21,18 @@ onMounted(() => {
     prefStore.general.theme = themeMode.value
 })
 
-const themeLabels = {
-    zh: { auto: '自动', light: '浅色', dark: '暗黑' },
-    tw: { auto: '自動', light: '淺色', dark: '暗黑' },
-    ja: { auto: '自動', light: 'ライト', dark: 'ダーク' },
-    ko: { auto: '자동', light: '라이트', dark: '다크' },
-    es: { auto: 'Auto', light: 'Claro', dark: 'Oscuro' },
-    fr: { auto: 'Auto', light: 'Clair', dark: 'Sombre' },
-    ru: { auto: 'Авто', light: 'Светлая', dark: 'Тёмная' },
-    pt: { auto: 'Auto', light: 'Claro', dark: 'Escuro' },
-    tr: { auto: 'Otomatik', light: 'Açık', dark: 'Koyu' },
-    en: { auto: 'Auto', light: 'Light', dark: 'Dark' },
+const getThemeLabels = (langKey) => {
+    const l = lang[langKey] || lang.en
+    const g = l.preferences?.general || {}
+    return {
+        auto: g.theme_auto || 'Auto',
+        light: g.theme_light || 'Light',
+        dark: g.theme_dark || 'Dark',
+    }
 }
 
 const themeOptions = computed(() => {
-    const labels = themeLabels[currentLang.value] || themeLabels.en
+    const labels = getThemeLabels(currentLang.value)
     return [
         { label: labels.light, key: 'light', icon: renderIcon('sun') },
         { label: labels.dark, key: 'dark', icon: renderIcon('moon') },
@@ -40,7 +41,7 @@ const themeOptions = computed(() => {
 })
 
 const currentThemeLabel = computed(() => {
-    const labels = themeLabels[currentLang.value] || themeLabels.en
+    const labels = getThemeLabels(currentLang.value)
     return labels[themeMode.value]
 })
 
@@ -53,24 +54,22 @@ const onThemeSelect = (key) => {
 
 // --- Language ---
 const LANG_KEY = 'rdm_login_lang'
-const langNames = {
-    zh: '简体中文', tw: '繁體中文', en: 'English', ja: '日本語', ko: '한국어',
-    es: 'Español', fr: 'Français', ru: 'Русский', pt: 'Português', tr: 'Türkçe',
-}
-const autoLabel = {
-    zh: '自动', tw: '自動', ja: '自動', ko: '자동', es: 'Auto',
-    fr: 'Auto', ru: 'Авто', pt: 'Auto', tr: 'Otomatik', en: 'Auto',
-}
+const langNames = Object.fromEntries(Object.entries(lang).map(([k, v]) => [k, v.name]))
+const autoLabel = Object.fromEntries(
+    Object.entries(lang).map(([k, v]) => [k, v.preferences?.general?.theme_auto || 'Auto']),
+)
 
 const detectSystemLang = () => {
     const sysLang = (navigator.language || '').toLowerCase()
-    if (sysLang.startsWith('zh-tw') || sysLang.startsWith('zh-hant')) return 'tw'
+    if (sysLang.startsWith('zh-tw') || sysLang.startsWith('zh-hant')) {
+        return 'tw'
+    }
     const prefix = sysLang.split('-')[0]
     return langNames[prefix] ? prefix : 'en'
 }
 
 const langSetting = ref(localStorage.getItem(LANG_KEY) || 'auto')
-const currentLang = computed(() => langSetting.value === 'auto' ? detectSystemLang() : langSetting.value)
+const currentLang = computed(() => (langSetting.value === 'auto' ? detectSystemLang() : langSetting.value))
 
 const langOptions = computed(() => [
     { label: autoLabel[currentLang.value] || 'Auto', key: 'auto' },
@@ -91,31 +90,88 @@ const onLangSelect = (key) => {
 }
 
 const SunSvg = {
-    render: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', width: '1em', height: '1em', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
-        h('circle', { cx: '12', cy: '12', r: '5' }),
-        h('path', { d: 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42' }),
-    ]),
+    render: () =>
+        h(
+            'svg',
+            {
+                xmlns: 'http://www.w3.org/2000/svg',
+                viewBox: '0 0 24 24',
+                width: '1em',
+                height: '1em',
+                fill: 'none',
+                stroke: 'currentColor',
+                'stroke-width': '2',
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+            },
+            [
+                h('circle', { cx: '12', cy: '12', r: '5' }),
+                h('path', {
+                    d: 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42',
+                }),
+            ],
+        ),
 }
 const MoonSvg = {
-    render: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', width: '1em', height: '1em', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
-        h('path', { d: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z' }),
-    ]),
+    render: () =>
+        h(
+            'svg',
+            {
+                xmlns: 'http://www.w3.org/2000/svg',
+                viewBox: '0 0 24 24',
+                width: '1em',
+                height: '1em',
+                fill: 'none',
+                stroke: 'currentColor',
+                'stroke-width': '2',
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+            },
+            [h('path', { d: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z' })],
+        ),
 }
 const AutoSvg = {
-    render: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', width: '1em', height: '1em', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
-        h('circle', { cx: '12', cy: '12', r: '10' }),
-        h('path', { d: 'M12 2a10 10 0 0 1 0 20V2' }),
-    ]),
+    render: () =>
+        h(
+            'svg',
+            {
+                xmlns: 'http://www.w3.org/2000/svg',
+                viewBox: '0 0 24 24',
+                width: '1em',
+                height: '1em',
+                fill: 'none',
+                stroke: 'currentColor',
+                'stroke-width': '2',
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+            },
+            [h('circle', { cx: '12', cy: '12', r: '10' }), h('path', { d: 'M12 2a10 10 0 0 1 0 20V2' })],
+        ),
 }
 const LangSvg = {
-    render: () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', width: '1em', height: '1em', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
-        h('path', { d: 'M5 8l6 6' }),
-        h('path', { d: 'M4 14l6-6 2-3' }),
-        h('path', { d: 'M2 5h12' }),
-        h('path', { d: 'M7 2h1' }),
-        h('path', { d: 'M22 22l-5-10-5 10' }),
-        h('path', { d: 'M14 18h6' }),
-    ]),
+    render: () =>
+        h(
+            'svg',
+            {
+                xmlns: 'http://www.w3.org/2000/svg',
+                viewBox: '0 0 24 24',
+                width: '1em',
+                height: '1em',
+                fill: 'none',
+                stroke: 'currentColor',
+                'stroke-width': '2',
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+            },
+            [
+                h('path', { d: 'M5 8l6 6' }),
+                h('path', { d: 'M4 14l6-6 2-3' }),
+                h('path', { d: 'M2 5h12' }),
+                h('path', { d: 'M7 2h1' }),
+                h('path', { d: 'M22 22l-5-10-5 10' }),
+                h('path', { d: 'M14 18h6' }),
+            ],
+        ),
 }
 
 const iconMap = { sun: SunSvg, moon: MoonSvg, auto: AutoSvg, lang: LangSvg }
@@ -123,16 +179,116 @@ const renderIcon = (name) => () => h(NIcon, null, { default: () => h(iconMap[nam
 
 // --- i18n texts ---
 const langTexts = {
-    zh: { title: '登录', username: '用户名', password: '密码', usernamePh: '请输入用户名', passwordPh: '请输入密码', submit: '登 录', tooMany: '尝试次数过多，请稍后再试', failed: '用户名或密码错误', network: '网络错误' },
-    tw: { title: '登入', username: '使用者名稱', password: '密碼', usernamePh: '請輸入使用者名稱', passwordPh: '請輸入密碼', submit: '登 入', tooMany: '嘗試次數過多，請稍後再試', failed: '使用者名稱或密碼錯誤', network: '網路錯誤' },
-    ja: { title: 'ログイン', username: 'ユーザー名', password: 'パスワード', usernamePh: 'ユーザー名を入力', passwordPh: 'パスワードを入力', submit: 'ログイン', tooMany: '試行回数が多すぎます', failed: 'ユーザー名またはパスワードが正しくありません', network: 'ネットワークエラー' },
-    ko: { title: '로그인', username: '사용자 이름', password: '비밀번호', usernamePh: '사용자 이름 입력', passwordPh: '비밀번호 입력', submit: '로그인', tooMany: '시도 횟수 초과, 잠시 후 다시 시도하세요', failed: '사용자 이름 또는 비밀번호가 올바르지 않습니다', network: '네트워크 오류' },
-    es: { title: 'Iniciar sesión', username: 'Usuario', password: 'Contraseña', usernamePh: 'Ingrese usuario', passwordPh: 'Ingrese contraseña', submit: 'Entrar', tooMany: 'Demasiados intentos, intente más tarde', failed: 'Credenciales inválidas', network: 'Error de red' },
-    fr: { title: 'Connexion', username: "Nom d'utilisateur", password: 'Mot de passe', usernamePh: "Entrez le nom d'utilisateur", passwordPh: 'Entrez le mot de passe', submit: 'Se connecter', tooMany: 'Trop de tentatives, réessayez plus tard', failed: 'Identifiants invalides', network: 'Erreur réseau' },
-    ru: { title: 'Вход', username: 'Имя пользователя', password: 'Пароль', usernamePh: 'Введите имя пользователя', passwordPh: 'Введите пароль', submit: 'Войти', tooMany: 'Слишком много попыток, попробуйте позже', failed: 'Неверные учётные данные', network: 'Ошибка сети' },
-    pt: { title: 'Entrar', username: 'Usuário', password: 'Senha', usernamePh: 'Digite o usuário', passwordPh: 'Digite a senha', submit: 'Entrar', tooMany: 'Muitas tentativas, tente novamente mais tarde', failed: 'Credenciais inválidas', network: 'Erro de rede' },
-    tr: { title: 'Giriş', username: 'Kullanıcı adı', password: 'Şifre', usernamePh: 'Kullanıcı adını girin', passwordPh: 'Şifreyi girin', submit: 'Giriş Yap', tooMany: 'Çok fazla deneme, lütfen daha sonra tekrar deneyin', failed: 'Geçersiz kimlik bilgileri', network: 'Ağ hatası' },
-    en: { title: 'Sign In', username: 'Username', password: 'Password', usernamePh: 'Enter username', passwordPh: 'Enter password', submit: 'Sign In', tooMany: 'Too many attempts, please try later', failed: 'Invalid credentials', network: 'Network error' },
+    zh: {
+        title: '登录',
+        username: '用户名',
+        password: '密码',
+        usernamePh: '请输入用户名',
+        passwordPh: '请输入密码',
+        submit: '登 录',
+        tooMany: '尝试次数过多，请稍后再试',
+        failed: '用户名或密码错误',
+        network: '网络错误',
+    },
+    tw: {
+        title: '登入',
+        username: '使用者名稱',
+        password: '密碼',
+        usernamePh: '請輸入使用者名稱',
+        passwordPh: '請輸入密碼',
+        submit: '登 入',
+        tooMany: '嘗試次數過多，請稍後再試',
+        failed: '使用者名稱或密碼錯誤',
+        network: '網路錯誤',
+    },
+    ja: {
+        title: 'ログイン',
+        username: 'ユーザー名',
+        password: 'パスワード',
+        usernamePh: 'ユーザー名を入力',
+        passwordPh: 'パスワードを入力',
+        submit: 'ログイン',
+        tooMany: '試行回数が多すぎます',
+        failed: 'ユーザー名またはパスワードが正しくありません',
+        network: 'ネットワークエラー',
+    },
+    ko: {
+        title: '로그인',
+        username: '사용자 이름',
+        password: '비밀번호',
+        usernamePh: '사용자 이름 입력',
+        passwordPh: '비밀번호 입력',
+        submit: '로그인',
+        tooMany: '시도 횟수 초과, 잠시 후 다시 시도하세요',
+        failed: '사용자 이름 또는 비밀번호가 올바르지 않습니다',
+        network: '네트워크 오류',
+    },
+    es: {
+        title: 'Iniciar sesión',
+        username: 'Usuario',
+        password: 'Contraseña',
+        usernamePh: 'Ingrese usuario',
+        passwordPh: 'Ingrese contraseña',
+        submit: 'Entrar',
+        tooMany: 'Demasiados intentos, intente más tarde',
+        failed: 'Credenciales inválidas',
+        network: 'Error de red',
+    },
+    fr: {
+        title: 'Connexion',
+        username: "Nom d'utilisateur",
+        password: 'Mot de passe',
+        usernamePh: "Entrez le nom d'utilisateur",
+        passwordPh: 'Entrez le mot de passe',
+        submit: 'Se connecter',
+        tooMany: 'Trop de tentatives, réessayez plus tard',
+        failed: 'Identifiants invalides',
+        network: 'Erreur réseau',
+    },
+    ru: {
+        title: 'Вход',
+        username: 'Имя пользователя',
+        password: 'Пароль',
+        usernamePh: 'Введите имя пользователя',
+        passwordPh: 'Введите пароль',
+        submit: 'Войти',
+        tooMany: 'Слишком много попыток, попробуйте позже',
+        failed: 'Неверные учётные данные',
+        network: 'Ошибка сети',
+    },
+    pt: {
+        title: 'Entrar',
+        username: 'Usuário',
+        password: 'Senha',
+        usernamePh: 'Digite o usuário',
+        passwordPh: 'Digite a senha',
+        submit: 'Entrar',
+        tooMany: 'Muitas tentativas, tente novamente mais tarde',
+        failed: 'Credenciais inválidas',
+        network: 'Erro de rede',
+    },
+    tr: {
+        title: 'Giriş',
+        username: 'Kullanıcı adı',
+        password: 'Şifre',
+        usernamePh: 'Kullanıcı adını girin',
+        passwordPh: 'Şifreyi girin',
+        submit: 'Giriş Yap',
+        tooMany: 'Çok fazla deneme, lütfen daha sonra tekrar deneyin',
+        failed: 'Geçersiz kimlik bilgileri',
+        network: 'Ağ hatası',
+    },
+    en: {
+        title: 'Sign In',
+        username: 'Username',
+        password: 'Password',
+        usernamePh: 'Enter username',
+        passwordPh: 'Enter password',
+        submit: 'Sign In',
+        tooMany: 'Too many attempts, please try later',
+        failed: 'Invalid credentials',
+        network: 'Network error',
+    },
 }
 
 const t = computed(() => langTexts[currentLang.value] || langTexts.en)
@@ -142,17 +298,6 @@ const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
-const appVersion = ref('')
-
-;(async () => {
-    try {
-        const resp = await fetch('/api/version')
-        const result = await resp.json()
-        if (result.success && result.data?.version) {
-            appVersion.value = result.data.version
-        }
-    } catch {}
-})()
 
 const canSubmit = computed(() => username.value.length > 0 && password.value.length > 0)
 
@@ -162,15 +307,15 @@ const handleLogin = async () => {
     errorMsg.value = ''
 
     try {
-        const resp = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ username: username.value, password: password.value }),
-        })
-        const data = await resp.json()
-        if (resp.status === 429) { errorMsg.value = t.value.tooMany; return }
-        if (!data.success) { errorMsg.value = t.value.failed; return }
+        const { msg, success = false } = await Login(username.value, password.value)
+        if (msg === 'too_many_attempts') {
+            errorMsg.value = t.value.tooMany
+            return
+        }
+        if (!success) {
+            errorMsg.value = t.value.failed
+            return
+        }
         emit('login')
     } catch (e) {
         errorMsg.value = t.value.network
@@ -228,21 +373,27 @@ const handleLogin = async () => {
             <div class="login-toolbar">
                 <n-dropdown :options="langOptions" size="small" trigger="hover" @select="onLangSelect">
                     <span class="toolbar-btn">
-                        <n-icon :component="LangSvg" :size="14" />
+                        <n-icon :component="LangIcon" :size="14" />
                         <span>{{ currentLangLabel }}</span>
                     </span>
                 </n-dropdown>
                 <n-divider style="margin: 0 4px" vertical />
                 <n-dropdown :options="themeOptions" size="small" trigger="hover" @select="onThemeSelect">
                     <span class="toolbar-btn">
-                        <n-icon :component="themeMode === 'dark' ? MoonSvg : themeMode === 'light' ? SunSvg : AutoSvg" :size="14" />
+                        <n-icon
+                            :component="themeMode === 'dark' ? MoonSvg : themeMode === 'light' ? SunSvg : AutoSvg"
+                            :size="14" />
                         <span>{{ currentThemeLabel }}</span>
                     </span>
                 </n-dropdown>
-                <template v-if="appVersion">
+                <template v-if="prefStore.appVersion">
                     <n-divider style="margin: 0 4px" vertical />
-                    <a class="toolbar-btn toolbar-link" href="https://github.com/tiny-craft/tiny-rdm" rel="noopener noreferrer" target="_blank">
-                        {{ appVersion }}
+                    <a
+                        class="toolbar-btn toolbar-link"
+                        href="https://github.com/tiny-craft/tiny-rdm"
+                        rel="noopener noreferrer"
+                        target="_blank">
+                        {{ prefStore.appVersion }}
                     </a>
                 </template>
             </div>
@@ -317,7 +468,9 @@ const handleLogin = async () => {
     cursor: pointer;
     padding: 2px 6px;
     border-radius: 4px;
-    transition: color 0.2s, background-color 0.2s;
+    transition:
+        color 0.2s,
+        background-color 0.2s;
     user-select: none;
     white-space: nowrap;
 
