@@ -92,7 +92,9 @@ const initApp = async () => {
             const prefResult = await prefStore.loadPreferences()
             // If loadPreferences failed (e.g. 401 from expired session),
             // rdm:unauthorized event already fired → silently abort init
-            if (prefResult === false || !authenticated.value) return
+            if (prefResult === false || !authenticated.value) {
+                return
+            }
             i18n.locale.value = prefStore.currentLanguage
         }
         await prefStore.loadFontList()

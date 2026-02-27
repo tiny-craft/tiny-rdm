@@ -27,8 +27,8 @@ async function setupApp() {
     const prefStore = usePreferencesStore()
     if (isWeb()) {
         await prefStore.loadAppVersion()
-        await prefStore.loadPreferences()
     }
+    await prefStore.loadPreferences()
     await setupDiscreteApi()
     app.config.errorHandler = (err, instance, info) => {
         // TODO: add "send error message to author" later
