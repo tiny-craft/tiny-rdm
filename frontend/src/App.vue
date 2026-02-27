@@ -34,27 +34,6 @@ const initializing = ref(true)
 // Web-only: lazy load LoginPage to avoid importing websocket.js in desktop mode
 const LoginPage = isWeb() ? defineAsyncComponent(() => import('@/components/LoginPage.vue')) : null
 
-// Viewport management for mobile
-const setViewport = (mode) => {
-    const meta = document.querySelector('meta[name="viewport"]')
-    if (!meta) return
-    if (mode === 'mobile') {
-        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
-    } else {
-        const ratio = (window.innerWidth || screen.width) / (window.innerHeight || screen.height)
-        const sh = window.innerHeight || screen.height
-        let vw
-        if (ratio < 1) {
-            vw = 680
-        } else if (sh < 500) {
-            vw = 1280
-        } else {
-            vw = 1024
-        }
-        meta.setAttribute('content', `width=${vw}, user-scalable=yes`)
-    }
-}
-
 // Auth state (web mode only)
 const authChecking = ref(isWeb()) // desktop: false (skip), web: true (checking)
 const authenticated = ref(false)
@@ -77,7 +56,6 @@ const checkAuth = async () => {
 
 const onLogin = async () => {
     authenticated.value = true
-    setViewport('desktop')
     // Reconnect WebSocket with auth cookie (dynamic import to avoid desktop issues)
     try {
         const runtime = await import('wailsjs/runtime/runtime.js')
@@ -186,15 +164,7 @@ const initApp = async () => {
 const onUnauthorized = () => {
     if (authEnabled.value) {
         authenticated.value = false
-        setViewport('mobile')
     }
-}
-
-let resizeTimer = null
-const onOrientationChange = () => {
-    if (!authenticated.value) return
-    clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(() => setViewport('desktop'), 200)
 }
 
 onMounted(async () => {
@@ -205,14 +175,10 @@ onMounted(async () => {
             prefStore.general.theme = savedTheme
         }
         window.addEventListener('rdm:unauthorized', onUnauthorized)
-        window.addEventListener('orientationchange', onOrientationChange)
-        window.addEventListener('resize', onOrientationChange)
         await checkAuth()
         if (authEnabled.value && !authenticated.value) {
             // Not authenticated — show login page, do NOT call any API
-            setViewport('mobile')
         } else {
-            setViewport('desktop')
             // Connect WebSocket before initApp
             try {
                 const runtime = await import('wailsjs/runtime/runtime.js')
@@ -229,8 +195,6 @@ onMounted(async () => {
 onUnmounted(() => {
     if (isWeb()) {
         window.removeEventListener('rdm:unauthorized', onUnauthorized)
-        window.removeEventListener('orientationchange', onOrientationChange)
-        window.removeEventListener('resize', onOrientationChange)
     }
 })
 
