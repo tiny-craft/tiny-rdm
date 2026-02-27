@@ -24,6 +24,7 @@ import { Info } from 'wailsjs/go/services/systemService.js'
 import DecoderDialog from '@/components/dialogs/DecoderDialog.vue'
 import { loadModule, trackEvent } from '@/utils/analytics.js'
 import { isWeb } from '@/utils/platform.js'
+import { STORAGE_LANG_KEY, STORAGE_THEME_KEY } from '@/consts/localstorage_key.js'
 
 const prefStore = usePreferencesStore()
 const connectionStore = useConnectionStore()
@@ -85,8 +86,8 @@ const onLogin = async () => {
         }
     } catch {}
     // Capture login page choices before loadPreferences overwrites them
-    const loginTheme = localStorage.getItem('rdm_login_theme')
-    const loginLang = localStorage.getItem('rdm_login_lang')
+    const loginTheme = localStorage.getItem(STORAGE_THEME_KEY)
+    const loginLang = localStorage.getItem(STORAGE_LANG_KEY)
     await initApp()
     // Sync login page choices to preferences
     let prefUpdated = false
@@ -199,7 +200,7 @@ const onOrientationChange = () => {
 onMounted(async () => {
     if (isWeb()) {
         // Apply saved login theme before auth check to prevent flash
-        const savedTheme = localStorage.getItem('rdm_login_theme')
+        const savedTheme = localStorage.getItem(STORAGE_THEME_KEY)
         if (savedTheme && prefStore.allThemes.includes(savedTheme)) {
             prefStore.general.theme = savedTheme
         }

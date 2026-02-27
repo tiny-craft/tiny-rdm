@@ -12,6 +12,7 @@ import { Login } from '@/utils/api.js'
 import { lang } from '@/langs/index.js'
 import { useI18n } from 'vue-i18n'
 import { useRender } from '@/utils/render.js'
+import { STORAGE_LANG_KEY, STORAGE_THEME_KEY } from '@/consts/localstorage_key.js'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
@@ -19,8 +20,7 @@ const i18n = useI18n()
 const emit = defineEmits(['login'])
 
 // --- Theme ---
-const THEME_KEY = 'rdm_login_theme'
-const themeMode = ref(localStorage.getItem(THEME_KEY) || 'auto')
+const themeMode = ref(localStorage.getItem(STORAGE_THEME_KEY) || 'auto')
 
 onMounted(() => {
     prefStore.general.theme = themeMode.value
@@ -56,11 +56,10 @@ const onThemeSelect = (key) => {
     }
     themeMode.value = key
     prefStore.general.theme = key
-    localStorage.setItem(THEME_KEY, key)
+    localStorage.setItem(STORAGE_THEME_KEY, key)
 }
 
 // --- Language ---
-const LANG_KEY = 'rdm_login_lang'
 const langNames = Object.fromEntries(Object.entries(lang).map(([k, v]) => [k, v.name]))
 const autoLabel = Object.fromEntries(
     Object.entries(lang).map(([k, v]) => [k, v.preferences?.general?.theme_auto || 'Auto']),
@@ -75,7 +74,7 @@ const detectSystemLang = () => {
     return langNames[prefix] ? prefix : 'en'
 }
 
-const langSetting = ref(localStorage.getItem(LANG_KEY) || 'auto')
+const langSetting = ref(localStorage.getItem(STORAGE_LANG_KEY) || 'auto')
 const currentLang = computed(() => (langSetting.value === 'auto' ? detectSystemLang() : langSetting.value))
 
 const langOptions = computed(() => [
@@ -94,7 +93,7 @@ const onLangSelect = (key) => {
         return
     }
     langSetting.value = key
-    localStorage.setItem(LANG_KEY, key)
+    localStorage.setItem(STORAGE_LANG_KEY, key)
 }
 
 const render = useRender()
