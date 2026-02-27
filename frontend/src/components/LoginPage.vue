@@ -1,14 +1,17 @@
 <script setup>
-// --- Render icon helper for dropdown items ---
-import { computed, h, onMounted, ref, watch } from 'vue'
-import { NIcon, useThemeVars } from 'naive-ui'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useThemeVars } from 'naive-ui'
 import iconUrl from '@/assets/images/icon.png'
 import usePreferencesStore from '@/stores/preferences.js'
 import LangIcon from '@/components/icons/Lang.vue'
+import Sun from '@/components/icons/Sun.vue'
+import Moon from '@/components/icons/Moon.vue'
+import ThemeAuto from '@/components/icons/ThemeAuto.vue'
 
 import { Login } from '@/utils/api.js'
 import { lang } from '@/langs/index.js'
 import { useI18n } from 'vue-i18n'
+import { useRender } from '@/utils/render.js'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
@@ -36,9 +39,9 @@ const getThemeLabels = (langKey) => {
 const themeOptions = computed(() => {
     const labels = getThemeLabels(currentLang.value)
     return [
-        { label: labels.light, key: 'light', icon: renderIcon('sun') },
-        { label: labels.dark, key: 'dark', icon: renderIcon('moon') },
-        { label: labels.auto, key: 'auto', icon: renderIcon('auto') },
+        { label: labels.light, key: 'light', icon: Sun },
+        { label: labels.dark, key: 'dark', icon: Moon },
+        { label: labels.auto, key: 'auto', icon: ThemeAuto },
     ]
 })
 
@@ -95,68 +98,7 @@ const onLangSelect = (key) => {
     localStorage.setItem(LANG_KEY, key)
 }
 
-const SunSvg = {
-    render: () =>
-        h(
-            'svg',
-            {
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 24 24',
-                width: '1em',
-                height: '1em',
-                fill: 'none',
-                stroke: 'currentColor',
-                'stroke-width': '2',
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
-            },
-            [
-                h('circle', { cx: '12', cy: '12', r: '5' }),
-                h('path', {
-                    d: 'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42',
-                }),
-            ],
-        ),
-}
-const MoonSvg = {
-    render: () =>
-        h(
-            'svg',
-            {
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 24 24',
-                width: '1em',
-                height: '1em',
-                fill: 'none',
-                stroke: 'currentColor',
-                'stroke-width': '2',
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
-            },
-            [h('path', { d: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z' })],
-        ),
-}
-const AutoSvg = {
-    render: () =>
-        h(
-            'svg',
-            {
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 24 24',
-                width: '1em',
-                height: '1em',
-                fill: 'none',
-                stroke: 'currentColor',
-                'stroke-width': '2',
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
-            },
-            [h('circle', { cx: '12', cy: '12', r: '10' }), h('path', { d: 'M12 2a10 10 0 0 1 0 20V2' })],
-        ),
-}
-
-const iconMap = { sun: SunSvg, moon: MoonSvg, auto: AutoSvg }
-const renderIcon = (name) => () => h(NIcon, null, { default: () => h(iconMap[name]) })
+const render = useRender()
 
 // --- i18n ---
 watch(
@@ -252,10 +194,15 @@ const handleLogin = async () => {
                     </span>
                 </n-dropdown>
                 <n-divider style="margin: 0 4px" vertical />
-                <n-dropdown :options="themeOptions" size="small" trigger="hover" @select="onThemeSelect">
+                <n-dropdown
+                    :options="themeOptions"
+                    :render-icon="({ icon }) => render.renderIcon(icon)"
+                    size="small"
+                    trigger="hover"
+                    @select="onThemeSelect">
                     <span class="toolbar-btn">
                         <n-icon
-                            :component="themeMode === 'dark' ? MoonSvg : themeMode === 'light' ? SunSvg : AutoSvg"
+                            :component="themeMode === 'dark' ? Moon : themeMode === 'light' ? Sun : ThemeAuto"
                             :size="14" />
                         <span>{{ currentThemeLabel }}</span>
                     </span>
