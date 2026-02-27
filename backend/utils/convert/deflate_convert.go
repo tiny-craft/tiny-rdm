@@ -2,9 +2,10 @@ package convutil
 
 import (
 	"bytes"
-	"github.com/klauspost/compress/flate"
 	"io"
 	"strings"
+
+	"github.com/klauspost/compress/flate"
 )
 
 type DeflateConvert struct{}

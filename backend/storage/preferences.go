@@ -2,13 +2,14 @@ package storage
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"log"
 	"reflect"
 	"strings"
 	"sync"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
+
+	"gopkg.in/yaml.v3"
 )
 
 type PreferencesStorage struct {

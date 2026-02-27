@@ -2,6 +2,7 @@ package convutil
 
 import (
 	"encoding/json"
+
 	"github.com/vmihailenco/msgpack/v5"
 )
 

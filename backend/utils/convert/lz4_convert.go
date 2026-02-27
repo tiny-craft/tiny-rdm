@@ -2,8 +2,9 @@ package convutil
 
 import (
 	"bytes"
-	"github.com/pierrec/lz4/v4"
 	"io"
+
+	"github.com/pierrec/lz4/v4"
 )
 
 type LZ4Convert struct{}

@@ -2,9 +2,10 @@ package convutil
 
 import (
 	"bytes"
-	"github.com/andybalholm/brotli"
 	"io"
 	"strings"
+
+	"github.com/andybalholm/brotli"
 )
 
 type BrotliConvert struct{}

@@ -1,9 +1,10 @@
 package convutil
 
 import (
-	"github.com/vrischmann/userdir"
 	"os"
 	"path"
+
+	"github.com/vrischmann/userdir"
 )
 
 func writeExecuteFile(content []byte, filename string) (string, error) {

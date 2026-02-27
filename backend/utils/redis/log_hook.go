@@ -3,11 +3,12 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type execCallback func(string, int64)

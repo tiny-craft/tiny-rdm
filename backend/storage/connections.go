@@ -2,11 +2,12 @@ package storage
 
 import (
 	"errors"
-	"gopkg.in/yaml.v3"
 	"slices"
 	"sync"
 	"tinyrdm/backend/consts"
 	"tinyrdm/backend/types"
+
+	"gopkg.in/yaml.v3"
 )
 
 type ConnectionsStorage struct {

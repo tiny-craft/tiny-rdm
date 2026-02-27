@@ -2,9 +2,10 @@ package convutil
 
 import (
 	"bytes"
-	"github.com/klauspost/compress/gzip"
 	"io"
 	"strings"
+
+	"github.com/klauspost/compress/gzip"
 )
 
 type GZipConvert struct{}

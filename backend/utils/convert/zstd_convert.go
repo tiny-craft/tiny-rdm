@@ -2,9 +2,10 @@ package convutil
 
 import (
 	"bytes"
-	"github.com/klauspost/compress/zstd"
 	"io"
 	"strings"
+
+	"github.com/klauspost/compress/zstd"
 )
 
 type ZStdConvert struct{}

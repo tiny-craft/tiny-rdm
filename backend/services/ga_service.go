@@ -3,12 +3,13 @@ package services
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
 	"runtime"
 	"strings"
 	"sync"
 	"tinyrdm/backend/storage"
+
+	"github.com/google/uuid"
 )
 
 // google analytics service
