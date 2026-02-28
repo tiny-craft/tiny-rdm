@@ -14,39 +14,42 @@ RUN npm run build
 # ============================================================
 # Stage 2: Build Go backend (web mode)
 # ============================================================
-FROM golang:1.24-alpine AS backend-builder
+FROM golang:1.25-alpine AS backend-builder
 
 RUN apk add --no-cache gcc musl-dev git
 
 WORKDIR /app
 COPY go.mod go.sum ./
 ENV GOPROXY=https://goproxy.cn,https://goproxy.io,direct
-ENV GOFLAGS=-mod=mod
 
 COPY backend/ ./backend/
-COPY main.go main_web.go ./
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+COPY main_web.go ./
 
-RUN go mod tidy
-RUN CGO_ENABLED=0 GOOS=linux go build -tags web -ldflags "-s -w -X main.version=1.2.6" -o /app/tinyrdm .
+RUN CGO_ENABLED=0 GOOS=linux GOFLAGS="-mod=mod" go build -tags web -ldflags "-s -w -X main.version=1.2.6" -o /app/tinyrdm-server .
 
 # ============================================================
-# Stage 3: Runtime
+# Stage 3: Runtime (nginx + Go backend)
 # ============================================================
 FROM alpine:3.21
 
-RUN apk add --no-cache ca-certificates tzdata fontconfig font-noto font-noto-cjk
+RUN apk add --no-cache ca-certificates tzdata fontconfig font-noto font-noto-cjk nginx
 
+# Frontend static files
+COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
+
+# Nginx config
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+
+# Go backend binary
 WORKDIR /app
-COPY --from=backend-builder /app/tinyrdm .
+COPY --from=backend-builder /app/tinyrdm-server .
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8088
+EXPOSE 80
 
 ENV PORT=8088
 ENV GIN_MODE=release
 ENV XDG_CONFIG_HOME=/app
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["./tinyrdm"]

@@ -4,7 +4,7 @@ services:
     container_name: tinyrdm
     restart: unless-stopped
     ports:
-      - "8088:8088"
+      - "8088:80"
     environment:
       - PORT=8088
       - GIN_MODE=release

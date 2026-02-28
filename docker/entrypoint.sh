@@ -1,10 +1,8 @@
 #!/bin/sh
 set -e
 
-# Pass through environment variables
-# PORT - HTTP listen port (default: 8088)
-# REDIS_HOST - default Redis host for auto-connect (optional)
-# REDIS_PORT - default Redis port (optional)
-# REDIS_PASSWORD - default Redis password (optional)
+# Start nginx in background (serves frontend + reverse proxy)
+nginx
 
-exec "$@"
+# Start Go backend in foreground
+exec ./tinyrdm-server
