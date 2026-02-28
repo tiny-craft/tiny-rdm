@@ -13,10 +13,10 @@
     "minute": "Minuto(s)",
     "hour": "Hora(s)",
     "day": "Dia(s)",
-    "unit_day": "D",
-    "unit_hour": "H",
-    "unit_minute": "M",
-    "unit_second": "S",
+    "unit_day": "d",
+    "unit_hour": "h",
+    "unit_minute": "m",
+    "unit_second": "s",
     "all": "Tudo",
     "key": "Chave",
     "value": "Valor",
@@ -395,8 +395,8 @@
     "welcome": {
       "title": "Bem-vindo ao Tiny RDM!",
       "content": "Para fornecer uma melhor experiência ao usuário, o Tiny RDM coleta alguns dados anônimos para ajudar a otimizar o software e melhorar a experiência do usuário. Fique tranquilo, isso não envolve suas informações de privacidade pessoal.\n\nSe você tiver alguma preocupação, pode desativar esse recurso de coleta de dados a qualquer momento indo em Preferências. Se tiver alguma dúvida, sinta-se à vontade para entrar em contato com o desenvolvedor. Espero que o Tiny RDM possa se tornar um assistente útil para você!",
-      "accept": "Help Improve",
-      "reject": "Reject"
+      "accept": "Ajudar a Melhorar",
+      "reject": "Rejeitar"
     },
     "about": {
       "source": "Código Fonte",

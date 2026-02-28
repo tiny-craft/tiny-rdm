@@ -161,7 +161,7 @@
       "cli": "コンソール",
       "slow_log": "スロー ログ",
       "cmd_monitor": "コマンドのモニタリング",
-      "pub_message": "パブ/サブ"
+      "pub_message": "パブリッシュ/サブスクライブ"
     }
   },
   "ribbon": {
@@ -432,7 +432,7 @@
     "exec_time": "実行時間",
     "server": "サーバー",
     "cmd": "コマンド",
-    "cost_time": "時間",
+    "cost_time": "所要時間",
     "refresh": "すぐに更新"
   },
   "status": {
@@ -460,7 +460,7 @@
     "exec_time": "実行時間",
     "client": "クライアント",
     "cmd": "コマンド",
-    "cost_time": "時間"
+    "cost_time": "所要時間"
   },
   "monitor": {
     "title": "コマンドのモニタリング",
@@ -476,9 +476,9 @@
   },
   "pubsub": {
     "title": "パブ/サブ",
-    "publish": "公開",
-    "subscribe": "購読を開始",
-    "unsubscribe": "購読を解除",
+    "publish": "パブリッシュ",
+    "subscribe": "サブスクライブ開始",
+    "unsubscribe": "サブスクライブ解除",
     "clear": "メッセージをクリア",
     "time": "時間",
     "filter": "フィルター",
