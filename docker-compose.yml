@@ -1,0 +1,15 @@
+services:
+  tinyrdm:
+    image: ghcr.io/tiny-craft/tiny-rdm:latest
+    container_name: tinyrdm
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      - PORT=8088
+      - GIN_MODE=release
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=tinyrdm
+      # - SESSION_TTL=24h
+    volumes:
+      - ./data:/app/tinyrdm
