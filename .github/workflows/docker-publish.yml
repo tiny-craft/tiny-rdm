@@ -67,5 +67,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          provenance: false
+          sbom: false
           build-args: |
             APP_VERSION=${{ steps.version.outputs.value }}
