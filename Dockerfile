@@ -24,7 +24,8 @@ RUN GOFLAGS="-mod=mod" go mod download
 COPY backend/ ./backend/
 COPY main_web.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux GOFLAGS="-mod=mod" go build -tags web -ldflags "-s -w -X main.version=1.2.6" -o /app/tinyrdm-server .
+ARG APP_VERSION=1.0.0
+RUN CGO_ENABLED=0 GOOS=linux GOFLAGS="-mod=mod" go build -tags web -ldflags "-s -w -X main.version=${APP_VERSION}" -o /app/tinyrdm-server .
 
 # ============================================================
 # Stage 3: Runtime (nginx + Go backend)
