@@ -1,4 +1,5 @@
 name: Release Linux App
+run-name: ${{ github.event.release.tag_name || github.event.inputs.tag }}
 
 on:
   release:
