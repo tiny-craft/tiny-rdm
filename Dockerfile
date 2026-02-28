@@ -46,7 +46,7 @@ COPY --from=backend-builder /app/tinyrdm-server .
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8086
 
 ENV PORT=8088
 ENV GIN_MODE=release
