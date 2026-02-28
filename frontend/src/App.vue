@@ -171,6 +171,13 @@ const onUnauthorized = () => {
 
 onMounted(async () => {
     if (isWeb()) {
+        // Force desktop layout on mobile (web only, desktop WebView unaffected)
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        if (isMobile) {
+            const meta = document.querySelector('meta[name="viewport"]')
+            if (meta) meta.setAttribute('content', 'width=1280, user-scalable=yes')
+        }
+
         // Apply saved login theme before auth check to prevent flash
         const savedTheme = localStorage.getItem(STORAGE_THEME_KEY)
         if (savedTheme && prefStore.allThemes.includes(savedTheme)) {
