@@ -1,11 +1,11 @@
 # ============================================================
 # Stage 1: Build frontend
 # ============================================================
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 COPY frontend/ ./
 ENV NODE_OPTIONS=--max-old-space-size=4096
 ENV VITE_WEB=true
@@ -16,11 +16,10 @@ RUN npm run build
 # ============================================================
 FROM golang:1.25-alpine AS backend-builder
 
-RUN apk add --no-cache gcc musl-dev git
-
 WORKDIR /app
 COPY go.mod go.sum ./
 ENV GOPROXY=https://goproxy.cn,https://goproxy.io,direct
+RUN GOFLAGS="-mod=mod" go mod download
 
 COPY backend/ ./backend/
 COPY main_web.go ./
@@ -32,7 +31,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOFLAGS="-mod=mod" go build -tags web -ldflags "-s 
 # ============================================================
 FROM alpine:3.21
 
-RUN apk add --no-cache ca-certificates tzdata fontconfig font-noto font-noto-cjk nginx
+RUN apk add --no-cache ca-certificates tzdata nginx \
+    && rm -rf /var/cache/apk/* /tmp/*
 
 # Frontend static files
 COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
