@@ -4,6 +4,8 @@ import (
 	"os"
 	"path"
 
+	"tinyrdm/backend/consts"
+
 	"github.com/vrischmann/userdir"
 )
 
@@ -16,7 +18,7 @@ type localStorage struct {
 // NewLocalStore returns a localStore instance.
 func NewLocalStore(filename string) *localStorage {
 	return &localStorage{
-		ConfPath: path.Join(userdir.GetConfigHome(), "TinyRDM", filename),
+		ConfPath: path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, filename),
 	}
 }
 

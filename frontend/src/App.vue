@@ -184,7 +184,9 @@ onMounted(async () => {
             // Connect WebSocket before initApp
             try {
                 const runtime = await import('wailsjs/runtime/runtime.js')
-                if (runtime.ReconnectWebSocket) await runtime.ReconnectWebSocket()
+                if (runtime.ReconnectWebSocket) {
+                    await runtime.ReconnectWebSocket()
+                }
             } catch {}
             await initApp()
         }
