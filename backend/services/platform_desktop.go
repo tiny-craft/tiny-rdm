@@ -78,3 +78,9 @@ func WindowIsMinimised(ctx context.Context) bool {
 func WindowIsNormal(ctx context.Context) bool {
 	return runtime.WindowIsNormal(ctx)
 }
+
+// IsWeb returns false in desktop mode
+func IsWeb() bool { return false }
+
+// IsDesktop returns true in desktop mode
+func IsDesktop() bool { return true }

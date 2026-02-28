@@ -24,13 +24,19 @@ func System() *systemService {
 			system = &systemService{
 				appVersion: "0.0.0",
 			}
-			go system.loopWindowEvent()
+			if IsDesktop() {
+				go system.loopWindowEvent()
+			}
 		})
 	}
 	return system
 }
 
 func (s *systemService) Start(ctx context.Context, version string) {
+	if !IsDesktop() {
+		return
+	}
+
 	s.ctx = ctx
 	s.appVersion = version
 
@@ -63,6 +69,10 @@ func (s *systemService) Info() (resp types.JSResp) {
 
 // SelectFile open file dialog to select a file
 func (s *systemService) SelectFile(title string, extensions []string) (resp types.JSResp) {
+	if !IsDesktop() {
+		return
+	}
+
 	filters := sliceutil.Map(extensions, func(i int) FileFilter {
 		return FileFilter{
 			Pattern: "*." + extensions[i],
@@ -86,6 +96,10 @@ func (s *systemService) SelectFile(title string, extensions []string) (resp type
 
 // SaveFile open file dialog to save a file
 func (s *systemService) SaveFile(title string, defaultName string, extensions []string) (resp types.JSResp) {
+	if !IsDesktop() {
+		return
+	}
+
 	filters := sliceutil.Map(extensions, func(i int) FileFilter {
 		return FileFilter{
 			Pattern: "*." + extensions[i],
@@ -109,6 +123,10 @@ func (s *systemService) SaveFile(title string, defaultName string, extensions []
 }
 
 func (s *systemService) loopWindowEvent() {
+	if !IsDesktop() {
+		return
+	}
+
 	var fullscreen, maximised, minimised, normal bool
 	var width, height int
 	var dirty bool
