@@ -11,7 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM, Mac, Windows ve Linux için kullanılabilen modern, hafif ve çapraz platform bir Redis masaüstü yöneticisidir.</strong>
+<strong>Tiny RDM, Mac, Windows ve Linux için kullanılabilen modern, hafif ve çapraz platform bir Redis masaüstü yöneticisidir. Docker ile dağıtılabilen bir web sürümü de sunmaktadır.</strong>
 </div>
 
 <picture>
@@ -143,7 +143,6 @@ docker run -d --name tinyrdm \
 |----------|----------|------------|
 | `ADMIN_USERNAME` | Giriş kullanıcı adı | - |
 | `ADMIN_PASSWORD` | Giriş şifresi | - |
-| `PORT` | Go backend dinleme portu | `8088` |
 
 ## Hakkında
 

@@ -11,7 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM é um gerenciador de desktop Redis moderno, leve e multiplataforma, disponível para Mac, Windows e Linux.</strong>
+<strong>Tiny RDM é um gerenciador Redis moderno, leve e multiplataforma, disponível para Mac, Windows e Linux. Também oferece uma versão web que pode ser implantada via Docker.</strong>
 </div>
 
 <picture>
@@ -143,7 +143,6 @@ docker run -d --name tinyrdm \
 |----------|-----------|--------|
 | `ADMIN_USERNAME` | Nome de usuário | - |
 | `ADMIN_PASSWORD` | Senha | - |
-| `PORT` | Porta de escuta do backend Go | `8088` |
 
 ## Sobre
 

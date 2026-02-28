@@ -11,7 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM은 Mac, Windows, Linux에서 사용할 수 있는 현대적이고 가벼운 크로스 플랫폼 Redis 데스크톱 관리자입니다.</strong>
+<strong>Tiny RDM은 Mac, Windows, Linux에서 사용할 수 있는 현대적이고 가벼운 크로스 플랫폼 Redis 데스크톱 관리자입니다. Docker를 통해 배포할 수 있는 웹 버전도 제공합니다.</strong>
 </div>
 
 <picture>
@@ -143,7 +143,6 @@ docker run -d --name tinyrdm \
 |------|------|--------|
 | `ADMIN_USERNAME` | 로그인 사용자 이름 | - |
 | `ADMIN_PASSWORD` | 로그인 비밀번호 | - |
-| `PORT` | Go 백엔드 리슨 포트 | `8088` |
 
 ## 소개
 

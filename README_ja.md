@@ -13,7 +13,7 @@
 [![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
 [![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
-<strong>Tiny RDMは、Mac、Windows、Linuxで利用可能な、モダンで軽量なクロスプラットフォームのRedisデスクトップマネージャーです。</strong>
+<strong>Tiny RDMは、Mac、Windows、Linuxで利用可能な、モダンで軽量なクロスプラットフォームのRedisデスクトップマネージャーです。Docker経由でデプロイ可能なWeb版も提供しています。</strong>
 </div>
 
 <picture>
@@ -145,7 +145,6 @@ docker run -d --name tinyrdm \
 |------|------|-------------|
 | `ADMIN_USERNAME` | ログインユーザー名 | - |
 | `ADMIN_PASSWORD` | ログインパスワード | - |
-| `PORT` | Goバックエンドのリッスンポート | `8088` |
 
 ## について
 

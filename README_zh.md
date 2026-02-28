@@ -11,7 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux</strong>
+<str>一个现代化轻量级的跨平台Redis桌面客户端，支持Mac、Windows和Linux，同时提供Web版本，可通过Docker快速部署</strong>
 </div>
 
 <picture>
@@ -144,7 +144,6 @@ docker run -d --name tinyrdm \
 |------|------|--------|
 | `ADMIN_USERNAME` | 登录用户名 | - |
 | `ADMIN_PASSWORD` | 登录密码 | - |
-| `PORT` | Go 后端监听端口 | `8088` |
 
 ## 关于
 

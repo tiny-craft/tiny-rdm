@@ -11,7 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM 是一款現代化輕量級的跨平台 Redis 桌面管理工具，支援 Mac、Windows 和 Linux</strong>
+<strong>Tiny RDM 是一款現代化輕量級的跨平台 Redis 桌面管理工具，支援 Mac、Windows 和 Linux，同時提供 Web 版本，可透過 Docker 快速部署</strong>
 </div>
 
 <picture>
@@ -143,7 +143,6 @@ docker run -d --name tinyrdm \
 |------|------|--------|
 | `ADMIN_USERNAME` | 登入帳號 | - |
 | `ADMIN_PASSWORD` | 登入密碼 | - |
-| `PORT` | Go 後端監聽埠 | `8088` |
 
 ## 關於
 

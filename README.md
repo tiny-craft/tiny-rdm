@@ -13,8 +13,7 @@
 [![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
 [![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
-<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and
-Linux.</strong>
+<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux. It also provides a web version that can be deployed via Docker.</strong>
 </div>
 
 <picture>
@@ -148,7 +147,6 @@ docker run -d --name tinyrdm \
 |----------|-------------|---------|
 | `ADMIN_USERNAME` | Login username | - |
 | `ADMIN_PASSWORD` | Login password | - |
-| `PORT` | Go backend listen port | `8088` |
 
 ## About
 
