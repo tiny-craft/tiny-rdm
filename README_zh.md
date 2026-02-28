@@ -57,7 +57,7 @@
 >  sudo xattr -d com.apple.quarantine /Applications/Tiny\ RDM.app
 > ```
 
-## 构建项目
+## 构建客户端
 
 ### 运行环境要求
 
@@ -95,6 +95,56 @@ npm install
 ```bash
 wails dev
 ```
+
+## Docker 部署
+
+除桌面客户端外，Tiny RDM 还提供 Web 版本，可通过 Docker 快速部署。
+
+### 使用 Docker Compose（推荐）
+
+创建 `docker-compose.yml` 文件：
+
+```yaml
+services:
+  tinyrdm:
+    image: ghcr.io/tiny-craft/tiny-rdm:latest
+    container_name: tinyrdm
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=tinyrdm
+    volumes:
+      - ./data:/app/tinyrdm
+```
+
+启动服务：
+
+```bash
+docker compose up -d
+```
+
+启动后访问 `http://localhost:8086`，使用上面配置的用户名密码登录。
+
+### 使用 Docker 命令
+
+```bash
+docker run -d --name tinyrdm \
+  -p 8086:8086 \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=tinyrdm \
+  -v ./data:/app/tinyrdm \
+  ghcr.io/tiny-craft/tiny-rdm:latest
+```
+
+### 环境变量说明
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `ADMIN_USERNAME` | 登录用户名 | - |
+| `ADMIN_PASSWORD` | 登录密码 | - |
+| `PORT` | Go 后端监听端口 | `8088` |
 
 ## 关于
 

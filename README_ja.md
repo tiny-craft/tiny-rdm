@@ -96,6 +96,57 @@ npm install
 ```bash
 wails dev
 ```
+
+## Dockerデプロイ
+
+デスクトップクライアントに加えて、Tiny RDMはDockerで素早くデプロイできるWeb版も提供しています。
+
+### Docker Composeを使用（推奨）
+
+`docker-compose.yml` ファイルを作成します：
+
+```yaml
+services:
+  tinyrdm:
+    image: ghcr.io/tiny-craft/tiny-rdm:latest
+    container_name: tinyrdm
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=tinyrdm
+    volumes:
+      - ./data:/app/tinyrdm
+```
+
+サービスを起動します：
+
+```bash
+docker compose up -d
+```
+
+起動後、`http://localhost:8086` にアクセスし、上記で設定したユーザー名とパスワードでログインしてください。
+
+### Dockerコマンドを使用
+
+```bash
+docker run -d --name tinyrdm \
+  -p 8086:8086 \
+  -e ADMIN_USERNAME=admin \
+  -e ADMIN_PASSWORD=tinyrdm \
+  -v ./data:/app/tinyrdm \
+  ghcr.io/tiny-craft/tiny-rdm:latest
+```
+
+### 環境変数の説明
+
+| 変数 | 説明 | デフォルト値 |
+|------|------|-------------|
+| `ADMIN_USERNAME` | ログインユーザー名 | - |
+| `ADMIN_PASSWORD` | ログインパスワード | - |
+| `PORT` | Goバックエンドのリッスンポート | `8088` |
+
 ## について
 
 ### Wechat公式アカウント
