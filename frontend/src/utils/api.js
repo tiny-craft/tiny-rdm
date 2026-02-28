@@ -361,8 +361,49 @@ export function RestorePreferences() {
     return post('/preferences/restore')
 }
 
-export function GetFontList() {
-    return get('/preferences/font-list')
+// Common fonts to probe when Local Font Access API is unavailable
+const CANDIDATE_FONTS = [
+    // Sans-serif
+    'Arial', 'Helvetica', 'Helvetica Neue', 'Verdana', 'Geneva', 'Tahoma',
+    'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Segoe UI',
+    'Roboto', 'Noto Sans', 'Open Sans', 'Lato', 'Source Sans Pro',
+    // Serif
+    'Times New Roman', 'Georgia', 'Palatino', 'Book Antiqua', 'Cambria',
+    'Noto Serif',
+    // Monospace
+    'Courier New', 'Consolas', 'Monaco', 'Menlo', 'DejaVu Sans Mono',
+    'Fira Code', 'JetBrains Mono', 'Source Code Pro', 'Cascadia Code',
+    // CJK
+    'Microsoft YaHei', 'PingFang SC', 'PingFang TC', 'Hiragino Sans GB',
+    'Noto Sans SC', 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR',
+    'Source Han Sans SC', 'Source Han Sans TC', 'WenQuanYi Micro Hei',
+    'Yu Gothic', 'Meiryo', 'Malgun Gothic',
+]
+
+async function queryBrowserFonts() {
+    // Try Local Font Access API first (Chromium 103+)
+    if ('queryLocalFonts' in window) {
+        try {
+            const fonts = await window.queryLocalFonts()
+            const families = [...new Set(fonts.map((f) => f.family))]
+            families.sort()
+            return families.map((name) => ({ name, path: '' }))
+        } catch (_) {
+            // User denied permission or API failed, fall through
+        }
+    }
+    // Fallback: probe candidate list with document.fonts.check
+    await document.fonts.ready
+    return CANDIDATE_FONTS.filter((f) => document.fonts.check(`16px "${f}"`)).map((name) => ({ name, path: '' }))
+}
+
+export async function GetFontList() {
+    try {
+        const fonts = await queryBrowserFonts()
+        return { success: true, data: { fonts } }
+    } catch (_) {
+        return { success: true, data: { fonts: [] } }
+    }
 }
 
 export function GetBuildInDecoder() {
