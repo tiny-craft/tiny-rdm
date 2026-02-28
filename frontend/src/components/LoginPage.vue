@@ -13,6 +13,7 @@ import { lang } from '@/langs/index.js'
 import { useI18n } from 'vue-i18n'
 import { useRender } from '@/utils/render.js'
 import { STORAGE_LANG_KEY, STORAGE_THEME_KEY } from '@/consts/localstorage_key.js'
+import { i18nGlobal } from '@/utils/i18n.js'
 
 const themeVars = useThemeVars()
 const prefStore = usePreferencesStore()
@@ -123,16 +124,16 @@ const handleLogin = async () => {
     try {
         const { msg, success = false } = await Login(username.value, password.value)
         if (msg === 'too_many_attempts') {
-            errorMsg.value = $t('login.too_many_attempts')
+            errorMsg.value = i18nGlobal.t('login.too_many_attempts')
             return
         }
         if (!success) {
-            errorMsg.value = $t('login.invalid_credentials')
+            errorMsg.value = i18nGlobal.t('login.invalid_credentials')
             return
         }
         emit('login')
     } catch (e) {
-        errorMsg.value = $t('login.network_error')
+        errorMsg.value = i18nGlobal.t('login.network_error')
     } finally {
         loading.value = false
     }
@@ -149,7 +150,7 @@ const handleLogin = async () => {
             </div>
 
             <n-form class="login-form" @submit.prevent="handleLogin">
-                <n-form-item :label="$t('dialogue.connection.usr')">
+                <n-form-item :label="$t('dialogue.connection.usr')" :show-feedback="false">
                     <n-input
                         v-model:value="username"
                         :placeholder="$t('login.username_placeholder')"
@@ -157,7 +158,10 @@ const handleLogin = async () => {
                         size="large"
                         @keydown.enter="handleLogin" />
                 </n-form-item>
-                <n-form-item :label="$t('dialogue.connection.pwd')">
+                <n-form-item
+                    :feedback="errorMsg"
+                    :label="$t('dialogue.connection.pwd')"
+                    :validation-status="errorMsg ? 'error' : undefined">
                     <n-input
                         v-model:value="password"
                         :placeholder="$t('login.password_placeholder')"
@@ -166,10 +170,6 @@ const handleLogin = async () => {
                         type="password"
                         @keydown.enter="handleLogin" />
                 </n-form-item>
-
-                <n-text v-if="errorMsg" style="font-size: 13px; margin-bottom: 12px; display: block" type="error">
-                    {{ errorMsg }}
-                </n-text>
 
                 <n-button
                     :disabled="!canSubmit"
