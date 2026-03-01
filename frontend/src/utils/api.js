@@ -381,18 +381,6 @@ const CANDIDATE_FONTS = [
 ]
 
 async function queryBrowserFonts() {
-    // Try Local Font Access API first (Chromium 103+)
-    if ('queryLocalFonts' in window) {
-        try {
-            const fonts = await window.queryLocalFonts()
-            const families = [...new Set(fonts.map((f) => f.family))]
-            families.sort()
-            return families.map((name) => ({ name, path: '' }))
-        } catch (_) {
-            // User denied permission or API failed, fall through
-        }
-    }
-    // Fallback: probe candidate list with document.fonts.check
     await document.fonts.ready
     return CANDIDATE_FONTS.filter((f) => document.fonts.check(`16px "${f}"`)).map((name) => ({ name, path: '' }))
 }
