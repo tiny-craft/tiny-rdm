@@ -150,10 +150,10 @@ const onOpenPrivacy = () => {
     let helpUrl = ''
     switch (prefStore.currentLanguage) {
         case 'zh':
-            helpUrl = 'https://redis.tinycraft.cc/zh/guide/privacy.html'
+            helpUrl = 'https://tinyrdm.com/zh/guide/privacy.html'
             break
         default:
-            helpUrl = 'https://redis.tinycraft.cc/guide/privacy.html'
+            helpUrl = 'https://tinyrdm.com/guide/privacy.html'
             break
     }
     BrowserOpenURL(helpUrl)
@@ -163,10 +163,10 @@ const openDecodeHelp = () => {
     let helpUrl = ''
     switch (prefStore.currentLanguage) {
         case 'zh':
-            helpUrl = 'https://redis.tinycraft.cc/zh/guide/custom-decoder.html'
+            helpUrl = 'https://tinyrdm.com/zh/guide/custom-decoder.html'
             break
         default:
-            helpUrl = 'https://redis.tinycraft.cc/guide/custom-decoder.html'
+            helpUrl = 'https://tinyrdm.com/guide/custom-decoder.html'
             break
     }
     BrowserOpenURL(helpUrl)

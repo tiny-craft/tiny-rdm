@@ -14,7 +14,7 @@ const onOpenSource = () => {
 }
 
 const onOpenWebsite = () => {
-    BrowserOpenURL('https://redis.tinycraft.cc/')
+    BrowserOpenURL('https://tinyrdm.com/')
 }
 </script>
 

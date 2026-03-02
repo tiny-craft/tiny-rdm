@@ -45,7 +45,7 @@
 * Veri içe/dışa aktarma desteği
 * Yayınla/abone ol desteği
 * Bağlantı profili içe/dışa aktarma desteği
-* Değer görüntüleme için özel veri kodlayıcı ve çözücü ([Talimatlar burada](https://redis.tinycraft.cc/guide/custom-decoder/))
+* Değer görüntüleme için özel veri kodlayıcı ve çözücü ([Talimatlar burada](https://tinyrdm.com/guide/custom-decoder/))
 
 ## Kurulum
 

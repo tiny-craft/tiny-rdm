@@ -45,7 +45,7 @@
 * 支援匯入/匯出資料
 * 支援發布訂閱
 * 支援匯入/匯出連線設定
-* 自訂資料展示編碼/解碼（[操作指引](https://redis.tinycraft.cc/guide/custom-decoder/)）
+* 自訂資料展示編碼/解碼（[操作指引](https://tinyrdm.com/guide/custom-decoder/)）
 
 ## 安裝
 

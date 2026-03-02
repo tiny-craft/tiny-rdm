@@ -49,7 +49,7 @@
 * Support import/export data.
 * Support publish/subscribe.
 * Support import/export connection profile.
-* Custom data encoder and decoder for value display ([Here are the instructions](https://redis.tinycraft.cc/guide/custom-decoder/)).
+* Custom data encoder and decoder for value display ([Here are the instructions](https://tinyrdm.com/guide/custom-decoder/)).
 
 ## Installation
 

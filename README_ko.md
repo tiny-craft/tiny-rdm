@@ -45,7 +45,7 @@
 * 데이터 가져오기/내보내기 지원
 * 발행/구독 지원
 * 연결 프로필 가져오기/내보내기 지원
-* 값 표시를 위한 사용자 정의 데이터 인코더 및 디코더 ([사용 방법](https://redis.tinycraft.cc/guide/custom-decoder/))
+* 값 표시를 위한 사용자 정의 데이터 인코더 및 디코더 ([사용 방법](https://tinyrdm.com/guide/custom-decoder/))
 
 ## 설치
 

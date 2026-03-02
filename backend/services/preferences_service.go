@@ -240,7 +240,7 @@ type upgradeInfo struct {
 func (p *preferencesService) CheckForUpdate() (resp types.JSResp) {
 	// request latest version
 	//res, err := http.Get("https://api.github.com/repos/tiny-craft/tiny-rdm/releases/latest")
-	res, err := http.Get("https://redis.tinycraft.cc/client_version.json")
+	res, err := http.Get("https://tinyrdm.com/client_version.json")
 	if err != nil || res.StatusCode != http.StatusOK {
 		resp.Msg = "network error"
 		return

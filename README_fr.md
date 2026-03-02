@@ -45,7 +45,7 @@
 * Import/export de données
 * Publication/abonnement
 * Import/export de profils de connexion
-* Encodeur et décodeur de données personnalisés pour l'affichage des valeurs ([Instructions ici](https://redis.tinycraft.cc/guide/custom-decoder/))
+* Encodeur et décodeur de données personnalisés pour l'affichage des valeurs ([Instructions ici](https://tinyrdm.com/guide/custom-decoder/))
 
 ## Installation
 

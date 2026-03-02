@@ -46,7 +46,7 @@
 * 支持导入/导出数据
 * 支持发布订阅
 * 支持导入/导出连接配置
-* 自定义数据展示编码/解码([这是操作指引](https://redis.tinycraft.cc/zh/guide/custom-decoder/))
+* 自定义数据展示编码/解码([这是操作指引](https://tinyrdm.com/zh/guide/custom-decoder/))
 
 ## 安装
 

@@ -60,7 +60,7 @@ const banner = computed(() => {
         //     title: 'title',
         //     content: 'content',
         //     button: 'button',
-        //     link: 'https://redis.tinycraft.cc',
+        //     link: 'https://tinyrdm.com',
         // }
     } catch {
         return null
