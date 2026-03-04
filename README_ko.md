@@ -153,3 +153,9 @@ docker run -d --name tinyrdm \
 * Wechat 후원
 
 <img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
+
+### 감사
+
+호스팅 후원을 제공해 주신 다음 서비스 제공업체에 감사드립니다
+
+[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")

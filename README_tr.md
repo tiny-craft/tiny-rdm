@@ -153,3 +153,9 @@ Bu proje işinize yaradıysa, bir kahve ısmarlayabilirsiniz ☕️
 * Wechat Sponsor
 
 <img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
+
+### Teşekkürler
+
+Barındırma sponsorluğu sağlayan aşağıdaki hizmet sağlayıcılara teşekkür ederiz
+
+[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")

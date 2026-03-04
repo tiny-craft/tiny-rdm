@@ -161,3 +161,9 @@ If this project helpful for you, feel free to buy me a cup of coffee ☕️.
 * Wechat Sponsor
 
 <img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
+
+### Thanks
+
+Thanks to the following service providers for hosting sponsorship
+
+[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")

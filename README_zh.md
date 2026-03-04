@@ -172,3 +172,9 @@ docker run -d --name tinyrdm \
 * 微信赞赏
 
 <img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
+
+### 感谢
+
+感谢以下服务商提供主机赞助
+
+[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
