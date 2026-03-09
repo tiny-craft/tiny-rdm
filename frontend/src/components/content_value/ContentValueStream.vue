@@ -6,7 +6,7 @@ import { NButton, NIcon, useThemeVars } from 'naive-ui'
 import { types, types as redisTypes } from '@/consts/support_redis_type.js'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
 import useDialogStore from 'stores/dialog.js'
-import { includes, isEmpty, size } from 'lodash'
+import { isEmpty, size } from 'lodash'
 import { decodeTypes, formatTypes } from '@/consts/value_view_type.js'
 import useBrowserStore from 'stores/browser.js'
 import LoadList from '@/components/icons/LoadList.vue'
@@ -14,6 +14,12 @@ import LoadAll from '@/components/icons/LoadAll.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import ContentSearchInput from '@/components/content_value/ContentSearchInput.vue'
 import { formatBytes } from '@/utils/byte_convert.js'
+import {
+    collectStreamColumns,
+    filterStreamRows,
+    formatStreamCellValue,
+    getStreamFieldValue,
+} from '@/utils/stream_view.js'
 import { ClipboardSetText } from 'wailsjs/runtime/runtime.js'
 
 const i18n = useI18n()
@@ -58,7 +64,6 @@ const emit = defineEmits(['loadmore', 'loadall', 'match'])
 const keyName = computed(() => {
     return !isEmpty(props.keyCode) ? props.keyCode : props.keyPath
 })
-const filterType = ref(1)
 
 const browserStore = useBrowserStore()
 const dialogStore = useDialogStore()
@@ -71,34 +76,21 @@ const idColumn = computed(() => ({
     resizable: true,
 }))
 
-const valueFilterOption = ref(null)
-const valueColumn = computed(() => ({
-    key: 'value',
-    title: () => i18n.t('common.value'),
-    align: 'left',
-    titleAlign: 'center',
-    resizable: true,
-    filterOptionValue: valueFilterOption.value,
-    filter: (value, row) => {
-        const v = value.toString()
-        if (isEmpty(v)) {
-            return true
-        }
-        if (row.dv) {
-            return includes(row.dv, v)
-        }
-        for (const k in row.v) {
-            if (includes(k, v) || includes(row.v[k], v)) {
-                return true
-            }
-        }
-        return false
-    },
-    // sorter: (row1, row2) => row1.value - row2.value,
-    render: (row) => {
-        return h('pre', { class: 'pre-wrap' }, row.dv)
-    },
-}))
+const valueFilterOption = ref('')
+const fieldColumns = computed(() => {
+    return collectStreamColumns(props.value)
+        .filter(({ key }) => key !== 'id')
+        .map(({ key, title }) => ({
+            key,
+            title: () => title || i18n.t('common.value'),
+            align: 'left',
+            titleAlign: 'center',
+            resizable: true,
+            render: (row) => {
+                return h('pre', { class: 'pre-wrap stream-cell' }, formatStreamCellValue(getStreamFieldValue(row, key)))
+            },
+        }))
+})
 const actionColumn = {
     key: 'action',
     title: () => i18n.t('interface.action'),
@@ -134,7 +126,8 @@ const actionColumn = {
         })
     },
 }
-const columns = computed(() => [idColumn.value, valueColumn.value, actionColumn])
+const columns = computed(() => [idColumn.value, ...fieldColumns.value, actionColumn])
+const tableRows = computed(() => filterStreamRows(props.value, valueFilterOption.value))
 
 const entries = computed(() => {
     const len = size(props.value)
@@ -161,10 +154,6 @@ const onFilterInput = (val) => {
 const onMatchInput = (matchVal, filterVal) => {
     valueFilterOption.value = filterVal
     emit('match', matchVal)
-}
-
-const onUpdateFilter = (filters, sourceColumn) => {
-    valueFilterOption.value = filters[sourceColumn.key]
 }
 
 const searchInputRef = ref(null)
@@ -224,17 +213,15 @@ defineExpose({
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="props.value"
+                :data="tableRows"
                 :loading="props.loading"
                 :row-key="(row) => row.id"
-                :single-column="true"
                 :single-line="false"
                 class="flex-item-expand"
                 flex-height
                 size="small"
                 striped
-                virtual-scroll
-                @update:filters="onUpdateFilter" />
+                virtual-scroll />
         </div>
 
         <div class="value-footer flex-box-h">
@@ -250,5 +237,9 @@ defineExpose({
 .value-footer {
     border-top: v-bind('themeVars.borderColor') 1px solid;
     background-color: v-bind('themeVars.tableHeaderColor');
+}
+
+.stream-cell {
+    margin: 0;
 }
 </style>
