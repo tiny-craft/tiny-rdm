@@ -45,6 +45,15 @@ func (MsgpackConvert) Decode(str string) (string, bool) {
 		}
 	}
 
+	var arr []any
+	if err := msgpack.Unmarshal([]byte(str), &arr); err == nil {
+		if b, err := json.Marshal(arr); err == nil {
+			if len(b) >= 10 {
+				return string(b), true
+			}
+		}
+	}
+
 	return str, false
 }
 
