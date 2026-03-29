@@ -80,9 +80,53 @@ const fullEdit = ref(false)
 
 const tableRef = ref(null)
 const fieldFilterOption = ref(null)
+const fieldSortOrder = ref('default')
+const fieldSortSymbol = computed(() => {
+    switch (fieldSortOrder.value) {
+        case 'asc':
+            return '↑'
+        case 'desc':
+            return '↓'
+        default:
+            return '↑↓'
+    }
+})
+const toggleFieldSort = () => {
+    switch (fieldSortOrder.value) {
+        case 'default':
+            fieldSortOrder.value = 'asc'
+            break
+        case 'asc':
+            fieldSortOrder.value = 'desc'
+            break
+        default:
+            fieldSortOrder.value = 'default'
+            break
+    }
+}
+const findValueIndexByKey = (fieldKey) => {
+    if (!(props.value instanceof Array)) {
+        return -1
+    }
+    return props.value.findIndex((item) => item.k === fieldKey)
+}
 const fieldColumn = computed(() => ({
     key: 'key',
-    title: () => i18n.t('common.field'),
+    title: () =>
+        h('div', { class: 'field-title-wrapper' }, [
+            h('span', {}, i18n.t('common.field')),
+            h(
+                'span',
+                {
+                    class: 'field-sort-btn',
+                    onClick: (e) => {
+                        e.stopPropagation()
+                        toggleFieldSort()
+                    },
+                },
+                fieldSortSymbol.value,
+            ),
+        ]),
     align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
     titleAlign: 'center',
     resizable: true,
@@ -167,7 +211,8 @@ const startEdit = async (no, key, value) => {
 
 const saveEdit = async (field, value, decode, format) => {
     try {
-        const row = props.value[currentEditRow.no - 1]
+        const rowIndex = findValueIndexByKey(currentEditRow.key)
+        const row = rowIndex >= 0 ? props.value[rowIndex] : null
         if (row == null) {
             throw new Error('row not exists')
         }
@@ -187,9 +232,10 @@ const saveEdit = async (field, value, decode, format) => {
             format,
             retDecode: props.decode,
             retFormat: props.format,
-            index: [currentEditRow.no - 1],
+            index: rowIndex >= 0 ? [rowIndex] : undefined,
         })
         if (success) {
+            currentEditRow.key = field
             currentEditRow.value = value
             $message.success(i18n.t('interface.save_value_succ'))
         } else {
@@ -233,12 +279,18 @@ const actionColumn = {
                     format: props.format,
                 })
                 if (success) {
-                    delete props.value[index]['rm']
+                    const rowIndex = findValueIndexByKey(row.k)
+                    if (rowIndex >= 0) {
+                        delete props.value[rowIndex]['rm']
+                    }
                     $message.success(i18n.t('dialogue.reload_succ'))
                 } else {
                     // update fail, the key may have been deleted
                     $message.error(msg)
-                    props.value[index]['rm'] = true
+                    const rowIndex = findValueIndexByKey(row.k)
+                    if (rowIndex >= 0) {
+                        props.value[rowIndex]['rm'] = true
+                    }
                 }
             },
             onCopy: async () => {
@@ -256,7 +308,10 @@ const actionColumn = {
                         reload: false,
                     })
                     if (success) {
-                        props.value.splice(index, 1)
+                        const rowIndex = findValueIndexByKey(row.k)
+                        if (rowIndex >= 0) {
+                            props.value.splice(rowIndex, 1)
+                        }
                         $message.success(i18n.t('dialogue.delete.success', { key: row.k }))
                     } else {
                         $message.error(msg)
@@ -318,6 +373,21 @@ const rowProps = (row, index) => {
         },
     }
 }
+
+const tableData = computed(() => {
+    if (!(props.value instanceof Array) || fieldSortOrder.value === 'default') {
+        return props.value
+    }
+    const sortedList = [...props.value]
+    sortedList.sort((a, b) => {
+        const compareVal = `${a?.k || ''}`.localeCompare(`${b?.k || ''}`, undefined, {
+            numeric: true,
+            sensitivity: 'base',
+        })
+        return fieldSortOrder.value === 'asc' ? compareVal : -compareVal
+    })
+    return sortedList
+})
 
 const entries = computed(() => {
     const len = size(props.value)
@@ -423,7 +493,7 @@ defineExpose({
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="props.value"
+                :data="tableData"
                 :loading="props.loading"
                 :row-key="(row) => row.k"
                 :row-props="rowProps"
@@ -477,5 +547,23 @@ defineExpose({
 .value-footer {
     border-top: v-bind('themeVars.borderColor') 1px solid;
     background-color: v-bind('themeVars.tableHeaderColor');
+}
+
+.field-title-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.field-sort-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
 }
 </style>
