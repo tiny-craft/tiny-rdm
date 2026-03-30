@@ -6,6 +6,7 @@ import Close from '@/components/icons/Close.vue'
 import Save from '@/components/icons/Save.vue'
 import Copy from '@/components/icons/Copy.vue'
 import Refresh from '@/components/icons/Refresh.vue'
+import { truncate } from 'lodash'
 
 const props = defineProps({
     bindKey: String,
@@ -34,7 +35,7 @@ const emit = defineEmits(['edit', 'delete', 'copy', 'refresh', 'save', 'cancel']
             <template #trigger>
                 <icon-button :icon="Delete" :title="$t('interface.delete_row')" />
             </template>
-            {{ $t('dialogue.remove_tip', { name: props.bindKey }) }}
+            {{ $t('dialogue.remove_tip', { name: truncate(props.bindKey, { length: 80 }) }) }}
         </n-popconfirm>
     </div>
 </template>
