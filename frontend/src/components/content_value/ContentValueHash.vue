@@ -80,12 +80,23 @@ const fullEdit = ref(false)
 
 const tableRef = ref(null)
 const fieldFilterOption = ref(null)
+const findValueIndexByKey = (fieldKey) => {
+    if (!(props.value instanceof Array)) {
+        return -1
+    }
+    return props.value.findIndex((item) => item.k === fieldKey)
+}
 const fieldColumn = computed(() => ({
     key: 'key',
     title: () => i18n.t('common.field'),
     align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
     titleAlign: 'center',
     resizable: true,
+    sorter: (row1, row2) =>
+        `${row1?.k || ''}`.localeCompare(`${row2?.k || ''}`, undefined, {
+            numeric: true,
+            sensitivity: 'base',
+        }),
     ellipsis: {
         tooltip: {
             style: {
@@ -167,7 +178,8 @@ const startEdit = async (no, key, value) => {
 
 const saveEdit = async (field, value, decode, format) => {
     try {
-        const row = props.value[currentEditRow.no - 1]
+        const rowIndex = findValueIndexByKey(currentEditRow.key)
+        const row = rowIndex >= 0 ? props.value[rowIndex] : null
         if (row == null) {
             throw new Error('row not exists')
         }
@@ -187,9 +199,10 @@ const saveEdit = async (field, value, decode, format) => {
             format,
             retDecode: props.decode,
             retFormat: props.format,
-            index: [currentEditRow.no - 1],
+            index: rowIndex >= 0 ? [rowIndex] : undefined,
         })
         if (success) {
+            currentEditRow.key = field
             currentEditRow.value = value
             $message.success(i18n.t('interface.save_value_succ'))
         } else {
@@ -233,12 +246,18 @@ const actionColumn = {
                     format: props.format,
                 })
                 if (success) {
-                    delete props.value[index]['rm']
+                    const rowIndex = findValueIndexByKey(row.k)
+                    if (rowIndex >= 0) {
+                        delete props.value[rowIndex]['rm']
+                    }
                     $message.success(i18n.t('dialogue.reload_succ'))
                 } else {
                     // update fail, the key may have been deleted
                     $message.error(msg)
-                    props.value[index]['rm'] = true
+                    const rowIndex = findValueIndexByKey(row.k)
+                    if (rowIndex >= 0) {
+                        props.value[rowIndex]['rm'] = true
+                    }
                 }
             },
             onCopy: async () => {
@@ -256,7 +275,10 @@ const actionColumn = {
                         reload: false,
                     })
                     if (success) {
-                        props.value.splice(index, 1)
+                        const rowIndex = findValueIndexByKey(row.k)
+                        if (rowIndex >= 0) {
+                            props.value.splice(rowIndex, 1)
+                        }
                         $message.success(i18n.t('dialogue.delete.success', { key: row.k }))
                     } else {
                         $message.error(msg)
