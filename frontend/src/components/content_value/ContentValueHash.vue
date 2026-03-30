@@ -80,30 +80,6 @@ const fullEdit = ref(false)
 
 const tableRef = ref(null)
 const fieldFilterOption = ref(null)
-const fieldSortOrder = ref('default')
-const fieldSortSymbol = computed(() => {
-    switch (fieldSortOrder.value) {
-        case 'asc':
-            return '↑'
-        case 'desc':
-            return '↓'
-        default:
-            return '↑↓'
-    }
-})
-const toggleFieldSort = () => {
-    switch (fieldSortOrder.value) {
-        case 'default':
-            fieldSortOrder.value = 'asc'
-            break
-        case 'asc':
-            fieldSortOrder.value = 'desc'
-            break
-        default:
-            fieldSortOrder.value = 'default'
-            break
-    }
-}
 const findValueIndexByKey = (fieldKey) => {
     if (!(props.value instanceof Array)) {
         return -1
@@ -112,24 +88,15 @@ const findValueIndexByKey = (fieldKey) => {
 }
 const fieldColumn = computed(() => ({
     key: 'key',
-    title: () =>
-        h('div', { class: 'field-title-wrapper' }, [
-            h('span', {}, i18n.t('common.field')),
-            h(
-                'span',
-                {
-                    class: 'field-sort-btn',
-                    onClick: (e) => {
-                        e.stopPropagation()
-                        toggleFieldSort()
-                    },
-                },
-                fieldSortSymbol.value,
-            ),
-        ]),
+    title: () => i18n.t('common.field'),
     align: props.textAlign !== TextAlignType.Left ? 'center' : 'left',
     titleAlign: 'center',
     resizable: true,
+    sorter: (row1, row2) =>
+        `${row1?.k || ''}`.localeCompare(`${row2?.k || ''}`, undefined, {
+            numeric: true,
+            sensitivity: 'base',
+        }),
     ellipsis: {
         tooltip: {
             style: {
@@ -374,21 +341,6 @@ const rowProps = (row, index) => {
     }
 }
 
-const tableData = computed(() => {
-    if (!(props.value instanceof Array) || fieldSortOrder.value === 'default') {
-        return props.value
-    }
-    const sortedList = [...props.value]
-    sortedList.sort((a, b) => {
-        const compareVal = `${a?.k || ''}`.localeCompare(`${b?.k || ''}`, undefined, {
-            numeric: true,
-            sensitivity: 'base',
-        })
-        return fieldSortOrder.value === 'asc' ? compareVal : -compareVal
-    })
-    return sortedList
-})
-
 const entries = computed(() => {
     const len = size(props.value)
     return `${len} / ${Math.max(len, props.length)}`
@@ -493,7 +445,7 @@ defineExpose({
                 :bordered="false"
                 :bottom-bordered="false"
                 :columns="columns"
-                :data="tableData"
+                :data="props.value"
                 :loading="props.loading"
                 :row-key="(row) => row.k"
                 :row-props="rowProps"
@@ -547,23 +499,5 @@ defineExpose({
 .value-footer {
     border-top: v-bind('themeVars.borderColor') 1px solid;
     background-color: v-bind('themeVars.tableHeaderColor');
-}
-
-.field-title-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.field-sort-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 14px;
-    padding: 0;
-    font-size: 11px;
-    line-height: 1;
-    cursor: pointer;
-    user-select: none;
 }
 </style>
