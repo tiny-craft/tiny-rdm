@@ -30,7 +30,11 @@ func (c MsgpackConvert) Encode(str string) (string, bool) {
 	return str, false
 }
 
-func (MsgpackConvert) Decode(str string) (string, bool) {
+func (c MsgpackConvert) Decode(str string) (string, bool) {
+	if !c.MaybeMsgpack(str) {
+		return str, false
+	}
+
 	var decodedStr string
 	if err := msgpack.Unmarshal([]byte(str), &decodedStr); err == nil {
 		return decodedStr, true
@@ -39,22 +43,31 @@ func (MsgpackConvert) Decode(str string) (string, bool) {
 	var obj map[string]any
 	if err := msgpack.Unmarshal([]byte(str), &obj); err == nil {
 		if b, err := json.Marshal(obj); err == nil {
-			if len(b) >= 10 {
-				return string(b), true
-			}
+			return string(b), true
 		}
 	}
 
 	var arr []any
 	if err := msgpack.Unmarshal([]byte(str), &arr); err == nil {
 		if b, err := json.Marshal(arr); err == nil {
-			if len(b) >= 10 {
-				return string(b), true
-			}
+			return string(b), true
 		}
 	}
 
 	return str, false
+}
+
+func (c MsgpackConvert) MaybeMsgpack(input string) bool {
+	byt := []byte(input)
+	if len(byt) < 2 {
+		return false
+	}
+
+	b := byt[0]
+
+	// fixmap 0x80-0x8f, fixarray 0x90-0x9f
+	// array16 0xdc, array32 0xdd, map16 0xde, map32 0xdf
+	return (b >= 0x80 && b <= 0x9f) || (b >= 0xdc && b <= 0xdf)
 }
 
 func (c MsgpackConvert) TryFloatToInt(input any) any {
