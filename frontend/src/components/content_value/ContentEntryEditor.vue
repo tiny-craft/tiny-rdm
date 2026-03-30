@@ -158,7 +158,12 @@ const onSave = () => {
 
 <template>
     <div v-show="show" class="entry-editor flex-box-v">
-        <n-card :title="$t('interface.edit_row')" autofocus class="flex-item-expand" size="small">
+        <n-card
+            :title="$t('interface.edit_row')"
+            autofocus
+            class="flex-item-expand"
+            content-class="flex-box"
+            size="small">
             <div class="editor-content flex-box-v flex-item-expand">
                 <!-- field -->
                 <div class="editor-content-item flex-box-v">
