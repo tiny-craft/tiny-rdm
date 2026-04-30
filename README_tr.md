@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM, Mac, Windows ve Linux için kullanılabilen modern, hafif ve çapraz platform bir Redis masaüstü yöneticisidir. Docker ile dağıtılabilen bir web sürümü de sunmaktadır.</strong>
+<strong>Tiny RDM, Mac, Windows ve Linux için kullanılabilen modern, hafif ve çapraz platform bir Redis masaüstü
+yöneticisidir. Docker ile dağıtılabilen bir web sürümü de sunmaktadır.</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## Özellikler
 
 * Ultra hafif, Webview2 tabanlı, gömülü tarayıcı yok ([Wails](https://github.com/wailsapp/wails)'e teşekkürler)
-* Görsel ve kullanıcı dostu arayüz, açık ve koyu tema desteği ([Naive UI](https://github.com/tusen-ai/naive-ui) ve [IconPark](https://iconpark.oceanengine.com)'a teşekkürler)
+* Görsel ve kullanıcı dostu arayüz, açık ve koyu tema desteği ([Naive UI](https://github.com/tusen-ai/naive-ui)
+  ve [IconPark](https://iconpark.oceanengine.com)'a teşekkürler)
 * Çoklu dil desteği ([Daha fazla dil mi gerekiyor? Katkıda bulunmak için tıklayın](.github/CONTRIBUTING.md))
 * Gelişmiş bağlantı yönetimi: SSH Tüneli/SSL/Sentinel Modu/Cluster Modu/HTTP proxy/SOCKS5 proxy desteği
 * Anahtar-değer işlemlerinin görselleştirilmesi, List, Hash, String, Set, Sorted Set ve Stream için CRUD desteği
@@ -124,7 +126,8 @@ Servisi başlatın:
 docker compose up -d
 ```
 
-Başlatıldıktan sonra `http://localhost:8086` adresini ziyaret edin ve yukarıda yapılandırılan kimlik bilgileriyle giriş yapın.
+Başlatıldıktan sonra `http://localhost:8086` adresini ziyaret edin ve yukarıda yapılandırılan kimlik bilgileriyle giriş
+yapın.
 
 ### Docker Komutu Kullanımı
 
@@ -139,23 +142,28 @@ docker run -d --name tinyrdm \
 
 ### Ortam Değişkenleri
 
-| Değişken | Açıklama | Varsayılan |
-|----------|----------|------------|
-| `ADMIN_USERNAME` | Giriş kullanıcı adı | - |
-| `ADMIN_PASSWORD` | Giriş şifresi | - |
+| Değişken         | Açıklama            | Varsayılan |
+|------------------|---------------------|------------|
+| `ADMIN_USERNAME` | Giriş kullanıcı adı | -          |
+| `ADMIN_PASSWORD` | Giriş şifresi       | -          |
+
+## Sponsorluk
+
+Barındırma sponsorluğu sağlayan aşağıdaki hizmet sağlayıcılarına teşekkür ederiz
+
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>Bu projeye sponsor olduğu için FlyMux'a özel teşekkürler! FlyMux, Claude Code ve Codex için resmi ve yüksek kararlılığa sahip relay hizmetleri sunmaya odaklanır; geliştiriciler için sorunsuz ve verimli bir entegrasyon deneyimi oluşturur. TinyRDM kullanıcılarına özel olarak, <a href="https://flymux.com/register?promo=TINYRDM">bu bağlantı</a> üzerinden kayıt olduğunuzda hesabınıza otomatik olarak $5 bonus kredi tanımlanır.</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>Bu projeye sponsor desteği verdiği için NotIDC'ye özel teşekkürler. NotIDC, bulut sunucuları, bare metal, CDN ve güvenlik çözümleri dahil yüksek performanslı bulut altyapısı sunar; küresel ağ kapsamı ve güvenilir DDoS korumasıyla geliştiricilerin uygulamalarını verimli şekilde dağıtmasına ve ölçeklemesine yardımcı olur.</td>
+</tr>
+</table>
 
 ## Hakkında
 
-### Sponsor
+### WeChat Resmi Hesabı
 
-Bu proje işinize yaradıysa, bir kahve ısmarlayabilirsiniz ☕️
-
-* Wechat Sponsor
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### Teşekkürler
-
-Barındırma sponsorluğu sağlayan aşağıdaki hizmet sağlayıcılara teşekkür ederiz
-
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />

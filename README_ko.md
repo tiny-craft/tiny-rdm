@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM은 Mac, Windows, Linux에서 사용할 수 있는 현대적이고 가벼운 크로스 플랫폼 Redis 데스크톱 관리자입니다. Docker를 통해 배포할 수 있는 웹 버전도 제공합니다.</strong>
+<strong>Tiny RDM은 Mac, Windows, Linux에서 사용할 수 있는 현대적이고 가벼운 크로스 플랫폼 Redis 데스크톱 관리자입니다. Docker를 통해 배포할 수 있는 웹 버전도
+제공합니다.</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## 기능
 
 * 초경량, Webview2 기반으로 내장 브라우저 없음 ([Wails](https://github.com/wailsapp/wails) 감사합니다)
-* 시각적이고 사용자 친화적인 UI, 라이트/다크 테마 제공 ([Naive UI](https://github.com/tusen-ai/naive-ui) 및 [IconPark](https://iconpark.oceanengine.com) 감사합니다)
+* 시각적이고 사용자 친화적인 UI, 라이트/다크 테마 제공 ([Naive UI](https://github.com/tusen-ai/naive-ui)
+  및 [IconPark](https://iconpark.oceanengine.com) 감사합니다)
 * 다국어 지원 ([더 많은 언어가 필요하신가요? 여기를 클릭하여 기여하세요](.github/CONTRIBUTING.md))
 * 향상된 연결 관리: SSH 터널/SSL/센티널 모드/클러스터 모드/HTTP 프록시/SOCKS5 프록시 지원
 * 키-값 작업 시각화, List, Hash, String, Set, Sorted Set, Stream의 CRUD 지원
@@ -139,23 +141,28 @@ docker run -d --name tinyrdm \
 
 ### 환경 변수
 
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `ADMIN_USERNAME` | 로그인 사용자 이름 | - |
-| `ADMIN_PASSWORD` | 로그인 비밀번호 | - |
+| 변수               | 설명         | 기본값 |
+|------------------|------------|-----|
+| `ADMIN_USERNAME` | 로그인 사용자 이름 | -   |
+| `ADMIN_PASSWORD` | 로그인 비밀번호   | -   |
+
+## 스폰서
+
+다음 서비스 제공업체의 호스팅 후원에 감사드립니다
+
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>이 프로젝트를 후원해 준 FlyMux에 특별히 감사드립니다! FlyMux는 Claude Code와 Codex를 위한 공식 고안정 중계 서비스 제공에 집중하며, 개발자에게 매끄럽고 효율적인 AI 코딩 연동 경험을 제공하고 있습니다. TinyRDM 사용자 전용 혜택으로 <a href="https://flymux.com/register?promo=TINYRDM">이 링크</a>를 통해 가입하면 계정에 $5 보너스 크레딧이 자동으로 지급됩니다.</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>이 프로젝트를 후원해 준 NotIDC에 특별히 감사드립니다. NotIDC는 클라우드 서버, 베어메탈, CDN, 보안 솔루션을 포함한 고성능 클라우드 인프라를 제공하며, 글로벌 네트워크 커버리지와 안정적인 DDoS 방어를 바탕으로 개발자가 애플리케이션을 효율적으로 배포하고 확장할 수 있도록 돕습니다.</td>
+</tr>
+</table>
 
 ## 소개
 
-### 스폰서
+### 위챗 공식 계정
 
-이 프로젝트가 도움이 되셨다면 커피 한 잔 사주세요 ☕️
-
-* Wechat 후원
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### 감사
-
-호스팅 후원을 제공해 주신 다음 서비스 제공업체에 감사드립니다
-
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />

@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM — современный легковесный кроссплатформенный менеджер Redis для Mac, Windows и Linux. Также доступна веб-версия с возможностью развёртывания через Docker.</strong>
+<strong>Tiny RDM — современный легковесный кроссплатформенный менеджер Redis для Mac, Windows и Linux. Также доступна
+веб-версия с возможностью развёртывания через Docker.</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## Возможности
 
 * Сверхлёгкий, на базе Webview2, без встроенного браузера (Спасибо [Wails](https://github.com/wailsapp/wails))
-* Визуально приятный и удобный интерфейс, светлая и тёмная темы (Спасибо [Naive UI](https://github.com/tusen-ai/naive-ui) и [IconPark](https://iconpark.oceanengine.com))
+* Визуально приятный и удобный интерфейс, светлая и тёмная темы (
+  Спасибо [Naive UI](https://github.com/tusen-ai/naive-ui) и [IconPark](https://iconpark.oceanengine.com))
 * Поддержка нескольких языков ([Нужно больше языков? Нажмите здесь, чтобы помочь](.github/CONTRIBUTING.md))
 * Улучшенное управление подключениями: SSH-туннель/SSL/режим Sentinel/режим Cluster/HTTP-прокси/SOCKS5-прокси
 * Визуализация операций с ключами, поддержка CRUD для List, Hash, String, Set, Sorted Set и Stream
@@ -45,7 +47,8 @@
 * Импорт/экспорт данных
 * Публикация/подписка
 * Импорт/экспорт профилей подключений
-* Пользовательские кодировщики и декодировщики для отображения значений ([Инструкция](https://tinyrdm.com/guide/custom-decoder/))
+* Пользовательские кодировщики и декодировщики для отображения
+  значений ([Инструкция](https://tinyrdm.com/guide/custom-decoder/))
 
 ## Установка
 
@@ -139,23 +142,28 @@ docker run -d --name tinyrdm \
 
 ### Переменные окружения
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `ADMIN_USERNAME` | Имя пользователя | - |
-| `ADMIN_PASSWORD` | Пароль | - |
+| Переменная       | Описание         | По умолчанию |
+|------------------|------------------|--------------|
+| `ADMIN_USERNAME` | Имя пользователя | -            |
+| `ADMIN_PASSWORD` | Пароль           | -            |
 
-## О проекте
-
-### Спонсорство
-
-Если этот проект оказался полезным, угостите автора чашкой кофе ☕️
-
-* Wechat Sponsor
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### Благодарности
+## Спонсоры
 
 Благодарим следующих поставщиков услуг за спонсорство хостинга
 
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>Отдельная благодарность FlyMux за спонсорскую поддержку этого проекта! FlyMux специализируется на предоставлении официальных и высокостабильных relay-сервисов для Claude Code и Codex, помогая разработчикам получить удобный и эффективный опыт интеграции AI-инструментов. Специально для пользователей TinyRDM: зарегистрируйтесь по <a href="https://flymux.com/register?promo=TINYRDM">этой ссылке</a>, и на ваш аккаунт автоматически будет начислен бонусный кредит $5.</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>Отдельная благодарность NotIDC за спонсорскую поддержку проекта. NotIDC предоставляет высокопроизводительную облачную инфраструктуру, включая облачные серверы, bare metal, CDN и решения безопасности, с глобальным покрытием сети и надёжной защитой от DDoS, помогая разработчикам эффективно развёртывать и масштабировать приложения.</td>
+</tr>
+</table>
+
+## О проекте
+
+### Официальный аккаунт WeChat
+
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />

@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM é um gerenciador Redis moderno, leve e multiplataforma, disponível para Mac, Windows e Linux. Também oferece uma versão web que pode ser implantada via Docker.</strong>
+<strong>Tiny RDM é um gerenciador Redis moderno, leve e multiplataforma, disponível para Mac, Windows e Linux. Também
+oferece uma versão web que pode ser implantada via Docker.</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## Funcionalidades
 
 * Ultra leve, baseado em Webview2, sem navegador embutido (Graças ao [Wails](https://github.com/wailsapp/wails))
-* Interface visual e amigável, temas claro e escuro (Graças ao [Naive UI](https://github.com/tusen-ai/naive-ui) e [IconPark](https://iconpark.oceanengine.com))
+* Interface visual e amigável, temas claro e escuro (Graças ao [Naive UI](https://github.com/tusen-ai/naive-ui)
+  e [IconPark](https://iconpark.oceanengine.com))
 * Suporte multilíngue ([Precisa de mais idiomas? Clique aqui para contribuir](.github/CONTRIBUTING.md))
 * Gerenciamento aprimorado de conexões: túnel SSH/SSL/modo Sentinel/modo Cluster/proxy HTTP/proxy SOCKS5
 * Visualização de operações chave-valor, suporte CRUD para List, Hash, String, Set, Sorted Set e Stream
@@ -45,7 +47,8 @@
 * Importação/exportação de dados
 * Publicação/assinatura
 * Importação/exportação de perfis de conexão
-* Codificador e decodificador de dados personalizados para exibição de valores ([Instruções aqui](https://tinyrdm.com/guide/custom-decoder/))
+* Codificador e decodificador de dados personalizados para exibição de
+  valores ([Instruções aqui](https://tinyrdm.com/guide/custom-decoder/))
 
 ## Instalação
 
@@ -139,23 +142,28 @@ docker run -d --name tinyrdm \
 
 ### Variáveis de ambiente
 
-| Variável | Descrição | Padrão |
-|----------|-----------|--------|
-| `ADMIN_USERNAME` | Nome de usuário | - |
-| `ADMIN_PASSWORD` | Senha | - |
+| Variável         | Descrição       | Padrão |
+|------------------|-----------------|--------|
+| `ADMIN_USERNAME` | Nome de usuário | -      |
+| `ADMIN_PASSWORD` | Senha           | -      |
 
-## Sobre
-
-### Patrocinar
-
-Se este projeto foi útil para você, sinta-se à vontade para pagar um café ☕️
-
-* Wechat Sponsor
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### Agradecimentos
+## Patrocínio
 
 Agradecemos aos seguintes provedores de serviços pelo patrocínio de hospedagem
 
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>Agradecimento especial à FlyMux por patrocinar este projeto! A FlyMux se dedica a fornecer serviços oficiais de retransmissão com alta estabilidade para Claude Code e Codex, focando em criar uma experiência de integração fluida e eficiente para desenvolvedores. Como benefício exclusivo para usuários do TinyRDM, ao se registrar por meio de <a href="https://flymux.com/register?promo=TINYRDM">deste link</a>, você receberá automaticamente um crédito bônus de $5 na sua conta.</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>Agradecimento especial à NotIDC pelo apoio de patrocínio a este projeto. A NotIDC oferece infraestrutura em nuvem de alto desempenho, incluindo servidores em nuvem, bare metal, CDN e soluções de segurança, com cobertura global de rede e proteção DDoS confiável, ajudando desenvolvedores a implantar e escalar aplicações com eficiência.</td>
+</tr>
+</table>
+
+## Sobre
+
+### Conta oficial do WeChat
+
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />

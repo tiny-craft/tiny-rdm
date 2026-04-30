@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM 是一款現代化輕量級的跨平台 Redis 桌面管理工具，支援 Mac、Windows 和 Linux，同時提供 Web 版本，可透過 Docker 快速部署</strong>
+<strong>Tiny RDM 是一款現代化輕量級的跨平台 Redis 桌面管理工具，支援 Mac、Windows 和 Linux，同時提供 Web 版本，可透過 Docker
+快速部署</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## 功能特性
 
 * 極度輕量，基於 Webview2，無內嵌瀏覽器（感謝 [Wails](https://github.com/wailsapp/wails)）
-* 介面精美易用，提供淺色/深色主題（感謝 [Naive UI](https://github.com/tusen-ai/naive-ui) 和 [IconPark](https://iconpark.oceanengine.com)）
+* 介面精美易用，提供淺色/深色主題（感謝 [Naive UI](https://github.com/tusen-ai/naive-ui)
+  和 [IconPark](https://iconpark.oceanengine.com)）
 * 多國語言支援（[需要更多語言支援？點此貢獻](.github/CONTRIBUTING.md)）
 * 更好的連線管理：支援 SSH 隧道/SSL/哨兵模式/叢集模式/HTTP 代理/SOCKS5 代理
 * 視覺化鍵值操作，支援 List、Hash、String、Set、Sorted Set 和 Stream 的 CRUD
@@ -139,10 +141,25 @@ docker run -d --name tinyrdm \
 
 ### 環境變數說明
 
-| 變數 | 說明 | 預設值 |
-|------|------|--------|
-| `ADMIN_USERNAME` | 登入帳號 | - |
-| `ADMIN_PASSWORD` | 登入密碼 | - |
+| 變數               | 說明   | 預設值 |
+|------------------|------|-----|
+| `ADMIN_USERNAME` | 登入帳號 | -   |
+| `ADMIN_PASSWORD` | 登入密碼 | -   |
+
+### 感謝
+
+感謝以下服務商提供主機贊助
+
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>感謝 FlyMux 贊助本專案！FlyMux 致力於提供 Claude Code 與 Codex 官方高穩定中轉服務，專注為開發者打造流暢、便捷的 AI 程式開發接入體驗。FlyMux 為 TinyRDM 使用者提供專屬特別福利：透過<a href="https://flymux.com/register?promo=TINYRDM">此連結</a>註冊帳號可直接獲得 $5 充值額度！</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>特別感謝 NotiDC 對本專案的贊助支持。NotiDC 提供高效能雲端伺服器、裸金屬、CDN 及安全防護等基礎設施服務，具備全球網路覆蓋與穩定的抗 DDoS 能力，協助開發者高效部署與擴展應用。</td>
+</tr>
+</table>
 
 ## 關於
 
@@ -153,9 +170,3 @@ docker run -d --name tinyrdm \
 * 微信贊賞
 
 <img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### 感謝
-
-感謝以下服務商提供主機贊助
-
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")

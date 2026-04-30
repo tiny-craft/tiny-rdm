@@ -13,7 +13,8 @@
 [![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
 [![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
-<strong>Tiny RDMは、Mac、Windows、Linuxで利用可能な、モダンで軽量なクロスプラットフォームのRedisデスクトップマネージャーです。Docker経由でデプロイ可能なWeb版も提供しています。</strong>
+<strong>Tiny
+RDMは、Mac、Windows、Linuxで利用可能な、モダンで軽量なクロスプラットフォームのRedisデスクトップマネージャーです。Docker経由でデプロイ可能なWeb版も提供しています。</strong>
 </div>
 
 <picture>
@@ -31,7 +32,8 @@
 ## 特徴
 
 * 超軽量、Webview2をベースにしており、埋め込みブラウザなし（[Wails](https://github.com/wailsapp/wails)に感謝）。
-* 視覚的でユーザーフレンドリーなUI、ライトとダークテーマを提供（[Naive UI](https://github.com/tusen-ai/naive-ui)と[IconPark](https://iconpark.oceanengine.com)に感謝）。
+* 視覚的でユーザーフレンドリーなUI、ライトとダークテーマを提供（[Naive UI](https://github.com/tusen-ai/naive-ui)
+  と[IconPark](https://iconpark.oceanengine.com)に感謝）。
 * 多言語サポート（[もっと多くの言語が必要ですか？ここをクリックして貢献してください](.github/CONTRIBUTING.md)）。
 * より良い接続管理：SSHトンネル/SSL/センチネルモード/クラスターモード/HTTPプロキシ/SOCKS5プロキシをサポート。
 * キー値操作の可視化、リスト、ハッシュ、文字列、セット、ソートセット、ストリームのCRUDサポート。
@@ -47,7 +49,8 @@
 * データのインポート/エクスポートをサポート。
 * パブリッシュ/サブスクライブをサポート。
 * 接続プロファイルのインポート/エクスポートをサポート。
-* 値表示のためのカスタムデータエンコーダーとデコーダーをサポート（[こちらが手順です](https://tinyrdm.com/guide/custom-decoder/)）。
+*
+値表示のためのカスタムデータエンコーダーとデコーダーをサポート（[こちらが手順です](https://tinyrdm.com/guide/custom-decoder/)）。
 
 ## インストール
 
@@ -141,27 +144,28 @@ docker run -d --name tinyrdm \
 
 ### 環境変数の説明
 
-| 変数 | 説明 | デフォルト値 |
-|------|------|-------------|
-| `ADMIN_USERNAME` | ログインユーザー名 | - |
-| `ADMIN_PASSWORD` | ログインパスワード | - |
+| 変数               | 説明        | デフォルト値 |
+|------------------|-----------|--------|
+| `ADMIN_USERNAME` | ログインユーザー名 | -      |
+| `ADMIN_PASSWORD` | ログインパスワード | -      |
+
+## スポンサー
+
+以下のサービスプロバイダーによるホスティングスポンサーに感謝いたします
+
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>本プロジェクトをスポンサーしてくださった FlyMux に心より感謝します。FlyMux は Claude Code と Codex 向けの公式かつ高安定なリレーサービスの提供に注力し、開発者にスムーズで効率的な AI コーディングへの接続体験を届けています。TinyRDM ユーザー向けの特典として、<a href="https://flymux.com/register?promo=TINYRDM">このリンク</a>から登録すると、アカウントに $5 のボーナスクレジットが自動で追加されます。</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>本プロジェクトへのスポンサー支援を行ってくださった NotIDC に心より感謝します。NotIDC はクラウドサーバー、ベアメタル、CDN、セキュリティソリューションを含む高性能なクラウドインフラを提供しており、グローバルなネットワークカバレッジと信頼性の高い DDoS 対策によって、開発者の効率的なデプロイとスケールを支援します。</td>
+</tr>
+</table>
 
 ## について
 
-### Wechat公式アカウント
+### WeChat公式アカウント
 
 <img src="docs/images/wechat_official.png" alt="wechat" width="360" />
-
-### スポンサー
-
-このプロジェクトが役立つ場合は、コーヒーを一杯おごってください ☕️。
-
-* Wechatスポンサー
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### 謝辞
-
-以下のサービスプロバイダーによるホスティングスポンサーシップに感謝いたします
-
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")

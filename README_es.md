@@ -11,7 +11,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
 
-<strong>Tiny RDM es un gestor Redis moderno, ligero y multiplataforma, disponible para Mac, Windows y Linux. También ofrece una versión web que se puede desplegar mediante Docker.</strong>
+<strong>Tiny RDM es un gestor Redis moderno, ligero y multiplataforma, disponible para Mac, Windows y Linux. También
+ofrece una versión web que se puede desplegar mediante Docker.</strong>
 </div>
 
 <picture>
@@ -29,7 +30,8 @@
 ## Características
 
 * Ultra ligero, basado en Webview2, sin navegador integrado (Gracias a [Wails](https://github.com/wailsapp/wails))
-* Interfaz visual y fácil de usar, temas claro y oscuro (Gracias a [Naive UI](https://github.com/tusen-ai/naive-ui) e [IconPark](https://iconpark.oceanengine.com))
+* Interfaz visual y fácil de usar, temas claro y oscuro (Gracias a [Naive UI](https://github.com/tusen-ai/naive-ui)
+  e [IconPark](https://iconpark.oceanengine.com))
 * Soporte multilingüe ([¿Necesitas más idiomas? Haz clic aquí para contribuir](.github/CONTRIBUTING.md))
 * Gestión mejorada de conexiones: túnel SSH/SSL/modo Sentinel/modo Cluster/proxy HTTP/proxy SOCKS5
 * Visualización de operaciones clave-valor, soporte CRUD para List, Hash, String, Set, Sorted Set y Stream
@@ -45,7 +47,8 @@
 * Importación/exportación de datos
 * Publicación/suscripción
 * Importación/exportación de perfiles de conexión
-* Codificador y decodificador de datos personalizados para la visualización de valores ([Instrucciones aquí](https://tinyrdm.com/guide/custom-decoder/))
+* Codificador y decodificador de datos personalizados para la visualización de
+  valores ([Instrucciones aquí](https://tinyrdm.com/guide/custom-decoder/))
 
 ## Instalación
 
@@ -139,23 +142,28 @@ docker run -d --name tinyrdm \
 
 ### Variables de entorno
 
-| Variable | Descripción | Valor por defecto |
-|----------|-------------|-------------------|
-| `ADMIN_USERNAME` | Nombre de usuario | - |
-| `ADMIN_PASSWORD` | Contraseña | - |
+| Variable         | Descripción       | Valor por defecto |
+|------------------|-------------------|-------------------|
+| `ADMIN_USERNAME` | Nombre de usuario | -                 |
+| `ADMIN_PASSWORD` | Contraseña        | -                 |
 
-## Acerca de
-
-### Patrocinar
-
-Si este proyecto te resulta útil, no dudes en invitar al autor a un café ☕️
-
-* Wechat Sponsor
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### Agradecimientos
+## Patrocinio
 
 Gracias a los siguientes proveedores de servicios por el patrocinio de alojamiento
 
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>¡Agradecimiento especial a FlyMux por patrocinar este proyecto! FlyMux se dedica a ofrecer servicios oficiales de retransmisión de alta estabilidad para Claude Code y Codex, con el objetivo de brindar a los desarrolladores una experiencia de integración fluida y eficiente. Como beneficio exclusivo para los usuarios de TinyRDM, al registrarte mediante <a href="https://flymux.com/register?promo=TINYRDM">este enlace</a> recibirás automáticamente un crédito adicional de $5 en tu cuenta.</td>
+</tr>
+<tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>Agradecimiento especial a NotIDC por apoyar este proyecto con su patrocinio. NotIDC ofrece infraestructura en la nube de alto rendimiento, incluyendo servidores cloud, bare metal, CDN y soluciones de seguridad, con cobertura global de red y protección DDoS confiable para ayudar a los desarrolladores a desplegar y escalar aplicaciones con eficiencia.</td>
+</tr>
+</table>
+
+## Acerca de
+
+### Cuenta oficial de WeChat
+
+<img src="docs/images/wechat_official.png" alt="wechat" width="360" />
