@@ -13,7 +13,8 @@
 [![Discord](https://img.shields.io/discord/1170373259133456434?label=Discord&color=5865F2)](https://discord.gg/VTFbBMGjWh)
 [![X](https://img.shields.io/badge/Twitter-black?logo=x&logoColor=white)](https://twitter.com/Lykin53448)
 
-<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux. It also provides a web version that can be deployed via Docker.</strong>
+<strong>Tiny RDM is a modern lightweight cross-platform Redis desktop manager available for Mac, Windows, and Linux. It
+also provides a web version that can be deployed via Docker.</strong>
 </div>
 
 <picture>
@@ -32,7 +33,8 @@
 
 * Super lightweight, built on Webview2, without embedded browsers (Thanks
   to [Wails](https://github.com/wailsapp/wails)).
-* Provides visually and user-friendly UI, light and dark themes (Thanks to [Naive UI](https://github.com/tusen-ai/naive-ui)
+* Provides visually and user-friendly UI, light and dark themes (Thanks
+  to [Naive UI](https://github.com/tusen-ai/naive-ui)
   and [IconPark](https://iconpark.oceanengine.com)).
 * Multi-language support ([Need more languages ? Click here to contribute](.github/CONTRIBUTING.md)).
 * Better connection management: supports SSH Tunnel/SSL/Sentinel Mode/Cluster Mode/HTTP proxy/SOCKS5 proxy.
@@ -49,7 +51,8 @@
 * Support import/export data.
 * Support publish/subscribe.
 * Support import/export connection profile.
-* Custom data encoder and decoder for value display ([Here are the instructions](https://tinyrdm.com/guide/custom-decoder/)).
+* Custom data encoder and decoder for value
+  display ([Here are the instructions](https://tinyrdm.com/guide/custom-decoder/)).
 
 ## Installation
 
@@ -143,27 +146,26 @@ docker run -d --name tinyrdm \
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ADMIN_USERNAME` | Login username | - |
-| `ADMIN_PASSWORD` | Login password | - |
+| Variable         | Description    | Default |
+|------------------|----------------|---------|
+| `ADMIN_USERNAME` | Login username | -       |
+| `ADMIN_PASSWORD` | Login password | -       |
+
+## Sponsor
+
+Thanks to the following service providers for hosting sponsorship
+
+<table>
+<tr>
+<td width="200"><a href="https://flymux.com/register?promo=TINYRDM"><img alt="FlyMux" src="docs/images/flymux_logo.png"/></a></td>
+<td>Special thanks to FlyMux for sponsoring this project! FlyMux is committed to providing official, high-stability relay services for Claude Code and Codex, focusing on creating a seamless and efficient integration experience for developers. As an exclusive benefit for TinyRDM users, register via <a href="https://flymux.com/register?promo=TINYRDM">this link</a> to receive a $5 bonus credit automatically added to your account.</td>
+</tr>
+<td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
+<td>Special thanks to NotIDC for sponsoring this project. NotIDC provides high-performance cloud infrastructure including cloud servers, bare metal, CDN, and security solutions, with global network coverage and reliable DDoS protection, helping developers deploy and scale applications efficiently.</td>
+</table>
 
 ## About
 
 ### Wechat Official Account
 
 <img src="docs/images/wechat_official.png" alt="wechat" width="360" />
-
-### Sponsor
-
-If this project helpful for you, feel free to buy me a cup of coffee ☕️.
-
-* Wechat Sponsor
-
-<img src="docs/images/wechat_sponsor.jpg" alt="wechat" width="200" />
-
-### Thanks
-
-Thanks to the following service providers for hosting sponsorship
-
-[![Powered by NotiDC](docs/images/notidc_logo.png)](https://www.notidc.com/ "Powered by NotiDC")
