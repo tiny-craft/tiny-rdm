@@ -161,7 +161,7 @@ Thanks to the following service providers for hosting sponsorship
 <td>Special thanks to FlyMux for sponsoring this project! FlyMux is committed to providing official, high-stability relay services for Claude Code and Codex, focusing on creating a seamless and efficient integration experience for developers. As an exclusive benefit for TinyRDM users, register via <a href="https://flymux.com/register?promo=TINYRDM">this link</a> to receive a $5 bonus credit automatically added to your account.</td>
 </tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>Special thanks to NotIDC for sponsoring this project. NotIDC provides high-performance cloud infrastructure including cloud servers, bare metal, CDN, and security solutions, with global network coverage and reliable DDoS protection, helping developers deploy and scale applications efficiently.</td>
+<td>Special thanks to NotIDC for sponsoring this project! NotIDC provides high-performance cloud infrastructure including cloud servers, bare metal, CDN, and security solutions, with global network coverage and reliable DDoS protection, helping developers deploy and scale applications efficiently.</td>
 </table>
 
 ## About

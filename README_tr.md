@@ -158,7 +158,7 @@ Barındırma sponsorluğu sağlayan aşağıdaki hizmet sağlayıcılarına teş
 </tr>
 <tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>Bu projeye sponsor desteği verdiği için NotIDC'ye özel teşekkürler. NotIDC, bulut sunucuları, bare metal, CDN ve güvenlik çözümleri dahil yüksek performanslı bulut altyapısı sunar; küresel ağ kapsamı ve güvenilir DDoS korumasıyla geliştiricilerin uygulamalarını verimli şekilde dağıtmasına ve ölçeklemesine yardımcı olur.</td>
+<td>Bu projeye sponsor olduğu için NotiDC'a özel teşekkürler! NotIDC, bulut sunucuları, bare metal, CDN ve güvenlik çözümleri dahil yüksek performanslı bulut altyapısı sunar; küresel ağ kapsamı ve güvenilir DDoS korumasıyla geliştiricilerin uygulamalarını verimli şekilde dağıtmasına ve ölçeklemesine yardımcı olur.</td>
 </tr>
 </table>
 

@@ -157,7 +157,7 @@ docker run -d --name tinyrdm \
 </tr>
 <tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>이 프로젝트를 후원해 준 NotIDC에 특별히 감사드립니다. NotIDC는 클라우드 서버, 베어메탈, CDN, 보안 솔루션을 포함한 고성능 클라우드 인프라를 제공하며, 글로벌 네트워크 커버리지와 안정적인 DDoS 방어를 바탕으로 개발자가 애플리케이션을 효율적으로 배포하고 확장할 수 있도록 돕습니다.</td>
+<td>이 프로젝트를 후원해 준 NotiDC에 특별히 감사드립니다! NotIDC는 클라우드 서버, 베어메탈, CDN, 보안 솔루션을 포함한 고성능 클라우드 인프라를 제공하며, 글로벌 네트워크 커버리지와 안정적인 DDoS 방어를 바탕으로 개발자가 애플리케이션을 효율적으로 배포하고 확장할 수 있도록 돕습니다.</td>
 </tr>
 </table>
 

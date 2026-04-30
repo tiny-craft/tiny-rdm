@@ -157,7 +157,7 @@ docker run -d --name tinyrdm \
 </tr>
 <tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>特別感謝 NotiDC 對本專案的贊助支持。NotiDC 提供高效能雲端伺服器、裸金屬、CDN 及安全防護等基礎設施服務，具備全球網路覆蓋與穩定的抗 DDoS 能力，協助開發者高效部署與擴展應用。</td>
+<td>感謝 NotiDC 贊助本專案！NotiDC 提供高效能雲端伺服器、裸金屬、CDN 及安全防護等基礎設施服務，具備全球網路覆蓋與穩定的抗 DDoS 能力，協助開發者高效部署與擴展應用。</td>
 </tr>
 </table>
 

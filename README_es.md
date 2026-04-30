@@ -158,7 +158,7 @@ Gracias a los siguientes proveedores de servicios por el patrocinio de alojamien
 </tr>
 <tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>Agradecimiento especial a NotIDC por apoyar este proyecto con su patrocinio. NotIDC ofrece infraestructura en la nube de alto rendimiento, incluyendo servidores cloud, bare metal, CDN y soluciones de seguridad, con cobertura global de red y protección DDoS confiable para ayudar a los desarrolladores a desplegar y escalar aplicaciones con eficiencia.</td>
+<td>¡Agradecimiento especial a NotiDC por patrocinar este proyecto! NotIDC ofrece infraestructura en la nube de alto rendimiento, incluyendo servidores cloud, bare metal, CDN y soluciones de seguridad, con cobertura global de red y protección DDoS confiable para ayudar a los desarrolladores a desplegar y escalar aplicaciones con eficiencia.</td>
 </tr>
 </table>
 

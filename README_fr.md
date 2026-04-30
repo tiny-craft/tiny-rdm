@@ -158,7 +158,7 @@ Merci aux fournisseurs de services suivants pour le parrainage de l'hébergement
 </tr>
 <tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>Un grand merci à NotIDC pour son soutien sponsorisé à ce projet. NotIDC fournit une infrastructure cloud haute performance, incluant des serveurs cloud, du bare metal, un CDN et des solutions de sécurité, avec une couverture réseau mondiale et une protection DDoS fiable pour aider les développeurs à déployer et faire évoluer leurs applications efficacement.</td>
+<td>Un grand merci à NotiDC pour le parrainage de ce projet ! NotIDC fournit une infrastructure cloud haute performance, incluant des serveurs cloud, du bare metal, un CDN et des solutions de sécurité, avec une couverture réseau mondiale et une protection DDoS fiable pour aider les développeurs à déployer et faire évoluer leurs applications efficacement.</td>
 </tr>
 </table>
 

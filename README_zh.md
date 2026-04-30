@@ -155,7 +155,7 @@ docker run -d --name tinyrdm \
 <td>感谢 FlyMux 赞助了本项目！FlyMux 致力于提供 Claude Code 与 Codex 官方高稳定中转服务，专注于为开发者打造流畅、便捷的 AI 编程接入体验。FlyMux 为 TinyRDM 用户提供了专属特别福利：通过<a href="https://flymux.com/register?promo=TINYRDM">此链接</a>账号直接到账 $5 赠送额度！</td>
 </tr>
 <td width="200"><a href="https://www.notidc.com/"><img src="docs/images/notidc_logo.png" alt="NotiDC"></a></td>
-<td>特别感谢 NotIDC 对本项目的赞助支持。NotIDC 提供高性能云服务器、裸金属、CDN 及安全防护等基础设施服务，具备全球网络覆盖与稳定的抗 DDoS 能力，助力开发者高效部署与扩展应用。</td>
+<td>感谢 NotiDC 赞助了本项目！NotIDC 提供高性能云服务器、裸金属、CDN 及安全防护等基础设施服务，具备全球网络覆盖与稳定的抗 DDoS 能力，助力开发者高效部署与扩展应用。</td>
 </table>
 
 ## 关于
