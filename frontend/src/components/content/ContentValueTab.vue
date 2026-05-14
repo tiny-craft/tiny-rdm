@@ -18,6 +18,7 @@ const connectionStore = useConnectionStore()
 const prefStore = usePreferencesStore()
 
 const onCloseTab = (tabIndex) => {
+    document.activeElement.blur()
     const tab = get(tabStore.tabs, tabIndex)
     tabStore.closeTab(tab.name)
 }
