@@ -11,7 +11,6 @@ import usePreferencesStore from 'stores/preferences.js'
 import { loadEnvironment } from '@/utils/platform.js'
 import { setupMonaco } from '@/utils/monaco.js'
 import { setupChart } from '@/utils/chart.js'
-import { isWeb } from './utils/platform.js'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -25,9 +24,7 @@ async function setupApp() {
     setupMonaco()
     setupChart()
     const prefStore = usePreferencesStore()
-    if (isWeb()) {
-        await prefStore.loadAppVersion()
-    }
+    await prefStore.loadAppVersion()
     await prefStore.loadPreferences()
     await setupDiscreteApi()
     app.config.errorHandler = (err, instance, info) => {
