@@ -5,8 +5,7 @@ import (
 	"path"
 
 	"tinyrdm/backend/consts"
-
-	"github.com/vrischmann/userdir"
+	"tinyrdm/backend/utils/confdir"
 )
 
 // localStorage provides reading and writing application data to the user's
@@ -18,7 +17,7 @@ type localStorage struct {
 // NewLocalStore returns a localStore instance.
 func NewLocalStore(filename string) *localStorage {
 	return &localStorage{
-		ConfPath: path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, filename),
+		ConfPath: path.Join(confdir.GetConfigDir(), consts.APP_DATA_FOLDER, filename),
 	}
 }
 

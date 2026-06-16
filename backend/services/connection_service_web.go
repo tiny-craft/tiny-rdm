@@ -12,7 +12,6 @@ import (
 	"tinyrdm/backend/types"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/vrischmann/userdir"
 )
 
 // ExportConnectionsToBytes exports connections as zip bytes for web download
@@ -20,7 +19,7 @@ func (c *connectionService) ExportConnectionsToBytes() ([]byte, string, error) {
 	const connectionFilename = "connections.yaml"
 	filename := "connections_" + time.Now().Format("20060102150405") + ".zip"
 
-	inputFile, err := os.Open(path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, connectionFilename))
+	inputFile, err := os.Open(path.Join(confdir.GetConfigDir(), consts.APP_DATA_FOLDER, connectionFilename))
 	if err != nil {
 		return nil, "", err
 	}
@@ -78,7 +77,7 @@ func (c *connectionService) ImportConnectionsFromBytes(data []byte) (resp types.
 	}
 	defer zippedFile.Close()
 
-	outputFile, err := os.Create(path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, connectionFilename))
+	outputFile, err := os.Create(path.Join(confdir.GetConfigDir(), consts.APP_DATA_FOLDER, connectionFilename))
 	if err != nil {
 		resp.Msg = "failed to save connections"
 		return
