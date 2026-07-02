@@ -14,10 +14,10 @@
         "lodash": "^4.18.1",
         "monaco-editor": "^0.47.0",
         "pinia": "^3.0.4",
-        "sass": "^1.100.0",
-        "vue": "^3.5.38",
+        "sass": "^1.101.0",
+        "vue": "^3.5.39",
         "vue-chartjs": "^5.3.3",
-        "vue-i18n": "^11.4.5",
+        "vue-i18n": "^11.4.6",
         "wcwidth": "^1.0.1",
         "xterm": "^5.3.0",
         "xterm-addon-fit": "^0.8.0"
@@ -25,10 +25,10 @@
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.7",
         "naive-ui": "^2.44.1",
-        "prettier": "^3.8.4",
+        "prettier": "^3.9.4",
         "unplugin-auto-import": "^21.0.0",
         "unplugin-icons": "^23.0.1",
         "unplugin-vue-components": "^32.1.0",
-        "vite": "^8.0.16"
+        "vite": "^8.1.3"
     }
 }
