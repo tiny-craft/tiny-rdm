@@ -18,6 +18,7 @@ const useDialogStore = defineStore('dialog', {
         connParam: null,
 
         groupDialogVisible: false,
+        newGroupCallback: null,
         editGroup: '',
 
         /**
@@ -153,9 +154,10 @@ const useDialogStore = defineStore('dialog', {
             this.connDialogVisible = true
         },
 
-        openNewGroupDialog() {
+        openNewGroupDialog(callback = null) {
             this.editGroup = ''
             this.groupDialogVisible = true
+            this.newGroupCallback = callback;
         },
         closeNewGroupDialog() {
             this.groupDialogVisible = false

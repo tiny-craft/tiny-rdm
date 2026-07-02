@@ -64,6 +64,8 @@ const onConfirm = async () => {
             const { success, msg } = await connectionStore.createGroup(name)
             if (success) {
                 $message.success(i18n.t('dialogue.handle_succ'))
+                if (dialogStore.newGroupCallback != null)
+                    dialogStore.newGroupCallback(name);
             } else {
                 $message.error(msg)
             }

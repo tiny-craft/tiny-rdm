@@ -12,6 +12,7 @@ import { useThemeVars } from 'naive-ui'
 import useBrowserStore from 'stores/browser.js'
 import Delete from '@/components/icons/Delete.vue'
 import Add from '@/components/icons/Add.vue'
+import AddGroup from '@/components/icons/AddGroup.vue'
 import IconButton from '@/components/common/IconButton.vue'
 
 /**
@@ -300,6 +301,15 @@ const onClose = () => {
     dialogStore.closeConnDialog()
 }
 
+const onNewGroupClick = () => {
+    dialogStore.openNewGroupDialog(newGroup)
+}
+
+function newGroup(newGroupName)
+{
+    generalForm.value.group = newGroupName;
+}
+
 const pasteFromClipboard = async () => {
     // url example:
     // rediss://user:password@localhost:6789/3?dial_timeout=3&db=1&read_timeout=6s&max_retries=2
@@ -379,7 +389,16 @@ const pasteFromClipboard = async () => {
                                 <n-select
                                     v-model:value="generalForm.group"
                                     :options="groupOptions"
-                                    :render-label="({ label, value }) => (value === '' ? $t(label) : label)" />
+                                    :render-label="({ label, value }) => (value === '' ? $t(label) : label)" 
+                                    />
+                                    <div style="margin-left:4px;">
+                                        <icon-button
+                                            :icon="AddGroup"
+                                            :stroke-width="3.5"
+                                            size="20"
+                                            t-tooltip="interface.new_group"
+                                            @click="onNewGroupClick()" />
+                                    </div>
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
                                 <n-input-group>
