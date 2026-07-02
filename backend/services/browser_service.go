@@ -229,7 +229,11 @@ func (b *browserService) OpenConnection(name string) (resp types.JSResp) {
 	if res, err := client.Info(ctx, "server").Result(); err == nil || errors.Is(err, redis.Nil) {
 		info := b.parseInfo(res)
 		serverInfo := maputil.Get(info, "Server", map[string]string{})
-		version = maputil.Get(serverInfo, "redis_version", "1.0.0")
+		// Prefer valkey_version if present, fallback to redis_version
+		version = maputil.Get(serverInfo, "valkey_version", "")
+		if version == "" {
+			version = maputil.Get(serverInfo, "redis_version", "1.0.0")
+		}
 	}
 
 	resp.Success = true

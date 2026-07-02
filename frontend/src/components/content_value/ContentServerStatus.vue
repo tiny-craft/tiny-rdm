@@ -250,6 +250,10 @@ onUnmounted(() => {
     stopAutoRefresh()
 })
 
+const valkeyVersion = computed(() => {
+    return get(serverInfo.value, 'Server.valkey_version', '')
+})
+
 const redisVersion = computed(() => {
     return get(serverInfo.value, 'Server.redis_version', '')
 })
@@ -595,7 +599,13 @@ const clientTableColumns = computed(() => {
             <template #header>
                 <n-space :wrap-item="false" align="center" inline size="small">
                     {{ props.server }}
-                    <n-tooltip v-if="redisVersion">
+                    <n-tooltip v-if="valkeyVersion">
+                        Valkey Version
+                        <template #trigger>
+                            <n-tag size="small" type="primary">v{{ valkeyVersion }}</n-tag>
+                        </template>
+                    </n-tooltip>
+                    <n-tooltip v-else-if="redisVersion">
                         Redis Version
                         <template #trigger>
                             <n-tag size="small" type="primary">v{{ redisVersion }}</n-tag>
