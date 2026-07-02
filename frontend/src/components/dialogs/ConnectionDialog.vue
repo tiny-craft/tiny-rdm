@@ -76,9 +76,7 @@ const onUpdateDBFilterType = (t) => {
     }
 }
 
-const aliasPair = ref([
-    /*{ db: 0, alias: '' }*/
-])
+const aliasPair = ref([/*{ db: 0, alias: '' }*/])
 const onCreateAlias = () => {
     return {
         db: 0,
@@ -301,13 +299,10 @@ const onClose = () => {
     dialogStore.closeConnDialog()
 }
 
-const onNewGroupClick = () => {
-    dialogStore.openNewGroupDialog(newGroup)
-}
-
-function newGroup(newGroupName)
-{
-    generalForm.value.group = newGroupName;
+const onNewGroup = () => {
+    dialogStore.openNewGroupDialog((newGroupName) => {
+        generalForm.value.group = newGroupName
+    })
 }
 
 const pasteFromClipboard = async () => {
@@ -386,19 +381,21 @@ const pasteFromClipboard = async () => {
                                 :label="$t('dialogue.connection.group')"
                                 :span="24"
                                 required>
-                                <n-select
-                                    v-model:value="generalForm.group"
-                                    :options="groupOptions"
-                                    :render-label="({ label, value }) => (value === '' ? $t(label) : label)" 
-                                    />
-                                    <div style="margin-left:4px;">
+                                <div class="connection-group-selector">
+                                    <n-select
+                                        v-model:value="generalForm.group"
+                                        class="connection-group-select"
+                                        :options="groupOptions"
+                                        :render-label="({ label, value }) => (value === '' ? $t(label) : label)" />
+                                    <div class="connection-group-action">
                                         <icon-button
                                             :icon="AddGroup"
                                             :stroke-width="3.5"
                                             size="20"
                                             t-tooltip="interface.new_group"
-                                            @click="onNewGroupClick()" />
+                                            @click="onNewGroup()" />
                                     </div>
+                                </div>
                             </n-form-item-gi>
                             <n-form-item-gi :label="$t('dialogue.connection.addr')" :span="24" path="addr" required>
                                 <n-input-group>
@@ -873,5 +870,24 @@ const pasteFromClipboard = async () => {
     border-style: solid;
     cursor: pointer;
     border-radius: 50%;
+}
+
+.connection-group-selector {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
+}
+
+.connection-group-select {
+    flex: 1;
+    min-width: 0;
+}
+
+.connection-group-action {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    margin: 0 0 0 5px;
 }
 </style>
