@@ -437,6 +437,10 @@ const findSiblingsAndIndex = (node, nodes) => {
     return [null, null]
 }
 
+const isRootNode = (node) => {
+    return connectionStore.connections.some((item) => item.key === node.key)
+}
+
 // delay save until drop stopped after 2 seconds
 const saveSort = debounce(connectionStore.saveConnectionSorted, 1500, { trailing: true })
 const handleDrop = ({ node, dragNode, dropPosition }) => {
@@ -445,6 +449,9 @@ const handleDrop = ({ node, dragNode, dropPosition }) => {
         return
     }
     if (node.type === ConnectionType.Group && dragNode.type === ConnectionType.Group) {
+        return
+    }
+    if (dragNode.type === ConnectionType.Group && !isRootNode(node)) {
         return
     }
     dragNodeSiblings.splice(dragNodeIndex, 1)
