@@ -17,11 +17,11 @@ import (
 	"tinyrdm/backend/consts"
 	. "tinyrdm/backend/storage"
 	"tinyrdm/backend/types"
+	"tinyrdm/backend/utils/confdir"
 	_ "tinyrdm/backend/utils/proxy"
 
 	"github.com/klauspost/compress/zip"
 	"github.com/redis/go-redis/v9"
-	"github.com/vrischmann/userdir"
 	sshagent "github.com/xanzy/ssh-agent"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
@@ -526,7 +526,7 @@ func (c *connectionService) ExportConnections() (resp types.JSResp) {
 
 	// compress the connections profile with zip
 	const connectionFilename = "connections.yaml"
-	inputFile, err := os.Open(path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, connectionFilename))
+	inputFile, err := os.Open(path.Join(confdir.GetConfigDir(), consts.APP_DATA_FOLDER, connectionFilename))
 	if err != nil {
 		resp.Msg = err.Error()
 		return
@@ -602,7 +602,7 @@ func (c *connectionService) ImportConnections() (resp types.JSResp) {
 		}
 		defer zippedFile.Close()
 
-		outputFile, err := os.Create(path.Join(userdir.GetConfigHome(), consts.APP_DATA_FOLDER, connectionFilename))
+		outputFile, err := os.Create(path.Join(confdir.GetConfigDir(), consts.APP_DATA_FOLDER, connectionFilename))
 		if err != nil {
 			resp.Msg = err.Error()
 			return
