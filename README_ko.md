@@ -10,6 +10,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/tiny-craft/tiny-rdm/total)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+[![AtomGitStars](https://atomgit.com/tiny-craft/tiny-rdm/star/badge.svg)](https://atomgit.com/tiny-craft/tiny-rdm)
 
 <strong>Tiny RDM은 Mac, Windows, Linux에서 사용할 수 있는 현대적이고 가벼운 크로스 플랫폼 Redis 데스크톱 관리자입니다. Docker를 통해 배포할 수 있는 웹 버전도
 제공합니다.</strong>

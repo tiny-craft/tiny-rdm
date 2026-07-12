@@ -10,6 +10,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/tiny-craft/tiny-rdm/total)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+[![AtomGitStars](https://atomgit.com/tiny-craft/tiny-rdm/star/badge.svg)](https://atomgit.com/tiny-craft/tiny-rdm)
 
 <strong>Tiny RDM es un gestor Redis moderno, ligero y multiplataforma, disponible para Mac, Windows y Linux. También
 ofrece una versión web que se puede desplegar mediante Docker.</strong>

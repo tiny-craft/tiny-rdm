@@ -10,6 +10,7 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/tiny-craft/tiny-rdm/total)
 [![GitHub stars](https://img.shields.io/github/stars/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/tiny-craft/tiny-rdm)](https://github.com/tiny-craft/tiny-rdm/fork)
+[![AtomGitStars](https://atomgit.com/tiny-craft/tiny-rdm/star/badge.svg)](https://atomgit.com/tiny-craft/tiny-rdm)
 
 <strong>Tiny RDM 是一款現代化輕量級的跨平台 Redis 桌面管理工具，支援 Mac、Windows 和 Linux，同時提供 Web 版本，可透過 Docker
 快速部署</strong>
