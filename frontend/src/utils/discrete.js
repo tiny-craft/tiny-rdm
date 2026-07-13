@@ -75,18 +75,39 @@ function setupDialog(dialog) {
             return dialog.create(option)
         },
         warning: (content, onConfirm) => {
-            return dialog.warning({
+            const handleDialogEnter = (e) => {
+                if (e.key !== 'Enter') {
+                    return
+                }
+                
+                e.preventDefault()
+                onConfirm && onConfirm()
+                dialogInstance?.destroy && dialogInstance.destroy()
+                cleanup()
+            }
+
+            const cleanup = () => {
+                window.removeEventListener('keydown', handleDialogEnter)
+            }
+
+            const dialogInstance = dialog.warning({
                 title: i18nGlobal.t('common.warning'),
                 content: content,
                 closable: false,
-                autoFocus: false,
+                autoFocus: true,
                 transformOrigin: 'center',
                 positiveText: i18nGlobal.t('common.confirm'),
                 negativeText: i18nGlobal.t('common.cancel'),
                 onPositiveClick: () => {
                     onConfirm && onConfirm()
+                    cleanup()
+                },
+                onNegativeClick: () => {
+                    cleanup()
                 },
             })
+            window.addEventListener('keydown', handleDialogEnter)
+            return dialogInstance
         },
     }
 }
