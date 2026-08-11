@@ -27,7 +27,7 @@
   "preferences": {
     "name": "偏好設定",
     "restore_defaults": "重設為預設值",
-    "font_tip": "支援多選，如列表沒有已安裝的字型，可自行手動輸入",
+    "font_tip": "支援多選；若清單中沒有已安裝的字型，也可手動輸入",
     "general": {
       "name": "一般設定",
       "theme": "主題",
@@ -40,21 +40,21 @@
       "font_tip": "請選擇或手動輸入字型名稱",
       "font_size": "字型大小",
       "scan_size": "SCAN命令預設數量",
-      "scan_size_tip": "SCAN/HSCAN/SSCAN/ZSCAN 命令每次返回的元素數量",
+      "scan_size_tip": "SCAN/HSCAN/SSCAN/ZSCAN 命令每次傳回的元素數量",
       "key_icon_style": "鍵圖示樣式",
       "key_icon_style0": "緊湊類型",
-      "key_icon_style1": "全稱類型",
+      "key_icon_style1": "完整名稱類型",
       "key_icon_style2": "點類型",
       "key_icon_style3": "通用圖示",
       "update": "更新",
       "auto_check_update": "自動檢查更新",
       "privacy": "隱私權政策",
-      "allow_track": "允許收集匿名數據"
+      "allow_track": "允許收集匿名資料"
     },
     "editor": {
       "name": "編輯器",
       "show_linenum": "顯示行號",
-      "show_folding": "啟用代碼折疊",
+      "show_folding": "啟用程式碼折疊",
       "drop_text": "允許拖放文字",
       "links": "支援連結跳轉"
     },
@@ -66,27 +66,27 @@
       "cursor_style_bar": "直線"
     },
     "decoder": {
-      "name": "自定義解碼",
-      "new": "新增自定義解碼",
+      "name": "自訂解碼",
+      "new": "新增自訂解碼",
       "decoder_name": "解碼器名稱",
       "cmd_preview": "命令預覽",
       "status": "狀態",
       "auto_enabled": "已加入自動解碼",
-      "help": "説明"
+      "help": "說明"
     }
   },
   "interface": {
     "new_conn": "新增連線",
     "new_group": "新增群組",
-    "disconnect_all": "斷開所有連線",
+    "disconnect_all": "中斷所有連線",
     "status": "狀態",
     "filter": "篩選",
     "sort_conn": "調整連線順序",
-    "new_conn_title": "新建連線",
+    "new_conn_title": "建立連線",
     "open_db": "開啟資料庫",
     "close_db": "關閉資料庫",
     "filter_key": "過濾鍵",
-    "disconnect": "斷開連線",
+    "disconnect": "中斷連線",
     "dup_conn": "複製連線",
     "remove_conn": "移除連線",
     "edit_conn": "編輯連線設定",
@@ -99,7 +99,7 @@
     "forever": "永久",
     "rename_key": "重新命名鍵",
     "delete_key": "刪除鍵",
-    "batch_delete_key": "批量刪除鍵",
+    "batch_delete_key": "批次刪除鍵",
     "import_key": "匯入資料",
     "flush_db": "清空資料庫",
     "check_mode": "勾選模式",
@@ -114,8 +114,8 @@
     "add_row": "插入行",
     "edit_row": "編輯行",
     "delete_row": "刪除行",
-    "fullscreen": "全屏顯示",
-    "offscreen": "退出全屏顯示",
+    "fullscreen": "全螢幕顯示",
+    "offscreen": "退出全螢幕顯示",
     "pin_edit": "固定編輯框(儲存後不關閉)",
     "unpin_edit": "取消固定",
     "search": "搜尋",
@@ -130,9 +130,9 @@
     "text_align_center": "文字置中",
     "view_as": "檢視方式",
     "decode_with": "解碼/解壓方式",
-    "custom_decoder": "新增自定義解碼",
+    "custom_decoder": "新增自訂解碼",
     "reload": "重新載入",
-    "reload_disable": "全量加載後可重新載入",
+    "reload_disable": "完整載入後可重新載入",
     "auto_refresh": "自動重新整理",
     "refresh_interval": "重新整理間隔",
     "open_connection": "開啟連線",
@@ -148,7 +148,7 @@
     "load_more_entries": "載入更多",
     "load_all_entries": "載入全部",
     "more_action": "更多操作",
-    "nonexist_tab_content": "所選鍵不存在或未選中任何鍵，請嘗試重新整理後重試",
+    "nonexist_tab_content": "所選鍵不存在或尚未選取任何鍵，請重新整理後再試一次",
     "empty_server_content": "可以從左邊選擇並開啟連線",
     "empty_server_list": "還沒新增Redis伺服器",
     "action": "操作",
@@ -188,7 +188,7 @@
     "spec_field_required": "{key} 不能為空",
     "illegal_characters": "包含非法字元",
     "connection": {
-      "new_title": "新建連線",
+      "new_title": "建立連線",
       "edit_title": "編輯連線",
       "general": "一般設定",
       "no_group": "無群組",
@@ -199,7 +199,7 @@
       "pwd": "密碼",
       "name_tip": "連線名",
       "addr_tip": "Redis伺服器位址",
-      "sock_tip": "Redis Socket文件",
+      "sock_tip": "Redis Socket 檔案",
       "usr_tip": "(可選)Redis伺服器授權使用者名稱",
       "pwd_tip": "(可選)Redis伺服器授權密碼 (Redis > 6.0)",
       "test": "測試連線",
@@ -225,8 +225,8 @@
         "dbfilter_input": "輸入資料庫索引",
         "dbfilter_input_tip": "按Enter確認",
         "key_view": "預設鍵檢視",
-        "key_view_tree": "樹形列表",
-        "key_view_list": "平鋪列表",
+        "key_view_tree": "樹狀清單",
+        "key_view_list": "平面清單",
         "load_size": "單次載入鍵數量",
         "mark_color": "標記顏色"
       },
@@ -241,24 +241,24 @@
         "allow_insecure": "允許不安全連線",
         "sni": "伺服器名(SNI)",
         "sni_tip": "(可選)伺服器名",
-        "cert_file": "公鑰文件",
-        "key_file": "私鑰文件",
-        "ca_file": "授權文件",
-        "cert_file_tip": "PEM格式公鑰文件(Cert)",
-        "key_file_tip": "PEM格式私鑰文件(Key)",
-        "ca_file_tip": "PEM格式授權文件(CA)"
+        "cert_file": "公鑰檔案",
+        "key_file": "私鑰檔案",
+        "ca_file": "憑證授權單位檔案",
+        "cert_file_tip": "PEM 格式的公鑰檔案（Cert）",
+        "key_file_tip": "PEM 格式的私鑰檔案（Key）",
+        "ca_file_tip": "PEM 格式的憑證授權單位檔案（CA）"
       },
       "ssh": {
         "enable": "啟用SSH隧道",
         "title": "SSH隧道",
         "login_type": "登入類型",
         "agent": "SSH代理",
-        "pkfile": "私鑰文件",
+        "pkfile": "私鑰檔案",
         "passphrase": "私鑰密碼",
         "addr_tip": "SSH位址",
         "usr_tip": "SSH登入使用者名稱",
         "pwd_tip": "SSH登入密碼",
-        "pkfile_tip": "SSH私鑰文件路徑",
+        "pkfile_tip": "SSH 私鑰檔案路徑",
         "passphrase_tip": "(可選)SSH私鑰密碼"
       },
       "sentinel": {
@@ -272,8 +272,8 @@
         "usr_tip": "(可選)主節點伺服器授權使用者名稱"
       },
       "cluster": {
-        "title": "集群模式",
-        "enable": "目前為集群節點"
+        "title": "叢集模式",
+        "enable": "目前為叢集節點"
       },
       "proxy": {
         "title": "網路代理",
@@ -281,7 +281,7 @@
         "type_system": "使用系統代理設定",
         "type_custom": "手動設定代理",
         "host": "主機名稱",
-        "auth": "使用身份驗證",
+        "auth": "使用身分驗證",
         "usr_tip": "代理授權使用者名稱",
         "pwd_tip": "代理授權密碼"
       }
@@ -302,7 +302,7 @@
       "confirm_delete_key": "確認刪除{num}個鍵",
       "direct_delete": "直接匹配刪除",
       "confirm_delete": "確認刪除",
-      "async_delete": "異步執行",
+      "async_delete": "非同步執行",
       "async_delete_title": "不等待操作結果",
       "confirm_flush": "我知道我正在執行的操作！",
       "confirm_flush_db": "確認清空資料庫"
@@ -344,7 +344,7 @@
       "export_expire": "同時匯出過期時間",
       "export": "確認匯出",
       "save_file": "匯出路徑",
-      "save_file_tip": "選擇匯出文件儲存路徑",
+      "save_file_tip": "選擇匯出檔案的儲存路徑",
       "exporting": "正在匯出鍵({index}/{count})",
       "export_completed": "已完成匯出操作，成功{success}個，失敗{fail}個"
     },
@@ -353,20 +353,20 @@
       "import_expire_title": "過期時間",
       "reload": "匯入完成後重新載入",
       "import": "確認匯入",
-      "open_csv_file": "匯入文件路徑",
-      "open_csv_file_tip": "選擇需要匯入的文件",
+      "open_csv_file": "匯入檔案路徑",
+      "open_csv_file_tip": "選擇要匯入的檔案",
       "conflict_handle": "鍵衝突處理",
       "conflict_overwrite": "覆蓋",
       "conflict_ignore": "忽略",
       "ttl_include": "嘗試匯入",
       "ttl_ignore": "不設定",
-      "ttl_custom": "自定義",
+      "ttl_custom": "自訂",
       "importing": "正在匯入資料 已匯入/覆蓋:{imported} 衝突/失敗:{conflict}",
       "import_completed": "已完成匯入操作，成功{success}個，忽略{ignored}個"
     },
     "ttl": {
       "title": "設定鍵存活時間",
-      "title_batch": "批量設定鍵存活時間({count})",
+      "title_batch": "批次設定鍵存活時間（{count}）",
       "quick_set": "快速設定",
       "success": "已全部更新TTL"
     },
@@ -380,9 +380,9 @@
       "auto": "自動解碼",
       "decode_path": "解碼器執行路徑",
       "encode_path": "編碼器執行路徑",
-      "path_help": "執行文件路徑，也可以直接填寫命令列介面，如sh/php/python",
-      "args": "運行參數",
-      "args_help": "使用[VALUE]代替編碼/解碼內容佔位符，如果不填內容佔位則默認放最後"
+      "path_help": "執行檔路徑，也可以直接填寫命令列程式，例如 sh、php 或 python",
+      "args": "執行參數",
+      "args_help": "使用 [VALUE] 作為編碼／解碼內容的預留位置；若未填寫，內容會預設附加於最後"
     },
     "upgrade": {
       "title": "有可用新版本",
@@ -394,12 +394,12 @@
     },
     "welcome": {
       "title": "歡迎使用Tiny RDM！",
-      "content": "為了提供更好的使用者體驗，Tiny RDM 會收集一些匿名的數據，以幫助最佳化軟體和改進使用者體驗，請放心這不會涉及到您的個人隱私資訊。\n\n如果您對此有任何顧慮，可以隨時前往\"偏好設定\"中關閉此項數據收集功能。有任何問題可聯繫開發者，希望Tiny RDM可以成為您的好幫手！",
+      "content": "為了提供更好的使用者體驗，Tiny RDM 會收集部分匿名資料，以協助改善軟體與使用體驗。請放心，這不會涉及您的個人隱私資訊。\n\n如果您對此有任何疑慮，可以隨時前往「偏好設定」關閉資料收集功能。如有任何問題，歡迎聯絡開發者。希望 Tiny RDM 能成為您的好幫手！",
       "accept": "幫助改進",
       "reject": "不接受"
     },
     "about": {
-      "source": "源碼地址",
+      "source": "原始碼",
       "website": "官方網站"
     }
   },
@@ -417,18 +417,18 @@
     "restore": "還原",
     "close": "關閉",
     "preferences": "偏好設定",
-    "help": "説明",
+    "help": "說明",
     "user_guide": "使用指南",
     "check_update": "檢查更新...",
     "report_bug": "回報錯誤",
     "about": "關於"
   },
   "log": {
-    "title": "運行日誌",
+    "title": "執行記錄",
     "filter_server": "篩選伺服器",
     "filter_keyword": "篩選關鍵字",
-    "clean_log": "清空運行日誌",
-    "confirm_clean_log": "確定清空運行日誌",
+    "clean_log": "清除執行記錄",
+    "confirm_clean_log": "確定清除執行記錄",
     "exec_time": "執行時間",
     "server": "伺服器",
     "cmd": "命令",
@@ -436,8 +436,8 @@
     "refresh": "立即重新整理"
   },
   "status": {
-    "uptime": "運行時間",
-    "connected_clients": "已連線客戶端",
+    "uptime": "運作時間",
+    "connected_clients": "已連線用戶端",
     "total_keys": "鍵總數",
     "memory_used": "記憶體使用量",
     "server_info": "狀態資訊",
@@ -446,8 +446,8 @@
     "act_network_input": "網路輸入",
     "act_network_output": "網路輸出",
     "client": {
-      "title": "所有客戶端列表",
-      "addr": "客戶端位址",
+      "title": "所有用戶端清單",
+      "addr": "用戶端位址",
       "age": "連線時長(秒)",
       "idle": "空閒時長(秒)",
       "db": "資料庫"
@@ -455,17 +455,17 @@
   },
   "slog": {
     "title": "慢日誌",
-    "limit": "條數",
+    "limit": "筆數",
     "filter": "篩選",
     "exec_time": "執行時間",
-    "client": "客戶端",
+    "client": "用戶端",
     "cmd": "命令",
     "cost_time": "耗時"
   },
   "monitor": {
     "title": "監控命令",
     "actions": "操作",
-    "warning": "命令監控可能會造成伺服器阻塞，請謹慎在生產環境的伺服器使用",
+    "warning": "命令監控可能會造成伺服器阻塞，請在正式環境的伺服器上謹慎使用",
     "start": "開啟監控",
     "stop": "停止監控",
     "search": "搜尋",
