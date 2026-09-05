@@ -480,6 +480,7 @@
     "subscribe": "구독",
     "unsubscribe": "구독 취소",
     "clear": "메시지 지우기",
+    "save": "메시지 저장",
     "time": "시간",
     "filter": "필터",
     "channel": "채널",

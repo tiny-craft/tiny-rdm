@@ -15,9 +15,10 @@ import Checked from '@/components/icons/Checked.vue'
 import Bottom from '@/components/icons/Bottom.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import EditableTableColumn from '@/components/common/EditableTableColumn.vue'
+import Save from '@/components/icons/Save.vue'
 
 const themeVars = useThemeVars()
-
+const datetimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
 const browserStore = useBrowserStore()
 const i18n = useI18n()
 const props = defineProps({
@@ -44,6 +45,10 @@ const publishData = reactive({
 
 const tableRef = ref(null)
 
+const getFormattedDateTime = (timestamp) => {
+    return dayjs(timestamp).format(datetimeFormat);
+}
+
 const columns = computed(() => [
     {
         title: () => i18n.t('pubsub.time'),
@@ -52,7 +57,7 @@ const columns = computed(() => [
         align: 'center',
         titleAlign: 'center',
         render: ({ timestamp }, index) => {
-            return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS')
+            return getFormattedDateTime(timestamp);
         },
     },
     {
@@ -181,6 +186,47 @@ const onCleanLog = () => {
     data.list = []
 }
 
+const onSave = async () => {
+    if (data.list.length == 0) {
+        $message.error("no messages");
+        return;
+    }
+
+    const headers = Object.keys(data.list[0]);
+
+    const csv = [
+      headers.join(','),
+      ...data.list.map(row =>
+            headers.map(header => `${String(header == 'timestamp' ? getFormattedDateTime(dayjs(row[header])) : row[header] ?? '')}`).join(',')
+      )
+    ].join('\n');
+
+    try
+    {
+        const handle = await window.showSaveFilePicker({
+            suggestedName: 'download.csv',
+            types: [
+            {
+                description: 'Csv file',
+                accept: {
+                'text/plain': ['.csv']
+                }
+            }
+            ]
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(csv);
+        await writable.close();    
+    }
+    catch (error) {
+        if (error.name === 'AbortError') {
+            return;
+        }
+        throw error;
+  }
+}
+
 const onPublish = async () => {
     if (isEmpty(publishData.channel)) {
         return
@@ -245,6 +291,13 @@ const onPublish = async () => {
                         stroke-width="3.5"
                         t-tooltip="monitor.always_show_last"
                         @click="data.autoShowLast = !data.autoShowLast" />
+                    <icon-button
+                        :icon="Save"
+                        :disabled=isSubscribing
+                        size="18"
+                        stroke-width="3.5"
+                        t-tooltip="pubsub.save"
+                        @click="onSave" />
                     <div class="flex-item-expand" />
                     <icon-button
                         :icon="Delete"

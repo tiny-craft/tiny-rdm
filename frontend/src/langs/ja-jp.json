@@ -480,6 +480,7 @@
     "subscribe": "サブスクライブ開始",
     "unsubscribe": "サブスクライブ解除",
     "clear": "メッセージをクリア",
+    "save": "メッセージを保存",
     "time": "時間",
     "filter": "フィルター",
     "channel": "チャンネル",

@@ -480,6 +480,7 @@
     "subscribe": "开启订阅",
     "unsubscribe": "取消订阅",
     "clear": "清空消息",
+    "save": "保存消息",
     "time": "时间",
     "filter": "筛选",
     "channel": "频道",
