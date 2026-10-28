@@ -13,11 +13,12 @@ import {
     SaveConnection,
     SaveLastDB,
     SaveRefreshInterval,
-    SaveSortedConnection
+    SaveSortedConnection,
 } from 'wailsjs/go/services/connectionService.js'
 import { ConnectionType } from '@/consts/connection_type.js'
 import { KeyViewType } from '@/consts/key_view_type.js'
 import useBrowserStore from 'stores/browser.js'
+import usePreferencesStore from 'stores/preferences.js'
 import { i18nGlobal } from '@/utils/i18n.js'
 import { ClipboardGetText } from 'wailsjs/runtime/runtime.js'
 
@@ -56,7 +57,33 @@ const useConnectionStore = defineStore('connections', {
         connections: [], // all connections
         serverProfile: {}, // all server profile in flat list
     }),
-    getters: {},
+    getters: {
+        connectionSortOrder() {
+            const order = usePreferencesStore().behavior.connectionSortOrder
+            return order === 'asc' || order === 'desc' ? order : 'original'
+        },
+
+        /**
+         * Keep the configuration order as the source of truth; sort copies for display.
+         */
+        displayConnections() {
+            if (this.connectionSortOrder === 'original') {
+                return this.connections
+            }
+            const direction = this.connectionSortOrder === 'desc' ? -1 : 1
+            const sortLevel = (connections) =>
+                connections
+                    .map((conn) =>
+                        conn.type === ConnectionType.Group ? { ...conn, children: sortLevel(conn.children) } : conn,
+                    )
+                    .sort(
+                        (a, b) =>
+                            direction *
+                            a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' }),
+                    )
+            return sortLevel(this.connections)
+        },
+    },
     actions: {
         /**
          * load all store connections struct from local profile
@@ -269,7 +296,7 @@ const useConnectionStore = defineStore('connections', {
 
         /**
          * save connection after sort
-         * @returns {Promise<void>}
+         * @returns {Promise<{success: boolean, [msg]: string}>}
          */
         async saveConnectionSorted() {
             const mapToList = (conns) => {
@@ -291,7 +318,7 @@ const useConnectionStore = defineStore('connections', {
                 return list
             }
             const s = mapToList(this.connections)
-            SaveSortedConnection(s)
+            return SaveSortedConnection(s)
         },
 
         /**

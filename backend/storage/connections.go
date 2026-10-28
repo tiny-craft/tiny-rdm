@@ -255,7 +255,16 @@ func (c *ConnectionsStorage) SaveSortedConnection(sortedConns types.Connections)
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	conns := c.GetConnectionsFlat()
+	var conns types.Connections
+	groups := make(map[string]types.Connection)
+	for _, conn := range c.getConnections() {
+		if conn.Type == "group" {
+			groups[conn.Name] = conn
+			conns = append(conns, conn.Connections...)
+		} else {
+			conns = append(conns, conn)
+		}
+	}
 	takeConn := func(name string) (types.Connection, bool) {
 		idx := slices.IndexFunc(conns, func(connection types.Connection) bool {
 			return connection.Name == name
@@ -267,28 +276,48 @@ func (c *ConnectionsStorage) SaveSortedConnection(sortedConns types.Connections)
 		}
 		return types.Connection{}, false
 	}
-	var replaceConn func(connections types.Connections) types.Connections
-	replaceConn = func(cons types.Connections) types.Connections {
+	// Reordering must retain every profile and the single-level group structure.
+	// Reject malformed or stale trees before touching the stored file.
+	var replaceConn func(types.Connections, bool) (types.Connections, error)
+	replaceConn = func(cons types.Connections, allowGroups bool) (types.Connections, error) {
 		var newConns types.Connections
 		for _, conn := range cons {
 			if conn.Type == "group" {
-				newConns = append(newConns, types.Connection{
-					ConnectionConfig: types.ConnectionConfig{
-						Name: conn.Name,
-					},
-					Type:        "group",
-					Connections: replaceConn(conn.Connections),
-				})
-			} else {
-				if foundConn, ok := takeConn(conn.Name); ok {
-					newConns = append(newConns, foundConn)
+				if !allowGroups {
+					return nil, errors.New("nested connection groups are not supported")
 				}
+				group, ok := groups[conn.Name]
+				if !ok {
+					return nil, errors.New("unknown or duplicated connection group")
+				}
+				children, err := replaceConn(conn.Connections, false)
+				if err != nil {
+					return nil, err
+				}
+				group.Connections = children
+				newConns = append(newConns, group)
+				delete(groups, conn.Name)
+			} else {
+				if conn.Type != "" || len(conn.Connections) > 0 {
+					return nil, errors.New("invalid connection tree")
+				}
+				foundConn, ok := takeConn(conn.Name)
+				if !ok {
+					return nil, errors.New("unknown or duplicated connection")
+				}
+				newConns = append(newConns, foundConn)
 			}
 		}
-		return newConns
+		return newConns, nil
 	}
-	conns = replaceConn(sortedConns)
-	return c.saveConnections(conns)
+	sorted, err := replaceConn(sortedConns, true)
+	if err != nil {
+		return err
+	}
+	if len(conns) > 0 || len(groups) > 0 {
+		return errors.New("connection list changed; reload and try again")
+	}
+	return c.saveConnections(sorted)
 }
 
 // CreateGroup create a new group

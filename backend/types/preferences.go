@@ -13,9 +13,10 @@ type Preferences struct {
 func NewPreferences() Preferences {
 	return Preferences{
 		Behavior: PreferencesBehavior{
-			AsideWidth:   consts.DEFAULT_ASIDE_WIDTH,
-			WindowWidth:  consts.DEFAULT_WINDOW_WIDTH,
-			WindowHeight: consts.DEFAULT_WINDOW_HEIGHT,
+			ConnectionSortOrder: "original",
+			AsideWidth:          consts.DEFAULT_ASIDE_WIDTH,
+			WindowWidth:         consts.DEFAULT_WINDOW_WIDTH,
+			WindowHeight:        consts.DEFAULT_WINDOW_HEIGHT,
 		},
 		General: PreferencesGeneral{
 			Theme:        "auto",
@@ -43,13 +44,15 @@ func NewPreferences() Preferences {
 }
 
 type PreferencesBehavior struct {
-	Welcomed        bool `json:"welcomed" yaml:"welcomed"`
-	AsideWidth      int  `json:"asideWidth" yaml:"aside_width"`
-	WindowWidth     int  `json:"windowWidth" yaml:"window_width"`
-	WindowHeight    int  `json:"windowHeight" yaml:"window_height"`
-	WindowMaximised bool `json:"windowMaximised" yaml:"window_maximised"`
-	WindowPosX      int  `json:"windowPosX" yaml:"window_pos_x"`
-	WindowPosY      int  `json:"windowPosY" yaml:"window_pos_y"`
+	// 连接列表显示顺序：original 为配置顺序，asc 为名称升序，desc 为名称降序。
+	ConnectionSortOrder string `json:"connectionSortOrder" yaml:"connection_sort_order"`
+	Welcomed            bool   `json:"welcomed" yaml:"welcomed"`
+	AsideWidth          int    `json:"asideWidth" yaml:"aside_width"`
+	WindowWidth         int    `json:"windowWidth" yaml:"window_width"`
+	WindowHeight        int    `json:"windowHeight" yaml:"window_height"`
+	WindowMaximised     bool   `json:"windowMaximised" yaml:"window_maximised"`
+	WindowPosX          int    `json:"windowPosX" yaml:"window_pos_x"`
+	WindowPosY          int    `json:"windowPosY" yaml:"window_pos_y"`
 }
 
 type PreferencesGeneral struct {

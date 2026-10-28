@@ -9,6 +9,7 @@ import {
     GetPreferences,
     RestorePreferences,
     SetPreferences,
+    UpdatePreferences,
 } from 'wailsjs/go/services/preferencesService.js'
 import { BrowserOpenURL } from 'wailsjs/runtime/runtime.js'
 import { i18nGlobal } from '@/utils/i18n.js'
@@ -37,6 +38,7 @@ const usePreferencesStore = defineStore('preferences', {
      */
     state: () => ({
         behavior: {
+            connectionSortOrder: 'original',
             welcomed: false,
             asideWidth: 300,
             windowWidth: 0,
@@ -382,6 +384,19 @@ const usePreferencesStore = defineStore('preferences', {
             const pf = pick(this, ['behavior', 'general', 'editor', 'cli', 'decoder'])
             const { success } = await SetPreferences(pf)
             return success === true
+        },
+
+        /**
+         * Persist only the display mode without rewriting the saved connection order.
+         * @param {'original'|'asc'|'desc'} order
+         * @returns {Promise<{success: boolean, [msg]: string}>}
+         */
+        async setConnectionSortOrder(order) {
+            const result = await UpdatePreferences({ 'behavior.connectionSortOrder': order })
+            if (result.success) {
+                this.behavior.connectionSortOrder = order
+            }
+            return result
         },
 
         /**

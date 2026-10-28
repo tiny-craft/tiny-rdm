@@ -34,6 +34,7 @@ const dialogStore = useDialogStore()
 
 const expandedKeys = ref([])
 const selectedKeys = ref([])
+const draggingNode = ref(null)
 
 const props = defineProps({
     filterPattern: {
@@ -441,38 +442,77 @@ const isRootNode = (node) => {
     return connectionStore.connections.some((item) => item.key === node.key)
 }
 
-// delay save until drop stopped after 2 seconds
-const saveSort = debounce(connectionStore.saveConnectionSorted, 1500, { trailing: true })
-const handleDrop = ({ node, dragNode, dropPosition }) => {
-    const [dragNodeSiblings, dragNodeIndex] = findSiblingsAndIndex(dragNode, connectionStore.connections)
-    if (dragNodeSiblings === null || dragNodeIndex === null) {
-        return
+// Connections are leaves; groups may only be reordered at the root level.
+const canDrop = ({ node, dragNode, dropPosition }) => {
+    if (
+        connectionStore.connectionSortOrder !== 'original' ||
+        !dragNode ||
+        node.key === dragNode.key ||
+        !['before', 'inside', 'after'].includes(dropPosition)
+    ) {
+        return false
     }
-    if (node.type === ConnectionType.Group && dragNode.type === ConnectionType.Group) {
-        return
+    const [targetSiblings] = findSiblingsAndIndex(node, connectionStore.connections)
+    const [dragSiblings] = findSiblingsAndIndex(dragNode, connectionStore.connections)
+    if (!targetSiblings || !dragSiblings) {
+        return false
     }
-    if (dragNode.type === ConnectionType.Group && !isRootNode(node)) {
-        return
-    }
-    dragNodeSiblings.splice(dragNodeIndex, 1)
     if (dropPosition === 'inside') {
-        if (node.children) {
-            node.children.unshift(dragNode)
-        } else {
-            node.children = [dragNode]
+        return dragNode.type === ConnectionType.Server && node.type === ConnectionType.Group && isRootNode(node)
+    }
+    return dragNode.type !== ConnectionType.Group || isRootNode(node)
+}
+
+const allowDrop = (info) => canDrop({ ...info, dragNode: draggingNode.value })
+
+// Save the latest tree after dragging has stopped for 1.5 seconds.
+const saveSort = debounce(
+    async () => {
+        try {
+            const { success, msg } = await connectionStore.saveConnectionSorted()
+            if (!success) {
+                $message.error(msg)
+            }
+        } catch (e) {
+            $message.error(e.message)
         }
-    } else if (dropPosition === 'before') {
-        const [nodeSiblings, nodeIndex] = findSiblingsAndIndex(node, connectionStore.connections)
-        if (nodeSiblings === null || nodeIndex === null) {
-            return
+    },
+    1500,
+    { trailing: true },
+)
+
+const handleDrop = ({ node, dragNode, dropPosition }) => {
+    if (!canDrop({ node, dragNode, dropPosition })) {
+        return
+    }
+
+    const [dragNodeSiblings, dragNodeIndex] = findSiblingsAndIndex(dragNode, connectionStore.connections)
+    let targetSiblings
+    let targetIndex
+    let groupName = ''
+    if (dropPosition === 'inside') {
+        targetSiblings = node.children || (node.children = [])
+        targetIndex = 0
+        groupName = node.label
+    } else {
+        ;[targetSiblings, targetIndex] = findSiblingsAndIndex(node, connectionStore.connections)
+        if (dropPosition === 'after') {
+            targetIndex++
         }
-        nodeSiblings.splice(nodeIndex, 0, dragNode)
-    } else if (dropPosition === 'after') {
-        const [nodeSiblings, nodeIndex] = findSiblingsAndIndex(node, connectionStore.connections)
-        if (nodeSiblings === null || nodeIndex === null) {
-            return
+        if (targetSiblings !== connectionStore.connections) {
+            groupName = connectionStore.connections.find((item) => item.children === targetSiblings).label
         }
-        nodeSiblings.splice(nodeIndex + 1, 0, dragNode)
+    }
+
+    dragNodeSiblings.splice(dragNodeIndex, 1)
+    if (targetSiblings === dragNodeSiblings && dragNodeIndex < targetIndex) {
+        targetIndex--
+    }
+    targetSiblings.splice(targetIndex, 0, dragNode)
+    if (dragNode.type === ConnectionType.Server) {
+        const oldKey = dragNode.key
+        dragNode.key = groupName + '/' + dragNode.name
+        selectedKeys.value = selectedKeys.value.map((key) => (key === oldKey ? dragNode.key : key))
     }
     connectionStore.connections = Array.from(connectionStore.connections)
     saveSort()
@@ -489,12 +529,13 @@ const onCancelOpen = () => {
 <template>
     <div class="connection-tree-wrapper" @keydown.esc="contextMenuParam.show = false">
         <n-tree
+            :allow-drop="allowDrop"
             :animated="false"
             :block-line="true"
             :block-node="true"
             :cancelable="false"
-            :data="connectionStore.connections"
-            :draggable="true"
+            :data="connectionStore.displayConnections"
+            :draggable="connectionStore.connectionSortOrder === 'original'"
             :expanded-keys="expandedKeys"
             :node-props="nodeProps"
             :pattern="props.filterPattern"
@@ -504,6 +545,8 @@ const onCancelOpen = () => {
             :selected-keys="selectedKeys"
             class="fill-height"
             virtual-scroll
+            @dragstart="({ node }) => (draggingNode = node)"
+            @dragend="draggingNode = null"
             @drop="handleDrop"
             @update:selected-keys="onUpdateSelectedKeys"
             @update:expanded-keys="onUpdateExpandedKeys">

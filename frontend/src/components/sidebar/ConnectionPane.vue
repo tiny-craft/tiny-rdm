@@ -6,26 +6,62 @@ import AddLink from '@/components/icons/AddLink.vue'
 import IconButton from '@/components/common/IconButton.vue'
 import Filter from '@/components/icons/Filter.vue'
 import ConnectionTree from './ConnectionTree.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import More from '@/components/icons/More.vue'
 import Import from '@/components/icons/Import.vue'
 import { useRender } from '@/utils/render.js'
 import Export from '@/components/icons/Export.vue'
+import Sort from '@/components/icons/Sort.vue'
+import Checked from '@/components/icons/Checked.vue'
 import useConnectionStore from 'stores/connections.js'
+import usePreferencesStore from 'stores/preferences.js'
 
 const themeVars = useThemeVars()
 const dialogStore = useDialogStore()
 const connectionStore = useConnectionStore()
+const prefStore = usePreferencesStore()
 const render = useRender()
 const filterPattern = ref('')
+const sorting = ref(false)
 
-const moreOptions = [
+const moreOptions = computed(() => [
+    {
+        key: 'sort',
+        label: 'interface.sort_conn',
+        icon: Sort,
+        children: [
+            { key: 'original', label: 'interface.sort_conn_original', fallback: '保持原有' },
+            { key: 'asc', label: 'A → Z', literal: true },
+            { key: 'desc', label: 'Z → A', literal: true },
+        ].map((option) => ({
+            ...option,
+            icon: connectionStore.connectionSortOrder === option.key ? Checked : undefined,
+        })),
+    },
     { key: 'import', label: 'interface.import_conn', icon: Import },
     { key: 'export', label: 'interface.export_conn', icon: Export },
-]
+])
 
 const onSelectOptions = async (select) => {
+    if (sorting.value) {
+        return
+    }
     switch (select) {
+        case 'original':
+        case 'asc':
+        case 'desc':
+            sorting.value = true
+            try {
+                const { success, msg } = await prefStore.setConnectionSortOrder(select)
+                if (!success) {
+                    $message.error(msg)
+                }
+            } catch (e) {
+                $message.error(e.message)
+            } finally {
+                sorting.value = false
+            }
+            break
         case 'import':
             await connectionStore.importConnections()
             await connectionStore.initConnections(true)
@@ -64,9 +100,12 @@ const onSelectOptions = async (select) => {
                 </template>
             </n-input>
             <n-dropdown
+                :disabled="sorting"
                 :options="moreOptions"
                 :render-icon="({ icon }) => render.renderIcon(icon, { strokeWidth: 3.5 })"
-                :render-label="({ label }) => $t(label)"
+                :render-label="
+                    ({ label, literal, fallback }) => (literal ? label : fallback ? $t(label, fallback) : $t(label))
+                "
                 placement="top-end"
                 style="min-width: 130px"
                 trigger="click"
