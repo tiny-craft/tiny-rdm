@@ -339,19 +339,26 @@ func (c *connectionService) ListSentinelMasters(config types.ConnectionConfig) (
 	sentinel := redis.NewSentinelClient(option)
 	defer sentinel.Close()
 
+	// SENTINEL MASTERS replies with a flat field/value array under RESP2 and a map
+	// under RESP3. MapStringStringSliceCmd handles both encodings, while
+	// SentinelClient.Masters returns a raw *SliceCmd that only yields maps on RESP3.
 	var retInfo []map[string]string
-	masterInfos, err := sentinel.Masters(c.ctx).Result()
-	if err != nil {
+	masters := redis.NewMapStringStringSliceCmd(c.ctx, "sentinel", "masters")
+	if err = sentinel.Process(c.ctx, masters); err != nil {
 		resp.Msg = err.Error()
 		return
 	}
-	for _, info := range masterInfos {
-		if infoMap, ok := info.(map[any]any); ok {
-			retInfo = append(retInfo, map[string]string{
-				"name": infoMap["name"].(string),
-				"addr": net.JoinHostPort(infoMap["ip"].(string), infoMap["port"].(string)),
-			})
+	for _, info := range masters.Val() {
+		name, okName := info["name"]
+		host, okHost := info["ip"]
+		port, okPort := info["port"]
+		if !okName || !okHost || !okPort {
+			continue
 		}
+		retInfo = append(retInfo, map[string]string{
+			"name": name,
+			"addr": net.JoinHostPort(host, port),
+		})
 	}
 
 	resp.Data = retInfo
